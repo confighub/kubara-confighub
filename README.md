@@ -83,8 +83,8 @@ When evidence is missing or stale, the pages say so instead of showing you a gre
 
 If you build your own platform, your charts keep coming from Kubara's own catalogs, exactly as they do today. Your `config.yaml` names them (`oci://ghcr.io/kubara-io/catalogs/bootstrap`, `oci://ghcr.io/kubara-io/catalogs/general`), Kubara resolves components from them, and ConfigHub imports what Kubara generated. Nothing in this repository substitutes chart sources or sits between you and the Kubara catalogs.
 
-Separately, our test lab [confighub/helm-expt](https://github.com/confighub/helm-expt) maintains its own Helm chart catalog that we used to cross-check Kubara's rendered output byte for byte. That catalog stayed in helm-expt. A few deep generated evidence views under `data/kubara-catalog-release/recipe-views/` still link into it; no tutorial step depends on them.
+Separately, our test lab [confighub/helm-expt](https://github.com/confighub/helm-expt) maintains its own Helm chart catalog that we used to cross-check Kubara's rendered output byte for byte. That catalog stayed in helm-expt, and it is the instrument we would pick up again to rebuild this platform at a newer Kubara release and cross-check the regenerated output the same way. A few deep generated evidence views under `data/kubara-catalog-release/recipe-views/` link into it; no tutorial step depends on them.
 
 ## History
 
-This project moved here from [confighub/helm-expt](https://github.com/confighub/helm-expt) at commit `6b4bc9d6b`, where its full development history remains public. Paths were preserved, so every receipt verifies unchanged.
+This project moved here from [confighub/helm-expt](https://github.com/confighub/helm-expt) at commit `6b4bc9d6b`, where its full development history remains public. Paths were preserved, so every receipt verifies unchanged. That link matters when we rebuild: the receipts committed here chain back to that history, so a future regeneration can prove exactly what changed since this snapshot.
