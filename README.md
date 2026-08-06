@@ -55,19 +55,21 @@ You need Node.js, [Kubara](https://github.com/kubara-io) if you want to generate
 
 Work through the tutorial in order. Steps 1 to 4 are fully offline: choose or reuse a config, generate, commit the exact hand-off, and prove the importer against deterministic fake surfaces. Step 5 compiles the resumable command contract that takes the package set into the organization you select; step 6 hands off applications the same way. The honest status: every step has deterministic self-tests that pass, the complete journey has passed live against the reference organization above, and the general fresh-organization path has not yet passed its complete live acceptance run. That distinction stays visible in the [checkpoints ledger](docs/demo/kubara/checkpoints.md) until it is earned.
 
-## Try it without any accounts
+## Try it on your laptop
 
-Every step has a deterministic self-test that runs against fake Git, OCI, and ConfigHub surfaces. No cluster, registry, or ConfigHub account is needed:
+Clone this repository and run one command. It needs Node.js and nothing else: no cluster, no registry, no ConfigHub account.
 
 ```sh
 npm run kubara-adoption:self-test
 ```
 
-## Why you can trust these pages
+This rehearses the whole journey on your machine: reading the Kubara config, compiling the generated platform into packages, importing them, and handing off application releases. It runs against built-in stand-ins for Git, the OCI registry, and ConfigHub, so nothing external is touched. Four "self-test passed" lines mean the exact tooling you would later run for real works end to end, including refusing bad input.
 
-Demo pages for config tools are easy to fake: a screenshot of a healthy dashboard proves nothing about the system that produced it. Adopting a delivery platform on that kind of evidence is how teams end up surprised in production.
+## Check that we are not making this up
 
-These pages work differently. Every screenshot, matrix cell, and measured number binds to a committed receipt by SHA-256, the receipts record the exact Git commit and organization they came from, and you can check the whole chain yourself in seconds, offline:
+A screenshot of a healthy dashboard proves nothing about the system that produced it. So every screenshot and measured number on these pages ships with a receipt: a YAML file committed in this repository that records where it came from — the exact Git commit, the ConfigHub organization, the capture time — plus a SHA-256 fingerprint of every file involved.
+
+These commands recompute the fingerprints and compare them against the receipts. They fail loudly if any image, page, or number was edited after the evidence was recorded:
 
 ```sh
 npm run kubara-mini-idp:receipt-verify
@@ -77,7 +79,7 @@ npm run kubara-platform-matrix:verify
 npm run kubara-wiring:verify
 ```
 
-When evidence is missing or stale, the pages say so instead of showing you a green badge. A screenshot never replaces a machine checkpoint.
+When evidence is missing or stale, the pages say so themselves instead of showing a green badge. A screenshot never replaces a machine checkpoint.
 
 ## Where your Helm charts come from
 
