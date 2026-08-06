@@ -4,6 +4,22 @@ This repository shows how a [Kubara](https://github.com/kubara-io)-generated pla
 
 Kubara keeps what it is good at. It selects components from its catalogs, wires a hub and spokes, and generates the platform files. ConfigHub adds what teams ask for next: component identity with retained versions, approvals before production, exact-digest releases, one-target rollback, drift repair, a fleet matrix, and queryable wiring. Argo CD remains the cluster reconciler on every target.
 
+## See the result first
+
+One application, four clusters, every placement healthy at its exact retained release. Production B stays on the older release because production A was rolled back one target at a time:
+
+![The hx-web application and platform binding across the four clusters](docs/images/kubara/04-application-four-clusters.png)
+
+The same application's production history shows the full governed story in one view: retained release tags, promotions, the one-target rollback, approval gates, and the applied head release:
+
+![hx-web production revision history with approval gates, promotion, rollback, and the applied release](docs/images/kubara-adoption/06-app-governance-live.png)
+
+The fleet matrix keeps desired placement separate from observed release, sync, health, and readiness across all 36 component and application cells, next to a zero-residue audit of the whole organization:
+
+![The 36-cell component-by-cluster matrix with the scoped residue audit identity](docs/images/kubara/06-fleet-matrix-clean-inventory.png)
+
+The [GUI tour](docs/demo/kubara/gui-tour.md) walks all six frames with their key takeaways.
+
 ## Read the journey
 
 The six-step adoption tutorial starts at [docs/demo/kubara/adoption.md](docs/demo/kubara/adoption.md):
@@ -15,7 +31,29 @@ The six-step adoption tutorial starts at [docs/demo/kubara/adoption.md](docs/dem
 5. [Import into a selected ConfigHub organization](docs/demo/kubara/adoption-5-confighub-org.md)
 6. [Add, promote, approve, and roll back applications](docs/demo/kubara/adoption-6-apps.md)
 
-The [GUI tour](docs/demo/kubara/gui-tour.md) walks the same platform through the ConfigHub interface in six receipt-bound frames. The [checkpoints ledger](docs/demo/kubara/checkpoints.md) records what is machine-proven and what remains gated.
+The [checkpoints ledger](docs/demo/kubara/checkpoints.md) records what is machine-proven and what remains gated.
+
+## The reference deployment behind these pages
+
+Everything you see here comes from one live reference integration that we operate:
+
+- A ConfigHub organization named **Kubara** on hub.confighub.com holding 55 Spaces, 63 managed Units, and 25 curated NeedsProvides Links.
+- Four kind clusters (`hx-app-dev`, `hx-app-staging`, `hx-app-prod-a`, `hx-app-prod-b`) forming the hub-and-spoke fleet, each running its own Argo CD.
+- The platform components Kubara selected (cert-manager, traefik, external-secrets, kube-prometheus-stack, metrics-server, homer-dashboard) plus two example applications.
+
+You do not need access to that organization. Every claim these pages make about it is bound by SHA-256 to a committed receipt in [runs/](runs/) and [data/](data/), every screenshot binds the same source commit as the receipts, and the offline verifiers below let you check the chain yourself.
+
+## How applications work
+
+Applications ride the same delivery path as platform components. The reviewed application source lives in a base Space (`hx-web-base`, `hx-cubbychat-base`). A variant Space per cluster binds it to that cluster's target. Publishing creates an immutable release; the reconciler submits only the exact release `ManifestDigest` to Argo with a Kubernetes compare-and-set, so a mutable `latest` pointer can never bypass review. Production Spaces carry approval gates; promotion moves the exact reviewed revision downstream; rollback restores one target to an exact earlier release while its peer keeps the newer one; a reviewed per-target departure (a staging-only environment variable) survives later promotions. Chapter 6 of the tutorial runs this end to end.
+
+## Run your own
+
+The hand-off between Kubara and ConfigHub is a Git tree, so your platform code lives wherever your Git lives. Fork this repository, or start a fresh one and copy [examples/kubara/git-import/](examples/kubara/git-import/) as your request templates.
+
+You need Node.js, [Kubara](https://github.com/kubara-io) if you want to generate your own platform rather than reuse the committed example, the [cub CLI](https://docs.confighub.com) logged into your own ConfigHub organization, and clusters (kind works; the reference fleet is kind).
+
+Work through the tutorial in order. Steps 1 to 4 are fully offline: choose or reuse a config, generate, commit the exact hand-off, and prove the importer against deterministic fake surfaces. Step 5 compiles the resumable command contract that takes the package set into the organization you select; step 6 hands off applications the same way. The honest status: every step has deterministic self-tests that pass, the complete journey has passed live against the reference organization above, and the general fresh-organization path has not yet passed its complete live acceptance run. That distinction stays visible in the [checkpoints ledger](docs/demo/kubara/checkpoints.md) until it is earned.
 
 ## Try it without any accounts
 
@@ -24,10 +62,6 @@ Every step has a deterministic self-test that runs against fake Git, OCI, and Co
 ```sh
 npm run kubara-adoption:self-test
 ```
-
-## Copy it
-
-Start from [examples/kubara/current-platform/source/config.yaml](examples/kubara/current-platform/source/config.yaml) and the request templates in [examples/kubara/git-import/](examples/kubara/git-import/). Each adoption chapter names the command that consumes each template and states its machine checkpoint before any live claim.
 
 ## Evidence discipline
 
