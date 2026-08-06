@@ -10,10 +10,6 @@ One application, four clusters, every placement healthy at its exact retained re
 
 ![The hx-web application and platform binding across the four clusters](docs/images/kubara/04-application-four-clusters.png)
 
-The same application's production history shows the full governed story in one view: retained release tags, promotions, the one-target rollback, approval gates, and the applied head release:
-
-![hx-web production revision history with approval gates, promotion, rollback, and the applied release](docs/images/kubara-adoption/06-app-governance-live.png)
-
 The fleet matrix keeps desired placement separate from observed release, sync, health, and readiness. Here is its development column, every component observed, Synced, and Healthy at its exact version or digest:
 
 ![The development column of the fleet matrix](docs/images/kubara/details/06a-matrix-dev-column.png)
@@ -27,6 +23,20 @@ Values overrides stay declared Kubara inputs, listed per cluster and component, 
 ![Declared values overrides per cluster and component](docs/images/kubara/details/06c-declared-overrides.png)
 
 These details are cut from one receipt-bound frame, [the full matrix page](docs/images/kubara/06-fleet-matrix-clean-inventory.png). The [GUI tour](docs/demo/kubara/gui-tour.md) walks all six frames with their key takeaways.
+
+## How applications work
+
+Your application code does not move into ConfigHub; its delivery does. The reviewed application source lives in a base Space (`hx-web-base` keeps one Unit per Kubernetes resource; `hx-cubbychat-base` keeps one Unit for the whole app), and a variant Space per cluster binds that source to the cluster's target. Upgrade links connect each variant back to its base, and NeedsProvides links declare what the app needs from the platform — its Ingress needs the traefik ingress class, its Certificate needs cert-manager — so the wiring that was implicit in folders becomes queryable facts:
+
+![The hx-cubbychat development Unit's native links to traefik and cert-manager](docs/images/kubara/05-native-links.png)
+
+Deployment is deliberately boring. Publishing a Space's Units creates an immutable release with an exact OCI `ManifestDigest`. The reconciler revalidates that release, waits until no Argo operation is active, and submits exactly `operation.sync.revision=<ManifestDigest>` with a Kubernetes compare-and-set on the Application object. Argo CD stays the cluster-local reconciler it always was; the retained argobot runs refresh-only and cannot deploy. The managed Application keeps `targetRevision: latest` for discovery only and has no automated sync, so a moving `latest` pointer can never bypass review — the approved digest is the only thing a cluster will converge to.
+
+Around that mechanism sits the lifecycle teams actually ask for. Production Spaces carry approval gates, and an approval binds to the exact observed revision head, so approving yesterday's revision authorizes nothing about today's. Promotion moves the exact reviewed revision downstream instead of rebuilding from a tag. Rollback restores one production target to an exact earlier release while its peer keeps the newer one. A reviewed per-target departure — staging's extra environment variable — survives later promotions instead of being silently overwritten. All of it is retained as numbered releases on the Unit, which is what the production history looks like after a real cycle:
+
+![hx-web production revision history with approval gates, promotion, rollback, and the applied release](docs/images/kubara-adoption/06-app-governance-live.png)
+
+Chapter 6 of the tutorial runs this cycle end to end, and every claim above has its receipt.
 
 ## Two paths from here
 
@@ -66,10 +76,6 @@ Everything you see here comes from one live reference integration that we operat
 - The platform components Kubara selected (cert-manager, traefik, external-secrets, kube-prometheus-stack, metrics-server, homer-dashboard) plus two example applications.
 
 You do not need access to that organization. Every claim these pages make about it is bound by SHA-256 to a committed receipt in [runs/](runs/) and [data/](data/), every screenshot binds the same source commit as the receipts, and the verifiers below let you check the chain yourself.
-
-## How applications work
-
-Applications ride the same delivery path as platform components. The reviewed application source lives in a base Space (`hx-web-base`, `hx-cubbychat-base`). A variant Space per cluster binds it to that cluster's target. Publishing creates an immutable release; the reconciler submits only the exact release `ManifestDigest` to Argo with a Kubernetes compare-and-set, so a mutable `latest` pointer can never bypass review. Production Spaces carry approval gates; promotion moves the exact reviewed revision downstream; rollback restores one target to an exact earlier release while its peer keeps the newer one; a reviewed per-target departure (a staging-only environment variable) survives later promotions. Chapter 6 of the tutorial runs this end to end.
 
 ## Check that we are not making this up
 
