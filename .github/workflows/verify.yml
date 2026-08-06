@@ -1,0 +1,29 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  offline-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Adoption self-tests
+        run: npm run kubara-adoption:self-test
+      - name: Reconcile receipt
+        run: npm run kubara-mini-idp:receipt-verify
+      - name: Performance receipt
+        run: npm run kubara-mini-idp:performance:receipt-verify
+      - name: Orphan audit receipt
+        run: npm run kubara-mini-idp:orphan-audit:receipt-verify
+      - name: Platform matrix
+        run: npm run kubara-platform-matrix:verify
+      - name: Wiring graph
+        run: npm run kubara-wiring:verify
+      - name: Faithful hub-spoke proof
+        run: npm run kubara-faithful-hub-spoke:verify
