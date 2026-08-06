@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hx-web-tls
+  namespace: hx-web
+spec:
+  secretName: hx-web-tls
+  dnsNames:
+    - hx-web.local
+  issuerRef:
+    name: selfsigned-root-issuer
+    kind: ClusterIssuer

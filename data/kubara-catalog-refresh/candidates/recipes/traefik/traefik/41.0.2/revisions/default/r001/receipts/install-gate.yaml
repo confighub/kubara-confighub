@@ -1,0 +1,20 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "traefik-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "460d20fb9271461c0ccf38da58c7aa940fd691aca94b48cf76aed24465a982ac"
+  decision: "blocked"
+  allowedScopes:
+    - "offline-local-evaluation"
+  blockedScopes:
+    - "live-cluster"
+    - "root-catalog-promotion"
+    - "production"
+  reasons:
+    - "Helm equivalence passed for default"
+    - "the exact artifact is qualified only as an offline candidate"
+    - "Kubara wrapper compatibility and live evidence remain required before retention"
+    - "live qualification has not run"
+    - "Kubara ServiceDefinition, wrapper, defaults, and additions compatibility is incomplete"

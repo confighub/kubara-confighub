@@ -1,0 +1,61 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "loki-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "2e25c21e656867877b5211bfb1914d335806e76df455a78f72e7ec7f8bd8b9ff"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "743f6ce209a0e83d5ed628ed507a02c74b97ccb48779cf65c261c743d20c5331"
+  findingCounts:
+    critical: 0
+    high: 0
+    medium: 7
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||loki-clusterrole"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||loki-clusterrole"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||loki-clusterrole"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||loki-clusterrole"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||loki-clusterrolebinding"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||loki-clusterrolebinding"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||loki-clusterrolebinding"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||loki-clusterrolebinding"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "stateful-workload-review:apps/v1|StatefulSet|loki|loki"
+      rule: "stateful-workload-review"
+      severity: "medium"
+      object: "apps/v1|StatefulSet|loki|loki"
+      message: "Stateful workload requires storage, upgrade, and rollback policy"
+    -
+      id: "stateful-workload-review:apps/v1|StatefulSet|loki|loki-chunks-cache"
+      rule: "stateful-workload-review"
+      severity: "medium"
+      object: "apps/v1|StatefulSet|loki|loki-chunks-cache"
+      message: "Stateful workload requires storage, upgrade, and rollback policy"
+    -
+      id: "stateful-workload-review:apps/v1|StatefulSet|loki|loki-results-cache"
+      rule: "stateful-workload-review"
+      severity: "medium"
+      object: "apps/v1|StatefulSet|loki|loki-results-cache"
+      message: "Stateful workload requires storage, upgrade, and rollback policy"

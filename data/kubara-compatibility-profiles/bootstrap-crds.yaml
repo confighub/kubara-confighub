@@ -1,0 +1,256 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraBootstrapCompatibilityProfile"
+metadata:
+  name: "bootstrap-crds"
+spec:
+  role: "non-user-selectable-bootstrap-concern"
+  deployable: true
+  userSelectable: false
+  platformRoleCounted: false
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      status: "not-present-as-a-separate-bootstrap-service-in-this-source-line"
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      status: "present"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+        repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+        releaseTags:
+          - "bootstrap-1.1.0"
+          - "general-1.1.0"
+        distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+      serviceDefinition:
+        path: "bootstrap/services/crds.yaml"
+        sha256: "576f6d99edd5f6e39292697439644870ed9e56a41e9a5d1565c19914795b49c8"
+        bytes: 182
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "bootstrap-crds"
+        chartPath: "bootstrap-crds"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "bootstrap/platform-components/helm/bootstrap-crds"
+        chartYaml:
+          path: "bootstrap/platform-components/helm/bootstrap-crds/Chart.yaml"
+          sha256: "c491cd3880fa78e2129c4350c123096d5c685871328e48ab112f16035af29a9b"
+          bytes: 621
+        name: "crds"
+        version: "1.0.0"
+        tree:
+          fileCount: 3
+          bytes: 1402
+          treeSha256: "f98cf8f8a1dddfe0d7464c2121710153143a5d8311cee9210854aeed155727d7"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        status: "absent-upstream-by-design"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:jetstack/cert-manager"
+          chartDependency:
+            name: "cert-manager"
+            version: "v1.21.0"
+            repository: "https://charts.jetstack.io"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/jetstack/cert-manager/v1.21.0"
+              package: "packages/jetstack/cert-manager/v1.21.0"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/jetstack/cert-manager/v1.21.0"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/jetstack/cert-manager/v1.21.0"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/jetstack/cert-manager/v1.21.0"
+                package: "data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0"
+                recipeExists: true
+                packageExists: true
+        -
+          canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+          chartDependency:
+            name: "kube-prometheus-stack"
+            version: "87.19.2"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+              package: "packages/prometheus-community/kube-prometheus-stack/87.19.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: false
+                packageExists: false
+        -
+          canonicalIdentity: "helm:external-secrets/external-secrets"
+          chartDependency:
+            name: "external-secrets"
+            version: "2.8.0"
+            repository: "https://charts.external-secrets.io"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/external-secrets/external-secrets/2.8.0"
+              package: "packages/external-secrets/external-secrets/2.8.0"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/external-secrets/external-secrets/2.8.0"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/external-secrets/external-secrets/2.8.0"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/external-secrets/external-secrets/2.8.0"
+                package: "data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.8.0"
+                recipeExists: false
+                packageExists: false
+      configHubBootstrapWrapper:
+        disposition: "source-export-only-no-equivalent-bootstrap-wrapper-component"
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      status: "present"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+        repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+        releaseTags:
+          []
+        distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+      serviceDefinition:
+        path: "bootstrap/services/crds.yaml"
+        sha256: "576f6d99edd5f6e39292697439644870ed9e56a41e9a5d1565c19914795b49c8"
+        bytes: 182
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "bootstrap-crds"
+        chartPath: "bootstrap-crds"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "bootstrap/platform-components/helm/bootstrap-crds"
+        chartYaml:
+          path: "bootstrap/platform-components/helm/bootstrap-crds/Chart.yaml"
+          sha256: "c491cd3880fa78e2129c4350c123096d5c685871328e48ab112f16035af29a9b"
+          bytes: 621
+        name: "crds"
+        version: "1.0.0"
+        tree:
+          fileCount: 3
+          bytes: 1402
+          treeSha256: "f98cf8f8a1dddfe0d7464c2121710153143a5d8311cee9210854aeed155727d7"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        status: "absent-upstream-by-design"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:jetstack/cert-manager"
+          chartDependency:
+            name: "cert-manager"
+            version: "v1.21.0"
+            repository: "https://charts.jetstack.io"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/jetstack/cert-manager/v1.21.0"
+              package: "packages/jetstack/cert-manager/v1.21.0"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/jetstack/cert-manager/v1.21.0"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/jetstack/cert-manager/v1.21.0"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/jetstack/cert-manager/v1.21.0"
+                package: "data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0"
+                recipeExists: true
+                packageExists: true
+        -
+          canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+          chartDependency:
+            name: "kube-prometheus-stack"
+            version: "87.19.2"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+              package: "packages/prometheus-community/kube-prometheus-stack/87.19.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: false
+                packageExists: false
+        -
+          canonicalIdentity: "helm:external-secrets/external-secrets"
+          chartDependency:
+            name: "external-secrets"
+            version: "2.8.0"
+            repository: "https://charts.external-secrets.io"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/external-secrets/external-secrets/2.8.0"
+              package: "packages/external-secrets/external-secrets/2.8.0"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/external-secrets/external-secrets/2.8.0"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/external-secrets/external-secrets/2.8.0"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/external-secrets/external-secrets/2.8.0"
+                package: "data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.8.0"
+                recipeExists: false
+                packageExists: false
+      configHubBootstrapWrapper:
+        disposition: "source-export-only-no-equivalent-bootstrap-wrapper-component"
+  contract:
+    requiredForCurrentKubaraBootstrap: true
+    retainedByteForByte: true
+    configSelectable: false
+    aiRequired: false

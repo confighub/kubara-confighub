@@ -1,0 +1,32 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Variant"
+metadata:
+  name: "external-tls-ca"
+spec:
+  recipe: "../../recipe.yaml"
+  namespace: "kube-system"
+  releaseName: "metrics-server"
+  valuesProfile: "../../effective-values-external-tls-ca.yaml"
+  capabilityProfile:
+    kubeVersion: "1.30.0"
+    apiVersions:
+      []
+  hookPolicy: "no-hooks"
+  targetFacts:
+    requiredSecrets:
+      -
+        namespace: "kube-system"
+        name: "metrics-server-tls"
+        keys:
+          - "tls.crt"
+          - "tls.key"
+        purpose: "metrics-server serving certificate"
+    requiredValues:
+      -
+        path: "apiService.caBundle"
+        purpose: "APIService CA bundle that validates kube-system/metrics-server-tls"
+        stage: "pre-render"
+        source: "metrics-server-tls-ca"
+        installerInput: "apiServiceCaBundle"
+        regularHelmFormat: "pem"
+        installerInputFormat: "base64-pem"

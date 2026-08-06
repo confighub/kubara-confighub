@@ -1,0 +1,8 @@
+
+# Immutable Kubara upstream snapshots and byte-identical generated outputs.
+# Preserve their source bytes while retaining normal whitespace checks elsewhere.
+data/kubara-catalog-snapshots/** whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+data/kubara-catalog-adapter/exports/** whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+data/kubara-effective-renders/** whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+examples/kubara/current-platform/generated/** whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+examples/kubara/current-platform/effective-renders/** whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab

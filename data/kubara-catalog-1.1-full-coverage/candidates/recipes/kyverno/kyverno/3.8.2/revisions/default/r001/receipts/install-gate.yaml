@@ -1,0 +1,18 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "kyverno-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "1596c72d8cde36995d7cd32ff3e953830da1763a59a25459c53ae4e4d425506d"
+  decision: "warn"
+  allowedScopes:
+    - "catalog-selection"
+    - "local-test"
+  blockedScopes:
+    - "production"
+  reasons:
+    - "Helm equivalence passed for default"
+    - "the exact artifact and deterministic installer package are retained for Kubara selection"
+    - "Kubara wrapper behavior and target-specific live readiness require separate review"
+    - "target facts and lifecycle prerequisites remain explicit and target-specific"

@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  chart: "traefik/traefik"
+  version: "41.0.2"
+  dependencies:
+    []

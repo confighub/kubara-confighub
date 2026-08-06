@@ -1,0 +1,135 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPainReport"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  chart:
+    name: "metrics-server/metrics-server"
+    version: "3.13.1"
+    source: "https://kubernetes-sigs.github.io/metrics-server/"
+    digest: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+  supportedScopeStatus: "no-unhandled-pain-points-for-supported-scopes"
+  supportedScopes:
+    []
+  supportedVariants:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  notes:
+    - "Default chart renders APIService with insecureSkipTLSVerify=true and lets metrics-server generate its serving certificate at runtime."
+    - "tls.type=helm activates Helm lookup and genSelfSignedCert; do not promote that path until generated-fact receipts are formalized."
+    - "external-tls-ca variant moves TLS material to a target Secret and binds APIService caBundle into effective values; the Secret and CA bundle must be produced together before render."
+    - "The local kind proof keeps --kubelet-insecure-tls so Metrics Server can scrape vanilla kind kubelets; production targets should review kubelet TLS separately."
+    - "APIService readiness must be observed after apply because a rendered object alone does not prove aggregated API health."
+  painPoints:
+    -
+      id: "source-lock"
+      detectedPainPoint: "source-lock requires source-lock.yaml"
+      evidence:
+        - "source-lock.yaml"
+      configHubHome: "source-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "source-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "dependency-lock"
+      detectedPainPoint: "chart has no subchart dependencies"
+      evidence:
+        - "dependency-lock.yaml"
+      configHubHome: "dependency-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "dependency-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "generated-facts"
+      detectedPainPoint: "tls.type=helm would use genSelfSignedCert and lookup; it is intentionally not promoted until generated-fact receipts are formalized. external-tls-ca avoids Helm generation but still requires a matching CA bundle before render."
+      evidence:
+        - "variants/default/variant.yaml and variants/external-tls-ca/variant.yaml"
+      configHubHome: "generated-fact"
+      disposition: "handled-by-variant"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "avoided-by-current-variants"
+    -
+      id: "target-facts"
+      detectedPainPoint: "target-facts requires variants/external-tls-ca/variant.yaml"
+      evidence:
+        - "variants/external-tls-ca/variant.yaml"
+        - "declared-required-target-facts"
+      configHubHome: "target-fact-requirement"
+      disposition: "handled-by-target-fact-values"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "required-for-external-tls-ca"
+    -
+      id: "lookup"
+      detectedPainPoint: "external-tls-ca sets tls.existingSecret.lookup=false; default keeps lookup path inactive"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "target-fact-requirement"
+      disposition: "handled-by-target-fact-values"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "avoided"
+    -
+      id: "capability-profile"
+      detectedPainPoint: "capability-profile is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "capability-profile"
+      disposition: "handled-by-capability-profile"
+      linkedReceipt: "revisions/default/r001/receipts/render-receipt.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "hook-policy"
+      detectedPainPoint: "hook-policy is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "no-hooks"
+      configHubHome: "lifecycle-policy"
+      disposition: "handled-by-lifecycle-policy"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "apiservice"
+      detectedPainPoint: "apiservice affects apiregistration.k8s.io/v1|APIService||v1beta1.metrics.k8s.io"
+      evidence:
+        - "apiregistration.k8s.io/v1|APIService||v1beta1.metrics.k8s.io"
+      configHubHome: "scan-gate"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/scan-receipt.yaml"
+      supportedVariantStatus: "needs-observation"
+    -
+      id: "cluster-rbac"
+      detectedPainPoint: "cluster-rbac requires scan receipts"
+      evidence:
+        - "scan receipts"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/scan-receipt.yaml"
+      supportedVariantStatus: "scan-and-review"
+    -
+      id: "installer-support-object"
+      detectedPainPoint: "installer-support-object affects v1|Namespace||kube-system"
+      evidence:
+        - "v1|Namespace||kube-system"
+      configHubHome: "recipe"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "scan-gate"
+      detectedPainPoint: "Current scan gate is warn-production-blocked"
+      evidence:
+        - "helm-plan.yaml"
+        - "scan receipts"
+        - "install gates"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "warn-production-blocked"
+    -
+      id: "value-model-diagnostics"
+      detectedPainPoint: "Helm values can be unknown, dead, misspelled, shadowed, or ignored unless the values model records the analysis boundary."
+      evidence:
+        - "value-model.yaml"
+      configHubHome: "value-model"
+      disposition: "absorbed-into-value-model"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "unknown=not-checked; dead=not-checked; ignored=not-checked"
+  answerForSkepticalHelmUser: "metrics-server/metrics-server@3.13.1 maps its detected Helm pain to 9 ConfigHub control areas: source-lock, dependency-lock, generated-fact, target-fact-requirement, capability-profile, lifecycle-policy, scan-gate, recipe, value-model. Supported scopes have explicit variants, receipts, scans/gates, and control-point dispositions; production readiness remains not-reviewed-for-production."

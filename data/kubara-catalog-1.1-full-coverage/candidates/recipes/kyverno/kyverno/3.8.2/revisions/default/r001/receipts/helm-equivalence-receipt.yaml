@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "kyverno-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "1596c72d8cde36995d7cd32ff3e953830da1763a59a25459c53ae4e4d425506d"
+    objectCount: 69
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 70
+    uploadedManifestFiles: 70
+    separatedSecretFiles: 0
+    semanticObjectMatches: "69/69"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||kyverno"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-1.1-full-coverage:compare"

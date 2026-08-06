@@ -1,0 +1,53 @@
+apiVersion: import.confighub.com/v1alpha1
+kind: KubaraSelectedOrganizationImport
+metadata:
+  name: acme-kubara
+spec:
+  platform:
+    portableRequest: /controlled/import/portable-request.yaml
+    checkout: /controlled/import/clean-detached-checkout
+    portableOutput: /controlled/import/portable
+  destination:
+    organization: Acme Kubara
+    context: acme-kubara
+    organizationExternalID: 30000000-0000-4000-8000-000000000001
+    organizationID: 30000000-0000-4000-8000-000000000002
+    serverURL: https://hub.confighub.example
+    spaceReleaseOCIBase: oci://oci.hub.confighub.example:443/space
+    requestTemplate: /controlled/import/destination-template.yaml
+    reviewedRequest: /controlled/import/reviewed-destination.yaml
+    credentialScanReport: /controlled/evidence/gitleaks-report.json
+    runtimeEvidence:
+      - cluster: acme-dev
+        path: /controlled/evidence/acme-dev-runtime.yaml
+      - cluster: acme-prod
+        path: /controlled/evidence/acme-prod-runtime.yaml
+    boundOutput: /controlled/import/bound
+    targetFactAttestation: /controlled/evidence/target-facts-attested.yaml
+    coordinateEvidence: /controlled/evidence/organization-coordinate.yaml
+  bootstrap:
+    policy: explicit-existing-or-cub-cluster-up
+    clusters:
+      - cluster: acme-dev
+        space: acme-dev
+        mode: existing
+        evidence: /controlled/evidence/acme-dev-bootstrap.yaml
+      - cluster: acme-prod
+        space: acme-prod
+        mode: existing
+        evidence: /controlled/evidence/acme-prod-bootstrap.yaml
+  applications:
+    - name: payments
+      request: /controlled/import/payments-release.yaml
+      output: /controlled/import/payments-release
+      liveAcceptanceEvidence: /controlled/evidence/payments-live.json
+  acceptance:
+    evidence: /controlled/evidence/kubara-import-acceptance.yaml
+    requires:
+      - exact-live-digests
+      - accepted-health
+      - immediate-zero-action-rerun
+      - exact-confighub-inventory
+      - zero-argo-prunable-resources
+      - zero-unclassified-or-dangling-five-durable-workload-types
+      - protected-namespace-uid-current-ownership

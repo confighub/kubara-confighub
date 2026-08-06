@@ -1,0 +1,17 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "metallb-metallb-0.16.1"
+spec:
+  chart: "metallb/metallb"
+  version: "0.16.1"
+  dependencies:
+    -
+      name: "crds"
+      repository: ""
+      version: "0.16.1"
+    -
+      name: "frr-k8s"
+      repository: "https://metallb.github.io/frr-k8s"
+      version: "0.0.25"
+  chartLockDigest: "sha256:91f6f08e93bcfc87c9388e5b063b814754151fced237f489cc84feaf5cf13584"

@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Variant"
+metadata:
+  name: "default"
+spec:
+  recipe: "../../recipe.yaml"
+  namespace: "loki"
+  releaseName: "loki"
+  valuesProfile: "../../effective-values-single-binary-filesystem.yaml"
+  capabilityProfile:
+    kubeVersion: "1.30.0"
+    apiVersions:
+      []
+  hookPolicy: "no-hooks"

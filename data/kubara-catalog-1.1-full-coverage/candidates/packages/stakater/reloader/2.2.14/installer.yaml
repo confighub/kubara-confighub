@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "stakater-reloader"
+  version: "2.2.14"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "reloader chart defaults variant rendered from stakater/reloader@2.2.14"

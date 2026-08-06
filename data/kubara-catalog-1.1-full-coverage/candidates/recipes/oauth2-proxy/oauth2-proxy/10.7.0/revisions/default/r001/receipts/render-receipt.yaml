@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "oauth2-proxy-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "95b39bde41e628ebb3f439e2664ae347ec3c82b567b8cbf5500e63a1ce767527"
+    dependencyLockSHA256: "d034e48d109e0e38730c21f481bf2932826939d0aabaa80c71b474606810b9bc"
+    effectiveValuesSHA256: "fca9ac87e58ec4bb1f7da61c8d99f4471379edd8c46539068535916772887d29"
+  outputs:
+    renderedObjectSetSHA256: "1e6b5312d0e3ec8d8c0e306fb995604d377c89207409e35f2934f3526ac54abc"
+    renderedObjectInventorySHA256: "ba7aec2367436ae32d63f28c2788147814e4358410b3161396854fd2e03b5b9b"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 5
+    renderedSecretCount: 1
+    secretCountSeparatedByCubInstall: 1

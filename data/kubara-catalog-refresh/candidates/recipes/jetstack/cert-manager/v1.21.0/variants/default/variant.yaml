@@ -1,0 +1,76 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Variant"
+metadata:
+  name: "default"
+spec:
+  recipe: "../../recipe.yaml"
+  namespace: "cert-manager"
+  releaseName: "cert-manager"
+  valuesProfile: "../../effective-values.yaml"
+  capabilityProfile:
+    kubeVersion: "1.30.0"
+    apiVersions:
+      []
+  hookPolicy: "no-hooks"
+  targetFacts:
+    requiredCRDs:
+      -
+        name: "challenges.acme.cert-manager.io"
+        sourceVariant: "crds-enabled"
+        purpose: "cert-manager CRD staged before the default chart and its startup API check"
+        deliveryLanes:
+          - "regularHelm"
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        applyMode: "server-side"
+      -
+        name: "orders.acme.cert-manager.io"
+        sourceVariant: "crds-enabled"
+        purpose: "cert-manager CRD staged before the default chart and its startup API check"
+        deliveryLanes:
+          - "regularHelm"
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        applyMode: "server-side"
+      -
+        name: "certificaterequests.cert-manager.io"
+        sourceVariant: "crds-enabled"
+        purpose: "cert-manager CRD staged before the default chart and its startup API check"
+        deliveryLanes:
+          - "regularHelm"
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        applyMode: "server-side"
+      -
+        name: "certificates.cert-manager.io"
+        sourceVariant: "crds-enabled"
+        purpose: "cert-manager CRD staged before the default chart and its startup API check"
+        deliveryLanes:
+          - "regularHelm"
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        applyMode: "server-side"
+      -
+        name: "clusterissuers.cert-manager.io"
+        sourceVariant: "crds-enabled"
+        purpose: "cert-manager CRD staged before the default chart and its startup API check"
+        deliveryLanes:
+          - "regularHelm"
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        applyMode: "server-side"
+      -
+        name: "issuers.cert-manager.io"
+        sourceVariant: "crds-enabled"
+        purpose: "cert-manager CRD staged before the default chart and its startup API check"
+        deliveryLanes:
+          - "regularHelm"
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        applyMode: "server-side"

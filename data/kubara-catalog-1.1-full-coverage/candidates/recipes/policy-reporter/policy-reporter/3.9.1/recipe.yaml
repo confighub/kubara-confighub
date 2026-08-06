@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "policy-reporter-policy-reporter"
+  version: "3.9.1"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/policy-reporter/policy-reporter/3.9.1"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/policy-reporter/policy-reporter/3.9.1"
+      - "--non-interactive"
+      - "--namespace"
+      - "policy-reporter"
+  variants:
+    - "variants/default/variant.yaml"

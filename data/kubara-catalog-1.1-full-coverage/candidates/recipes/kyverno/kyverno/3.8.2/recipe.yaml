@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "kyverno-kyverno"
+  version: "3.8.2"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/kyverno/kyverno/3.8.2"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/kyverno/kyverno/3.8.2"
+      - "--non-interactive"
+      - "--namespace"
+      - "kyverno"
+  variants:
+    - "variants/default/variant.yaml"

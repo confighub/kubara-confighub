@@ -1,0 +1,130 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "ConfigHubKubaraSinglePlatformReceipt"
+metadata:
+  name: "hx-kubara-single-platform-gitops-apps"
+spec:
+  recordedAt: "2026-08-03T22:14:20Z"
+  intent: >-
+    Build an internal developer platform (IDP) from ConfigHub and an adapted
+    Kubara (its own Argo CD dropped), delivered through ConfigHub-owned Argo CD,
+    and run GitOps apps on it. Kubara decides the platform; ConfigHub governs and
+    delivers it; app teams run their apps on the same governed path.
+  clusters: ["hx-app-dev", "hx-app-staging", "hx-app-prod-a", "hx-app-prod-b"]
+  argoOwner: "cub cluster up: ConfigHub-owned Argo CD + argobot on each cluster"
+  platform:
+    scope: "Delivered on hx-app-dev in this phase. cert-manager and traefik also run on all four clusters from the app-rollout proof."
+    services:
+      - { name: "cert-manager", version: "v1.21.0", state: "3/3 Running", space: "hx-cm-*" }
+      - name: "external-secrets"
+        version: "2.7.0"
+        state: "controller, webhook, and cert-controller 1/1 Running; 24 CRDs installed; ClusterSecretStore Ready=True (Valid); Grafana ExternalSecret Ready=True (SecretSynced)"
+        spaces: ["hx-eso-dev", "hx-eso-store-dev", "hx-eso-grafana-es-dev"]
+        note: "Operator runs in default in this adapted layout. The kind-only fake provider holds demo data and is not a production secret backend."
+      - { name: "traefik", version: "41.0.2", state: "1/1 Running", space: "hx-traefik-*" }
+      - { name: "metrics-server", state: "1/1 Running", space: "hx-metrics-dev" }
+      - { name: "homer-dashboard", state: "1/1 Running", space: "hx-homer-dev", note: "render omitted namespace; set-namespace applied before delivery" }
+      - name: "kube-prometheus-stack"
+        version: "87.19.0 (Kubara pinned 87.15.1, pruned upstream)"
+        state: "operator, Prometheus, Alertmanager, node-exporter, kube-state-metrics, blackbox, and Grafana all Running. Grafana's admin Secret is now managed and owned by external-secrets."
+        spaces: ["hx-kps-crds-dev", "hx-kps-main-dev"]
+  apps:
+    - { name: "hx-web", type: "nginx", uses: "traefik ingress + cert-manager cert", space: "hx-web-*" }
+    - name: "cubbychat"
+      type: "3-tier sample app from the ConfigHub tutorial (postgres StatefulSet + backend + frontend)"
+      source: "https://raw.githubusercontent.com/confighub/cubbychat/refs/heads/main/simple/config-data.yaml"
+      uses: "traefik Ingress (host cubbychat.local) + cert-manager Certificate (SAN DNS:cubbychat.local)"
+      reachTest: "On all four clusters, HTTPS through traefik returned HTTP 200 and the 'Cubby AI Chat' page, served with the cert-manager certificate (SAN DNS:cubbychat.local)"
+      state: "postgres, backend, frontend all 1/1 on all four clusters (dev, staging, prod-a, prod-b)"
+  governance:
+    promotion: "base -> dev -> staging -> prod wave, delivered by argobot"
+    approvalGate: "hx-platform/require-approval (vet-approvedby) attached to hx-web-prod-a, hx-web-prod-b, hx-cubbychat-prod-a, and hx-cubbychat-prod-b; release publish refused HTTP 422 until all Units in the Space are approved"
+  findings:
+    - id: "pinned-version-pruned"
+      detail: >-
+        Kubara pinned kube-prometheus-stack 87.15.1. The prometheus-community
+        repository had pruned it from its index, so the bundle would not build.
+        Moved to the nearest surviving version in the same line, 87.19.0.
+    - id: "crd-before-cr"
+      detail: >-
+        cert-manager ClusterIssuer and the ServiceMonitors are custom resources
+        that need their CRDs (and cert-manager's webhook) first. Bring-up order is
+        CRDs, then controllers, then custom resources.
+    - id: "chart-assumes-whole-platform"
+      detail: >-
+        Charts refuse to render their ServiceMonitor without the Prometheus
+        operator CRD, so they were rendered with --api-versions monitoring.coreos.com/v1.
+    - id: "large-crd-annotation-limit"
+      detail: >-
+        kube-prometheus-stack CRDs exceed the 256 KB annotation limit that
+        client-side apply uses. cub cluster up installs stock Argo CD, which
+        defaults to client-side apply, so the first large chart hits this. The fix
+        is ServerSideApply=true on the Argo Application, which large CRDs need.
+        Replace=true was a temporary mid-flight fallback; it was removed after
+        convergence. The final application has exactly ServerSideApply=true, is
+        Synced/Healthy, and all 10 monitoring.coreos.com CRDs remain installed.
+    - id: "grafana-secret-source"
+      detail: >-
+        Grafana does not depend on external-secrets. Grafana reads a Secret;
+        Kubara's platform uses external-secrets to create that Secret from a store.
+        The Secret was initially supplied by hand to unblock Grafana. The follow-up
+        delivered external-secrets, a kind-only fake ClusterSecretStore, and the
+        Grafana ExternalSecret. The Secret now has external-secrets management
+        labels and an ExternalSecret controller owner reference; the manual Argo
+        app Unit was deleted and the apps Space published. Because the root
+        Application has pruning disabled, the stale child Application remained;
+        after confirming it was the sole extra resource and had no cascade
+        finalizer, that exact Application was deleted directly. The
+        hx-kps-grafana-secret base/dev Spaces and stale tracking, origin, and
+        last-applied annotations were then removed. Grafana was 1/1 after cleanup.
+    - id: "external-secrets-ssa-publication-race"
+      detail: >-
+        The first external-secrets auto-sync operation was captured in the short
+        interval between variant creation and the ConfigHub SSA edit. It therefore
+        retried client-side apply and failed on clustersecretstores and secretstores
+        with the 256 KB annotation limit. The stale operation was terminated and a
+        server-side sync completed. Final evidence is 24 CRDs, three ready
+        deployments, populated webhook TLS/CA data, and a Synced/Healthy app.
+    - id: "external-secrets-fake-provider-contract"
+      detail: >-
+        Kubara intentionally leaves clusterSecretStores empty. For kind, the
+        prerequisite was adapted to external-secrets' built-in fake provider. In
+        version 2.7.0 the provider requires a JSON string in value; the obsolete
+        valueMap shape is rejected. dataFrom.extract decoded the JSON into the two
+        Grafana Secret keys.
+    - id: "external-secrets-shared-namespace"
+      detail: >-
+        The hand-off render put the operator in default and also emitted a redundant
+        Namespace/default document. Argo reported a shared-resource tracking
+        conflict with the existing Homer Application. Only that Namespace document
+        was removed from the external-secrets base and promoted to dev; the
+        namespace and all workloads remained in place, and the app became
+        Synced/Healthy.
+    - id: "render-omits-namespace"
+      detail: >-
+        The homer-dashboard render left namespace off its objects, so Argo CD could
+        not place them. Namespace was set on the Units before delivery.
+  evidence:
+    tools:
+      cubClient: "v0.2.10"
+      cubServer: "v0.2.11"
+    hxAppDev:
+      externalSecretsApps:
+        hx-eso-dev: "Synced/Healthy; OCI sha256:f3c10b3936235499f88ddf1cd37a9ab7af65f9a810144c0ffbc661f71625233e"
+        hx-eso-store-dev: "Synced/Healthy; OCI sha256:56d5f02fbc271922f90cac728e383dd5c76fd098bb97f7a3c215284ffcae8f79"
+        hx-eso-grafana-es-dev: "Synced/Healthy; OCI sha256:cc9d0ccb52a03da350b9cfcd90b8d4c5766963efa1dcb0899fc2810e0736915a"
+      operator: "external-secrets, webhook, and cert-controller each Ready=1 Available=1; webhook Secret has ca.crt, ca.key, tls.crt, tls.key; validating webhook CA bundles populated"
+      store: "ClusterSecretStore/test-cluster-local Ready=True reason=Valid"
+      externalSecret: "default/grafana-admin-credentials-es Ready=True reason=SecretSynced"
+      generatedSecret: "default/grafana-admin-credentials keys admin-password and admin-user; managed=true; controller owner ExternalSecret/grafana-admin-credentials-es; obsolete manual tracking/origin/last-applied annotations absent"
+      grafana: "Deployment/kube-prometheus-stack-grafana Ready=1 Available=1 after manual delivery removal"
+      kpsCrds: "hx-kps-crds-dev Synced/Healthy with syncOptions [ServerSideApply=true]; 10 monitoring.coreos.com CRDs present"
+      manualDelivery: "app Unit absent and apps release published; prune-disabled root left the sole stale child Application, which had no cascade finalizer and was deleted directly; hx-kps-grafana-secret-dev Application and base/dev Spaces now absent"
+      cubScoutDefaultNamespace: "0 stuck applications, silent failures, or runtime failures"
+status:
+  result: "pass-with-limits"
+  limits:
+    - "The heavier platform services (metrics-server, homer-dashboard, kube-prometheus-stack) ran on the dev cluster only. cert-manager and traefik run on all four; both applications run on all four."
+    - "The Kubara platform has seven roles. Six services run on dev (cert-manager, external-secrets, traefik, metrics-server, homer-dashboard, kube-prometheus-stack), and ConfigHub's Argo CD replaces Kubara's argo-cd, so all seven are accounted for."
+    - "The external-secrets proof uses its built-in fake provider with demo admin/admin data stored in ConfigHub. It does not prove a production Vault, AWS, or other external secret backend."
+    - "The three new external-secrets Applications and the KPS CRD Application are Synced/Healthy. The cluster-wide cub-scout snapshot still reports unrelated pre-existing OutOfSync or Progressing aggregate state on hx-cm-dev, hx-cubbychat-dev, hx-kps-main-dev, hx-metrics-dev, hx-traefik-dev, and hx-web-platform-dev."
+    - "The applications are a minimal nginx service and the cubbychat sample, not production workloads."

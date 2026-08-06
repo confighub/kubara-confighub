@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "traefik-traefik"
+  version: "41.0.2"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "traefik chart defaults variant rendered from traefik/traefik@41.0.2"

@@ -1,0 +1,61 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      note: "chart has no subchart dependencies"
+    -
+      category: "generated-facts"
+      status: "avoided-by-current-variants"
+      evidence: "variants/default/variant.yaml and variants/external-tls-ca/variant.yaml"
+      note: "tls.type=helm would use genSelfSignedCert and lookup; it is intentionally not promoted until generated-fact receipts are formalized. external-tls-ca avoids Helm generation but still requires a matching CA bundle before render."
+    -
+      category: "target-facts"
+      status: "required-for-external-tls-ca"
+      evidence: "variants/external-tls-ca/variant.yaml"
+      required:
+        -
+          kind: "Secret"
+          namespace: "kube-system"
+          name: "metrics-server-tls"
+          keys:
+            - "tls.crt"
+            - "tls.key"
+        -
+          kind: "Value"
+          path: "apiService.caBundle"
+          stage: "pre-render"
+          purpose: "must match the Secret certificate authority"
+    -
+      category: "lookup"
+      status: "avoided"
+      note: "external-tls-ca sets tls.existingSecret.lookup=false; default keeps lookup path inactive"
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+    -
+      category: "hook-policy"
+      status: "handled"
+      policy: "no-hooks"
+    -
+      category: "apiservice"
+      status: "needs-observation"
+      object: "apiregistration.k8s.io/v1|APIService||v1beta1.metrics.k8s.io"
+    -
+      category: "cluster-rbac"
+      status: "scan-and-review"
+      evidence: "scan receipts"
+    -
+      category: "installer-support-object"
+      status: "handled"
+      object: "v1|Namespace||kube-system"

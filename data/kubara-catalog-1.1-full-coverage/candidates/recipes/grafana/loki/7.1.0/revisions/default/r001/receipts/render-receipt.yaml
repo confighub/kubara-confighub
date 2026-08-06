@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "loki-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "fe7f248120d499f76fab530fb528f7b1d663773739c429b9b84f6b88a35e9c81"
+    dependencyLockSHA256: "f67140aa8f19f6fba7f62d6f41ce3ddd7b7d7014d071d4ba0f65d562ee6544f6"
+    effectiveValuesSHA256: "9c7b9e2e3aa390e13e4ebe7d87efa83490a2f0f6bde26db44261e3053e4c61a5"
+  outputs:
+    renderedObjectSetSHA256: "2e25c21e656867877b5211bfb1914d335806e76df455a78f72e7ec7f8bd8b9ff"
+    renderedObjectInventorySHA256: "a3deb9bc330dbc11e90004daae20c60b40b4b030afd105eab8d8b9428a9eda3c"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 19
+    renderedSecretCount: 0
+    secretCountSeparatedByCubInstall: 0

@@ -1,0 +1,36 @@
+apiVersion: catalog.confighub.com/v1alpha1
+kind: KubaraCurrentExampleSourceLock
+metadata:
+  name: kubara-v0-13-0-catalogs-v1-1-0
+spec:
+  kubara:
+    repository: https://github.com/kubara-io/kubara.git
+    version: v0.13.0
+    tagObject: a23656ad2357fab75222a12fe3bd3bde552be29e
+    commit: 096ed84d116e5316852537046cc61d15a1e1c304
+    repositoryTree: cf82cd21ae2e38da73d3428c508b3f8945122058
+    release:
+      platform: darwin-arm64
+      asset: kubara_0.13.0_darwin_arm64.tar.gz
+      assetSha256: d2bad751f149d9e73cd7cd35bd1843fc1d7acb231deaa7df8eb12eb75cfd1685
+      extractedBinarySha256: 72642ce49aa5e9d13aeb4441aebc4c4530c7427c0d0aacbcee7b97e249f57183
+  catalogs:
+    version: 1.1.0
+    repository: https://github.com/kubara-io/catalogs.git
+    commit: b451260636bba764ccdb0561d9f8f5ce414e2ee5
+    repositoryTree: 9c722d1ba28053d4b802d3c74a14fea5a343b765
+    releaseTags:
+      - bootstrap-1.1.0
+      - general-1.1.0
+    publicReferences:
+      bootstrap: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0
+      general: oci://ghcr.io/kubara-io/catalogs/general:1.1.0
+    pinnedSnapshot: data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-release/source
+    alignedExport: data/kubara-catalog-adapter/exports/kubara-catalogs-1.1.0-release
+  generation:
+    config: examples/kubara/current-platform/source/config.yaml
+    helmKubeVersion: 1.35.0
+    catalogSourceLanes:
+      - kubara-release-snapshot
+      - confighub-aligned-export
+    expectedParity: byte-for-byte

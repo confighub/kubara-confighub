@@ -1,0 +1,13 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "external-secrets-external-secrets-2.7.0-no-crds"
+spec:
+  files:
+    -
+      path: "effective-values-no-crds.yaml"
+      source: "inline-proof"
+      sha256: "fe6f4857fe502d81fce8c99a4daf0a0d0ae0564d62633b5efb15508151e8c265"
+  mergedValuesCaptured: false
+  values:
+    installCRDs: false

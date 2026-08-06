@@ -1,0 +1,181 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "kube-prometheus-stack-existing-secret-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "6f170071f5d1120d97bafc701e2a4631b2f01c313d5af5a1ec65943dcf69602a"
+  findingCounts:
+    critical: 0
+    high: 7
+    medium: 20
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "admission-webhook-requires-observation:admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||kube-prometheus-stack-admission"
+      rule: "admission-webhook-requires-observation"
+      severity: "medium"
+      object: "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||kube-prometheus-stack-admission"
+      message: "Admission webhook availability must be observed after apply"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-grafana-clusterrole"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-grafana-clusterrole"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-kube-state-metrics"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-kube-state-metrics"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-operator"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-operator"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-prometheus"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-prometheus"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-grafana-clusterrolebinding"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-grafana-clusterrolebinding"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-kube-state-metrics"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-kube-state-metrics"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-operator"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-operator"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-prometheus"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-prometheus"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||alertmanagerconfigs.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||alertmanagerconfigs.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||alertmanagers.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||alertmanagers.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||podmonitors.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||podmonitors.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||probes.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||probes.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||prometheusagents.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||prometheusagents.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||prometheuses.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||prometheuses.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||prometheusrules.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||prometheusrules.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||scrapeconfigs.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||scrapeconfigs.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||servicemonitors.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||servicemonitors.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||thanosrulers.monitoring.coreos.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||thanosrulers.monitoring.coreos.com"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "dependency-lock-review:umbrella"
+      rule: "dependency-lock-review"
+      severity: "medium"
+      object: "dependency|crds,kube-state-metrics,prometheus-node-exporter,grafana,prometheus-windows-exporter"
+      message: "Umbrella chart dependencies are locked before recipe publication"
+    -
+      id: "service-selector-has-workload-match:v1|Service|kube-system|kube-prometheus-stack-coredns"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|kube-system|kube-prometheus-stack-coredns"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|kube-system|kube-prometheus-stack-kube-controller-manager"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|kube-system|kube-prometheus-stack-kube-controller-manager"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|kube-system|kube-prometheus-stack-kube-etcd"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|kube-system|kube-prometheus-stack-kube-etcd"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|kube-system|kube-prometheus-stack-kube-proxy"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|kube-system|kube-prometheus-stack-kube-proxy"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|kube-system|kube-prometheus-stack-kube-scheduler"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|kube-system|kube-prometheus-stack-kube-scheduler"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|monitoring|kube-prometheus-stack-alertmanager"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|monitoring|kube-prometheus-stack-alertmanager"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|monitoring|kube-prometheus-stack-prometheus"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|monitoring|kube-prometheus-stack-prometheus"
+      message: "Service selector matches no rendered workload pod template"

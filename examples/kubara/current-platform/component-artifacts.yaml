@@ -1,0 +1,59 @@
+apiVersion: catalog.confighub.com/v1alpha1
+kind: KubaraComponentArtifactSet
+metadata:
+  name: kubara-catalogs-v1-1-0-selected-components
+spec:
+  exactVersionPolicy: fail-if-missing
+  retentionPolicy: additive-only
+  artifacts:
+    - service: argo-cd
+      canonicalIdentity: helm:argo-cd/argo-cd
+      wrapperVersion: 1.3.0
+      version: 10.2.1
+      url: https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.2.1/argo-cd-10.2.1.tgz
+      sha256: 27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885
+    - service: cert-manager
+      canonicalIdentity: helm:jetstack/cert-manager
+      wrapperVersion: 0.5.0
+      version: v1.21.0
+      url: https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz
+      sha256: 9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97
+    - service: external-secrets
+      canonicalIdentity: helm:external-secrets/external-secrets
+      wrapperVersion: 0.14.0
+      version: 2.8.0
+      url: https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.8.0/external-secrets-2.8.0.tgz
+      sha256: 251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd
+    - service: kube-prometheus-stack
+      canonicalIdentity: helm:prometheus-community/kube-prometheus-stack
+      wrapperVersion: 2.5.0
+      version: 87.19.2
+      url: https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.19.2/kube-prometheus-stack-87.19.2.tgz
+      sha256: b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88
+    - service: kube-prometheus-stack
+      canonicalIdentity: helm:prometheus-community/prometheus-blackbox-exporter
+      wrapperVersion: 2.5.0
+      version: 11.15.1
+      url: https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz
+      sha256: 4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e
+    - service: metrics-server
+      canonicalIdentity: helm:metrics-server/metrics-server
+      wrapperVersion: 0.1.0
+      version: 3.13.1
+      url: https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz
+      sha256: 084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13
+    - service: traefik
+      canonicalIdentity: helm:traefik/traefik
+      wrapperVersion: 2.1.0
+      version: 41.0.2
+      url: oci://ghcr.io/traefik/helm/traefik:41.0.2
+      manifestDigest: sha256:b64212403e056c14dbcac5bfd0030f89f0e08fccae370dd7cd96592ee745848e
+      sha256: a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a
+  firstParty:
+    - service: homer-dashboard
+      canonicalIdentity: kubara:homer-dashboard
+      wrapperVersion: 0.1.0
+    - service: shared-template-library
+      canonicalIdentity: kubara:template-library
+      wrapperVersion: 0.2.0
+      deployable: false

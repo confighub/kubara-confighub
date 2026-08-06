@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "argo-cd-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "82fac8f1bf522ef60cef66b28d4c42e2ebf0335a04e92b8e480f80fba187dae3"
+    dependencyLockSHA256: "53b6b99e9a6f39b2eeb1f678ea3546a0805b272acf518fb0924fda340b1e22e2"
+    effectiveValuesSHA256: "587912755b9f572606a00248cb100192428250e4efdd029580158eb137ad8f0b"
+  outputs:
+    renderedObjectSetSHA256: "b2cbe21e58abbf285edb7710df9df299c93bb288293eed091ef7e24f83f850b5"
+    renderedObjectInventorySHA256: "f5f0da7db46022124ad617315fc207554b9f2565fbf54b1393e9f658c5850c9c"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 55
+    renderedSecretCount: 2
+    secretCountSeparatedByCubInstall: 2

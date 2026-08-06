@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "kyverno-kyverno-policies"
+  version: "3.8.2"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "kyverno-policies chart defaults variant rendered from kyverno/kyverno-policies@3.8.2"

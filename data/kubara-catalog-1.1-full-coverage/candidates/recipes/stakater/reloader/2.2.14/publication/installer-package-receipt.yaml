@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "stakater-reloader-2.2.14"
+spec:
+  chart:
+    repository: "stakater"
+    name: "reloader"
+    version: "2.2.14"
+  package:
+    path: "data/kubara-catalog-1.1-full-coverage/candidates/packages/stakater/reloader/2.2.14"
+    name: "stakater-reloader"
+    version: "2.2.14"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "87b31fd66337fd8bb0c21bd435f167db60e462dd4b87755bd7b827fb7b953fbb"
+        bytes: 391
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "206dcaad71b6f825e834c5b1c0a3dc6799927de8344f4f5d58ed8f6a8bded049"
+        bytes: 6720
+      -
+        path: "installer.yaml"
+        sha256: "e0f99190882bf9f2b0cf631fac224173aba164c457334deceb6ff8b689e3f5f7"
+        bytes: 304
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-1.1-full-coverage/candidates/packages/stakater/reloader/2.2.14 -o <tmp>/reloader-2.2.14.tgz"
+    sha256: "eeca278bc7280f67c3c24362539959616f5089e478b4233cc4f582fca2041c65"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-1.1-full-coverage/candidates/packages/stakater/reloader/2.2.14 --base default --work-dir <tmp> --non-interactive --namespace reloader"
+      helmReleaseObjectCount: 6
+      cubInstallObjectCountIncludingSupport: 7
+      semanticObjectMatches: "6/6"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||reloader"

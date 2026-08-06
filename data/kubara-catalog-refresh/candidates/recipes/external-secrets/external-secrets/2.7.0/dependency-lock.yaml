@@ -1,0 +1,13 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "external-secrets-external-secrets-2.7.0"
+spec:
+  chart: "external-secrets/external-secrets"
+  version: "2.7.0"
+  dependencies:
+    -
+      name: "bitwarden-sdk-server"
+      repository: "oci://ghcr.io/external-secrets/charts"
+      version: "v0.6.0"
+  chartLockDigest: "sha256:208b88721c3e5991e45a41a2d5dd376ac8d98af6991bc7da43e86955ccda1c9a"

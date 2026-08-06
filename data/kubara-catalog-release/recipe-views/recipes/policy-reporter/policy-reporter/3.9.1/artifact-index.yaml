@@ -1,0 +1,134 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "policy-reporter-policy-reporter-3.9.1"
+  chart: "policy-reporter/policy-reporter"
+  version: "3.9.1"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "policy-reporter/policy-reporter"
+    version: "3.9.1"
+    appVersion: "3.9.0"
+    sourceLock: "recipes/policy-reporter/policy-reporter/3.9.1/source-lock.yaml"
+    dependencyLock: "recipes/policy-reporter/policy-reporter/3.9.1/dependency-lock.yaml"
+    repository: "https://kyverno.github.io/policy-reporter"
+    packageSHA256: "a7d00d9b79435bc40fb3049302e8e08da156f718713403042666bb699c569fb1"
+  recipe:
+    path: "recipes/policy-reporter/policy-reporter/3.9.1/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/policy-reporter/policy-reporter/3.9.1/helm-plan.yaml"
+    chartDossier: "recipes/policy-reporter/policy-reporter/3.9.1/chart-dossier.yaml"
+    controlPoints: "recipes/policy-reporter/policy-reporter/3.9.1/control-points.yaml"
+    valueModel: "recipes/policy-reporter/policy-reporter/3.9.1/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/policy-reporter/policy-reporter/3.9.1/helm-pain-report.yaml"
+    controlPointCategories:
+      - "capability-profile"
+      - "catalog-coverage"
+      - "dependency-lock"
+      - "rendered-secret-ownership"
+      - "source-lock"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/policy-reporter/policy-reporter/3.9.1/catalog-status.yaml"
+    status: "proof-grade"
+    supportLevel: "machine-proof-only"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/policy-reporter/policy-reporter/3.9.1"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/policy-reporter-policy-reporter:3.9.1"
+    installer: "packages/policy-reporter/policy-reporter/3.9.1/installer.yaml"
+    receipt: "recipes/policy-reporter/policy-reporter/3.9.1/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "40621dbdce4489cad2f52e624efe72e5020a574017df3b53b626f667880fd5a6"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/policy-reporter/policy-reporter/3.9.1/bases/default"
+        default: true
+        description: "policy-reporter chart defaults variant rendered from policy-reporter/policy-reporter@3.9.1"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/policy-reporter/policy-reporter/3.9.1/variants/default/variant.yaml"
+      namespace: "policy-reporter"
+      releaseName: "policy-reporter"
+      valuesProfile: "recipes/policy-reporter/policy-reporter/3.9.1/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        {}
+      targetFactSummary: "none"
+      packageBase:
+        name: "default"
+        path: "packages/policy-reporter/policy-reporter/3.9.1/bases/default"
+        default: true
+        description: "policy-reporter chart defaults variant rendered from policy-reporter/policy-reporter@3.9.1"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/policy-reporter-policy-reporter:3.9.1 --base default --work-dir <tmp> --non-interactive --namespace policy-reporter"
+        helmReleaseObjectCount: 8
+        cubInstallObjectCountIncludingSupport: 9
+        semanticObjectMatches: "8/8"
+        separatedSecretCount: 1
+        allowedCubOnlyObjects:
+          - "v1|Namespace||policy-reporter"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/variant-revision.yaml"
+          digest: "651cc21f4b18c6dccabe3ae9512929cb9d11bfb90121fe10db2e2935920e9f54"
+          renderedObjectSetSHA256: "95d0f5f27c2ca4df172b45db2a8f60d2c86c43801984c62ee032fca725bf1abf"
+          renderedObjects: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 8
+          helmObjectCount: 8
+          cubInstallObjectCountIncludingSupport: 9
+          semanticObjectMatches: "8/8"
+          separatedSecretFiles: 1
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "95d0f5f27c2ca4df172b45db2a8f60d2c86c43801984c62ee032fca725bf1abf"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "95d0f5f27c2ca4df172b45db2a8f60d2c86c43801984c62ee032fca725bf1abf"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "95d0f5f27c2ca4df172b45db2a8f60d2c86c43801984c62ee032fca725bf1abf"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/policy-reporter/policy-reporter/3.9.1/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "95d0f5f27c2ca4df172b45db2a8f60d2c86c43801984c62ee032fca725bf1abf"

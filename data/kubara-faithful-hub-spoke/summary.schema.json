@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://confighub.github.io/helm-expt/schemas/kubara-faithful-hub-spoke-summary.json",
+  "title": "Kubara faithful hub-and-spoke proof summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec", "status"],
+  "properties": {
+    "apiVersion": { "const": "helm-expt.confighub.com/v1alpha1" },
+    "kind": { "const": "KubaraFaithfulHubSpokeProofSummary" },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "const": "kubara-v0-13-0-faithful-hub-spoke" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": [
+        "receipt",
+        "observedAt",
+        "kubaraVersion",
+        "catalogVersion",
+        "hub",
+        "spoke",
+        "component",
+        "componentVersion",
+        "checks",
+        "githubStatusEnforced"
+      ],
+      "properties": {
+        "receipt": { "const": "runs/kubara-faithful-hub-spoke/receipt.yaml" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "kubaraVersion": { "const": "v0.13.0" },
+        "catalogVersion": { "const": "1.1.0" },
+        "hub": { "const": "hx-app-dev" },
+        "spoke": { "const": "hx-app-staging" },
+        "component": { "const": "cert-manager" },
+        "componentVersion": { "const": "v1.21.0" },
+        "checks": {
+          "type": "object",
+          "required": [
+            "kubaraClusterAdd",
+            "gitSourceUnchanged",
+            "configHubPlanApproval",
+            "openBaoExternalSecretRoute",
+            "argoSpokeRegistration",
+            "applicationSync",
+            "applicationHealth",
+            "cleanup"
+          ],
+          "properties": {
+            "kubaraClusterAdd": { "const": "pass" },
+            "gitSourceUnchanged": { "const": "pass" },
+            "configHubPlanApproval": { "const": "pass" },
+            "openBaoExternalSecretRoute": { "const": "pass" },
+            "argoSpokeRegistration": { "const": "pass" },
+            "applicationSync": { "const": "Synced" },
+            "applicationHealth": { "const": "Healthy" },
+            "cleanup": { "const": "pass" }
+          }
+        },
+        "githubStatusEnforced": { "const": false }
+      }
+    },
+    "status": {
+      "type": "object",
+      "required": ["result"],
+      "properties": {
+        "result": { "const": "pass" }
+      }
+    }
+  }
+}

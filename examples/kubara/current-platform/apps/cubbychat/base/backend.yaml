@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: cubbychat
+  annotations:
+    helm-expt.confighub.com/release-note: "2026-08-06 reviewed fleet release: governed changed-apply and zero-action rerun proof"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cubbychat-backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cubbychat-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/confighub/cubbychat/backend@sha256:0d8342bcb139662ab76b962609f3f99da0b3aaa050a97ad7230eb0c73f440755
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: OLLAMA_URL
+              value: http://ollama:11434
+            - name: OLLAMA_ENABLED
+              value: "false"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cubbychat-postgres
+                  key: database-url
+            - name: CHAT_TITLE
+              value: Cubby Chat
+            - name: PORT
+              value: "8080"
+            - name: REGION
+              value: dev
+            - name: ROLE
+              value: development
+          resources:
+            requests:
+              memory: 100Mi
+            limits:
+              memory: 200Mi

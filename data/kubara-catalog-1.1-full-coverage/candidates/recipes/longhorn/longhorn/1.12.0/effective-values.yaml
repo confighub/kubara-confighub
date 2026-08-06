@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "longhorn-longhorn-1.12.0-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "70b801c79e6d54ac281dda702cd078249d9aa0bbdf13edaf1aced8e866c02876"
+  mergedValuesCaptured: false
+  values:
+    {}

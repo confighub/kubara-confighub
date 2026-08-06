@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "grafana-loki-7.1.0"
+spec:
+  checkedValues:
+    -
+      path: "effective-values-single-binary-filesystem.yaml"
+      variant: "default"
+      disposition: "bounded-render-profile"
+      reason: "the chart defaults do not render; the package binds the smallest deterministic local configuration"
+  unknownValues: "not-exhaustively-checked-by-additive-coverage-proof"
+  deadValues: "not-exhaustively-checked-by-additive-coverage-proof"
+  ignoredValues: "not-exhaustively-checked-by-additive-coverage-proof"

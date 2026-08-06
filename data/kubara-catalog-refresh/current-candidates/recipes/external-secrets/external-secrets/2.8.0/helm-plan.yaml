@@ -1,0 +1,32 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "external-secrets-external-secrets-2.8.0"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "external-secrets/external-secrets"
+    version: "2.8.0"
+    variants:
+      - "default"
+      - "no-crds"
+    helmObjectsByVariant:
+      default: 44
+      no-crds: 19
+    cubInstallObjectsByVariant:
+      default: 45
+      no-crds: 20
+    helmMatchByVariant:
+      default: "44/44"
+      no-crds: "19/19"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"
+    - "revisions/no-crds/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/render-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/scan-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/install-gate.yaml"

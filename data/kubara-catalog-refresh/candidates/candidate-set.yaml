@@ -1,0 +1,130 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogCandidateSet"
+metadata:
+  name: "kubara-v0-12-0-exact-pins"
+spec:
+  sourceAlignment: "examples/kubara/local-platform/catalog-alignment.yaml"
+  retentionMode: "additive-only"
+  qualification: "live-qualified-root-retained"
+  rootRetention: "retained"
+  candidates:
+    -
+      canonicalIdentity: "helm:argo-cd/argo-cd"
+      version: "10.1.3"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz"
+        sha256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/argo-cd/argo-cd/10.1.3"
+      package: "data/kubara-catalog-refresh/candidates/packages/argo-cd/argo-cd/10.1.3"
+      variants:
+        -
+          name: "default"
+          objectCount: 55
+        -
+          name: "no-crds"
+          objectCount: 52
+      sourceLockSHA256: "82fac8f1bf522ef60cef66b28d4c42e2ebf0335a04e92b8e480f80fba187dae3"
+    -
+      canonicalIdentity: "helm:jetstack/cert-manager"
+      version: "v1.21.0"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+        sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/jetstack/cert-manager/v1.21.0"
+      package: "data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0"
+      variants:
+        -
+          name: "default"
+          objectCount: 40
+        -
+          name: "crds-enabled"
+          objectCount: 46
+      sourceLockSHA256: "18cbc1643830bc39cc302e4d46a0ac3d85d2c687f997b203e6058e28f4417a47"
+    -
+      canonicalIdentity: "helm:external-secrets/external-secrets"
+      version: "2.7.0"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz"
+        sha256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/external-secrets/external-secrets/2.7.0"
+      package: "data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0"
+      variants:
+        -
+          name: "default"
+          objectCount: 43
+        -
+          name: "no-crds"
+          objectCount: 19
+      sourceLockSHA256: "e131d43b0dadc07973286bd24574944663487f6d44554e759ca3d0bfb0b24a33"
+    -
+      canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+      version: "87.15.1"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+        sha256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.15.1"
+      package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.15.1"
+      variants:
+        -
+          name: "default"
+          objectCount: 125
+        -
+          name: "no-crds"
+          objectCount: 115
+        -
+          name: "existing-secret"
+          objectCount: 124
+      sourceLockSHA256: "c7d1ff1f1d7f18bfe67bf3bb6fe9769a6d9c0cc997ccf0276b1f11374cae4445"
+    -
+      canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+      version: "11.15.1"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+        sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+      package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+      variants:
+        -
+          name: "default"
+          objectCount: 4
+      sourceLockSHA256: "7986a85d37a68f8e48f8acf9b6bd98872c494eda49c6955a82e5dc90a7cd0814"
+    -
+      canonicalIdentity: "helm:metrics-server/metrics-server"
+      version: "3.13.1"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+        sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1"
+      package: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+      variants:
+        -
+          name: "default"
+          objectCount: 9
+        -
+          name: "external-tls-ca"
+          objectCount: 9
+      sourceLockSHA256: "b349a59ba35363e1007d1b4e1ff5cc21a21305b5b771bf4e56981d58a6fe16ad"
+    -
+      canonicalIdentity: "helm:traefik/traefik"
+      version: "41.0.2"
+      status: "offline-candidate-pass"
+      exactArtifact:
+        url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+        sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2"
+      package: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+      variants:
+        -
+          name: "default"
+          objectCount: 31
+      sourceLockSHA256: "0c569de2069c5e7ab716a56fdd1fadb30ac35462c51c6a1a9edffe422986860a"
+  limits:
+    - "candidate status does not imply retained root Catalog status"
+    - "candidate status does not include Kubara ServiceDefinition or wrapper compatibility"
+    - "candidate status does not include live qualification or installer OCI publication"

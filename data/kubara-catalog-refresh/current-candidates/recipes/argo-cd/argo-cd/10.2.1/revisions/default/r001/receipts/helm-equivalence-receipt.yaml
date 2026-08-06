@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "argo-cd-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "a2ba05a7684443115b1516e1b01a03ebe845cdfcf956722539ae0d3f5bff8780"
+    objectCount: 55
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 56
+    uploadedManifestFiles: 56
+    separatedSecretFiles: 2
+    semanticObjectMatches: "55/55"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||argocd"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-current-catalog-candidates:verify"

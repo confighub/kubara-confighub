@@ -1,0 +1,64 @@
+apiVersion: import.confighub.com/v1alpha1
+kind: KubaraGitHandoffPreparation
+metadata:
+  name: kubara-current-four-cluster
+spec:
+  # Run Kubara normally first. These paths name its reviewed, generated
+  # worktree inputs; the preparer never resolves an unreviewed mutable catalog.
+  source:
+    path: .
+    layout:
+      config: examples/kubara/current-platform/source/config.yaml
+      components: examples/kubara/current-platform/generated/platform-components/helm
+      configs: examples/kubara/current-platform/generated/platform-configs
+      artifactLock: examples/kubara/current-platform/component-artifacts.yaml
+      sourceLock: examples/kubara/current-platform/source-lock.yaml
+      overrides: examples/kubara/current-platform/source/overrides
+  # This is a separate clean subtree. It deliberately excludes apps,
+  # target-facts, .env files, and destination-specific facts.
+  output:
+    path: examples/kubara/prepared-current-platform
+  render:
+    kubeVersion: 1.35.0
+    apiVersions:
+      - argoproj.io/v1alpha1
+      - argoproj.io/v1alpha1/Application
+      - argoproj.io/v1alpha1/ApplicationSet
+      - cert-manager.io/v1
+      - cert-manager.io/v1/Certificate
+      - cert-manager.io/v1/ClusterIssuer
+      - external-secrets.io/v1
+      - external-secrets.io/v1/ClusterExternalSecret
+      - external-secrets.io/v1/ClusterSecretStore
+      - external-secrets.io/v1/ExternalSecret
+      - monitoring.coreos.com/v1
+      - monitoring.coreos.com/v1/PodMonitor
+      - monitoring.coreos.com/v1/PrometheusRule
+      - monitoring.coreos.com/v1/ServiceMonitor
+      - traefik.io/v1alpha1
+      - traefik.io/v1alpha1/IngressRoute
+      - traefik.io/v1alpha1/Middleware
+    services:
+      argo-cd:
+        releaseName: argo-cd
+        namespace: argocd
+      cert-manager:
+        releaseName: cert-manager
+        namespace: cert-manager
+      external-secrets:
+        releaseName: external-secrets
+        namespace: external-secrets
+      homer-dashboard:
+        releaseName: homer-dashboard
+        namespace: homer-dashboard
+      kube-prometheus-stack:
+        releaseName: kube-prometheus-stack
+        namespace: monitoring
+      metrics-server:
+        releaseName: metrics-server
+        namespace: kube-system
+      traefik:
+        releaseName: traefik
+        namespace: traefik
+  tools:
+    helmVersion: v4.1.4+g05fa37973dc9e42b76e1d2883494c87174b6074f

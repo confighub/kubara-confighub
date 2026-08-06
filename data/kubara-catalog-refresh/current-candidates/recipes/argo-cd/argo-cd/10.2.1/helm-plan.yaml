@@ -1,0 +1,32 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "argo-cd-argo-cd-10.2.1"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "argo-cd/argo-cd"
+    version: "10.2.1"
+    variants:
+      - "default"
+      - "no-crds"
+    helmObjectsByVariant:
+      default: 55
+      no-crds: 52
+    cubInstallObjectsByVariant:
+      default: 56
+      no-crds: 53
+    helmMatchByVariant:
+      default: "55/55"
+      no-crds: "52/52"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"
+    - "revisions/no-crds/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/render-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/scan-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/install-gate.yaml"

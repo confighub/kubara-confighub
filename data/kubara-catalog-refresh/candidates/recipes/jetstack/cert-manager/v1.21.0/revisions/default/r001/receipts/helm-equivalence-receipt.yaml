@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "cert-manager-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "9e9b6442f769b8a02974ae801946207452f7f4990e873e007e4d32ec88d9cc09"
+    objectCount: 40
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 41
+    uploadedManifestFiles: 41
+    separatedSecretFiles: 0
+    semanticObjectMatches: "40/40"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||cert-manager"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-candidates:verify"

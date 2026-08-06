@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "metallb-metallb-0.16.1-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "84cb6ed418c19b05fc6930d3087262a74a01ac7bc85f5f67775cb67b6f3cdd5d"
+  mergedValuesCaptured: false
+  values:
+    {}

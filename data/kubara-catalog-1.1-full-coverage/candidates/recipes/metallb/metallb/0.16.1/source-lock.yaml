@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "metallb-metallb-0.16.1"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "metallb"
+  repositoryURL: "https://metallb.github.io/metallb"
+  chart: "metallb"
+  version: "0.16.1"
+  appVersion: "v0.16.1"
+  packageSHA256: "fb06bb584fcb7856f15733b2a6a2aff5b61b5c350687e341c163ae24a5938adc"
+  packageBytes: 45209
+  exactArtifact:
+    url: "https://github.com/metallb/metallb/releases/download/metallb-chart-0.16.1/metallb-0.16.1.tgz"
+    sha256: "fb06bb584fcb7856f15733b2a6a2aff5b61b5c350687e341c163ae24a5938adc"
+    resolution: "artifact-addressed"
+  evidence:
+    exactArtifactRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

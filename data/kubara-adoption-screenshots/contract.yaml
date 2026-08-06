@@ -1,0 +1,164 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraConfigHubAdoptionScreenshotContract"
+metadata:
+  name: "kubara-config-hub-six-step-adoption"
+spec:
+  tutorialSource: "docs/demo/kubara/adoption.md"
+  requiredFrames: 6
+  orderedFrames:
+    -
+      step: 1
+      id: "native-config"
+      chapter: "docs/demo/kubara/adoption-1-choose.md"
+      imagePath: "docs/images/kubara-adoption/01-native-kubara-config.png"
+      subject: "native Kubara config, component selection, cluster placement, and wiring"
+      evidenceBindings:
+        - "generationReceipt"
+    -
+      step: 2
+      id: "generation-parity"
+      chapter: "docs/demo/kubara/adoption-2-generate.md"
+      imagePath: "docs/images/kubara-adoption/02-kubara-generation-parity.png"
+      subject: "Kubara generation result and path-and-byte catalog parity"
+      evidenceBindings:
+        - "generationReceipt"
+        - "catalogParityReceipt"
+    -
+      step: 3
+      id: "exact-git-revision"
+      chapter: "docs/demo/kubara/adoption-3-git.md"
+      imagePath: "docs/images/kubara-adoption/03-exact-git-revision.png"
+      subject: "pushed exact Git revision and complete prepared hand-off tree"
+      evidenceBindings:
+        - "preparedHandoffReceipt"
+    -
+      step: 4
+      id: "oci-packages-index"
+      chapter: "docs/demo/kubara/adoption-4-oci.md"
+      imagePath: "docs/images/kubara-adoption/04-oci-packages-index.png"
+      subject: "isolated deterministic importer proof of per-component and per-config OCI packages plus the digest-bound platform index"
+      evidenceBindings:
+        - "preparedHandoffReceipt"
+        - "importerImplementation"
+        - "releaseAcceptanceContract"
+    -
+      step: 5
+      id: "selected-org-topology"
+      chapter: "docs/demo/kubara/adoption-5-confighub-org.md"
+      imagePath: "docs/images/kubara-adoption/05-selected-org-topology.png"
+      subject: "selected ConfigHub organization with recognizable faithful and adapted Kubara topology"
+      evidenceBindings:
+        - "faithfulReceipt"
+        - "miniIdpReceipt"
+        - "orphanReceipt"
+    -
+      step: 6
+      id: "app-governance-live"
+      chapter: "docs/demo/kubara/adoption-6-apps.md"
+      imagePath: "docs/images/kubara-adoption/06-app-governance-live.png"
+      subject: "application approval, promotion, departure, rollback, exact release, and live result"
+      evidenceBindings:
+        - "miniIdpReceipt"
+        - "orphanReceipt"
+        - "matrix"
+        - "wiring"
+  screenshotDirectoryWhenPublished: "docs/images/kubara-adoption"
+  receiptWhenPublished: "data/kubara-adoption-screenshots/receipt.yaml"
+  staticVerificationRequiresScreenshots: false
+  finalVerificationRequiresScreenshots: true
+  finalCurrentVerificationRequiresScreenshots: true
+  publicationPolicy: "one-real-source-current-frame-per-adoption-step-after-that-step-machine-checkpoint-and-the-complete-live-gate-pass"
+  imagePolicy:
+    format: "PNG"
+    minimumWidth: 800
+    minimumHeight: 450
+    mockupsAllowed: false
+    crossRevisionCompositesAllowed: false
+  sourceBinding:
+    repository: "https://github.com/confighub/helm-expt.git"
+    selectedPath: "examples/kubara/prepared-current-platform"
+    requiredFields:
+      - "commit"
+      - "repositoryTree"
+      - "selectedPathTree"
+  organizationBinding:
+    name: "Kubara"
+    externalID: "58b23b85-9699-4384-bd57-80ef695a1d58"
+    internalID: "12c33fa8-00b1-4011-ad3e-19d56458b29c"
+    serverURL: "https://hub.confighub.com"
+  sharedEvidence:
+    -
+      id: "generationReceipt"
+      path: "examples/kubara/current-platform/generation-receipt.yaml"
+    -
+      id: "catalogParityReceipt"
+      path: "examples/kubara/current-platform/catalog-parity-receipt.yaml"
+    -
+      id: "preparedHandoffReceipt"
+      path: "examples/kubara/prepared-current-platform/preparation-receipt.yaml"
+    -
+      id: "importerImplementation"
+      path: "scripts/import-kubara-git-revision.mjs"
+    -
+      id: "appReleaseRunnerImplementation"
+      path: "scripts/run-kubara-app-release.mjs"
+    -
+      id: "releaseAcceptanceContract"
+      path: "data/kubara-release-acceptance/contract.yaml"
+    -
+      id: "faithfulReceipt"
+      path: "runs/kubara-faithful-hub-spoke/receipt.yaml"
+    -
+      id: "miniIdpReceipt"
+      path: "runs/kubara-mini-idp-reconcile/receipt.yaml"
+    -
+      id: "orphanReceipt"
+      path: "runs/kubara-mini-idp-reconcile/orphan-audit.yaml"
+    -
+      id: "matrix"
+      path: "data/kubara-platform-matrix/matrix.json"
+    -
+      id: "wiring"
+      path: "data/kubara-wiring/graph.json"
+  receiptShape:
+    kind: "KubaraConfigHubAdoptionScreenshotReceipt"
+    contractFields:
+      - "path"
+      - "sha256"
+    sourceFields:
+      - "repository"
+      - "commit"
+      - "repositoryTree"
+      - "selectedPath"
+      - "selectedPathTree"
+    organizationFields:
+      - "name"
+      - "externalID"
+      - "internalID"
+      - "serverURL"
+    evidenceRecordFields:
+      - "id"
+      - "path"
+      - "sha256"
+    status:
+      result: "pass"
+      sourceCurrent: true
+      frameCount: 6
+  requiredPerImageMetadata:
+    - "step"
+    - "id"
+    - "path"
+    - "sha256"
+    - "capturedAt"
+    - "visibleIdentities"
+    - "evidenceBindings"
+    - "sensitiveHandling"
+    - "caption"
+    - "claimBoundary"
+  claimBoundary:
+    - "A screenshot illustrates a machine-accepted step; it never replaces the machine checkpoint or evidence receipt."
+    - "All six frames must bind the same exact source commit and Git trees."
+    - "The OCI frame shows the deterministic isolated importer self-test and its fake OCI surface; it does not claim a live registry publication, ConfigHub materialization, or cluster health."
+    - "The selected-organization frame proves visible topology, not workload convergence by itself."
+    - "Only the application frame may illustrate the current governance and live-result claim, and it remains bound to mini-IDP, orphan, matrix, and wiring evidence."
+    - "The six adoption frames are independent of the exactly-six-frame ConfigHub GUI tour contract."

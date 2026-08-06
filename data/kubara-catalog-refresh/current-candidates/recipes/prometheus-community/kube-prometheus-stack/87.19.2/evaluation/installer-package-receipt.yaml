@@ -1,0 +1,127 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.19.2"
+spec:
+  chart:
+    repository: "prometheus-community"
+    name: "kube-prometheus-stack"
+    version: "87.19.2"
+  package:
+    path: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+    name: "kube-prometheus-stack-kube-prometheus-stack"
+    version: "87.19.2"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "4d66eedd95fd084eb9f8c96865825fde020b5097de2b2a1efbb913a6e4040b3a"
+        bytes: 1164
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "f93812ce23b92c73c0bcc223d5c4efd125e80430b846dc41aa874eee09f67d99"
+        bytes: 5161136
+      -
+        path: "bases/existing-secret/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/existing-secret/upstream.yaml"
+        sha256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"
+        bytes: 5160503
+      -
+        path: "bases/no-crds/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/no-crds/upstream.yaml"
+        sha256: "86d54113ec12fcea838d30e7e2ff6722de375bd0f6cc0e09ab8a14078c941446"
+        bytes: 658990
+      -
+        path: "collector/target-facts.sh"
+        sha256: "937e65f08e03f5beda7d7cc1bd5f7e43d52eaa369ceba692efef7f44f4529c57"
+        bytes: 19985
+      -
+        path: "installer.yaml"
+        sha256: "2ac985aa0d5a8998cd2298698095c90653dba7597f1a75b4d0a1b902e4baa6bf"
+        bytes: 9283
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/README.md"
+        sha256: "a7514d783f162ea83a30e5dcfed0167f781dc0d294490002d3dc52e1d6580c02"
+        bytes: 1235
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/admission-create-job.yaml"
+        sha256: "fdf438c0c1b2d2d35531d03fe7753db5c12274e325d2e4e7cdc3345d03b53a37"
+        bytes: 2327
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/admission-patch-job.yaml"
+        sha256: "67f23380e065cb2e5d24641145288c72087960d52f21e4a7eafc4eed69e3f38b"
+        bytes: 2326
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        sha256: "bba9c3c345520981690399f86ad6a33ce45c9dac61f89721e1a5730f8f1ed964"
+        bytes: 3870160
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/finish.sh"
+        sha256: "15b952d403001bcd25dfb811600a7701446dd9041a27d52d86898102389e4f13"
+        bytes: 3711
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/generation-receipt.yaml"
+        sha256: "8941a9fb89b309fdb33b2ed89a5f423844fa65dcce79337993f00b4a5304731b"
+        bytes: 3391
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/hook-support.yaml"
+        sha256: "1a7e88f91af052b546dd251dde05045aefd9adbea749f05ff760abd7b289d3dd"
+        bytes: 4643
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/lifecycle-actions.yaml"
+        sha256: "7e0c5e477eb0bdbf55ff7da04a72b3854b30174f90d76f981cae89c7c23a7b19"
+        bytes: 2607
+      -
+        path: "prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+        sha256: "077463aa641c68d10a688b63f183d3c64922091455ad985b38ef3fdffe34e2fb"
+        bytes: 1663
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2 -o <tmp>/kube-prometheus-stack-87.19.2.tgz"
+    sha256: "ab2a4207e4548be2b0130db4e20ec24b384d67beed3c5c86c757e7d54e85676d"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2 --base default --work-dir <tmp> --non-interactive --namespace monitoring"
+      helmReleaseObjectCount: 125
+      cubInstallObjectCountIncludingSupport: 126
+      semanticObjectMatches: "125/125"
+      separatedSecretCount: 2
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||monitoring"
+    -
+      variant: "no-crds"
+      base: "no-crds"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2 --base no-crds --work-dir <tmp> --non-interactive --namespace monitoring"
+      helmReleaseObjectCount: 115
+      cubInstallObjectCountIncludingSupport: 116
+      semanticObjectMatches: "115/115"
+      separatedSecretCount: 2
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||monitoring"
+    -
+      variant: "existing-secret"
+      base: "existing-secret"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2 --base existing-secret --work-dir <tmp> --non-interactive --namespace monitoring"
+      helmReleaseObjectCount: 124
+      cubInstallObjectCountIncludingSupport: 125
+      semanticObjectMatches: "124/124"
+      separatedSecretCount: 1
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||monitoring"

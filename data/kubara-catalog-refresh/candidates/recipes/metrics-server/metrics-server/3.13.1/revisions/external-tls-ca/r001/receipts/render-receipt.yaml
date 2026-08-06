@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "metrics-server-external-tls-ca-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "b349a59ba35363e1007d1b4e1ff5cc21a21305b5b771bf4e56981d58a6fe16ad"
+    dependencyLockSHA256: "295ecc75851fb4c673b4f29ebe6567a1cc872ec625467123e491e3d0f544839a"
+    effectiveValuesSHA256: "63450b6f3176c3930591055b6299885027ae55bbcdfc0732f521939396425f54"
+  outputs:
+    renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+    renderedObjectInventorySHA256: "75e7a34cb880c86b23cfad2faa0709baf038d3b36d6ceb9343ac97c6061de53d"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 9
+    renderedSecretCount: 0
+    secretCountSeparatedByCubInstall: 0

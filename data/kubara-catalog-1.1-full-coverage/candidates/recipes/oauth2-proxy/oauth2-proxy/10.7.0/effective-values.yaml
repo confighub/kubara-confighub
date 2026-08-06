@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "511ff52fe6a35bb8422b2af4fcebc5c45b0f2ac78ebc89d4579e29dfc9b585e6"
+  mergedValuesCaptured: false
+  values:
+    {}

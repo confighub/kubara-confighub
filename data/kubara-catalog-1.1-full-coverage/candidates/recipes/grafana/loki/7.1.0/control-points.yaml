@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "grafana-loki-7.1.0"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      dependencyCount: 3
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+    -
+      category: "catalog-coverage"
+      status: "packaged-with-controls"
+      note: "exact source and deterministic package are retained; live qualification and production support remain separate gates"

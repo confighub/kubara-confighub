@@ -1,0 +1,75 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "kyverno-kyverno-policies-3.8.2-default-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"
+  objectCount: 11
+  objects:
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-capabilities"
+      kind: "ClusterPolicy"
+      name: "disallow-capabilities"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-host-namespaces"
+      kind: "ClusterPolicy"
+      name: "disallow-host-namespaces"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-host-path"
+      kind: "ClusterPolicy"
+      name: "disallow-host-path"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-host-ports"
+      kind: "ClusterPolicy"
+      name: "disallow-host-ports"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-host-process"
+      kind: "ClusterPolicy"
+      name: "disallow-host-process"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-privileged-containers"
+      kind: "ClusterPolicy"
+      name: "disallow-privileged-containers"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-proc-mount"
+      kind: "ClusterPolicy"
+      name: "disallow-proc-mount"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||disallow-selinux"
+      kind: "ClusterPolicy"
+      name: "disallow-selinux"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||restrict-apparmor-profiles"
+      kind: "ClusterPolicy"
+      name: "restrict-apparmor-profiles"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||restrict-seccomp"
+      kind: "ClusterPolicy"
+      name: "restrict-seccomp"
+      namespace: ""
+    -
+      apiVersion: "kyverno.io/v1"
+      identity: "kyverno.io/v1|ClusterPolicy||restrict-sysctls"
+      kind: "ClusterPolicy"
+      name: "restrict-sysctls"
+      namespace: ""

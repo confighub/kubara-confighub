@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "traefik/traefik"
+    version: "41.0.2"
+    variants:
+      - "default"
+    helmObjectsByVariant:
+      default: 31
+    cubInstallObjectsByVariant:
+      default: 32
+    helmMatchByVariant:
+      default: "31/31"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"

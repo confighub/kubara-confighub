@@ -1,0 +1,205 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "longhorn-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "5297ce7e4c7d1dcbae7404f2b3348efcb4c2d4e1b11a140de98c81eb99fe07c7"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "743f6ce209a0e83d5ed628ed507a02c74b97ccb48779cf65c261c743d20c5331"
+  findingCounts:
+    critical: 0
+    high: 2
+    medium: 29
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||longhorn-role"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||longhorn-role"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||longhorn-role"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||longhorn-role"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-bind"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-bind"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-bind"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-bind"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-support-bundle"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-support-bundle"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-support-bundle"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||longhorn-support-bundle"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backingimagedatasources.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backingimagedatasources.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backingimagemanagers.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backingimagemanagers.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backingimages.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backingimages.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backupbackingimages.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backupbackingimages.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backups.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backups.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backuptargets.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backuptargets.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||backupvolumes.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||backupvolumes.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||enginefrontends.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||enginefrontends.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||engineimages.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||engineimages.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||engines.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||engines.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||instancemanagers.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||instancemanagers.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||nodes.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||nodes.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||orphans.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||orphans.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||recurringjobs.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||recurringjobs.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||replicas.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||replicas.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||settings.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||settings.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||sharemanagers.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||sharemanagers.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||snapshots.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||snapshots.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||supportbundles.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||supportbundles.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||systembackups.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||systembackups.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||systemrestores.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||systemrestores.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||volumeattachments.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||volumeattachments.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||volumes.longhorn.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||volumes.longhorn.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "service-selector-has-workload-match:v1|Service|longhorn-system|longhorn-admission-webhook"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|longhorn-system|longhorn-admission-webhook"
+      message: "Service selector matches no rendered workload pod template"
+    -
+      id: "service-selector-has-workload-match:v1|Service|longhorn-system|longhorn-recovery-backend"
+      rule: "service-selector-has-workload-match"
+      severity: "high"
+      object: "v1|Service|longhorn-system|longhorn-recovery-backend"
+      message: "Service selector matches no rendered workload pod template"

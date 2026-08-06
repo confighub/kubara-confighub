@@ -1,0 +1,123 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "external-secrets-external-secrets-2.8.0-no-crds-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "75ce0bfaa1c4ed14044edbd406eaa256987967a395676e2902a280e9abfa3304"
+  objectCount: 19
+  objects:
+    -
+      apiVersion: "admissionregistration.k8s.io/v1"
+      identity: "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||externalsecret-validate"
+      kind: "ValidatingWebhookConfiguration"
+      name: "externalsecret-validate"
+      namespace: ""
+    -
+      apiVersion: "admissionregistration.k8s.io/v1"
+      identity: "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||secretstore-validate"
+      kind: "ValidatingWebhookConfiguration"
+      name: "secretstore-validate"
+      namespace: ""
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|external-secrets|external-secrets"
+      kind: "Deployment"
+      name: "external-secrets"
+      namespace: "external-secrets"
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|external-secrets|external-secrets-cert-controller"
+      kind: "Deployment"
+      name: "external-secrets-cert-controller"
+      namespace: "external-secrets"
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|external-secrets|external-secrets-webhook"
+      kind: "Deployment"
+      name: "external-secrets-webhook"
+      namespace: "external-secrets"
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||external-secrets-cert-controller"
+      kind: "ClusterRoleBinding"
+      name: "external-secrets-cert-controller"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||external-secrets-controller"
+      kind: "ClusterRoleBinding"
+      name: "external-secrets-controller"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-cert-controller"
+      kind: "ClusterRole"
+      name: "external-secrets-cert-controller"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-controller"
+      kind: "ClusterRole"
+      name: "external-secrets-controller"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-edit"
+      kind: "ClusterRole"
+      name: "external-secrets-edit"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-servicebindings"
+      kind: "ClusterRole"
+      name: "external-secrets-servicebindings"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-view"
+      kind: "ClusterRole"
+      name: "external-secrets-view"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|RoleBinding|external-secrets|external-secrets-leaderelection"
+      kind: "RoleBinding"
+      name: "external-secrets-leaderelection"
+      namespace: "external-secrets"
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|Role|external-secrets|external-secrets-leaderelection"
+      kind: "Role"
+      name: "external-secrets-leaderelection"
+      namespace: "external-secrets"
+    -
+      apiVersion: "v1"
+      identity: "v1|Secret|external-secrets|external-secrets-webhook"
+      kind: "Secret"
+      name: "external-secrets-webhook"
+      namespace: "external-secrets"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|external-secrets|external-secrets"
+      kind: "ServiceAccount"
+      name: "external-secrets"
+      namespace: "external-secrets"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|external-secrets|external-secrets-cert-controller"
+      kind: "ServiceAccount"
+      name: "external-secrets-cert-controller"
+      namespace: "external-secrets"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|external-secrets|external-secrets-webhook"
+      kind: "ServiceAccount"
+      name: "external-secrets-webhook"
+      namespace: "external-secrets"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|external-secrets|external-secrets-webhook"
+      kind: "Service"
+      name: "external-secrets-webhook"
+      namespace: "external-secrets"

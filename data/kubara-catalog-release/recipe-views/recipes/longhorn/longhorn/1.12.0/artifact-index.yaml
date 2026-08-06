@@ -1,0 +1,134 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "longhorn-longhorn-1.12.0"
+  chart: "longhorn/longhorn"
+  version: "1.12.0"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "longhorn/longhorn"
+    version: "1.12.0"
+    appVersion: "v1.12.0"
+    sourceLock: "recipes/longhorn/longhorn/1.12.0/source-lock.yaml"
+    dependencyLock: "recipes/longhorn/longhorn/1.12.0/dependency-lock.yaml"
+    repository: "https://charts.longhorn.io"
+    packageSHA256: "869bb20701b154473606f1e8967b27f34f2448a2dfe6eb8970f1cae6957384f5"
+  recipe:
+    path: "recipes/longhorn/longhorn/1.12.0/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/longhorn/longhorn/1.12.0/helm-plan.yaml"
+    chartDossier: "recipes/longhorn/longhorn/1.12.0/chart-dossier.yaml"
+    controlPoints: "recipes/longhorn/longhorn/1.12.0/control-points.yaml"
+    valueModel: "recipes/longhorn/longhorn/1.12.0/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/longhorn/longhorn/1.12.0/helm-pain-report.yaml"
+    controlPointCategories:
+      - "capability-profile"
+      - "catalog-coverage"
+      - "crd-lifecycle"
+      - "dependency-lock"
+      - "source-lock"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/longhorn/longhorn/1.12.0/catalog-status.yaml"
+    status: "proof-grade"
+    supportLevel: "machine-proof-only"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/longhorn/longhorn/1.12.0"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/longhorn-longhorn:1.12.0"
+    installer: "packages/longhorn/longhorn/1.12.0/installer.yaml"
+    receipt: "recipes/longhorn/longhorn/1.12.0/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "06a73e1d849b99b26da8c25ed683ffd3d6ce290b2a2feca1123d9c5ae7083a69"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/longhorn/longhorn/1.12.0/bases/default"
+        default: true
+        description: "longhorn chart defaults variant rendered from longhorn/longhorn@1.12.0"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/longhorn/longhorn/1.12.0/variants/default/variant.yaml"
+      namespace: "longhorn-system"
+      releaseName: "longhorn"
+      valuesProfile: "recipes/longhorn/longhorn/1.12.0/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        {}
+      targetFactSummary: "none"
+      packageBase:
+        name: "default"
+        path: "packages/longhorn/longhorn/1.12.0/bases/default"
+        default: true
+        description: "longhorn chart defaults variant rendered from longhorn/longhorn@1.12.0"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/longhorn-longhorn:1.12.0 --base default --work-dir <tmp> --non-interactive --namespace longhorn-system"
+        helmReleaseObjectCount: 42
+        cubInstallObjectCountIncludingSupport: 43
+        semanticObjectMatches: "42/42"
+        separatedSecretCount: 0
+        allowedCubOnlyObjects:
+          - "v1|Namespace||longhorn-system"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/variant-revision.yaml"
+          digest: "028aea18e9fae110273d7680d8c25e26e69818e5a52b41400a9b20058cb1f359"
+          renderedObjectSetSHA256: "5297ce7e4c7d1dcbae7404f2b3348efcb4c2d4e1b11a140de98c81eb99fe07c7"
+          renderedObjects: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 42
+          helmObjectCount: 42
+          cubInstallObjectCountIncludingSupport: 43
+          semanticObjectMatches: "42/42"
+          separatedSecretFiles: 0
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "5297ce7e4c7d1dcbae7404f2b3348efcb4c2d4e1b11a140de98c81eb99fe07c7"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "5297ce7e4c7d1dcbae7404f2b3348efcb4c2d4e1b11a140de98c81eb99fe07c7"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "5297ce7e4c7d1dcbae7404f2b3348efcb4c2d4e1b11a140de98c81eb99fe07c7"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/longhorn/longhorn/1.12.0/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "5297ce7e4c7d1dcbae7404f2b3348efcb4c2d4e1b11a140de98c81eb99fe07c7"

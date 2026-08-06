@@ -1,0 +1,61 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCompatibilityProfile"
+metadata:
+  name: "template-library"
+spec:
+  kubaraServiceKey: "template-library"
+  role: "nondeployable-shared-build-dependency"
+  deployable: false
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      catalog: "built-in"
+      path: "platform-components/helm/template-library"
+      version: "0.2.0"
+      chartYaml:
+        path: "platform-components/helm/template-library/Chart.yaml"
+        sha256: "80a0bf19d06ea052d9ccf8cf0b2552afd1b934be79fca7ac90f978cdc7701060"
+        bytes: 150
+      tree:
+        fileCount: 22
+        bytes: 24764
+        treeSha256: "2c0475e4b8da632780e99866d311745c9b39bb94b059e52c3986c0899e587f6a"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configHub:
+        mappingStatus: "source-locked-build-dependency"
+        deployableUnit: false
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      catalog: "bootstrap"
+      path: "bootstrap/platform-components/helm/template-library"
+      version: "0.2.0"
+      chartYaml:
+        path: "bootstrap/platform-components/helm/template-library/Chart.yaml"
+        sha256: "80a0bf19d06ea052d9ccf8cf0b2552afd1b934be79fca7ac90f978cdc7701060"
+        bytes: 150
+      tree:
+        fileCount: 22
+        bytes: 25060
+        treeSha256: "68f3491cb6cbce80f3f412abc338360e8344c6d75508c1cba14b3b70f54f762d"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configHub:
+        mappingStatus: "source-locked-build-dependency"
+        deployableUnit: false
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      catalog: "bootstrap"
+      path: "bootstrap/platform-components/helm/template-library"
+      version: "0.2.0"
+      chartYaml:
+        path: "bootstrap/platform-components/helm/template-library/Chart.yaml"
+        sha256: "80a0bf19d06ea052d9ccf8cf0b2552afd1b934be79fca7ac90f978cdc7701060"
+        bytes: 150
+      tree:
+        fileCount: 22
+        bytes: 25060
+        treeSha256: "68f3491cb6cbce80f3f412abc338360e8344c6d75508c1cba14b3b70f54f762d"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configHub:
+        mappingStatus: "source-locked-build-dependency"
+        deployableUnit: false

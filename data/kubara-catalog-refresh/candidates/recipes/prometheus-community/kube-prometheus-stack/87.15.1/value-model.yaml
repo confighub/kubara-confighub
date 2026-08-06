@@ -1,0 +1,54 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.15.1"
+spec:
+  checkedValues:
+    -
+      path: "grafana.adminPassword"
+      variant: "default"
+      disposition: "generated-fact-bound"
+      reason: "Grafana subchart generates a random admin password by default; this proof binds it before render"
+    -
+      path: "grafana.adminPassword"
+      variant: "no-crds"
+      disposition: "generated-fact-bound"
+      reason: "The no-crds variant keeps Grafana enabled and binds the same generated fact before render"
+    -
+      path: "grafana.admin.existingSecret"
+      variant: "existing-secret"
+      disposition: "target-secret-reference"
+      reason: "matches Kubara's reference-based Grafana credential custody without rendering the admin credential Secret"
+    -
+      path: "crds.enabled"
+      variant: "default"
+      disposition: "crds-included"
+      reason: "chart defaults render all Prometheus Operator CRDs"
+    -
+      path: "crds.enabled"
+      variant: "no-crds"
+      disposition: "crds-excluded"
+      reason: "omits CRDs from the rendered revision for clusters that manage CRDs separately"
+    -
+      path: "crds.*"
+      variant: "all"
+      disposition: "crd-selection-controls"
+      reason: "controls Prometheus Operator CRD rendering"
+    -
+      path: "prometheusOperator.admissionWebhooks.*"
+      variant: "all"
+      disposition: "admission-webhook-policy"
+      reason: "controls Prometheus Operator admission webhook objects and patch-job hook policy"
+    -
+      path: "additionalPrometheusRulesMap / prometheus.prometheusSpec.additionalScrapeConfigs / extraManifests"
+      variant: "all"
+      disposition: "empty-extension-slot"
+      reason: "chart exposes tpl/raw monitoring extension slots; offline candidate variants keep them empty"
+    -
+      path: "grafana.enabled / kubeStateMetrics.enabled / nodeExporter.enabled"
+      variant: "all"
+      disposition: "umbrella-dependency-selection"
+      reason: "umbrella chart dependencies remain enabled in offline candidate variants and are recorded in dependency-lock.yaml"
+  unknownValues: "not-checked"
+  deadValues: "not-checked"
+  ignoredValues: "not-checked"

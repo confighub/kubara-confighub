@@ -1,0 +1,178 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "external-secrets-external-secrets"
+  version: "2.8.0"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "external-secrets default variant rendered from external-secrets/external-secrets@2.8.0"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "Secret external-secrets/external-secrets-webhook"
+          namespace: "external-secrets"
+          suggestedSource: "kubectl -n external-secrets apply -f <work-dir>/out/secrets/secret-external-secrets-external-secrets-webhook.yaml"
+    -
+      name: "no-crds"
+      path: "bases/no-crds"
+      description: "external-secrets CRDs disabled variant rendered from external-secrets/external-secrets@2.8.0"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "CRD acraccesstokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD beyondtrustworkloadcredentialsdynamicsecrets.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD cloudsmithaccesstokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD clusterexternalsecrets.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD clustergenerators.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD clusterpushsecrets.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD clustersecretstores.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD ecrauthorizationtokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD externalsecrets.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD fakes.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD gcraccesstokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD generatorstates.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD githubaccesstokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD gitlabdeploytokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD grafanas.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD mfas.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD passwords.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD pushsecrets.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD quayaccesstokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD secretstores.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD sshkeys.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD stssessiontokens.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD uuids.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD vaultdynamicsecrets.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD webhooks.generators.external-secrets.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "Secret external-secrets/external-secrets-webhook"
+          namespace: "external-secrets"
+          suggestedSource: "kubectl -n external-secrets apply -f <work-dir>/out/secrets/secret-external-secrets-external-secrets-webhook.yaml"
+  collector:
+    command: "/bin/sh"
+    args:
+      - "collector/target-facts.sh"
+    description: "Records target-fact bindings and can live-check cluster-visible Secret and CRD requirements."
+  transformers:
+    -
+      toolchain: "Kubernetes/YAML"
+      whereResource: ""
+      description: "Set the namespace on every namespaced resource."
+      invocations:
+        -
+          name: "set-namespace"
+          args:
+            - "{{ .Namespace }}"
+    -
+      toolchain: "Kubernetes/YAML"
+      whereResource: "ConfigHub.ResourceType IN ('rbac.authorization.k8s.io/v1/ClusterRoleBinding', 'rbac.authorization.k8s.io/v1/RoleBinding')"
+      description: "Keep RBAC subject namespaces aligned with the selected install namespace."
+      invocations:
+        -
+          name: "yq-i"
+          args:
+            - ".subjects[]?.namespace = \"{{ .Namespace }}\""
+    -
+      toolchain: "Kubernetes/YAML"
+      whereResource: "ConfigHub.ResourceType = 'apps/v1/Deployment'"
+      description: "Keep external-secrets webhook certificate controller namespace references aligned."
+      invocations:
+        -
+          name: "yq-i"
+          args:
+            - "(.spec.template.spec.containers[] | select(.name == \"cert-controller\").args[3]) = \"--service-namespace={{ .Namespace }}\""
+        -
+          name: "yq-i"
+          args:
+            - "(.spec.template.spec.containers[] | select(.name == \"cert-controller\").args[5]) = \"--secret-namespace={{ .Namespace }}\""
+        -
+          name: "yq-i"
+          args:
+            - "(.spec.template.spec.containers[] | select(.name == \"webhook\").args[2]) = \"--dns-name=external-secrets-webhook.{{ .Namespace }}.svc\""
+    -
+      toolchain: "Kubernetes/YAML"
+      whereResource: "ConfigHub.ResourceType = 'admissionregistration.k8s.io/v1/ValidatingWebhookConfiguration'"
+      description: "Keep admission webhook service references aligned with the selected install namespace."
+      invocations:
+        -
+          name: "yq-i"
+          args:
+            - ".webhooks[].clientConfig.service.namespace = \"{{ .Namespace }}\""

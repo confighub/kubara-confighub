@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "velero-velero-12.1.0-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "cddd350f3fdcdf8f08d77b8a3f9b9b41436fc4a3bf4bde5911ae5b78cb922d72"
+  mergedValuesCaptured: false
+  values:
+    {}

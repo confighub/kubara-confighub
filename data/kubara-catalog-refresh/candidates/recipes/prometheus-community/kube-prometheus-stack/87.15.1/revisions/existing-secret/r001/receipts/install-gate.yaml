@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "kube-prometheus-stack-existing-secret-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "7297b2aaced5ed2e6e6bd040af1114b0f4360fa4fdebbb1d63a1ce65d89edfcc"
+  decision: "blocked"
+  allowedScopes:
+    - "offline-local-evaluation"
+  blockedScopes:
+    - "live-cluster"
+    - "root-catalog-promotion"
+    - "production"
+  reasons:
+    - "Helm equivalence passed for existing-secret"
+    - "CRD install/upgrade behavior needs explicit lifecycle policy before production"
+    - "Admission webhook availability needs a fresh observation receipt after apply"
+    - "Grafana admin password binding must be owned by generated-fact policy before production"
+    - "Cluster-scoped RBAC needs production review"
+    - "references target-owned Grafana credentials, includes Prometheus Operator CRDs, and preserves the packaged admission-webhook setup route"
+    - "live qualification has not run"
+    - "Kubara ServiceDefinition, wrapper, defaults, and additions compatibility is incomplete"

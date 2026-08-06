@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "policy-reporter-policy-reporter-3.9.1"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "policy-reporter"
+  repositoryURL: "https://kyverno.github.io/policy-reporter"
+  chart: "policy-reporter"
+  version: "3.9.1"
+  appVersion: "3.9.0"
+  packageSHA256: "a7d00d9b79435bc40fb3049302e8e08da156f718713403042666bb699c569fb1"
+  packageBytes: 47536
+  exactArtifact:
+    url: "https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-3.9.1/policy-reporter-3.9.1.tgz"
+    sha256: "a7d00d9b79435bc40fb3049302e8e08da156f718713403042666bb699c569fb1"
+    resolution: "artifact-addressed"
+  evidence:
+    exactArtifactRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

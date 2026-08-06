@@ -1,0 +1,55 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "external-secrets-external-secrets-2.8.0"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      note: "chart declares bitwarden-sdk-server dependency; offline candidate variants keep it disabled but lock its metadata."
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+      note: "OpenShift and ServiceMonitor branches are bound to the named Kubernetes capability profile."
+    -
+      category: "capability-profile-live-pruning"
+      status: "strict-live-object-parity-blocked-on-kubernetes-1.30"
+      evidence: "data/live-e2e/cub-scout-watchlist.csv"
+      note: "cub-scout live witness on kind Kubernetes 1.30 found the ExternalSecret CRD renders spec.versions[0].selectableFields, but the live CRD omitted it after apply; workloads converged, but strict rendered-object/live parity is blocked until the capability/feature-gate route is decided."
+    -
+      category: "crd-policy"
+      status: "variant-controlled-and-target-fact"
+      variants:
+        default: 23
+        no-crds: 0
+      note: "CRDs are ordinary rendered objects in the default variant and required target facts for the no-crds variant."
+    -
+      category: "admission-webhook"
+      status: "scan-and-observe"
+      objects:
+        - "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||externalsecret-validate"
+        - "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||secretstore-validate"
+    -
+      category: "webhook-secret"
+      status: "target-fact-and-observe"
+      object: "v1|Secret|external-secrets|external-secrets-webhook"
+      note: "rendered Secret is separated by installer and must be staged before ConfigHub/GitOps sync; cert-controller populates certificate material later."
+    -
+      category: "cluster-rbac"
+      status: "scan-and-review"
+      evidence: "scan receipts"
+    -
+      category: "tpl"
+      status: "controlled-by-empty-defaults"
+      note: "extraObjects uses tpl; offline candidate variants do not set that value."
+    -
+      category: "installer-support-object"
+      status: "handled"
+      object: "v1|Namespace||external-secrets"

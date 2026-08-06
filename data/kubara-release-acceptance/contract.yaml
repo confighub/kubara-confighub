@@ -1,0 +1,369 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraConfigHubReleaseAcceptance"
+metadata:
+  name: "kubara-v0-13-0-confighub-mini-idp"
+spec:
+  outcome: "ConfigHub simplifies Kubara without making it fundamentally different."
+  operatingModel: "Kubara composes; ConfigHub governs; Argo reconciles."
+  deliveryAuthority:
+    releaseAuthority: "ConfigHub authoritative published release"
+    argoRole: "cluster-local reconciler"
+    managedApplicationInventory: "cluster-wide-exact-allowlist; namespace-argocd-only; ApplicationSets-zero"
+    managedApplicationTargetRevision: "latest-discovery-only"
+    managedApplicationAutomatedSync: "absent"
+    argobot:
+      version: "v0.1.6"
+      image: "ghcr.io/confighub/argobot:v0.1.6"
+      environment:
+        ARGO_SYNC_MODE: "kubernetes"
+        ARGO_NAMESPACE: "argocd"
+        ARGO_REFRESH_TYPE: "hard"
+      authority: "hard-refresh-only-never-deploy"
+    syncOperation:
+      revision: "operation.sync.revision=<ManifestDigest>"
+      compareAndSet:
+        - "metadata.uid"
+        - "metadata.resourceVersion"
+      activeOperationPolicy: "wait-until-inactive-never-replace"
+      preSubmitReleaseRevalidation: "exact-authoritative-confighub-release"
+    retainedReleaseTagHistory: "release-N identity and contiguity audited; tags are not deployment authority"
+    publishRaceBoundary: "client opening/closing checks plus the no-auto fence prevent a rejected raced Release from deploying through the managed reconciler; atomic Release rejection requires server publish preconditions"
+    claimBoundary: "managed automated delivery path only; privileged human or manual Argo sync requires separate RBAC or admission proof"
+  adoption:
+    requiredAIRewrite: false
+    kubaraConfigAndOverridesRetained: true
+    catalogGenerationParity: "byte-for-byte"
+    kubaraVersion: "v0.13.0"
+    kubaraCatalogVersion: "1.1.0"
+    clusters: 4
+    selectedPlatformRoles: 7
+    applications:
+      - "hx-web"
+      - "cubbychat"
+    reconcilerPlan:
+      spaces: 55
+      managedUnits: 63
+      deployments: 27
+      needsProvidesLinks: 25
+      payloadsBeforeFaithfulEvidence: 55
+      payloadsReadyForApply: 56
+      orphanAuditAllowlist:
+        spaces: 55
+        units: 105
+        links: 64
+        targets: 4
+        currentReleaseStreams: 35
+        argoApplications: 35
+        completeConfigHubInventory: true
+        auditedKubernetesResourceTypes:
+          - "deployments.apps"
+          - "statefulsets.apps"
+          - "daemonsets.apps"
+          - "cronjobs.batch"
+          - "jobs.batch"
+          - "four-protected-namespaces"
+        clusterWideKubernetesInventory: false
+    desiredMatrixRows: 36
+  catalog:
+    role: "component-first"
+    retention: "additive-only-non-overwrite"
+    exactVersionPolicy: "fail-if-missing"
+    baselineRootVersions: 110
+    historicalAdditions: 7
+    currentAdditions: 3
+    qualifiedIntermediateRootVersions: 120
+    fullCoverageAdditions: 10
+    expectedFinalRootVersions: 130
+    expectedFinalComponents: 103
+    baselineRecipesTreeSHA256: "405bb7847cff4a4c9c691aafbaf69a1baff160c5e8a8f5d927569c8dd2286424"
+    baselinePackagesTreeSHA256: "68c82bb177743dc610172bacd035475160515cccb47aea68910d32d222bd6e1c"
+    historicalAdditionPaths:
+      - "argo-cd/argo-cd/10.1.3"
+      - "external-secrets/external-secrets/2.7.0"
+      - "jetstack/cert-manager/v1.21.0"
+      - "metrics-server/metrics-server/3.13.1"
+      - "prometheus-community/kube-prometheus-stack/87.15.1"
+      - "prometheus-community/prometheus-blackbox-exporter/11.15.1"
+      - "traefik/traefik/41.0.2"
+    currentAdditionPaths:
+      - "argo-cd/argo-cd/10.2.1"
+      - "external-secrets/external-secrets/2.8.0"
+      - "prometheus-community/kube-prometheus-stack/87.19.2"
+    fullCoverageAdditionPaths:
+      - "grafana/loki/7.1.0"
+      - "grafana/alloy/1.11.0"
+      - "stakater/reloader/2.2.14"
+      - "oauth2-proxy/oauth2-proxy/10.7.0"
+      - "kyverno/kyverno-policies/3.8.2"
+      - "velero/velero/12.1.0"
+      - "policy-reporter/policy-reporter/3.9.1"
+      - "longhorn/longhorn/1.12.0"
+      - "metallb/metallb/0.16.1"
+      - "kyverno/kyverno/3.8.2"
+    requiredOciPublicationPackages:
+      - "packages/argo-cd/argo-cd/10.1.3"
+      - "packages/external-secrets/external-secrets/2.7.0"
+      - "packages/jetstack/cert-manager/v1.21.0"
+      - "packages/metrics-server/metrics-server/3.13.1"
+      - "packages/prometheus-community/kube-prometheus-stack/87.15.1"
+      - "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+      - "packages/traefik/traefik/41.0.2"
+      - "packages/argo-cd/argo-cd/10.2.1"
+      - "packages/external-secrets/external-secrets/2.8.0"
+      - "packages/prometheus-community/kube-prometheus-stack/87.19.2"
+      - "packages/grafana/loki/7.1.0"
+      - "packages/grafana/alloy/1.11.0"
+      - "packages/stakater/reloader/2.2.14"
+      - "packages/oauth2-proxy/oauth2-proxy/10.7.0"
+      - "packages/kyverno/kyverno-policies/3.8.2"
+      - "packages/velero/velero/12.1.0"
+      - "packages/policy-reporter/policy-reporter/3.9.1"
+      - "packages/longhorn/longhorn/1.12.0"
+      - "packages/metallb/metallb/0.16.1"
+      - "packages/kyverno/kyverno/3.8.2"
+    promotionSafety:
+      baselineLock: "110 recipe roots and 110 package roots are byte-locked"
+      ordering: "historical-7-then-current-3"
+      overwritePolicy: "never-overwrite-existing-bytes"
+      retryPolicy: "fill-missing-files-and-accept-only-byte-identical-residue"
+      fullCoverageBaseline: "the 120-root intermediate Catalog is byte-locked before the final additive wave"
+      requiredReceipts:
+        - "data/kubara-catalog-refresh/root-promotion/receipt.yaml"
+        - "data/kubara-catalog-refresh/current-root-promotion/receipt.yaml"
+        - "data/kubara-catalog-1.1-full-coverage/preflight-receipt.yaml"
+        - "data/kubara-catalog-1.1-full-coverage/receipt.yaml"
+    publicationSafety:
+      scope: "two explicitly enumerated ten-package additive waves"
+      retryPolicy: "reuse-only-an-existing-identical-layer"
+      conflictPolicy: "refuse-existing-different-layer"
+      verification: "local-source-tree-and-archive-plus-remote-manifest-and-layer"
+  orderedReleaseCommands:
+    - "npm run kubara-release:verify-static"
+    - "npm run kubara-git-handoff:verify-current"
+    - "npm run kubara-git-handoff:self-test"
+    - "npm run kubara-git-import:self-test"
+    - "npm run kubara-live-qualification:preflight"
+    - "npm run kubara-live-qualification:run"
+    - "npm run kubara-live-qualification:verify"
+    - "npm run kubara-current-live-qualification:preflight"
+    - "npm run kubara-current-live-qualification:run"
+    - "npm run kubara-current-live-qualification:verify"
+    - "npm run kubara-catalog-promotion:dry-run"
+    - "npm run kubara-catalog-promotion:stage"
+    - "npm run kubara-catalog-promotion:stage:verify"
+    - "npm run kubara-catalog-promotion:promote"
+    - "npm run kubara-catalog-promotion:verify"
+    - "npm run kubara-current-catalog-promotion:dry-run"
+    - "npm run kubara-current-catalog-promotion:stage"
+    - "npm run kubara-current-catalog-promotion:stage:verify"
+    - "npm run kubara-current-catalog-promotion:promote"
+    - "npm run kubara-current-catalog-promotion:verify"
+    - "npm run kubara-catalog-oci:dry-run"
+    - "npm run kubara-catalog-oci:publish"
+    - "npm run kubara-catalog-oci:verify"
+    - "npm run kubara-catalog-full-coverage:generate"
+    - "npm run kubara-catalog-full-coverage:verify-candidates"
+    - "npm run kubara-catalog-full-coverage:preflight"
+    - "npm run kubara-catalog-full-coverage:promote"
+    - "npm run kubara-catalog-full-coverage:publish"
+    - "npm run kubara-catalog-full-coverage:verify"
+    - "npm run kubara-faithful-hub-spoke:rehearse"
+    - "npm run kubara-faithful-hub-spoke:run"
+    - "npm run kubara-faithful-hub-spoke:generate"
+    - "npm run kubara-faithful-hub-spoke:verify"
+    - "npm run kubara-mini-idp:plan"
+    - "npm run kubara-mini-idp:apply"
+    - "npm run kubara-mini-idp:apply"
+    - "npm run kubara-mini-idp:verify"
+    - "npm run kubara-mini-idp:receipt-verify"
+    - "npm run kubara-mini-idp:performance-contract:verify"
+    - "npm run kubara-mini-idp:performance:self-test"
+    - "npm run kubara-mini-idp:orphan-plan"
+    - "npm run kubara-mini-idp:orphan-audit:self-test"
+    - "npm run kubara-mini-idp:orphan-audit"
+    - "npm run kubara-mini-idp:orphan-audit:receipt-verify"
+    - "npm run kubara-mini-idp:performance:receipt-verify"
+    - "npm run kubara-platform-matrix:generate"
+    - "npm run kubara-platform-matrix:verify"
+    - "npm run kubara-catalog-release:generate"
+    - "npm run kubara-catalog-release:verify"
+    - "npm run kubara-release:verify"
+  gates:
+    -
+      id: "catalog-alignment"
+      outcome: "Immutable upstream snapshots, byte-preserving aligned exports, all 18 exact Kubara catalogs 1.1.0 selections, and an additive 103-component/130-version Catalog."
+      packageScripts:
+        - "kubara-catalog-adapter:verify"
+        - "kubara-catalog-candidates:verify"
+        - "kubara-current-catalog-candidates:verify"
+        - "kubara-catalog-promotion:verify"
+        - "kubara-current-catalog-promotion:verify"
+        - "kubara-catalog-oci:self-test"
+        - "kubara-catalog-oci:verify"
+        - "kubara-catalog-full-coverage:self-test"
+        - "kubara-catalog-full-coverage:verify-candidates"
+        - "kubara-catalog-full-coverage:verify"
+    -
+      id: "current-example"
+      outcome: "Kubara v0.13.0 generates the same 135 files from upstream and ConfigHub-aligned catalogs and yields 13 exact effective renders, including explicit healthy kind Traefik exposure."
+      packageScripts:
+        - "kubara-current-example:verify"
+        - "kubara-effective-renders:verify"
+    -
+      id: "git-handoff-preparation"
+      outcome: "One deterministic preparer converts an ordinary Kubara-generated worktree plus a reviewed exact artifact lock into a separate clean, importer-compatible Git subtree; the current 13-render fixture is committed and offline-verifiable."
+      packageScripts:
+        - "kubara-git-handoff:verify-current"
+        - "kubara-git-handoff:self-test"
+    -
+      id: "git-revision-import"
+      outcome: "One deterministic command path compiles an immutable Kubara Git revision, publishes component-first OCI packages, reconciles the exact user-selected ConfigHub organization and cluster-local Argo delivery Applications, and requires a second zero-action apply receipt without using AI."
+      packageScripts:
+        - "kubara-git-import:self-test"
+        - "kubara-selected-org:self-test"
+        - "kubara-app-release:self-test"
+        - "kubara-app-release-runner:self-test"
+        - "kubara-adoption:self-test"
+    -
+      id: "live-qualification"
+      outcome: "Historical and current exact chart selections each retain a serial 13-lane live qualification receipt."
+      packageScripts:
+        - "kubara-live-qualification:verify"
+        - "kubara-current-live-qualification:verify"
+    -
+      id: "matrix-and-wiring"
+      outcome: "Current and retained historical component-by-cluster and dependency views are reproducible generated data."
+      packageScripts:
+        - "kubara-wiring:verify"
+        - "kubara-platform-matrix:verify"
+    -
+      id: "mini-idp"
+      outcome: "One idempotent reconciler owns the four-cluster platform, hx-web, cubbychat, governance controls, matrix, and visible wiring evidence; ConfigHub selects the exact release, every managed Argo Application has automated sync disabled, and Argo reconciles only a revalidated ManifestDigest operation submitted with Kubernetes identity compare-and-set; its receipt requires an initial reconciliation followed by a zero-action rerun, plus exact ConfigHub inventory and zero residue in the declared Argo/workload audit scope."
+      packageScripts:
+        - "kubara-mini-idp:receipt-verify"
+        - "kubara-mini-idp:orphan-audit:receipt-verify"
+    -
+      id: "mini-idp-performance"
+      outcome: "The accepted live receipt ends with an adjacent changed apply and immediate zero-action apply under one execution fingerprint; both retain schema-v2 measurements within the four-cluster fixture budgets and the pair is backed by the scoped residue audit."
+      packageScripts:
+        - "kubara-mini-idp:performance-contract:verify"
+        - "kubara-mini-idp:performance:self-test"
+        - "kubara-mini-idp:performance:receipt-verify"
+    -
+      id: "faithful-hub-spoke"
+      outcome: "The unchanged Kubara hub Argo CD to registered spoke topology is retained as the faithful lane."
+      packageScripts:
+        - "kubara-faithful-hub-spoke:verify"
+    -
+      id: "public-release"
+      outcome: "The linear website path uses current v0.13 evidence while retaining v0.12 as historical compatibility evidence."
+      packageScripts:
+        - "catalog:status:verify"
+        - "catalog:maps:verify"
+        - "catalog:index:verify"
+        - "catalog:review:verify"
+        - "installer-oci:catalog:verify"
+        - "npm-scripts:catalog:verify"
+        - "kubara-catalog-release:verify"
+        - "site:verify"
+        - "kubara-release:verify"
+  offlineVerification:
+    - "node scripts/generate-kubara-catalog-adapter.mjs --verify"
+    - "node scripts/run-kubara-catalog-candidates.mjs --verify"
+    - "node scripts/run-kubara-current-catalog-candidates.mjs --verify"
+    - "node scripts/publish-installer-oci-packages.mjs --self-test"
+    - "node scripts/publish-kubara-catalog-additions.mjs --dry-run"
+    - "node scripts/complete-kubara-catalog-1-1-coverage.mjs --self-test"
+    - "node scripts/complete-kubara-catalog-1-1-coverage.mjs --verify-candidates"
+    - "node scripts/generate-kubara-current-example.mjs --verify"
+    - "node scripts/prepare-kubara-git-handoff.mjs --verify --request examples/kubara/git-import/current-platform.prepare.yaml --checkout ."
+    - "node scripts/prepare-kubara-git-handoff.mjs --self-test"
+    - "node scripts/import-kubara-git-revision.mjs --self-test"
+    - "node scripts/compile-kubara-selected-org-workflow.mjs --self-test"
+    - "node scripts/compile-kubara-app-release.mjs --self-test"
+    - "node scripts/run-kubara-app-release.mjs --self-test"
+    - "node scripts/sync-kubara-org-shape.mjs --self-test"
+    - "node scripts/generate-kubara-effective-renders.mjs --verify --all"
+    - "node scripts/generate-kubara-wiring.mjs --verify --all"
+    - "node scripts/generate-kubara-wiring.mjs --self-test"
+    - "node scripts/generate-kubara-platform-matrix.mjs --verify --all"
+    - "node scripts/generate-kubara-platform-matrix.mjs --self-test"
+    - "node scripts/verify-kubara-mini-idp-performance.mjs --contract"
+    - "node scripts/verify-kubara-mini-idp-performance.mjs --self-test"
+    - "node scripts/reconcile-kubara-mini-idp.mjs --plan"
+  finalVerification:
+    - "node scripts/run-kubara-live-qualification.mjs --verify"
+    - "node scripts/run-kubara-live-qualification.mjs --verify --current"
+    - "node scripts/promote-kubara-catalog-candidates.mjs --verify"
+    - "node scripts/promote-kubara-catalog-candidates.mjs --verify --current"
+    - "node scripts/complete-kubara-catalog-1-1-coverage.mjs --verify"
+    - "node scripts/run-kubara-faithful-hub-spoke-proof.mjs --verify"
+    - "node scripts/reconcile-kubara-mini-idp.mjs --receipt-verify"
+    - "node scripts/audit-kubara-mini-idp-orphans.mjs --receipt-verify"
+    - "node scripts/verify-kubara-mini-idp-performance.mjs --receipt-verify"
+    - "node scripts/generate-kubara-catalog-release.mjs --verify"
+  requiredEvidence:
+    currentExample: "examples/kubara/current-platform/generation-receipt.yaml"
+    preparedGitHandoff: "examples/kubara/prepared-current-platform/preparation-receipt.yaml"
+    catalogParity: "examples/kubara/current-platform/catalog-parity-receipt.yaml"
+    currentMatrix: "data/kubara-platform-matrix/matrix.json"
+    currentWiring: "data/kubara-wiring/graph.json"
+    faithfulLane: "runs/kubara-faithful-hub-spoke/receipt.yaml"
+    miniIdp: "runs/kubara-mini-idp-reconcile/receipt.yaml"
+    miniIdpOrphans: "runs/kubara-mini-idp-reconcile/orphan-audit.yaml"
+    miniIdpPerformanceAcceptance: "data/kubara-mini-idp-performance/contract.yaml"
+    historicalLiveQualification: "runs/kubara-live-qualification/receipt.yaml"
+    currentLiveQualification: "runs/kubara-current-live-qualification/receipt.yaml"
+    historicalPromotion: "data/kubara-catalog-refresh/root-promotion/receipt.yaml"
+    currentPromotion: "data/kubara-catalog-refresh/current-root-promotion/receipt.yaml"
+    fullCatalogCoverage: "data/kubara-catalog-1.1-full-coverage/receipt.yaml"
+    rootCatalog: "CATALOG.md"
+    installerCatalog: "data/installer-oci-packages/packages.json"
+    buyerPage: "site/kubara.html"
+    adoptionTutorial: "site/d/docs/demo/kubara/adoption.html"
+    evidenceCheckpoints: "site/d/docs/demo/kubara/checkpoints.html"
+    guiTour: "site/d/docs/demo/kubara/gui-tour.html"
+    technicalRunbook: "site/d/docs/demo/kubara/single-platform.html"
+    adoptionScreenshotContract: "data/kubara-adoption-screenshots/contract.yaml"
+  adoptionScreenshotEvidenceContract:
+    tutorialSource: "docs/demo/kubara/adoption.md"
+    requiredFrames: 6
+    publicationPolicy: "publish-only-after-all-six-steps-have-source-current-real-evidence"
+    screenshotReceiptWhenPublished: "data/kubara-adoption-screenshots/receipt.yaml"
+    screenshotDirectoryWhenPublished: "docs/images/kubara-adoption"
+    staticVerificationRequiresScreenshots: false
+    finalVerificationRequiresScreenshots: true
+    finalCurrentVerificationRequiresScreenshots: true
+  guiEvidenceContract:
+    tourSource: "docs/demo/kubara/gui-tour.md"
+    requiredTourFrames: 6
+    publicationPolicy: "publish-only-after-source-current-faithful-mini-idp-idempotence-performance-health-and-orphan-receipts-pass"
+    screenshotReceiptWhenPublished: "data/kubara-gui-evidence/receipt.yaml"
+    screenshotDirectoryWhenPublished: "docs/images/kubara"
+    staticVerificationRequiresScreenshots: false
+    finalVerificationRequiresScreenshots: true
+    requiredSharedMetadata:
+      - "sourceCommit"
+      - "organizationExternalID"
+      - "organizationInternalID"
+      - "faithfulReceiptSHA256"
+      - "miniIdpReceiptSHA256"
+      - "orphanReceiptSHA256"
+      - "matrixSHA256"
+      - "wiringSHA256"
+    requiredPerImageMetadata:
+      - "path"
+      - "sha256"
+      - "capturedAt"
+      - "visibleIdentities"
+      - "sensitiveValues"
+      - "caption"
+      - "claimBoundary"
+  claimBoundary:
+    - "The static verifier proves deterministic committed inputs and generated outputs; it does not turn missing live receipts into passes."
+    - "The full verifier fails until both live qualification sets, both additive promotions, the faithful lane, the mini-IDP reconciliation, and the public site verify."
+    - "The first mini-IDP apply writes a pending-idempotence receipt; the immediately repeated apply must record zero actions before receipt and release verification can pass."
+    - "The scoped residue audit is a separate receipt and must pass before the website can claim exact ConfigHub inventory or zero Argo-prunable and audited durable-workload residue; it is not a complete inventory of every Kubernetes resource type."
+    - "A green website claim is derived only from mutually consistent faithful, mini-IDP, orphan, schema-v2 performance, matrix, wiring, and exactly six published GUI evidence hashes."
+    - "The exact-digest authority contract controls the importer-managed automated delivery path; privileged human or manual Argo sync remains outside the claim unless separate RBAC or admission evidence proves otherwise."
+    - "AI may propose future wiring, but no required adoption, generation, reconciliation, or verification step depends on AI."

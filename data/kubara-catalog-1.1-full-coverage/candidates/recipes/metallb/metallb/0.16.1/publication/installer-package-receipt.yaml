@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "metallb-metallb-0.16.1"
+spec:
+  chart:
+    repository: "metallb"
+    name: "metallb"
+    version: "0.16.1"
+  package:
+    path: "data/kubara-catalog-1.1-full-coverage/candidates/packages/metallb/metallb/0.16.1"
+    name: "metallb-metallb"
+    version: "0.16.1"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "7d99f4399955c321a10a1f10e3450754dc26a5bf206086f7d44a00b5c36bc8dc"
+        bytes: 388
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+        bytes: 151459
+      -
+        path: "installer.yaml"
+        sha256: "8c65e981dd3eb6610099b7d12d716f744c450ac57046f527d4bc7222799f57cb"
+        bytes: 299
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-1.1-full-coverage/candidates/packages/metallb/metallb/0.16.1 -o <tmp>/metallb-0.16.1.tgz"
+    sha256: "a8dda85492c18543c1f541be8a6e803a270f89bc7d9001c87bbabe4bdd6b7070"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-1.1-full-coverage/candidates/packages/metallb/metallb/0.16.1 --base default --work-dir <tmp> --non-interactive --namespace metallb-system"
+      helmReleaseObjectCount: 42
+      cubInstallObjectCountIncludingSupport: 43
+      semanticObjectMatches: "42/42"
+      separatedSecretCount: 2
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||metallb-system"

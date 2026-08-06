@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "loki-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "2e25c21e656867877b5211bfb1914d335806e76df455a78f72e7ec7f8bd8b9ff"
+    objectCount: 19
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 20
+    uploadedManifestFiles: 20
+    separatedSecretFiles: 0
+    semanticObjectMatches: "19/19"
+  semanticNormalizations:
+    - "prune-null-fields"
+    - "loki-configmap-leading-blank-line-pruned-by-kustomize"
+  classifications:
+    -
+      identity: "v1|Namespace||loki"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-1.1-full-coverage:compare"

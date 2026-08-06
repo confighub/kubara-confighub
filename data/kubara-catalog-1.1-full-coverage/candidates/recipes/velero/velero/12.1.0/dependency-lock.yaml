@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "velero-velero-12.1.0"
+spec:
+  chart: "velero/velero"
+  version: "12.1.0"
+  dependencies:
+    []

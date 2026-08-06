@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartDossier"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  chart: "traefik/traefik"
+  version: "41.0.2"
+  maintainedNotes:
+    - "The exact Kubara OCI chart layer renders 31 objects with chart defaults, including 25 CRDs."
+    - "The OCI layer digest is required because the same version from the Helm repository is a different archive."
+    - "This is an offline upstream-package candidate; CRD lifecycle, Kubara wrapper compatibility, and live qualification remain separate gates."
+  knownControlPoints:
+    - "source-lock"
+    - "dependency-lock"
+    - "capability-profile"
+    - "crd-lifecycle"
+    - "cluster-rbac"
+    - "admission-webhook"
+    - "tpl-extension-slots"

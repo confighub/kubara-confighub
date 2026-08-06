@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack"
+  version: "87.19.2"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/prometheus-community/kube-prometheus-stack/87.19.2"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/prometheus-community/kube-prometheus-stack/87.19.2"
+      - "--non-interactive"
+      - "--namespace"
+      - "monitoring"
+  variants:
+    - "variants/default/variant.yaml"
+    - "variants/no-crds/variant.yaml"
+    - "variants/existing-secret/variant.yaml"

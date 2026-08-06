@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "cert-manager-crds-enabled-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "ce9f3596a16fd6af0ef68f3c292349bd4174cff361bdc2e1318901396d8f6967"
+  decision: "blocked"
+  allowedScopes:
+    - "offline-local-evaluation"
+  blockedScopes:
+    - "live-cluster"
+    - "root-catalog-promotion"
+    - "production"
+  reasons:
+    - "Helm equivalence passed for crds-enabled"
+    - "CRD install/upgrade behavior needs explicit lifecycle policy before production"
+    - "Admission webhook availability needs a fresh observation receipt after apply"
+    - "Helm startup API check hook Job needs explicit lifecycle policy before production"
+    - "Cluster-scoped RBAC needs production review"
+    - "adds the six cert-manager CRDs to the rendered revision"
+    - "live qualification has not run"
+    - "Kubara ServiceDefinition, wrapper, defaults, and additions compatibility is incomplete"

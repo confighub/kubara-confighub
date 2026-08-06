@@ -1,0 +1,69 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogPublicationPlan"
+metadata:
+  name: "kubara-catalogs-1-1-0-full-coverage"
+spec:
+  mode: "serial-idempotent-exact-layer-only"
+  packageCount: 10
+  packages:
+    -
+      canonicalIdentity: "grafana/loki"
+      version: "7.1.0"
+      packagePath: "packages/grafana/loki/7.1.0"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/grafana-loki:7.1.0"
+    -
+      canonicalIdentity: "grafana/alloy"
+      version: "1.11.0"
+      packagePath: "packages/grafana/alloy/1.11.0"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/grafana-alloy:1.11.0"
+    -
+      canonicalIdentity: "stakater/reloader"
+      version: "2.2.14"
+      packagePath: "packages/stakater/reloader/2.2.14"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/stakater-reloader:2.2.14"
+    -
+      canonicalIdentity: "oauth2-proxy/oauth2-proxy"
+      version: "10.7.0"
+      packagePath: "packages/oauth2-proxy/oauth2-proxy/10.7.0"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/oauth2-proxy-oauth2-proxy:10.7.0"
+    -
+      canonicalIdentity: "kyverno/kyverno-policies"
+      version: "3.8.2"
+      packagePath: "packages/kyverno/kyverno-policies/3.8.2"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kyverno-kyverno-policies:3.8.2"
+    -
+      canonicalIdentity: "velero/velero"
+      version: "12.1.0"
+      packagePath: "packages/velero/velero/12.1.0"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/velero-velero:12.1.0"
+    -
+      canonicalIdentity: "policy-reporter/policy-reporter"
+      version: "3.9.1"
+      packagePath: "packages/policy-reporter/policy-reporter/3.9.1"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/policy-reporter-policy-reporter:3.9.1"
+    -
+      canonicalIdentity: "longhorn/longhorn"
+      version: "1.12.0"
+      packagePath: "packages/longhorn/longhorn/1.12.0"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/longhorn-longhorn:1.12.0"
+    -
+      canonicalIdentity: "metallb/metallb"
+      version: "0.16.1"
+      packagePath: "packages/metallb/metallb/0.16.1"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metallb-metallb:0.16.1"
+    -
+      canonicalIdentity: "kyverno/kyverno"
+      version: "3.8.2"
+      packagePath: "packages/kyverno/kyverno/3.8.2"
+      ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kyverno-kyverno:3.8.2"
+  supplements:
+    -
+      canonicalIdentity: "external-dns/external-dns"
+      version: "1.21.1"
+      action: "separate-lock-registry-only"
+      existingRootMutation: "none"
+    -
+      canonicalIdentity: "traefik/traefik"
+      version: "41.0.2"
+      action: "separate-lock-registry-only"
+      existingRootMutation: "none"

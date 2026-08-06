@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "metrics-server-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+    objectCount: 9
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 10
+    uploadedManifestFiles: 10
+    separatedSecretFiles: 0
+    semanticObjectMatches: "9/9"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||kube-system"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-candidates:verify"

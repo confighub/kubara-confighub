@@ -1,0 +1,32 @@
+{
+  "kubaraVersion": "v0.12.0",
+  "helmVersion": "v4.1.4+g05fa379",
+  "kubeVersion": "1.34.0",
+  "generatedFileCount": 113,
+  "objectCount": 77,
+  "kinds": {
+    "ApplicationSet": 17,
+    "AppProject": 2,
+    "ClusterExternalSecret": 1,
+    "ClusterRole": 5,
+    "ClusterRoleBinding": 2,
+    "ConfigMap": 7,
+    "CustomResourceDefinition": 3,
+    "Deployment": 5,
+    "Ingress": 1,
+    "Job": 1,
+    "Namespace": 1,
+    "NetworkPolicy": 5,
+    "Role": 6,
+    "RoleBinding": 6,
+    "Secret": 2,
+    "Service": 6,
+    "ServiceAccount": 6,
+    "StatefulSet": 1
+  },
+  "crdCount": 3,
+  "applicationSetCount": 17,
+  "hookObjectCount": 4,
+  "secretCount": 2,
+  "literalConfigOciDigest": "sha256:b5cc98615a93c708870ecc80d92af488e7a7e517c8da8c8af0bc3b6ae5bfdf54"
+}

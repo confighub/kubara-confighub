@@ -1,0 +1,27 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      dependencyCount: 1
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+    -
+      category: "rendered-secret-ownership"
+      status: "review-required"
+      count: 1
+    -
+      category: "catalog-coverage"
+      status: "packaged-with-controls"
+      note: "exact source and deterministic package are retained; live qualification and production support remain separate gates"

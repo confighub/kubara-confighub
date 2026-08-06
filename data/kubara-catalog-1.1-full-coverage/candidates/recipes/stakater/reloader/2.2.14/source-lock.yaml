@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "stakater-reloader-2.2.14"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "stakater"
+  repositoryURL: "https://stakater.github.io/stakater-charts"
+  chart: "reloader"
+  version: "2.2.14"
+  appVersion: "v1.4.19"
+  packageSHA256: "a21154a5b32df7c4d78c575e957ffa2af5afdfdf608415d3eb0a0da1d045dcec"
+  packageBytes: 14133
+  exactArtifact:
+    url: "https://stakater.github.io/stakater-charts/reloader-2.2.14.tgz"
+    sha256: "a21154a5b32df7c4d78c575e957ffa2af5afdfdf608415d3eb0a0da1d045dcec"
+    resolution: "artifact-addressed"
+  evidence:
+    exactArtifactRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

@@ -1,0 +1,57 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "policy-reporter-policy-reporter-3.9.1-default-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "95d0f5f27c2ca4df172b45db2a8f60d2c86c43801984c62ee032fca725bf1abf"
+  objectCount: 8
+  objects:
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|policy-reporter|policy-reporter"
+      kind: "Deployment"
+      name: "policy-reporter"
+      namespace: "policy-reporter"
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||policy-reporter"
+      kind: "ClusterRoleBinding"
+      name: "policy-reporter"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||policy-reporter"
+      kind: "ClusterRole"
+      name: "policy-reporter"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|RoleBinding|policy-reporter|policy-reporter-secret-reader"
+      kind: "RoleBinding"
+      name: "policy-reporter-secret-reader"
+      namespace: "policy-reporter"
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|Role|policy-reporter|policy-reporter-secret-reader"
+      kind: "Role"
+      name: "policy-reporter-secret-reader"
+      namespace: "policy-reporter"
+    -
+      apiVersion: "v1"
+      identity: "v1|Secret|policy-reporter|policy-reporter-config"
+      kind: "Secret"
+      name: "policy-reporter-config"
+      namespace: "policy-reporter"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|policy-reporter|policy-reporter"
+      kind: "ServiceAccount"
+      name: "policy-reporter"
+      namespace: "policy-reporter"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|policy-reporter|policy-reporter"
+      kind: "Service"
+      name: "policy-reporter"
+      namespace: "policy-reporter"

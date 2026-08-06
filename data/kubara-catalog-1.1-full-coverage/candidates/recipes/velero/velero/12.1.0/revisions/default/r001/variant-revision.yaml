@@ -1,0 +1,18 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "VariantRevision"
+metadata:
+  name: "default-r001"
+spec:
+  variant: "../../../variants/default/variant.yaml"
+  revision: "r001"
+  digest: "9cb957237d85626428cea4a1ff8aeef41be367835c29c06accc1e36f59f0aaec"
+  digestInputs:
+    recipeSHA256: "15da0a96f75b683eda90b04dc9b5f46bbfd661c51e464b5d61db4c41ef47e608"
+    variantSHA256: "f6ee3ac0ec628d3d99c34c8c77253ecf3f24585bab24b058914d85312ae931ec"
+    effectiveValuesSHA256: "79e0ba6d13e1538ea4c28192812b411a7672becc2e3ddfb0ddca07fec736c4a3"
+    rendererSHA256: "5c7201e34962ec7b6216bef8811ca3569ea9e9632f53c90247d215523f0de22b"
+    renderedObjectSetSHA256: "98ae56afed33da670906bb8ea003f7abd1ec19e4bbc42244590bc2e97f772d3f"
+  rendered:
+    releaseObjects: "rendered/release-objects.yaml"
+    objectInventory: "rendered/object-inventory.yaml"
+    objectCount: 23

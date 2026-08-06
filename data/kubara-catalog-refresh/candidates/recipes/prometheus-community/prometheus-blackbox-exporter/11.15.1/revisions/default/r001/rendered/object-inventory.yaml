@@ -1,0 +1,33 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1-default-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"
+  objectCount: 4
+  objects:
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|monitoring|prometheus-blackbox-exporter"
+      kind: "Deployment"
+      name: "prometheus-blackbox-exporter"
+      namespace: "monitoring"
+    -
+      apiVersion: "v1"
+      identity: "v1|ConfigMap|monitoring|prometheus-blackbox-exporter"
+      kind: "ConfigMap"
+      name: "prometheus-blackbox-exporter"
+      namespace: "monitoring"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|monitoring|prometheus-blackbox-exporter"
+      kind: "ServiceAccount"
+      name: "prometheus-blackbox-exporter"
+      namespace: "monitoring"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|monitoring|prometheus-blackbox-exporter"
+      kind: "Service"
+      name: "prometheus-blackbox-exporter"
+      namespace: "monitoring"

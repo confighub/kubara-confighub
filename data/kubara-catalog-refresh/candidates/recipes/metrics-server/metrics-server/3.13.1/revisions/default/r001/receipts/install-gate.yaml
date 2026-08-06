@@ -1,0 +1,21 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "metrics-server-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+  decision: "blocked"
+  allowedScopes:
+    - "offline-local-evaluation"
+  blockedScopes:
+    - "live-cluster"
+    - "root-catalog-promotion"
+    - "production"
+  reasons:
+    - "Helm equivalence passed for default"
+    - "APIService availability needs a fresh observation receipt after apply"
+    - "Cluster-scoped RBAC needs production review"
+    - "uses metrics-server runtime-generated serving cert; Helm generated-cert path is inactive"
+    - "live qualification has not run"
+    - "Kubara ServiceDefinition, wrapper, defaults, and additions compatibility is incomplete"

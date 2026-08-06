@@ -1,0 +1,48 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "PackagedLifecycleGenerationReceipt"
+metadata:
+  name: "prometheus-community-kube-prometheus-stack-87-15-1"
+spec:
+  chart: "prometheus-community/kube-prometheus-stack"
+  version: "87.15.1"
+  sourceLock: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.15.1/source-lock.yaml"
+  chartPackageSha256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+  totalChartObjects: 132
+  ordinaryObjects: 125
+  hookObjects: 7
+  sourceImage: "ghcr.io/jkroepke/kube-webhook-certgen:1.8.4"
+  pinnedImage: "ghcr.io/jkroepke/kube-webhook-certgen@sha256:76a2170cd0c9a7758c4ac8ac5bbe9b6f73e869a15ffb77d9f684664f7d7b96b1"
+  files:
+    crds:
+      path: "data/kubara-catalog-refresh/candidates/config-catalog/package-extras/prometheus-community/kube-prometheus-stack/87.15.1/default-crds.yaml"
+      sha256: "bba9c3c345520981690399f86ad6a33ce45c9dac61f89721e1a5730f8f1ed964"
+      objects:
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||alertmanagerconfigs.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||alertmanagers.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||podmonitors.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||probes.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||prometheusagents.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||prometheuses.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||prometheusrules.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||scrapeconfigs.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||servicemonitors.monitoring.coreos.com"
+        - "apiextensions.k8s.io/v1|CustomResourceDefinition||thanosrulers.monitoring.coreos.com"
+    support:
+      path: "data/kubara-catalog-refresh/candidates/config-catalog/package-extras/prometheus-community/kube-prometheus-stack/87.15.1/hook-support.yaml"
+      sha256: "528d9dce95f120bff5d9ab7d60a1fe494bbeee92a71f8a58650ade3b468b4901"
+      objects:
+        - "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kube-prometheus-stack-admission"
+        - "rbac.authorization.k8s.io/v1|ClusterRole||kube-prometheus-stack-admission"
+        - "rbac.authorization.k8s.io/v1|RoleBinding|monitoring|kube-prometheus-stack-admission"
+        - "rbac.authorization.k8s.io/v1|Role|monitoring|kube-prometheus-stack-admission"
+        - "v1|ServiceAccount|monitoring|kube-prometheus-stack-admission"
+    createJob:
+      path: "data/kubara-catalog-refresh/candidates/config-catalog/package-extras/prometheus-community/kube-prometheus-stack/87.15.1/admission-create-job.yaml"
+      sha256: "06a2c932d9a752cfeb872619d7b15e04f8cca9dc16013b6b4394c52fd50ed58d"
+      objects:
+        - "batch/v1|Job|monitoring|kube-prometheus-stack-admission-create"
+    patchJob:
+      path: "data/kubara-catalog-refresh/candidates/config-catalog/package-extras/prometheus-community/kube-prometheus-stack/87.15.1/admission-patch-job.yaml"
+      sha256: "4ab6bc715865710166c326625c7918711c4eb0bc819976efc19ec8331c687611"
+      objects:
+        - "batch/v1|Job|monitoring|kube-prometheus-stack-admission-patch"

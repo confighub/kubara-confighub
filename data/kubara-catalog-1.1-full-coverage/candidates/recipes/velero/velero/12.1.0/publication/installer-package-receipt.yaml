@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "velero-velero-12.1.0"
+spec:
+  chart:
+    repository: "velero"
+    name: "velero"
+    version: "12.1.0"
+  package:
+    path: "data/kubara-catalog-1.1-full-coverage/candidates/packages/velero/velero/12.1.0"
+    name: "velero-velero"
+    version: "12.1.0"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "3784ce37819f1119cc51a3f450769a856defcec1173e72449f0d139ba4c0bd76"
+        bytes: 385
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "98ae56afed33da670906bb8ea003f7abd1ec19e4bbc42244590bc2e97f772d3f"
+        bytes: 166891
+      -
+        path: "installer.yaml"
+        sha256: "d7f0da87e6a897287a82fc3a56cc921a6b6b9c0dfb16a82f48dd1626967ca72c"
+        bytes: 294
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-1.1-full-coverage/candidates/packages/velero/velero/12.1.0 -o <tmp>/velero-12.1.0.tgz"
+    sha256: "94798a27f0af0ef9032a333a71f711e5198f23becc78aa7b3baa082c5858d307"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-1.1-full-coverage/candidates/packages/velero/velero/12.1.0 --base default --work-dir <tmp> --non-interactive --namespace velero"
+      helmReleaseObjectCount: 23
+      cubInstallObjectCountIncludingSupport: 24
+      semanticObjectMatches: "23/23"
+      separatedSecretCount: 1
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||velero"

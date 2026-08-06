@@ -1,0 +1,49 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "alloy-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "d6e75fca48c764892e27664e0137148e30e34428763f411ef4eca669720e2ba6"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "743f6ce209a0e83d5ed628ed507a02c74b97ccb48779cf65c261c743d20c5331"
+  findingCounts:
+    critical: 0
+    high: 0
+    medium: 5
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||alloy"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||alloy"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||alloy"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||alloy"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||alloy"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||alloy"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||alloy"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||alloy"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||podlogs.monitoring.grafana.com"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||podlogs.monitoring.grafana.com"
+      message: "CRD ownership and upgrade behavior require production review"

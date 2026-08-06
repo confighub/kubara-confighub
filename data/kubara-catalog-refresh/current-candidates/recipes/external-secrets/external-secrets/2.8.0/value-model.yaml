@@ -1,0 +1,39 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "external-secrets-external-secrets-2.8.0"
+spec:
+  checkedValues:
+    -
+      path: "installCRDs"
+      variant: "default"
+      disposition: "crds-included"
+      reason: "chart defaults render all external-secrets CRDs"
+    -
+      path: "installCRDs"
+      variant: "no-crds"
+      disposition: "crds-excluded"
+      reason: "omits CRDs from the rendered revision for clusters that manage CRDs separately"
+    -
+      path: "crds.*"
+      variant: "all"
+      disposition: "crd-selection-controls"
+      reason: "controls which external-secrets CRDs are rendered when installCRDs is enabled"
+    -
+      path: "webhook.certManager.enabled"
+      variant: "all"
+      disposition: "built-in-cert-controller"
+      reason: "defaults to built-in cert-controller and an empty webhook Secret rather than cert-manager Certificate objects"
+    -
+      path: "extraObjects"
+      variant: "all"
+      disposition: "empty-extension-slot"
+      reason: "chart exposes a tpl-powered extension slot; offline candidate variants keep it empty"
+    -
+      path: "bitwarden-sdk-server.enabled"
+      variant: "all"
+      disposition: "disabled-dependency"
+      reason: "chart declares and locks this dependency, but offline candidate variants keep it disabled"
+  unknownValues: "not-checked"
+  deadValues: "not-checked"
+  ignoredValues: "not-checked"

@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0-crds-enabled"
+spec:
+  files:
+    -
+      path: "effective-values-crds-enabled.yaml"
+      source: "inline-proof"
+      sha256: "b878275258eb101b16ca769726370bb7473976349ed5e350ef189aa28a6db5a1"
+  mergedValuesCaptured: false
+  values:
+    crds:
+      enabled: true

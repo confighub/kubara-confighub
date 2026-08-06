@@ -1,0 +1,85 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "external-secrets-no-crds-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "75ce0bfaa1c4ed14044edbd406eaa256987967a395676e2902a280e9abfa3304"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "6db242f043d479d2f1f6a2db23e87a636cc424aeebdf950c2ccf0795ced79ab9"
+  findingCounts:
+    critical: 0
+    high: 0
+    medium: 11
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "admission-webhook-requires-observation:admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||externalsecret-validate"
+      rule: "admission-webhook-requires-observation"
+      severity: "medium"
+      object: "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||externalsecret-validate"
+      message: "Admission webhook availability must be observed after apply"
+    -
+      id: "admission-webhook-requires-observation:admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||secretstore-validate"
+      rule: "admission-webhook-requires-observation"
+      severity: "medium"
+      object: "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||secretstore-validate"
+      message: "Admission webhook availability must be observed after apply"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-cert-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-cert-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-edit"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-edit"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-servicebindings"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-servicebindings"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-view"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||external-secrets-view"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||external-secrets-cert-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||external-secrets-cert-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||external-secrets-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||external-secrets-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "dependency-lock-review:bitwarden-sdk-server"
+      rule: "dependency-lock-review"
+      severity: "medium"
+      object: "dependency|bitwarden-sdk-server|v0.6.0"
+      message: "Disabled bitwarden-sdk-server dependency is locked and should remain disabled unless selected by a variant"
+    -
+      id: "webhook-secret-cert-controller-policy:v1|Secret|external-secrets|external-secrets-webhook"
+      rule: "webhook-secret-cert-controller-policy"
+      severity: "medium"
+      object: "v1|Secret|external-secrets|external-secrets-webhook"
+      message: "Webhook Secret certificate material is populated by cert-controller after apply and needs observation"

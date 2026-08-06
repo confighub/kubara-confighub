@@ -1,0 +1,75 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogSnapshot"
+metadata:
+  name: "kubara-v0.12.0-built-in"
+spec:
+  source:
+    repository: "https://github.com/kubara-io/kubara.git"
+    commit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+    repositoryTree: "92cb8480e662d53906418c8c1e0b6f7bbd545f40"
+    sourceSubtree: "src/internal/catalog/built-in"
+    releaseTags:
+      []
+    defaultOciReferences:
+      []
+    distributionStatus: "embedded-in-kubara-v0.12.0"
+    catalogSubtrees:
+      -
+        name: "built-in"
+        path: "src/internal/catalog/built-in"
+        gitTree: "1df083ad7aefc36c93035d97c52379b20a4a42c9"
+        version: "embedded-in-v0.12.0"
+        catalogManifest: null
+  snapshot:
+    scope: "seven-service-adoption-slice"
+    profiledServices:
+      - "argocd"
+      - "cert-manager"
+      - "external-secrets"
+      - "homer-dashboard"
+      - "kube-prometheus-stack"
+      - "metrics-server"
+      - "traefik"
+    bootstrapConcerns:
+      -
+        key: "bootstrap-crds"
+        status: "not-present-as-a-separate-service-in-source-line"
+    selectedPaths:
+      - "platform-components/helm/argo-cd"
+      - "platform-components/helm/cert-manager"
+      - "platform-components/helm/external-secrets"
+      - "platform-components/helm/homer-dashboard"
+      - "platform-components/helm/kube-prometheus-stack"
+      - "platform-components/helm/metrics-server"
+      - "platform-components/helm/template-library"
+      - "platform-components/helm/traefik"
+      - "platform-configs/helm/argo-cd/values.generated.yaml.tplt"
+      - "platform-configs/helm/cert-manager/values.generated.yaml.tplt"
+      - "platform-configs/helm/external-secrets/values.generated.yaml.tplt"
+      - "platform-configs/helm/homer-dashboard/values.generated.yaml.tplt"
+      - "platform-configs/helm/kube-prometheus-stack/values.generated.yaml.tplt"
+      - "platform-configs/helm/metrics-server/values.generated.yaml.tplt"
+      - "platform-configs/helm/traefik/values.generated.yaml.tplt"
+      - "services/argo-cd.yaml"
+      - "services/cert-manager.yaml"
+      - "services/external-secrets.yaml"
+      - "services/homer-dashboard.yaml"
+      - "services/kube-prometheus-stack.yaml"
+      - "services/metrics-server.yaml"
+      - "services/traefik.yaml"
+    fileCount: 117
+    bytes: 364147
+    treeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+    digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+    checksums: "data/kubara-catalog-snapshots/kubara-v0.12.0-built-in/checksums.txt"
+  license:
+    path: "data/kubara-catalog-snapshots/kubara-v0.12.0-built-in/UPSTREAM_LICENSE"
+    sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    identifier: "Apache-2.0"
+  boundaries:
+    fullUpstreamRepositorySnapshot: false
+    fullCatalogSubtrees: false
+    historicalBuiltInBoundary: "selected compatibility slice only; the existing Kubara v0.12 example retains its generated full built-in output"
+    sourceFilesModified: false
+    networkRequiredForOfflineVerify: false

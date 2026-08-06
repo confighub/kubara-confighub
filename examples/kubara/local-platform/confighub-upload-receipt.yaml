@@ -1,0 +1,93 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "ConfigHubUploadReceipt"
+metadata:
+  name: "kubara-local-platform-v0-12-0"
+spec:
+  command:
+    - "cub"
+    - "variant"
+    - "upload"
+    - "--component"
+    - "kubara-local-platform"
+    - "--variant"
+    - "v0-12-0-local"
+    - "--space"
+    - "kubara-local-platform-v0-12-0"
+    - "--granularity"
+    - "per-file"
+    - "--label"
+    - "SourceType=kubara"
+    - "--layer"
+    - "Platform"
+    - "--owner"
+    - "Platform"
+    - "oci://localhost:5001/kubara-local-platform-config:0.12.0"
+  organization: "helm-catalog"
+  policy:
+    profile: "catalog-standard"
+    filter: "platform/helm-catalog-prod-gates"
+    filterId: "8784a447-0e4d-4471-b924-eae5377778a2"
+    reason: "system-configuration"
+    checks:
+      - "platform/vet-schemas"
+      - "platform/vet-placeholders"
+      - "platform/lifecycle-route-evidence"
+      - "platform/aicr-training-secret-refs"
+      - "platform/aicr-training-images-pinned"
+      - "platform/digest-pinned-images"
+      - "platform/probes-declared"
+      - "platform/require-approval"
+    liveReceipt: "data/apply-policy-profiles/live-helm-catalog.yaml"
+  readme:
+    slug: "readme"
+    id: "172817a9-f139-4d2f-9a22-19ccd51b348a"
+    dataHash: "8b850ce7161ff3006c22f6afe94723c513f58b1f91060c17f47961cccdf58f8b"
+    headRevision: 8
+    source: "data/helm-catalog-readmes/units/kubara-local-platform-v0-12-0/readme.yaml"
+  secretsNotUploaded:
+    - "argocd/argocd-secret"
+    - "argocd/cluster-kubernetes.default.svc"
+  source:
+    digest: "sha256:b5cc98615a93c708870ecc80d92af488e7a7e517c8da8c8af0bc3b6ae5bfdf54"
+    reference: "oci://localhost:5001/kubara-local-platform-config:0.12.0"
+    renderedObjectCount: 77
+  space:
+    externalSource: "oci://localhost:5001/kubara-local-platform-config:0.12.0"
+    externalSourceDigest: "sha256:b5cc98615a93c708870ecc80d92af488e7a7e517c8da8c8af0bc3b6ae5bfdf54"
+    id: "df6baeda-0e26-40ad-af6a-4cfba2056913"
+    labels:
+      ApplyPolicyProfile: "catalog-standard"
+      Component: "kubara-local-platform"
+      Layer: "Platform"
+      Owner: "Platform"
+      ResourceClass: "system-configuration"
+      SourceType: "kubara"
+      Variant: "v0-12-0-local"
+    slug: "kubara-local-platform-v0-12-0"
+  unit:
+    dataHash: "222de125a8c4b342365997921973ee45604b7e40e10101cdb24202b883573c9e"
+    headRevision: 2
+    id: "35144adb-8095-4f20-a1b5-1bd8ab480d74"
+    label:
+      SourceType: "kubara"
+    slug: "release-objects"
+    sourceIdentitiesMatched: true
+    uploadedObjectCount: 75
+  verifiedAt: "2026-07-27T20:59:56.411Z"
+status:
+  apply: "not-run"
+  approvalRequiredPolicyAssigned: "pass"
+  limits:
+    - "The upload used one Unit because the demo organization had reached its Link quota."
+    - "The Unit contains the 75 non-Secret objects from the 77-object render."
+    - "The two Secrets remain explicit out-of-band requirements."
+    - "Upload and policy assignment do not prove apply, route execution, Argo CD sync, or workload health."
+  liveArgoReconciliation: "not-run"
+  livePlatformHealth: "not-run"
+  objectIdentitiesMatched: "pass"
+  ociPull: "pass"
+  policyRefreshKeptObjectsEqual: "pass"
+  result: "pass"
+  routeExecution: "not-run"
+  secretsUploaded: false
+  spaceCreated: "pass"

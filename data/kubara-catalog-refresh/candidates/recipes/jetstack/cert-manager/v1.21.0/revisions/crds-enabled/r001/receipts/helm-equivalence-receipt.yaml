@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "cert-manager-crds-enabled-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "ce9f3596a16fd6af0ef68f3c292349bd4174cff361bdc2e1318901396d8f6967"
+    objectCount: 46
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 47
+    uploadedManifestFiles: 47
+    separatedSecretFiles: 0
+    semanticObjectMatches: "46/46"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||cert-manager"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-candidates:verify"

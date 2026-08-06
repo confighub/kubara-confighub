@@ -1,0 +1,28 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Variant"
+metadata:
+  name: "default"
+spec:
+  recipe: "../../recipe.yaml"
+  namespace: "external-secrets"
+  releaseName: "external-secrets"
+  valuesProfile: "../../effective-values.yaml"
+  capabilityProfile:
+    kubeVersion: "1.30.0"
+    apiVersions:
+      []
+  hookPolicy: "no-hooks"
+  targetFacts:
+    requiredSecrets:
+      -
+        namespace: "external-secrets"
+        name: "external-secrets-webhook"
+        keys:
+          []
+        sourceVariant: "default"
+        purpose: "Rendered webhook Secret separated by installer and populated by the cert-controller after apply"
+        deliveryLanes:
+          - "cubInstallerApply"
+          - "configHubKubectlApply"
+          - "configHubOciArgo"
+        suggestedSource: "kubectl -n external-secrets apply -f <work-dir>/out/secrets/secret-external-secrets-external-secrets-webhook.yaml"

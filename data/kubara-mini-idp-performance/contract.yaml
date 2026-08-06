@@ -1,0 +1,205 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraMiniIDPPerformanceAcceptance"
+metadata:
+  name: "kubara-v0-13-0-four-cluster-warm"
+spec:
+  purpose: "Separate ConfigHub client discovery, content verification, governed mutations, and Argo/Kubernetes waiting; reject N+1 regressions without weakening governance or convergence checks."
+  fixture:
+    id: "kubara-v0-13-0-four-cluster-warm-v1"
+    kubaraVersion: "v0.13.0"
+    clusters: 4
+    spaces: 55
+    managedUnits: 63
+    deployments: 27
+    needsProvidesLinks: 25
+    environment: "retained four-cluster kind fleet and pinned Kubara ConfigHub organization"
+    firstConvergenceBoundary: "the first hx-app-dev Application accepted at its exact ConfigHub OCI revision and allowed health"
+    portability: "Regression budget for this fixture, not a service-level objective or a cross-environment latency promise."
+  rejectedBaseline:
+    evidenceType: "failed-process-exit-profile"
+    observedDate: "2026-08-05"
+    acceptedAsSuccessfulRun: false
+    wallElapsedMs: 1541558
+    subprocesses:
+      calls: 1372
+    confighub:
+      metadataDiscoveryReadCommands:
+        calls: 658
+        byVerb:
+          - verb: "cub.unit.list"
+            calls: 185
+          - verb: "cub.unit.get"
+            calls: 149
+          - verb: "cub.target.get"
+            calls: 135
+          - verb: "cub.link.list"
+            calls: 80
+          - verb: "cub.space.get"
+            calls: 71
+          - verb: "cub.space.list"
+            calls: 38
+      contentReadCommands:
+        calls: 208
+        byVerb:
+          - verb: "cub.unit.data"
+            calls: 208
+      knownReadCommands:
+        calls: 866
+        shareOfSubprocessCallsPercent: 63.1
+        commandsPerManagedUnit: 13.75
+      knownMutationCommands:
+        completeness: "partial-one-verb-only"
+        byVerb:
+          - verb: "cub.unit.update"
+            calls: 20
+        limit: "Twenty unit.update calls are not the complete mutation count and must not be described as all writes."
+      attribution: "Kubara supplies the platform cardinality and dependency order. The N+1 multiplier is in the ConfigHub CLI/reconciler read shape and the additional governance proof, not Kubara generation."
+    waits:
+      explicitSleepElapsedMs: 866701
+      shareOfWallPercent: 56.2
+      unclassifiedByReason: true
+      limit: "The old sleep.wait aggregate mixes Argo contract, operation, health, refresh, and namespace-move polling; it is not evidence that every millisecond was Argo work."
+    derived:
+      wallMinutes: 25.69
+      explicitSleepMinutes: 14.45
+      wallOutsideExplicitSleepMs: 674857
+      wallOutsideExplicitSleepMinutes: 11.25
+    disposition: "rejected-as-performance-evidence"
+  receiptSchema:
+    schemaVersion: 2
+    perRunPath: "spec.reconcileRuns[].performance"
+    fields:
+      fixtureID: "fixtureID"
+      runClass: "runClass"
+      wallElapsedMs: "wallElapsedMs"
+      subprocessCalls: "subprocesses.calls"
+      unexpectedCommandFailures: "subprocesses.unexpectedFailures"
+      commandRows: "subprocesses.byVerb[]"
+      configHubReadCommands: "confighub.reads.commands"
+      configHubReadCommandsBeforeFirstDevAccepted: "confighub.reads.beforeFirstDevAcceptedCommands"
+      configHubReadRows: "confighub.reads.byVerb[]"
+      configHubMutationAttempts: "confighub.mutations.attempts"
+      successfulConfigHubMutations: "confighub.mutations.succeeded"
+      expectedConfigHubMutationRefusals: "confighub.mutations.expectedRefusals"
+      unexpectedConfigHubMutationFailures: "confighub.mutations.unexpectedFailures"
+      unattributedSuccessfulMutations: "confighub.mutations.unattributedSucceeded"
+      configHubMutationRows: "confighub.mutations.byVerb[]"
+      explicitWaitElapsedMs: "waits.explicitElapsedMs"
+      unclassifiedExplicitWaitMs: "waits.unclassifiedExplicitMs"
+      waitRows: "waits.byReason[]"
+      preArgoWallElapsedMs: "milestones.preArgoWallElapsedMs"
+      firstArgoAcceptedMs: "milestones.firstArgoAcceptedMs"
+      firstArgoAcceptedCluster: "milestones.firstArgoAcceptedCluster"
+      argoSyncRequests: "argo.syncRequests"
+      receiptPerformanceStatus: "status.performanceResult"
+    requiredRunClasses:
+      - "changed-apply"
+      - "idempotent-apply"
+    commandSemantics: "Subprocess command counts are not wire-request counts. A buyer-facing authenticated-request claim requires sanitized client-transport evidence in addition to these command budgets."
+    requiredDimensions:
+      - "subprocess totals and sanitized by-verb rows"
+      - "ConfigHub metadata-discovery reads"
+      - "ConfigHub content reads"
+      - "ConfigHub mutation attempts, successes, expected refusals, and unexpected failures"
+      - "mutation target-pin reads as a distinct governance purpose"
+      - "explicit waits classified by reason"
+      - "time to first Argo convergence start and first accepted Application"
+      - "unattributed local/process time"
+    allowedWaitReasons:
+      - "argo-application-contract"
+      - "argo-active-operation"
+      - "argo-health-pending"
+      - "argo-retry-backoff"
+      - "argo-refresh-ack"
+      - "namespace-move-uid-gone"
+      - "protected-namespace-settle"
+  profiles:
+    - id: "changed-apply"
+      selector:
+        idempotentNoop: false
+        minimumActionCount: 1
+      budgets:
+        maximumWallElapsedMs: 900000
+        maximumSubprocessCalls: 650
+        maximumConfigHubReadCommands: 400
+        maximumConfigHubReadCommandsBeforeFirstDevAccepted: 96
+        maximumPreArgoWallElapsedMs: 120000
+        maximumExplicitWaitElapsedMs: 600000
+        maximumUnclassifiedExplicitWaitMs: 0
+        maximumUnexpectedCommandFailures: 0
+        maximumUnexpectedMutationFailures: 0
+        maximumUnattributedSuccessfulMutations: 0
+        byVerbMaximums:
+          cub.unit.list: 96
+          cub.unit.get: 0
+          cub.target.get: 32
+          cub.target.list: 32
+          cub.link.list: 64
+          cub.release.list: 64
+          cub.space.get: 64
+          cub.unit.data: 0
+          cub.space.list: 64
+      invariants:
+        - "Every successful mutation remains serial, target-pinned, and linked to an exact recorded action."
+        - "Production gated heads are observed through two stable authoritative boundaries, then approved by Unit ID and numeric revision; the non-CAS negative publish is not executed."
+        - "No release-boundary or final-snapshot stability check is removed to meet the budget."
+    - id: "idempotent-apply"
+      selector:
+        idempotentNoop: true
+        exactActionCount: 0
+      budgets:
+        maximumWallElapsedMs: 300000
+        maximumSubprocessCalls: 220
+        maximumConfigHubReadCommands: 96
+        maximumConfigHubReadCommandsBeforeFirstDevAccepted: 96
+        maximumPreArgoWallElapsedMs: 90000
+        maximumExplicitWaitElapsedMs: 120000
+        maximumUnclassifiedExplicitWaitMs: 0
+        maximumUnexpectedCommandFailures: 0
+        maximumUnexpectedMutationFailures: 0
+        maximumUnattributedSuccessfulMutations: 0
+        exactSuccessfulConfigHubMutations: 0
+        exactConfigHubMutationAttempts: 0
+        exactArgoSyncRequests: 0
+        byVerbMaximums:
+          cub.unit.list: 36
+          cub.unit.get: 0
+          cub.target.get: 0
+          cub.target.list: 4
+          cub.link.list: 4
+          cub.release.list: 36
+          cub.space.get: 1
+          cub.unit.data: 0
+          cub.space.list: 4
+      invariants:
+        - "The immediate second apply performs no ConfigHub mutation attempt and no Argo sync request."
+        - "Governed Unit bodies and hashes come from bounded bulk Unit snapshots; no per-Unit data read remains."
+        - "All 27 Applications are still checked at their exact OCI revision and accepted health."
+        - "The complete immediate no-op remains below 100 ConfigHub read commands; the ceiling includes final stability verification."
+        - "The changed/no-op pair is bound to consecutive durable apply attempts; any later active, failed, or interrupted attempt invalidates acceptance."
+  pairAcceptance:
+    order:
+      - "changed-apply"
+      - "idempotent-apply"
+    sameExecutionFingerprint: true
+    sameFixture: true
+    firstResult: "pass"
+    secondResult: "pass"
+    secondMustBeImmediateNextRun: true
+    orphanAuditRequired: true
+    receiptStatus: "performance-pass"
+  publication:
+    claimStateBeforeAcceptedPair: "measurement-in-progress"
+    allowedAfterAcceptedPair:
+      - "The unchanged second apply performed zero ConfigHub writes and zero Argo sync requests."
+      - "The complete unchanged second apply stayed below 100 ConfigHub read commands."
+      - "The same component-granular model reached its first accepted dev Application within the recorded sub-100 ConfigHub read-command budget."
+      - "The receipt separates ConfigHub discovery and governance cost from Argo/Kubernetes convergence time."
+      - "The speedup came from bulk/boundary reads, not flattening Units or skipping approvals, exact OCI revisions, wiring, or health checks."
+    forbiddenWithoutClientTransportEvidence:
+      - "fewer than 100 authenticated HTTP round trips"
+      - "wire-request latency"
+    forbiddenFromThisFixtureAlone:
+      - "production service-level objective"
+      - "ConfigHub is faster than Kubara"
+      - "all explicit sleep time was caused by Argo"

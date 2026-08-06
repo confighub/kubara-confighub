@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  checkedValues:
+    -
+      path: "<chart defaults>"
+      variant: "default"
+      disposition: "default-render-captured"
+      reason: "the candidate binds the exact artifact and records its deterministic default render"
+  unknownValues: "not-exhaustively-checked-in-offline-candidate-lane"
+  deadValues: "not-exhaustively-checked-in-offline-candidate-lane"
+  ignoredValues: "not-exhaustively-checked-in-offline-candidate-lane"

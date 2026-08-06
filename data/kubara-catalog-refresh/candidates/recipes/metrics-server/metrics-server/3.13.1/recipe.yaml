@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "metrics-server-metrics-server"
+  version: "3.13.1"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/metrics-server/metrics-server/3.13.1"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/metrics-server/metrics-server/3.13.1"
+      - "--non-interactive"
+      - "--namespace"
+      - "kube-system"
+  variants:
+    - "variants/default/variant.yaml"
+    - "variants/external-tls-ca/variant.yaml"

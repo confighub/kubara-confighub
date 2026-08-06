@@ -1,0 +1,135 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "metallb-metallb-0.16.1"
+  chart: "metallb/metallb"
+  version: "0.16.1"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "metallb/metallb"
+    version: "0.16.1"
+    appVersion: "v0.16.1"
+    sourceLock: "recipes/metallb/metallb/0.16.1/source-lock.yaml"
+    dependencyLock: "recipes/metallb/metallb/0.16.1/dependency-lock.yaml"
+    repository: "https://metallb.github.io/metallb"
+    packageSHA256: "fb06bb584fcb7856f15733b2a6a2aff5b61b5c350687e341c163ae24a5938adc"
+  recipe:
+    path: "recipes/metallb/metallb/0.16.1/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/metallb/metallb/0.16.1/helm-plan.yaml"
+    chartDossier: "recipes/metallb/metallb/0.16.1/chart-dossier.yaml"
+    controlPoints: "recipes/metallb/metallb/0.16.1/control-points.yaml"
+    valueModel: "recipes/metallb/metallb/0.16.1/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/metallb/metallb/0.16.1/helm-pain-report.yaml"
+    controlPointCategories:
+      - "capability-profile"
+      - "catalog-coverage"
+      - "crd-lifecycle"
+      - "dependency-lock"
+      - "rendered-secret-ownership"
+      - "source-lock"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/metallb/metallb/0.16.1/catalog-status.yaml"
+    status: "proof-grade"
+    supportLevel: "machine-proof-only"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/metallb/metallb/0.16.1"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metallb-metallb:0.16.1"
+    installer: "packages/metallb/metallb/0.16.1/installer.yaml"
+    receipt: "recipes/metallb/metallb/0.16.1/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "a8dda85492c18543c1f541be8a6e803a270f89bc7d9001c87bbabe4bdd6b7070"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/metallb/metallb/0.16.1/bases/default"
+        default: true
+        description: "metallb chart defaults variant rendered from metallb/metallb@0.16.1"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/metallb/metallb/0.16.1/variants/default/variant.yaml"
+      namespace: "metallb-system"
+      releaseName: "metallb"
+      valuesProfile: "recipes/metallb/metallb/0.16.1/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        {}
+      targetFactSummary: "none"
+      packageBase:
+        name: "default"
+        path: "packages/metallb/metallb/0.16.1/bases/default"
+        default: true
+        description: "metallb chart defaults variant rendered from metallb/metallb@0.16.1"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metallb-metallb:0.16.1 --base default --work-dir <tmp> --non-interactive --namespace metallb-system"
+        helmReleaseObjectCount: 42
+        cubInstallObjectCountIncludingSupport: 43
+        semanticObjectMatches: "42/42"
+        separatedSecretCount: 2
+        allowedCubOnlyObjects:
+          - "v1|Namespace||metallb-system"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/metallb/metallb/0.16.1/revisions/default/r001/variant-revision.yaml"
+          digest: "46502e4f01a49d8134758eb5d3764cea2d4fc1bc5b97e8400a28a438965fcbc8"
+          renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+          renderedObjects: "recipes/metallb/metallb/0.16.1/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/metallb/metallb/0.16.1/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 42
+          helmObjectCount: 42
+          cubInstallObjectCountIncludingSupport: 43
+          semanticObjectMatches: "42/42"
+          separatedSecretFiles: 2
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/metallb/metallb/0.16.1/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/metallb/metallb/0.16.1/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/metallb/metallb/0.16.1/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/metallb/metallb/0.16.1/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"

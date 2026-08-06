@@ -1,0 +1,574 @@
+apiVersion: "confighub.com/v1alpha1"
+kind: "ConfigHubKubaraOrgShapeReceipt"
+metadata:
+  name: "kubara-org-shape"
+spec:
+  organization:
+    name: "Kubara"
+    entityID: "12c33fa8-00b1-4011-ad3e-19d56458b29c"
+  source:
+    kubaraVersion: "v0.12.0"
+    contractPath: "examples/kubara/local-platform/source/config.yaml"
+    contractSha256: "sha256:d6b861de754b2c1e37ae1096ec5eb329a904b2756a698c1f2c0f2dd7bde5c7af"
+    catalogAlignmentPath: "examples/kubara/local-platform/catalog-alignment.yaml"
+    catalogAlignmentSha256: "sha256:0e42126b7ca3c178485a40afd141ffed9dcd6db3981d0368d07158bf073eb96b"
+    platformReceiptPath: "runs/kubara-single-platform-proof/receipt.yaml"
+    platformReceiptSha256: "sha256:e95f2f01ff3d8a0fc5504ad96dc15823b59183c78ca15aad2533c0ee74ecbf7d"
+  contractUnit:
+    ref: "hx-platform/platform-contract"
+    id: "399ac37b-7378-43b0-b7fc-e37b99663718"
+    toolchain: "AppConfig/YAML"
+    provider: "None"
+    targetID: null
+    headRevisionNum: 1
+    dataHash: "d6b861de754b2c1e37ae1096ec5eb329a904b2756a698c1f2c0f2dd7bde5c7af"
+    labels:
+      ExampleCohort: "kubara-v0.12.0"
+      KubaraVersion: "v0.12.0"
+      Role: "PlatformContract"
+      SourceType: "Kubara"
+    annotations:
+      confighub.com/source-path: "examples/kubara/local-platform/source/config.yaml"
+      confighub.com/source-sha256: "sha256:d6b861de754b2c1e37ae1096ec5eb329a904b2756a698c1f2c0f2dd7bde5c7af"
+  spaces:
+    -
+      slug: "argobot-base"
+      id: "055ea72e-2f41-4ab3-bf5c-c26076b5c43e"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "DeliveryDefinition"
+        Layer: "Platform"
+    -
+      slug: "argobot-hx-app-dev"
+      id: "03fa2e64-1c73-45f1-afe9-152b4d5bb014"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "DeliveryInstance"
+        Layer: "Platform"
+    -
+      slug: "argobot-hx-app-prod-a"
+      id: "7ac2ed18-1f7e-4c8c-a731-b72a4003c041"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "DeliveryInstance"
+        Layer: "Platform"
+    -
+      slug: "argobot-hx-app-prod-b"
+      id: "b947247c-fcf3-4b46-bf3d-0a55515e17ff"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "DeliveryInstance"
+        Layer: "Platform"
+    -
+      slug: "argobot-hx-app-staging"
+      id: "4ba430a4-e584-4e74-a10d-8591629ce611"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "DeliveryInstance"
+        Layer: "Platform"
+    -
+      slug: "hx-app-dev"
+      id: "657db6b4-6b97-4eb8-8fab-331946a91ea1"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ClusterTarget"
+        Component: "cluster-target"
+        Layer: "Platform"
+    -
+      slug: "hx-app-dev-argo-apps"
+      id: "fd847f4a-bc71-4623-84d2-1fa0eea7d6a6"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "DeliveryInstance"
+        Component: "argocd-delivery"
+        Layer: "Platform"
+    -
+      slug: "hx-app-prod-a"
+      id: "4c7a44ae-9f31-4947-96bd-89f36a03bbd9"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "ClusterTarget"
+        Component: "cluster-target"
+        Layer: "Platform"
+    -
+      slug: "hx-app-prod-a-argo-apps"
+      id: "d13717d7-d1d6-431b-a096-7dfbea54b0eb"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "DeliveryInstance"
+        Component: "argocd-delivery"
+        Layer: "Platform"
+    -
+      slug: "hx-app-prod-b"
+      id: "5dd1de1f-ad26-4724-9e48-3f936d1cd44b"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "ClusterTarget"
+        Component: "cluster-target"
+        Layer: "Platform"
+    -
+      slug: "hx-app-prod-b-argo-apps"
+      id: "f39b849f-19dd-4f34-813b-6482583fc9e0"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "DeliveryInstance"
+        Component: "argocd-delivery"
+        Layer: "Platform"
+    -
+      slug: "hx-app-staging"
+      id: "c7462b51-96f9-4c3e-8a9c-74f1820d3c3c"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "ClusterTarget"
+        Component: "cluster-target"
+        Layer: "Platform"
+    -
+      slug: "hx-app-staging-argo-apps"
+      id: "c6c2f949-7314-40f1-99f8-8de71c8f5778"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "DeliveryInstance"
+        Component: "argocd-delivery"
+        Layer: "Platform"
+    -
+      slug: "hx-cm-base"
+      id: "9fefd3e5-8f7c-4ad5-9e02-74fd1b14ce99"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ComponentDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "cert-manager"
+        KubaraSelectedVersion: "v1.21.0"
+        ObservedComponentVersion: "v1.21.0"
+    -
+      slug: "hx-cm-dev"
+      id: "0ce80422-a21d-4034-9b8a-6e9f85187469"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "cert-manager"
+        KubaraSelectedVersion: "v1.21.0"
+        ObservedComponentVersion: "v1.21.0"
+    -
+      slug: "hx-cm-prod-a"
+      id: "0ae926cb-49ea-4154-ae51-0fd101169882"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "cert-manager"
+        KubaraSelectedVersion: "v1.21.0"
+        ObservedComponentVersion: "v1.21.0"
+    -
+      slug: "hx-cm-prod-b"
+      id: "52701b61-7576-497c-9573-6e130268b8ea"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "cert-manager"
+        KubaraSelectedVersion: "v1.21.0"
+        ObservedComponentVersion: "v1.21.0"
+    -
+      slug: "hx-cm-staging"
+      id: "3592a7e0-7b03-446f-9c21-e5f6595fc33a"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "cert-manager"
+        KubaraSelectedVersion: "v1.21.0"
+        ObservedComponentVersion: "v1.21.0"
+    -
+      slug: "hx-cubbychat-base"
+      id: "af4c7a81-002c-4d1e-935d-6264b0c4759a"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ApplicationDefinition"
+    -
+      slug: "hx-cubbychat-dev"
+      id: "ef8ee033-d55f-4a31-844c-505f4fb44f16"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-cubbychat-prod-a"
+      id: "7ac896f9-4c66-477c-b2a0-029f7a75b6bb"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-cubbychat-prod-b"
+      id: "949f3c58-9395-447c-b7b8-f8f06ffbf55f"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-cubbychat-staging"
+      id: "4d1601c9-fae9-4063-a583-67033d19486b"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-eso-base"
+      id: "221576df-e4f3-4b87-aa57-d6fe65d5ad18"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ComponentDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "external-secrets"
+        KubaraSelectedVersion: "2.7.0"
+        ObservedComponentVersion: "2.7.0"
+    -
+      slug: "hx-eso-dev"
+      id: "f9ff2616-5065-44b1-a54e-89b51317bf61"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "external-secrets"
+        KubaraSelectedVersion: "2.7.0"
+        ObservedComponentVersion: "2.7.0"
+    -
+      slug: "hx-eso-grafana-es-base"
+      id: "ca01cf75-2f2f-41f8-afce-a37bded91680"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "WiringDefinition"
+        KubaraComponent: "external-secrets"
+        Part: "grafana-admin-credentials"
+    -
+      slug: "hx-eso-grafana-es-dev"
+      id: "6a791e0f-e027-428a-968a-a1822022e035"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "WiringInstance"
+        KubaraComponent: "external-secrets"
+        Part: "grafana-admin-credentials"
+    -
+      slug: "hx-eso-store-base"
+      id: "400fd5e4-a40e-4556-82ee-6ffffb1028f0"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "PrerequisiteDefinition"
+        KubaraComponent: "external-secrets"
+        Part: "cluster-secret-store"
+    -
+      slug: "hx-eso-store-dev"
+      id: "6384215b-f42b-4931-a844-17a915cc86a5"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "PrerequisiteInstance"
+        KubaraComponent: "external-secrets"
+        Part: "cluster-secret-store"
+    -
+      slug: "hx-homer-base"
+      id: "4d3841cd-40fb-4cc0-bf1a-da4a8974fe96"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ComponentDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "homer-dashboard"
+        KubaraSelectedVersion: "0.1.0"
+    -
+      slug: "hx-homer-dev"
+      id: "31168bfe-6f96-4695-b938-24a2febe4391"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "homer-dashboard"
+        KubaraSelectedVersion: "0.1.0"
+    -
+      slug: "hx-kps-crds-base"
+      id: "934547ae-69f8-4e94-9f69-bd3794c8fc75"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "LifecycleDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "kube-prometheus-stack"
+        KubaraSelectedVersion: "87.15.1"
+        ObservedComponentVersion: "87.19.0"
+        Part: "crds"
+    -
+      slug: "hx-kps-crds-dev"
+      id: "d27c393b-ef83-45e6-899f-f932cb702e78"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "LifecycleInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "kube-prometheus-stack"
+        KubaraSelectedVersion: "87.15.1"
+        ObservedComponentVersion: "87.19.0"
+        Part: "crds"
+    -
+      slug: "hx-kps-main-base"
+      id: "cd909cb6-1f90-442c-96c1-c577f48873ec"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ComponentDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "kube-prometheus-stack"
+        KubaraSelectedVersion: "87.15.1"
+        ObservedComponentVersion: "87.19.0"
+    -
+      slug: "hx-kps-main-dev"
+      id: "78ada6c7-5190-434f-8240-bfb22001d6b6"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "kube-prometheus-stack"
+        KubaraSelectedVersion: "87.15.1"
+        ObservedComponentVersion: "87.19.0"
+    -
+      slug: "hx-metrics-base"
+      id: "d0ab0714-673b-4d5c-a33b-3a16e37a9938"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ComponentDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "metrics-server"
+        KubaraSelectedVersion: "3.13.1"
+    -
+      slug: "hx-metrics-dev"
+      id: "7e374c07-8cf0-4e8b-b965-0cbc9f56d874"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "metrics-server"
+        KubaraSelectedVersion: "3.13.1"
+    -
+      slug: "hx-platform"
+      id: "b9ef2e4b-f052-41c2-ae6d-80f52c57901d"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        Component: "platform-control"
+        Layer: "Platform"
+        Role: "PlatformControl"
+    -
+      slug: "hx-traefik-base"
+      id: "70616ed0-29b0-461b-bff5-2610405593b6"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ComponentDefinition"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "traefik"
+        KubaraSelectedVersion: "41.0.2"
+        ObservedComponentVersion: "41.0.2"
+    -
+      slug: "hx-traefik-dev"
+      id: "d115fe96-0850-4ccc-9723-ea225fa1f7e6"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "traefik"
+        KubaraSelectedVersion: "41.0.2"
+        ObservedComponentVersion: "41.0.2"
+    -
+      slug: "hx-traefik-prod-a"
+      id: "1c340be7-cb3b-4e0e-a64a-913a107af21f"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "traefik"
+        KubaraSelectedVersion: "41.0.2"
+        ObservedComponentVersion: "41.0.2"
+    -
+      slug: "hx-traefik-prod-b"
+      id: "1847731d-1593-4dc8-9120-b81318c6d3ea"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "traefik"
+        KubaraSelectedVersion: "41.0.2"
+        ObservedComponentVersion: "41.0.2"
+    -
+      slug: "hx-traefik-staging"
+      id: "3d5745c5-d7ad-4de9-8aa4-e70f9269fa1a"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "ComponentInstance"
+        KubaraVersion: "v0.12.0"
+        KubaraComponent: "traefik"
+        KubaraSelectedVersion: "41.0.2"
+        ObservedComponentVersion: "41.0.2"
+    -
+      slug: "hx-web-base"
+      id: "77f0dd6c-286c-4673-9b7c-f463a2203b24"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "ApplicationDefinition"
+    -
+      slug: "hx-web-dev"
+      id: "12f64ad9-eea1-41af-a502-f021671687fd"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-web-platform-base"
+      id: "90a58930-42b4-4f6a-acac-17fa1472092a"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Scope: "Fleet"
+        DefinitionScope: "Base"
+        Role: "PlatformBindingDefinition"
+    -
+      slug: "hx-web-platform-dev"
+      id: "5ad849d8-d675-4bdb-9217-981b06d0a8b0"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-dev"
+        Environment: "Dev"
+        Role: "PlatformBindingInstance"
+    -
+      slug: "hx-web-platform-prod-a"
+      id: "12db9736-4e54-4e1f-91b3-4f93f78708e1"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "PlatformBindingInstance"
+    -
+      slug: "hx-web-platform-prod-b"
+      id: "add4f7e3-9f0b-4cd2-82ec-f8769193f0b3"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "PlatformBindingInstance"
+    -
+      slug: "hx-web-platform-staging"
+      id: "ec1ed5f1-180b-4c1c-98a4-f37dff9c560f"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "PlatformBindingInstance"
+    -
+      slug: "hx-web-prod-a"
+      id: "78f534cf-f98c-49a6-9f30-242499171392"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-a"
+        Environment: "Prod"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-web-prod-b"
+      id: "dca6a284-9e58-4b04-b59a-8d8dddf97b43"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-prod-b"
+        Environment: "Prod"
+        Role: "ApplicationInstance"
+    -
+      slug: "hx-web-staging"
+      id: "92e87bd4-f58d-4fe8-a1c2-5ab46a2b17a3"
+      labels:
+        ExampleCohort: "kubara-v0.12.0"
+        Cluster: "hx-app-staging"
+        Environment: "Staging"
+        Role: "ApplicationInstance"
+status:
+  result: "pass"
+  observedAt: "2026-08-04T16:22:47.895Z"
+  limits:
+    - "This receipt verifies the existing proof organization's conceptual labels and contract mirror; it does not reproduce the platform or its clusters."
+    - "The four-cluster adapted lane is not generated from the one-cluster contract yet."
+    - "ExampleCohort groups the proof; KubaraVersion is reserved for the contract and Kubara-derived component surfaces."
+    - "KubaraSelectedVersion comes from the checked catalog alignment; ObservedComponentVersion appears only where the historical live-platform receipt records a version."
+    - "Provider None and a null target prove the contract is not target-applied; this receipt does not inspect release membership."

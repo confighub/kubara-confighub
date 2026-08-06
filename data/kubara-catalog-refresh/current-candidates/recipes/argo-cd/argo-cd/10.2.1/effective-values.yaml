@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "argo-cd-argo-cd-10.2.1-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "d535a28759470e0d5af335a7663464f8ceb0ca7915d1a68fc3c398f7db31f8a9"
+  mergedValuesCaptured: false
+  values:
+    {}

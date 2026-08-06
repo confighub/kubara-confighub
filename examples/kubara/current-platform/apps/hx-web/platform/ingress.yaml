@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hx-web
+  namespace: hx-web
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hx-web.local
+      secretName: hx-web-tls
+  rules:
+    - host: hx-web.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hx-web
+                port:
+                  name: http

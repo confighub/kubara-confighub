@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "stakater-reloader"
+  version: "2.2.14"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/stakater/reloader/2.2.14"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/stakater/reloader/2.2.14"
+      - "--non-interactive"
+      - "--namespace"
+      - "reloader"
+  variants:
+    - "variants/default/variant.yaml"

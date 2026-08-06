@@ -1,0 +1,61 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogSnapshot"
+metadata:
+  name: "kubara-catalogs-1.1.0-observed-head"
+spec:
+  source:
+    repository: "https://github.com/kubara-io/catalogs.git"
+    commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+    repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+    sourceSubtree: "."
+    releaseTags:
+      []
+    defaultOciReferences:
+      []
+    distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+    catalogSubtrees:
+      -
+        name: "bootstrap"
+        path: "bootstrap"
+        gitTree: "ecb54cef159ea19e3015b2627180d3cc408402ac"
+        version: "1.1.0"
+        catalogManifest: "bootstrap/Catalog.yaml"
+      -
+        name: "general"
+        path: "general"
+        gitTree: "209f06e611fea9c78367338a20f90aab3d433ae6"
+        version: "1.1.0"
+        catalogManifest: "general/Catalog.yaml"
+  snapshot:
+    scope: "full-bootstrap-and-general-catalogs"
+    profiledServices:
+      - "argocd"
+      - "cert-manager"
+      - "external-secrets"
+      - "homer-dashboard"
+      - "kube-prometheus-stack"
+      - "metrics-server"
+      - "traefik"
+    bootstrapConcerns:
+      -
+        key: "bootstrap-crds"
+        status: "included"
+    selectedPaths:
+      - "bootstrap"
+      - "general"
+    fileCount: 354
+    bytes: 6394972
+    treeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+    digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+    checksums: "data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-observed-head/checksums.txt"
+  license:
+    path: "data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-observed-head/UPSTREAM_LICENSE"
+    sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    identifier: "Apache-2.0"
+  boundaries:
+    fullUpstreamRepositorySnapshot: false
+    fullCatalogSubtrees: true
+    historicalBuiltInBoundary: null
+    sourceFilesModified: false
+    networkRequiredForOfflineVerify: false

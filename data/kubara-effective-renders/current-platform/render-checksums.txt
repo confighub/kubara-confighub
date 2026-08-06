@@ -1,0 +1,13 @@
+0810f86226a13a70f24a345af9560536f773f054fb75a7cbaf2202ab64858d2d  data/kubara-effective-renders/current-platform/hx-app-dev/homer-dashboard.yaml
+0c39aaa4266218d7c9cd5c29f8fd303b832d53345176fbd7bd2a94a14909ca7c  data/kubara-effective-renders/current-platform/hx-app-dev/traefik.yaml
+27f69adde8d447b0294205f65d9d19685c987a4b2ad573271e3edbb239f0a75a  data/kubara-effective-renders/current-platform/hx-app-prod-a/cert-manager.yaml
+3881930e58f377be7074eda757a17e304825a3104183f477cfadb4cb87c57bb8  data/kubara-effective-renders/current-platform/hx-app-dev/argo-cd.yaml
+3ebec65bab14e1f48da29496d979c7463741f2e6f2697e46752a582d6d77633c  data/kubara-effective-renders/current-platform/hx-app-staging/traefik.yaml
+9d5ce0593524ae3e9b2aaf99ec8fddf4a8c57332b9a07bff91f24456a034a4a1  data/kubara-effective-renders/current-platform/hx-app-prod-b/traefik.yaml
+a9c778d0a46b42a05f4296c6ab34fc75c62a5fb1efd5e1906ab10a7a25edaf92  data/kubara-effective-renders/current-platform/hx-app-dev/kube-prometheus-stack.yaml
+b90bd5215ed87a67cd9b2754f04865a20e40b805fe1349e93de25770b0a69292  data/kubara-effective-renders/current-platform/hx-app-dev/external-secrets.yaml
+d42bd87d5d10982edf3d3c308769c3fba802df70bfca68e10600a76114e95ee7  data/kubara-effective-renders/current-platform/hx-app-dev/cert-manager.yaml
+d7cc5ad406be55803cc8c8f267631812051d82dd649863a89f87c2db0ed0690d  data/kubara-effective-renders/current-platform/hx-app-staging/cert-manager.yaml
+da40e4395191e57b4a67b579a9b9e171461e960d9df22ae108bf2d262fa65f69  data/kubara-effective-renders/current-platform/hx-app-dev/metrics-server.yaml
+ddab0a44c5efc491c6132223fff6b88ecd2da5abdd77e73af1887f7593aef70a  data/kubara-effective-renders/current-platform/hx-app-prod-b/cert-manager.yaml
+f3f494ffb978b154e083493974f39221f32ce5ec047f3e4caaced3d3310e3d81  data/kubara-effective-renders/current-platform/hx-app-prod-a/traefik.yaml

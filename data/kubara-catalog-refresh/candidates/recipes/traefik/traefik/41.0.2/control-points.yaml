@@ -1,0 +1,27 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      dependencyCount: 0
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+    -
+      category: "crd-lifecycle"
+      status: "review-required"
+      count: 25
+    -
+      category: "candidate-boundary"
+      status: "offline-only"
+      note: "root retention, Kubara compatibility, and live qualification are not implied"

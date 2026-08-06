@@ -1,0 +1,4980 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "KubaraMiniIDPOrphanAuditReceipt"
+metadata:
+  name: "kubara-v0-13-0-mini-idp-orphan-audit"
+spec:
+  observedAt: "2026-08-06T09:10:55.578Z"
+  organization:
+    name: "Kubara"
+    externalID: "58b23b85-9699-4384-bd57-80ef695a1d58"
+    entityID: "12c33fa8-00b1-4011-ad3e-19d56458b29c"
+    serverURL: "https://hub.confighub.com"
+  source:
+    auditor: "scripts/audit-kubara-mini-idp-orphans.mjs"
+    auditorSha256: "sha256:9beedf1f3f101fa2f370f34ed16ef102617abcb327d0d3fe7b052570d21d436b"
+    reconciler: "scripts/reconcile-kubara-mini-idp.mjs"
+    reconcilerSha256: "sha256:bf61c8c203c1159f40855819495fa21273f23ef07c7e93b0a45dec9df2927230"
+    reconcilePlanSha256: "sha256:d2f3df8dc6c51f9230e47fdff48de06d1a3c552d8d05c7c479b6d39003caf1ae"
+    applyAttemptLedger: "runs/kubara-mini-idp-reconcile/attempts.yaml"
+    applyAttemptLedgerSha256: "sha256:a7534d676badafd5b68d4ae0a436b5fae38c7b994c893ed54904106fe854d1e4"
+  auditScope:
+    claim: "zero unexpected ConfigHub inventory, zero Argo-prunable resources, zero unclassified or dangling audited durable workloads, and zero stale ownership on protected Namespaces"
+    completeConfigHubInventory:
+      - "Spaces"
+      - "Units"
+      - "Links"
+      - "Targets"
+      - "Triggers"
+      - "Filters"
+      - "release Tags"
+      - "published Releases"
+    argoInventory:
+      - "the exact planned Applications"
+      - "every resource reported by current Application status"
+      - "every requiresPruning marker"
+    kubernetesInventory:
+      - "deployments.apps"
+      - "statefulsets.apps"
+      - "daemonsets.apps"
+      - "cronjobs.batch"
+      - "jobs.batch"
+      - "namespace/default"
+      - "namespace/kube-system"
+      - "namespace/kube-public"
+      - "namespace/kube-node-lease"
+    excludedFromClusterWideClaim: "Kubernetes resource types outside current Argo status, the five audited durable-workload types, and the four protected Namespaces are not a complete cluster inventory and are not covered by this receipt"
+    clusterWideOrphanFreeClaim: false
+  execution:
+    readOnly: true
+    liveMutationCommands: 0
+    sharedSerialLiveLock: true
+    operationJournalRequiredQuiescent: true
+    snapshotBracketsRequired: 2
+    organizationWideListCallsPerBracket:
+      space: 1
+      unit: 1
+      link: 1
+      target: 1
+      release: 1
+      trigger: 1
+      filter: 1
+      tag: 1
+    persistentClustersPreserved:
+      - "hx-app-dev"
+      - "hx-app-prod-a"
+      - "hx-app-prod-b"
+      - "hx-app-staging"
+    organizationWideReadBrackets:
+      openingCoreFiveResourceFingerprint: "sha256:5901975e3f42c56256b280d7ebe676197c38bc738a19c66fd8a3647c9a5bddc1"
+      closingCoreFiveResourceFingerprint: "sha256:5901975e3f42c56256b280d7ebe676197c38bc738a19c66fd8a3647c9a5bddc1"
+      openingFullEightResourceFingerprint: "sha256:6d35241e2f868e51ff000125f12da153095d90d4f834100cfc29edb82bf4a507"
+      closingFullEightResourceFingerprint: "sha256:6d35241e2f868e51ff000125f12da153095d90d4f834100cfc29edb82bf4a507"
+      stable: true
+  expected:
+    spaces: 55
+    units: 105
+    links: 64
+    targets: 4
+    triggers: 1
+    filters: 1
+    releaseTags: "dynamic-complete-additive-history-through-each-current-release"
+    currentReleaseStreams: 35
+    argoApplications: 35
+    bootstrapDurableWorkloads: 44
+    protectedNamespaces: 16
+  observed:
+    spaces: 55
+    units: 105
+    links: 64
+    targets: 4
+    triggers: 1
+    filters: 1
+    releaseTags: 148
+    argoApplications: 35
+    argoTrackedResources: 631
+    durableWorkloads: 92
+  configHubInventory:
+    snapshot:
+      schemaVersion: 1
+      mode: "organization-wide-single-list-per-resource"
+      canonicalization: "stable-recursive-key-order-and-entity-row-order"
+      fingerprintAlgorithm: "sha256"
+      coreResources:
+        - "space"
+        - "unit"
+        - "release"
+        - "link"
+        - "target"
+      fullResources:
+        - "space"
+        - "unit"
+        - "release"
+        - "link"
+        - "target"
+        - "trigger"
+        - "filter"
+        - "tag"
+      coreFiveResourceFingerprintScope: "reconciler-final-selected-Space-Unit-published-Release-Link-Target-snapshot"
+      coreFiveResourceFingerprint: "sha256:5901975e3f42c56256b280d7ebe676197c38bc738a19c66fd8a3647c9a5bddc1"
+      fullEightResourceFingerprintScope: "core-five-plus-selected-Trigger-Filter-release-Tag-snapshot"
+      fullEightResourceFingerprint: "sha256:6d35241e2f868e51ff000125f12da153095d90d4f834100cfc29edb82bf4a507"
+      fieldSets:
+        space:
+          - "OrganizationID"
+          - "SpaceID"
+          - "Slug"
+          - "Labels"
+          - "Annotations"
+          - "ReleaseTargetID"
+          - "TriggerFilterID"
+          - "TriggerIDs"
+          - "WhereTrigger"
+          - "DeleteGates"
+        unit:
+          - "SpaceID"
+          - "UnitID"
+          - "Slug"
+          - "Labels"
+          - "Annotations"
+          - "TargetID"
+          - "UpstreamUnitID"
+          - "DeleteGates"
+          - "DestroyGates"
+          - "ToolchainType"
+          - "ProviderType"
+          - "Data"
+          - "DataHash"
+          - "ContentHash"
+          - "HeadRevisionNum"
+          - "LastAppliedRevisionNum"
+          - "ApprovedBy"
+          - "ApplyGates"
+        release:
+          - "SpaceID"
+          - "ReleaseID"
+          - "TagID"
+          - "Digest"
+          - "ManifestDigest"
+          - "ReleaseNum"
+          - "UnitCount"
+          - "CreatedAt"
+        link:
+          - "SpaceID"
+          - "LinkID"
+          - "Slug"
+          - "FromUnitID"
+          - "ToUnitID"
+          - "ToSpaceID"
+          - "UpdateType"
+          - "AutoUpdate"
+          - "UpstreamLastMergedRevisionNum"
+          - "DownstreamLastMergedRevisionNum"
+          - "Labels"
+          - "Annotations"
+        target:
+          - "SpaceID"
+          - "TargetID"
+          - "Slug"
+          - "ProviderType"
+          - "ToolchainType"
+          - "Annotations"
+        trigger:
+          - "SpaceID"
+          - "TriggerID"
+          - "Slug"
+          - "Event"
+          - "ToolchainType"
+          - "FunctionName"
+          - "Arguments"
+          - "Disabled"
+          - "Validating"
+          - "FailOpenAfter"
+        filter:
+          - "SpaceID"
+          - "FilterID"
+          - "Slug"
+          - "From"
+          - "Where"
+        tag:
+          - "OrganizationID"
+          - "SpaceID"
+          - "TagID"
+          - "Slug"
+          - "CreatedAt"
+      listCalls:
+        space: 1
+        unit: 1
+        link: 1
+        target: 1
+        release: 1
+        trigger: 1
+        filter: 1
+        tag: 1
+      counts:
+        spaces: 55
+        units: 105
+        links: 64
+        targets: 4
+        releases: 35
+        publishedReleases: 35
+        triggers: 1
+        filters: 1
+        tags: 148
+    triggerAllowlist:
+      -
+        ref: "hx-platform/require-approval"
+        id: "0c508168-26b8-46f7-92d8-01cb9b94cc7f"
+        event: "Mutation"
+        toolchainType: "Kubernetes/YAML"
+        functionName: "vet-approvedby"
+        arguments:
+          -
+            ParameterName: "num-approvers"
+            Value: "1"
+        disabled: false
+        validating: true
+        failOpenAfter: 0
+    filterAllowlist:
+      -
+        ref: "hx-platform/prod-approval"
+        id: "dbc3e71f-ef95-428e-a476-c7023e8e0574"
+        from: "Trigger"
+        where: "Space.Slug = 'hx-platform' AND FunctionName = 'vet-approvedby'"
+  catalogRetention:
+    components: 103
+    versions: 130
+    selections: 18
+    policy: "AdditiveOnly"
+    classification: "intentional-additive-inventory-not-orphans"
+  releaseClassification:
+    activeCurrent:
+      -
+        space: "argobot-hx-app-dev"
+        releaseID: "6f46495c-9f58-4d90-85ae-b0d1e5c9934f"
+        tagID: "bf9a23ca-2794-4c0b-a39c-cf12ed1e5ad0"
+        releaseNum: 1
+        unitCount: 1
+        bundleDigest: "sha256:f9c0bac3436dc4ff34ed8001aba868c203a646ad124006bed79d426c1a745f44"
+        manifestDigest: "sha256:0ba241ce5a99837a6d24d8bbc4086c79e4511b4622198353270bc6839d16b947"
+        createdAt: "2026-08-03T07:23:56.721916Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-helper"
+        cluster: "hx-app-dev"
+      -
+        space: "argobot-hx-app-prod-a"
+        releaseID: "72034467-2e9a-40c3-845a-b0bb2185a09d"
+        tagID: "40d2d00f-84f5-4c35-814d-30a94705ed05"
+        releaseNum: 1
+        unitCount: 1
+        bundleDigest: "sha256:7973f2809423c674bbe92355fe79ec2040dbd19287c6be1d32511dbfeaa7eb31"
+        manifestDigest: "sha256:741815e526c5351d5016056697c786278a21d3899001f8caa6378532d03dd6aa"
+        createdAt: "2026-08-03T07:39:55.26509Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-helper"
+        cluster: "hx-app-prod-a"
+      -
+        space: "argobot-hx-app-prod-b"
+        releaseID: "b2b356f9-ce02-4e36-89fe-8fedf4613fb5"
+        tagID: "42e8cfaa-5808-404d-9a57-0e507d5d4b10"
+        releaseNum: 1
+        unitCount: 1
+        bundleDigest: "sha256:d75d5c76c136f57a4bb362002dd878b9403369bd979965e1e64411b725beb549"
+        manifestDigest: "sha256:d21c082f5bd85ebc6af90f880cb0395379fe76967b9206edca7534596a5dd26d"
+        createdAt: "2026-08-03T07:41:40.160228Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-helper"
+        cluster: "hx-app-prod-b"
+      -
+        space: "argobot-hx-app-staging"
+        releaseID: "f2a64695-c8ce-417a-b5ec-21649ef493ac"
+        tagID: "4d3b3918-1005-45be-8361-8a43ff8b7d23"
+        releaseNum: 1
+        unitCount: 1
+        bundleDigest: "sha256:ed03c41fb7da2467245afe33815faecfda22bb01a981cffa24dfc37b314ca2fd"
+        manifestDigest: "sha256:66307b8eb1b7f6ec680a8c50f37b6d963a23d5050a7ef7c189e4c390f365fa3c"
+        createdAt: "2026-08-03T07:38:41.388881Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-helper"
+        cluster: "hx-app-staging"
+      -
+        space: "hx-app-dev-argo-apps"
+        releaseID: "f88f4a0d-37ed-4ecb-ae19-4d4e3a870d2c"
+        tagID: "b351ab58-6d8e-40ee-96a7-302a9c2b961c"
+        releaseNum: 25
+        unitCount: 14
+        bundleDigest: "sha256:21c1f1d8039598c7360e41ee193a0d8410f079a647fa4afc5914c40563094f00"
+        manifestDigest: "sha256:32b80148b5e15a5721785eeb481b9147a23748ccec2b701ddfa1ea0a322de043"
+        createdAt: "2026-08-05T14:56:51.86945Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-root"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-app-prod-a-argo-apps"
+        releaseID: "33a54a0a-c6fa-4a50-8772-c92771df01c7"
+        tagID: "fd61f9b6-29e3-43aa-ba3e-9777db67f6cb"
+        releaseNum: 9
+        unitCount: 7
+        bundleDigest: "sha256:3ce3a54aa67ff275e6555588f2afbc53a9925b49e7768f53f3f2a4b065c7c7a4"
+        manifestDigest: "sha256:4609fdf15d4b086f222bcf6f825fe3ce7b9b7900683adc6f4c04c441bf0cf38a"
+        createdAt: "2026-08-05T14:58:14.536575Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-root"
+        cluster: "hx-app-prod-a"
+      -
+        space: "hx-app-prod-b-argo-apps"
+        releaseID: "bca44a69-9d38-44b4-9552-4ebcdf31e577"
+        tagID: "d02f2341-3a89-438f-813e-2a80ebb89e14"
+        releaseNum: 9
+        unitCount: 7
+        bundleDigest: "sha256:78c663962144b53b7de9645f694574c58ad31951c2c37cf42548c008172be372"
+        manifestDigest: "sha256:eeab55039c5b10891bb5040217bc1795f792887068d6dc91876dc58a5bb4b3c4"
+        createdAt: "2026-08-05T14:58:51.547956Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-root"
+        cluster: "hx-app-prod-b"
+      -
+        space: "hx-app-staging-argo-apps"
+        releaseID: "a0563664-0753-4c36-ba5c-831071615999"
+        tagID: "7fc2055d-e422-461d-acf3-5375b4c413a1"
+        releaseNum: 9
+        unitCount: 7
+        bundleDigest: "sha256:d683ffcc78b6a05e944e233dad1856020cbb7d9a488529db2c6c247c08a66b2d"
+        manifestDigest: "sha256:38100655738b0d4f9b3b63c8e2635a13865520db0f089204ac5d352b1a9fff0e"
+        createdAt: "2026-08-05T14:57:36.89319Z"
+        published: true
+        classification: "active-current"
+        role: "delivery-root"
+        cluster: "hx-app-staging"
+      -
+        space: "hx-cm-dev"
+        releaseID: "5d071a8e-c5eb-45e3-bf7e-abfa11d3733e"
+        tagID: "dfd63815-b65a-4526-b7ca-428ded971c1b"
+        releaseNum: 4
+        unitCount: 1
+        bundleDigest: "sha256:38115663d13a519979fb64a265e4c7757792f398934f16625d2a96365d90ee90"
+        manifestDigest: "sha256:2e0d50c5b6e233006aabaa4b73cdff53391cc497efca3500c6990441984da251"
+        createdAt: "2026-08-04T17:58:50.082313Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-cm-prod-a"
+        releaseID: "777ab945-a734-4eb6-8958-6276af15e96b"
+        tagID: "6cc27c06-31eb-4e8a-a416-ff5c515df508"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:d8cbeef32f6158cc88443edbbe6ec115d7577d7380ce09df5cac821067451c49"
+        manifestDigest: "sha256:cabd665438d96ed200c9bb961bdc30978e5b8b4d4d20a6d03535fe34fca718b0"
+        createdAt: "2026-08-04T18:48:52.947239Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-a"
+      -
+        space: "hx-cm-prod-b"
+        releaseID: "5aac0f3f-8332-47bb-8346-0aa9cdf2ad27"
+        tagID: "0e5e4751-a72f-4690-8f3f-8d3aedea194e"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:751add04304ece33e41903ed4f98abeb01cc87fa99f5f62468db38b0ffe7d949"
+        manifestDigest: "sha256:e32682d356a5e244d233c6d259bbf0830156cd8449cd701fe82ed7e7afe0192e"
+        createdAt: "2026-08-04T19:02:06.969074Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-b"
+      -
+        space: "hx-cm-staging"
+        releaseID: "1dbdce54-ce63-4250-b33d-206c281dbf52"
+        tagID: "a898192f-1c0f-4759-95c7-eef6d52bb3c2"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:18885e791a252c84bff7a1361305e038a3e4d776b072db789d9a8fc3f7cdf7fe"
+        manifestDigest: "sha256:d60b237d6cda6886a3c908bbba62d587e1fa7695f9500bb723a5dbc24e969b90"
+        createdAt: "2026-08-04T19:13:54.538135Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-staging"
+      -
+        space: "hx-cubbychat-dev"
+        releaseID: "5a0b7482-7560-4954-96d9-a9a51511deda"
+        tagID: "a5f0a8b6-e484-4ed4-9db1-956a5e6828ea"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:ce8aed8382504de1dd17df839a66fe3817bbe813999f25367f09606fbc3bcd40"
+        manifestDigest: "sha256:cda318aecd995e12fad48d036b9974ee14d91050f3aaf551643d9a1720507961"
+        createdAt: "2026-08-06T08:28:49.63206Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-cubbychat-prod-a"
+        releaseID: "258aea03-6e8f-4a75-93ee-ea1902ba781b"
+        tagID: "cf573117-d812-4f75-83ce-e5ee0124d128"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:0b06a5c35f981a5691d7e025696a13252ea82392d5eab346ded2190dc32b916d"
+        manifestDigest: "sha256:49d2ee594dc2b4fac79efb3c9408df60b8b6ac5e928884ab96b75e0d21484e8a"
+        createdAt: "2026-08-06T08:29:43.077437Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-a"
+      -
+        space: "hx-cubbychat-prod-b"
+        releaseID: "6b5dee2e-716c-4a5b-962f-e76d4a38f035"
+        tagID: "0d8cde49-5400-40a4-a8cd-645cea273393"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:b061b5b54296e2c8bb17b8d6f8b172445b52d3479700903cc516bf6e7c74bb3a"
+        manifestDigest: "sha256:09135166bd373e4d7950a0740eff7ddbf31a4cb7eb438a09fed041e6891edfad"
+        createdAt: "2026-08-06T08:30:12.327655Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-b"
+      -
+        space: "hx-cubbychat-staging"
+        releaseID: "6a1d6257-e045-4e24-b449-bce4729ce735"
+        tagID: "2e578c24-2a1a-42b5-a5b5-1cc879991fff"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:470467e93f1c1b45a101102b42dd9cf4cef7cedc3da25696e4d3d2aea621f0c2"
+        manifestDigest: "sha256:b9d06e8aa028134c2b6ad237db74a4c01bbdb79c5dacc79b8e3a6a40dab3aba2"
+        createdAt: "2026-08-06T08:29:13.68786Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-staging"
+      -
+        space: "hx-eso-dev"
+        releaseID: "5c4e4041-e147-4776-8aed-e9e46311be9e"
+        tagID: "67f01cad-10d3-4eda-b60e-f06412fb62d9"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:c1f8883bb7d465e8ce828bbbdd5d23c06b2a8a9a4b4b540cca4a3fcc182d987d"
+        manifestDigest: "sha256:2e6825dec9a6839d8f69a2d5c9d99be9b4f75c4d5d9fc4aa2ada30efcf55571d"
+        createdAt: "2026-08-04T19:16:09.515686Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-eso-grafana-es-dev"
+        releaseID: "b06a9444-7e63-46f2-8c7e-1a36e1b11b4e"
+        tagID: "d871d322-4d25-419d-9218-8ec31fa93fdb"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:02ac8337d47015cb76fa909704145da55d3912fab58f096e60cd9cc9da6fca4b"
+        manifestDigest: "sha256:c06a17c8e869ae085c38c3668c56af387c2c9b44f6e608075d348d8a535f771c"
+        createdAt: "2026-08-04T20:47:46.205185Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-eso-store-dev"
+        releaseID: "fd1a9dea-2340-4557-9174-869b740f6eb2"
+        tagID: "23bf352c-78ef-43f4-bcca-55859967b7c6"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:be71f454ddfc9f794ab183ae5baba8d20d723a78920e594229d72d103b517e4b"
+        manifestDigest: "sha256:8755fef589a5ee71b549d6a3ee848ec471fbf1b6c6df8f5b7aa4f60ab9e7711a"
+        createdAt: "2026-08-04T19:16:15.630216Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-homer-dev"
+        releaseID: "5f858196-68f6-4e60-aca9-9b8785c4e1de"
+        tagID: "5a5036e8-c2ef-4401-8066-a8eaf167eea8"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:2f8bd37a563c2e5b6e3841ceddf32d9e963cbad5e3ca24fd1284ed6710614b0a"
+        manifestDigest: "sha256:caa49b21bf81ef876108bf39a2847a2a7c2db53d1107ec9a8eadb350f5c5ae10"
+        createdAt: "2026-08-05T11:17:18.656983Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-kps-crds-dev"
+        releaseID: "bd6668d0-df72-43a6-b435-0c5930247cf7"
+        tagID: "21d06321-24c4-4a52-aa6b-6c0e78a7aca6"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:689d094348b44f3fcbbf6cd751c11f71e492393dcd7b9baad7da49770227f4c4"
+        manifestDigest: "sha256:050f420f2ae55b2cee0ccfb97913db12f7e4640abb1e7b6b0a5f7257a3cc0f86"
+        createdAt: "2026-08-04T17:58:41.472338Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-kps-main-dev"
+        releaseID: "980f8060-9b18-4a22-91c3-0bf1641f0507"
+        tagID: "3cb0bd7d-0f2f-4122-8a0f-60e0f66dc9ec"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:079d652f5a3a1f244593c2cdca65dd0aa21b6ecab930282d63f5da86e0009542"
+        manifestDigest: "sha256:c8fc5027f0564d058d1e339352b144472fe3210c2ba39f6e7dbb0250552a514a"
+        createdAt: "2026-08-04T20:48:16.899399Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-metrics-dev"
+        releaseID: "4c21868a-171d-4540-ad6d-192d7ee72571"
+        tagID: "f1b00157-c76a-496d-b9d0-08bc170bf8c3"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:329a7dc6ceec6b2415bb375ccef9f99e92285b2f609246dbc7aea14f881fbf38"
+        manifestDigest: "sha256:5c9faf13ff05c6b5a0e269ff4b68006c87c10fbe86cd5c1236897780ebed34a0"
+        createdAt: "2026-08-05T06:22:51.219291Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-traefik-dev"
+        releaseID: "1ec76996-9277-476e-8693-d03fe2502276"
+        tagID: "f3f91a42-9c09-42f2-8fc9-b1f7cdd81d29"
+        releaseNum: 4
+        unitCount: 1
+        bundleDigest: "sha256:fefab5767cfa932c096eb7a7770ae2aab4d1f4b2710e22ec59a557479e62d0dc"
+        manifestDigest: "sha256:7ab1ce5e6acf3381ffdad16a5afb5db7c9818b630bf6004b008a7581ce8f5fc4"
+        createdAt: "2026-08-05T14:59:40.904042Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-traefik-prod-a"
+        releaseID: "a6ebe517-671c-4e1b-820e-06150ed5c424"
+        tagID: "d1bd14af-0456-4760-b777-a8e58a860513"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:79fd49ccd2416b0706f861d65a1f60f5c580b7def2351fe62023f19fcc179324"
+        manifestDigest: "sha256:f72f143f7850b03e76892230a81d566edca44d707c9b6a6d857a625559c7aa50"
+        createdAt: "2026-08-05T15:10:05.310982Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-a"
+      -
+        space: "hx-traefik-prod-b"
+        releaseID: "8a27a050-792d-41c1-bea0-5ba78785c313"
+        tagID: "b599f028-ca3d-4c5e-9c62-b251d6d66f54"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:357c0708b178e02741c44fdcaa945db7e5998f00ba3c34186b35b7bef9767d2f"
+        manifestDigest: "sha256:1ab358364c425bf70f01422474279b495432807251b4078e8f3569d9a3b4b82c"
+        createdAt: "2026-08-05T15:13:18.250296Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-b"
+      -
+        space: "hx-traefik-staging"
+        releaseID: "3eed2ed4-72c6-4c21-abac-2b12445dc433"
+        tagID: "d2814933-7901-428d-b575-f817853fad63"
+        releaseNum: 4
+        unitCount: 1
+        bundleDigest: "sha256:5488d1de1adde326e3686ddb4f25312c98bbe505879ea8ea669d640a3703a0a5"
+        manifestDigest: "sha256:49014d44a9dc2f0b075b91779ca2850831dd193646c71d680282b3a9188f4bc3"
+        createdAt: "2026-08-05T15:00:24.233918Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-staging"
+      -
+        space: "hx-web-dev"
+        releaseID: "897396f1-2e77-46d5-b791-fd747ba9ba6b"
+        tagID: "5b3a5c9b-3396-4547-9739-b6f008e45396"
+        releaseNum: 8
+        unitCount: 3
+        bundleDigest: "sha256:7d55814127a67f8c721333397b6de61554f369fd3289ba4f825649a4b809374b"
+        manifestDigest: "sha256:e44f4071816e30e98b563fedbd96e0fb5784d293c73c7e2b4562ce6df8d8000f"
+        createdAt: "2026-08-05T16:35:47.949794Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-web-platform-dev"
+        releaseID: "4dd4c2ec-f5cf-4000-b7db-7373d455975d"
+        tagID: "b3211165-6779-48cb-8343-eaa2956924a1"
+        releaseNum: 3
+        unitCount: 1
+        bundleDigest: "sha256:3fa68adca6d7d1ca664c9cef4628237e535c337220d96e660960e18d63cff493"
+        manifestDigest: "sha256:00d2ea5fe48835d8a9d5f325e09687a149d937c39fcd2c437593766bb751762a"
+        createdAt: "2026-08-05T19:20:04.874466Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-dev"
+      -
+        space: "hx-web-platform-prod-a"
+        releaseID: "3fef3fff-7c7f-4877-8139-123135edcd8b"
+        tagID: "ed094298-ce86-4ad0-876b-3b838cb89d30"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:12528f7eb0409febeea0dc6b4c49e8bae7e6298447953a169d687561e26fbdb4"
+        manifestDigest: "sha256:aa4d22f6fb66a3b74dd8fca638db8c0613c4b92974bae7bc36de148136674323"
+        createdAt: "2026-08-05T17:15:51.940313Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-a"
+      -
+        space: "hx-web-platform-prod-b"
+        releaseID: "ce6daab1-1f4c-4cd1-a3b6-b549594f7c11"
+        tagID: "ef5f2fdb-21b5-44c8-b381-353e8173205c"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:e91001157dc1cb49e1f43557a3a5cb3f987779b5f8b2be18b51378f160b6c32a"
+        manifestDigest: "sha256:c0f9f9539c5d5f268242ff3bdf40f9a0b93d386081a8e40c0d7f12616dd39dff"
+        createdAt: "2026-08-05T17:16:25.881553Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-b"
+      -
+        space: "hx-web-platform-staging"
+        releaseID: "2a27726c-5d7a-4e6c-943b-c969b30e86a0"
+        tagID: "db76aed9-0f2f-4c35-bb61-015d133d237e"
+        releaseNum: 2
+        unitCount: 1
+        bundleDigest: "sha256:0a42e9a47998b06c9234eeb36be510ba65c3a5de9d2c1a3bcd3136087220184e"
+        manifestDigest: "sha256:74aed764f889c55a8fc2df3ddb693ba3322626e5f9eb44170c4680c58a69f810"
+        createdAt: "2026-08-05T17:15:20.069709Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-staging"
+      -
+        space: "hx-web-prod-a"
+        releaseID: "86371aba-0b66-491c-a920-4e24bbaae225"
+        tagID: "c7dee782-5f80-4a07-a17c-0e5e83d71744"
+        releaseNum: 7
+        unitCount: 3
+        bundleDigest: "sha256:e884951f6c3b33c87abdf7f3b4e2cd33fca845775dc06ad4a4f9000b463743da"
+        manifestDigest: "sha256:23e0d4db7ada2fc37b3e4c7e945e41a9f1071f067a4c3b99842099fb1aa28c48"
+        createdAt: "2026-08-05T16:30:56.057308Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-a"
+      -
+        space: "hx-web-prod-b"
+        releaseID: "709a7b34-7759-4816-b391-c8bb64063e79"
+        tagID: "218902f4-2e68-4e18-aab0-771a39b1aa0c"
+        releaseNum: 6
+        unitCount: 3
+        bundleDigest: "sha256:1e823aa2f5ae3897e49cc30e7e68d6518736a5490063ee841415c6697284153a"
+        manifestDigest: "sha256:df7faec7a7dcf930dd4d425b9a82ab8ac6b9df660fd5ad94b75f139d88967424"
+        createdAt: "2026-08-05T16:48:49.452324Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-prod-b"
+      -
+        space: "hx-web-staging"
+        releaseID: "db97164e-da18-4e08-8aba-390b8ef67340"
+        tagID: "04270e82-df06-4db5-a5c6-d3b52d0bddb7"
+        releaseNum: 9
+        unitCount: 3
+        bundleDigest: "sha256:5f22c8a364fdccd482c8eddb8de36c4e464964f8cf2a3a14125d4c3109c3b6a5"
+        manifestDigest: "sha256:6397b2aac57e2c0965e5cd26ff7f82243a4f0aef440a14b9a003f9cd99fe013c"
+        createdAt: "2026-08-05T16:37:54.833725Z"
+        published: true
+        classification: "active-current"
+        role: "workload-or-component"
+        cluster: "hx-app-staging"
+    historical:
+      []
+    retainedCatalogOrProof:
+      []
+    orphaned:
+      []
+  releaseTagHistory:
+    policy: "additive-release-N-tags-contiguous-from-one-through-current-release"
+    streams:
+      -
+        space: "argobot-hx-app-dev"
+        currentReleaseID: "6f46495c-9f58-4d90-85ae-b0d1e5c9934f"
+        currentReleaseNum: 1
+        currentTagID: "bf9a23ca-2794-4c0b-a39c-cf12ed1e5ad0"
+        retainedTagCount: 1
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "bf9a23ca-2794-4c0b-a39c-cf12ed1e5ad0"
+            createdAt: "2026-08-03T07:23:56.718241Z"
+      -
+        space: "argobot-hx-app-prod-a"
+        currentReleaseID: "72034467-2e9a-40c3-845a-b0bb2185a09d"
+        currentReleaseNum: 1
+        currentTagID: "40d2d00f-84f5-4c35-814d-30a94705ed05"
+        retainedTagCount: 1
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "40d2d00f-84f5-4c35-814d-30a94705ed05"
+            createdAt: "2026-08-03T07:39:55.260819Z"
+      -
+        space: "argobot-hx-app-prod-b"
+        currentReleaseID: "b2b356f9-ce02-4e36-89fe-8fedf4613fb5"
+        currentReleaseNum: 1
+        currentTagID: "42e8cfaa-5808-404d-9a57-0e507d5d4b10"
+        retainedTagCount: 1
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "42e8cfaa-5808-404d-9a57-0e507d5d4b10"
+            createdAt: "2026-08-03T07:41:40.156112Z"
+      -
+        space: "argobot-hx-app-staging"
+        currentReleaseID: "f2a64695-c8ce-417a-b5ec-21649ef493ac"
+        currentReleaseNum: 1
+        currentTagID: "4d3b3918-1005-45be-8361-8a43ff8b7d23"
+        retainedTagCount: 1
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "4d3b3918-1005-45be-8361-8a43ff8b7d23"
+            createdAt: "2026-08-03T07:38:41.385498Z"
+      -
+        space: "hx-app-dev-argo-apps"
+        currentReleaseID: "f88f4a0d-37ed-4ecb-ae19-4d4e3a870d2c"
+        currentReleaseNum: 25
+        currentTagID: "b351ab58-6d8e-40ee-96a7-302a9c2b961c"
+        retainedTagCount: 25
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "7a7a220c-0d9c-46c8-924a-d6198fd55007"
+            createdAt: "2026-08-03T07:23:55.184436Z"
+          -
+            slug: "release-2"
+            tagID: "a28fc373-d3cf-4ec5-a0c3-d82c759c95c4"
+            createdAt: "2026-08-03T07:26:51.978037Z"
+          -
+            slug: "release-3"
+            tagID: "0afeeaa4-285c-4425-a01a-75d433ec090a"
+            createdAt: "2026-08-03T08:34:18.336447Z"
+          -
+            slug: "release-4"
+            tagID: "d7e56c93-16d7-4760-abc5-e464271b8288"
+            createdAt: "2026-08-03T09:36:41.479238Z"
+          -
+            slug: "release-5"
+            tagID: "ac71b027-90c4-40e7-be56-991e63f12f7e"
+            createdAt: "2026-08-03T09:38:07.80484Z"
+          -
+            slug: "release-6"
+            tagID: "0029954d-f68b-4532-80da-34f7504a8d8d"
+            createdAt: "2026-08-03T14:41:05.990173Z"
+          -
+            slug: "release-7"
+            tagID: "343ac08b-3020-410f-befc-859719e21855"
+            createdAt: "2026-08-03T14:41:13.702393Z"
+          -
+            slug: "release-8"
+            tagID: "ea53d300-f72a-4150-86cd-300eec499800"
+            createdAt: "2026-08-03T14:49:36.501918Z"
+          -
+            slug: "release-9"
+            tagID: "bc107838-74ac-4732-8105-ac28902405ea"
+            createdAt: "2026-08-03T14:58:27.785642Z"
+          -
+            slug: "release-10"
+            tagID: "2c4d8bc8-948c-42e3-aeea-25906fc4763e"
+            createdAt: "2026-08-03T14:58:57.871033Z"
+          -
+            slug: "release-11"
+            tagID: "cad1ad5c-2711-4593-a308-a302e44fb3a2"
+            createdAt: "2026-08-03T15:16:13.773241Z"
+          -
+            slug: "release-12"
+            tagID: "05a35758-e873-4a3a-a7ed-f38f3e885cd9"
+            createdAt: "2026-08-03T15:29:19.178383Z"
+          -
+            slug: "release-13"
+            tagID: "a01b8138-7fda-4bf5-be10-5bdc66bf6ddf"
+            createdAt: "2026-08-03T15:29:21.174993Z"
+          -
+            slug: "release-14"
+            tagID: "b1661b76-4f18-498b-a90f-63224d2c8459"
+            createdAt: "2026-08-03T16:04:43.414489Z"
+          -
+            slug: "release-15"
+            tagID: "0f4fa7f1-d803-4b8b-abda-77338b58e097"
+            createdAt: "2026-08-03T21:42:24.447883Z"
+          -
+            slug: "release-16"
+            tagID: "a1a817fb-fd47-41c2-9f87-4bd07ce335fe"
+            createdAt: "2026-08-03T21:42:29.910347Z"
+          -
+            slug: "release-17"
+            tagID: "f665463f-939e-4a87-adaf-1a3424882942"
+            createdAt: "2026-08-03T21:49:28.50973Z"
+          -
+            slug: "release-18"
+            tagID: "f3cfa1d4-6663-4eb4-a056-170fd482f70c"
+            createdAt: "2026-08-03T21:50:23.29845Z"
+          -
+            slug: "release-19"
+            tagID: "eee4cbd7-1e13-4fc6-9147-fc635c70876b"
+            createdAt: "2026-08-03T21:51:14.35655Z"
+          -
+            slug: "release-20"
+            tagID: "39dcfd2a-046a-4517-a1e1-90a9f0bebf6d"
+            createdAt: "2026-08-03T21:55:37.126773Z"
+          -
+            slug: "release-21"
+            tagID: "3cfe1dff-a0f2-47e1-8589-74ff8ce18dd1"
+            createdAt: "2026-08-04T17:58:34.73225Z"
+          -
+            slug: "release-22"
+            tagID: "6e972513-f6c3-4b05-af5a-4129b97139ac"
+            createdAt: "2026-08-04T18:18:06.455896Z"
+          -
+            slug: "release-23"
+            tagID: "5c93fd29-f6e8-4b53-8534-f01f39ec7637"
+            createdAt: "2026-08-04T18:48:13.278887Z"
+          -
+            slug: "release-24"
+            tagID: "a64334d2-6d9f-45a2-9aa1-49edbd54770b"
+            createdAt: "2026-08-05T05:29:44.921049Z"
+          -
+            slug: "release-25"
+            tagID: "b351ab58-6d8e-40ee-96a7-302a9c2b961c"
+            createdAt: "2026-08-05T14:56:51.865873Z"
+      -
+        space: "hx-app-prod-a-argo-apps"
+        currentReleaseID: "33a54a0a-c6fa-4a50-8772-c92771df01c7"
+        currentReleaseNum: 9
+        currentTagID: "fd61f9b6-29e3-43aa-ba3e-9777db67f6cb"
+        retainedTagCount: 9
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "e07c925d-bcee-4541-ab00-154c259a260a"
+            createdAt: "2026-08-03T07:39:53.766656Z"
+          -
+            slug: "release-2"
+            tagID: "89746e81-2d98-49fa-a2ad-1f72d4ca2134"
+            createdAt: "2026-08-03T07:41:27.593973Z"
+          -
+            slug: "release-3"
+            tagID: "3ad4d450-9e2d-4c2c-9006-3b12c2f4caa3"
+            createdAt: "2026-08-03T10:34:46.884798Z"
+          -
+            slug: "release-4"
+            tagID: "ba95e102-1b26-49d7-8924-21ddc28a227a"
+            createdAt: "2026-08-03T10:34:53.300792Z"
+          -
+            slug: "release-5"
+            tagID: "dd651cd7-ac94-49c1-9f50-a9437c64f6a8"
+            createdAt: "2026-08-03T10:41:35.804496Z"
+          -
+            slug: "release-6"
+            tagID: "87908831-c20e-4e53-9098-6c0587da5036"
+            createdAt: "2026-08-03T15:58:56.512423Z"
+          -
+            slug: "release-7"
+            tagID: "3c7d155f-22ed-4270-a332-295a34063dce"
+            createdAt: "2026-08-04T18:48:46.175775Z"
+          -
+            slug: "release-8"
+            tagID: "3c100dd7-b5a6-497a-955f-49c4ee8dce02"
+            createdAt: "2026-08-05T05:33:03.401457Z"
+          -
+            slug: "release-9"
+            tagID: "fd61f9b6-29e3-43aa-ba3e-9777db67f6cb"
+            createdAt: "2026-08-05T14:58:14.53317Z"
+      -
+        space: "hx-app-prod-b-argo-apps"
+        currentReleaseID: "bca44a69-9d38-44b4-9552-4ebcdf31e577"
+        currentReleaseNum: 9
+        currentTagID: "d02f2341-3a89-438f-813e-2a80ebb89e14"
+        retainedTagCount: 9
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "3dceda47-c9af-4406-a65b-595b5b06981f"
+            createdAt: "2026-08-03T07:41:38.672612Z"
+          -
+            slug: "release-2"
+            tagID: "d74a29f8-ab26-4c2a-b2b4-4a7df1d2edd6"
+            createdAt: "2026-08-03T07:49:09.362458Z"
+          -
+            slug: "release-3"
+            tagID: "5f217e93-6999-430a-8133-1dd180db68bb"
+            createdAt: "2026-08-03T10:35:02.812604Z"
+          -
+            slug: "release-4"
+            tagID: "a584f574-b8af-4c7d-886d-56a967c2d481"
+            createdAt: "2026-08-03T10:35:09.280004Z"
+          -
+            slug: "release-5"
+            tagID: "8f2a59c1-07ab-4f13-8de0-dcf0b1e50ab9"
+            createdAt: "2026-08-03T10:41:38.707384Z"
+          -
+            slug: "release-6"
+            tagID: "59bedacf-af82-4f6f-98ad-cd4e89428a5e"
+            createdAt: "2026-08-03T15:58:59.431671Z"
+          -
+            slug: "release-7"
+            tagID: "303eea5e-dea0-42a7-bb2d-7ba0f961a339"
+            createdAt: "2026-08-04T19:02:00.819477Z"
+          -
+            slug: "release-8"
+            tagID: "2d109aa4-5a7a-494b-b72b-829f3ed6a227"
+            createdAt: "2026-08-05T05:33:59.922607Z"
+          -
+            slug: "release-9"
+            tagID: "d02f2341-3a89-438f-813e-2a80ebb89e14"
+            createdAt: "2026-08-05T14:58:51.544874Z"
+      -
+        space: "hx-app-staging-argo-apps"
+        currentReleaseID: "a0563664-0753-4c36-ba5c-831071615999"
+        currentReleaseNum: 9
+        currentTagID: "7fc2055d-e422-461d-acf3-5375b4c413a1"
+        retainedTagCount: 9
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "3c8878d9-0195-44cd-93ec-8b273fad24d6"
+            createdAt: "2026-08-03T07:38:40.015293Z"
+          -
+            slug: "release-2"
+            tagID: "3e2cb577-6554-4cfc-9567-df065d31b80d"
+            createdAt: "2026-08-03T07:40:20.014763Z"
+          -
+            slug: "release-3"
+            tagID: "4d1c3e58-b7f0-4041-a6c5-4722736af44e"
+            createdAt: "2026-08-03T10:34:30.940265Z"
+          -
+            slug: "release-4"
+            tagID: "d451b98d-2701-483c-b8dd-95ba949667ce"
+            createdAt: "2026-08-03T10:34:37.925818Z"
+          -
+            slug: "release-5"
+            tagID: "127a7392-7df6-45dc-ad0d-b38a1eb2a787"
+            createdAt: "2026-08-03T10:41:32.884225Z"
+          -
+            slug: "release-6"
+            tagID: "7409c79a-b385-497b-8dd8-2f859117c4d0"
+            createdAt: "2026-08-03T15:58:53.493896Z"
+          -
+            slug: "release-7"
+            tagID: "d42b1e1b-31d3-40d9-9232-0ed2d556f439"
+            createdAt: "2026-08-04T19:13:51.770096Z"
+          -
+            slug: "release-8"
+            tagID: "3ad2b4a6-9239-44fc-b522-290be705494a"
+            createdAt: "2026-08-05T05:32:07.687353Z"
+          -
+            slug: "release-9"
+            tagID: "7fc2055d-e422-461d-acf3-5375b4c413a1"
+            createdAt: "2026-08-05T14:57:36.889734Z"
+      -
+        space: "hx-cm-dev"
+        currentReleaseID: "5d071a8e-c5eb-45e3-bf7e-abfa11d3733e"
+        currentReleaseNum: 4
+        currentTagID: "dfd63815-b65a-4526-b7ca-428ded971c1b"
+        retainedTagCount: 4
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "baca23b5-f099-4ea7-9cf1-8310ba7fb372"
+            createdAt: "2026-08-03T08:34:19.888015Z"
+          -
+            slug: "release-2"
+            tagID: "4ddfdfb2-3025-42af-92bf-3a06cf5adf21"
+            createdAt: "2026-08-03T08:56:34.210384Z"
+          -
+            slug: "release-3"
+            tagID: "475ab726-0486-424e-8a69-fd4b451cddbc"
+            createdAt: "2026-08-03T09:32:29.234103Z"
+          -
+            slug: "release-4"
+            tagID: "dfd63815-b65a-4526-b7ca-428ded971c1b"
+            createdAt: "2026-08-04T17:58:50.078817Z"
+      -
+        space: "hx-cm-prod-a"
+        currentReleaseID: "777ab945-a734-4eb6-8958-6276af15e96b"
+        currentReleaseNum: 2
+        currentTagID: "6cc27c06-31eb-4e8a-a416-ff5c515df508"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "363de16f-0b44-4b5c-a541-0733269d3af1"
+            createdAt: "2026-08-03T10:34:48.320422Z"
+          -
+            slug: "release-2"
+            tagID: "6cc27c06-31eb-4e8a-a416-ff5c515df508"
+            createdAt: "2026-08-04T18:48:52.943926Z"
+      -
+        space: "hx-cm-prod-b"
+        currentReleaseID: "5aac0f3f-8332-47bb-8346-0aa9cdf2ad27"
+        currentReleaseNum: 2
+        currentTagID: "0e5e4751-a72f-4690-8f3f-8d3aedea194e"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "785b7d34-4ff2-4154-ada5-2cc8afba61e4"
+            createdAt: "2026-08-03T10:35:04.321235Z"
+          -
+            slug: "release-2"
+            tagID: "0e5e4751-a72f-4690-8f3f-8d3aedea194e"
+            createdAt: "2026-08-04T19:02:06.965684Z"
+      -
+        space: "hx-cm-staging"
+        currentReleaseID: "1dbdce54-ce63-4250-b33d-206c281dbf52"
+        currentReleaseNum: 2
+        currentTagID: "a898192f-1c0f-4759-95c7-eef6d52bb3c2"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "db587504-7bb1-4602-9e93-e0543744910f"
+            createdAt: "2026-08-03T10:34:33.257296Z"
+          -
+            slug: "release-2"
+            tagID: "a898192f-1c0f-4759-95c7-eef6d52bb3c2"
+            createdAt: "2026-08-04T19:13:54.534796Z"
+      -
+        space: "hx-cubbychat-dev"
+        currentReleaseID: "5a0b7482-7560-4954-96d9-a9a51511deda"
+        currentReleaseNum: 3
+        currentTagID: "a5f0a8b6-e484-4ed4-9db1-956a5e6828ea"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "20c32368-ebf0-471b-b10f-fb32c8f8602b"
+            createdAt: "2026-08-03T14:49:37.420549Z"
+          -
+            slug: "release-2"
+            tagID: "e8539303-345c-4ff0-9640-9293366b9ba5"
+            createdAt: "2026-08-05T16:52:09.215083Z"
+          -
+            slug: "release-3"
+            tagID: "a5f0a8b6-e484-4ed4-9db1-956a5e6828ea"
+            createdAt: "2026-08-06T08:28:49.626435Z"
+      -
+        space: "hx-cubbychat-prod-a"
+        currentReleaseID: "258aea03-6e8f-4a75-93ee-ea1902ba781b"
+        currentReleaseNum: 3
+        currentTagID: "cf573117-d812-4f75-83ce-e5ee0124d128"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "e2fb4ea3-d1f9-4d38-bf2e-b5ad6b5a88ec"
+            createdAt: "2026-08-03T15:58:57.426429Z"
+          -
+            slug: "release-2"
+            tagID: "90a2ceac-74b0-4025-8a10-842d070140ba"
+            createdAt: "2026-08-05T17:09:33.924542Z"
+          -
+            slug: "release-3"
+            tagID: "cf573117-d812-4f75-83ce-e5ee0124d128"
+            createdAt: "2026-08-06T08:29:43.074241Z"
+      -
+        space: "hx-cubbychat-prod-b"
+        currentReleaseID: "6b5dee2e-716c-4a5b-962f-e76d4a38f035"
+        currentReleaseNum: 3
+        currentTagID: "0d8cde49-5400-40a4-a8cd-645cea273393"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "2c111725-bdc0-46af-b6ac-4f8665c5c5ae"
+            createdAt: "2026-08-03T15:59:00.412638Z"
+          -
+            slug: "release-2"
+            tagID: "9bc1e2c1-9e86-4309-bc8f-81aebc2ef852"
+            createdAt: "2026-08-05T17:13:58.047761Z"
+          -
+            slug: "release-3"
+            tagID: "0d8cde49-5400-40a4-a8cd-645cea273393"
+            createdAt: "2026-08-06T08:30:12.323919Z"
+      -
+        space: "hx-cubbychat-staging"
+        currentReleaseID: "6a1d6257-e045-4e24-b449-bce4729ce735"
+        currentReleaseNum: 3
+        currentTagID: "2e578c24-2a1a-42b5-a5b5-1cc879991fff"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "ff66c43b-ee6d-4009-aa23-ce32be29cc82"
+            createdAt: "2026-08-03T15:58:54.4054Z"
+          -
+            slug: "release-2"
+            tagID: "f24af164-22ef-4650-807d-e46030128b1c"
+            createdAt: "2026-08-05T17:08:36.695687Z"
+          -
+            slug: "release-3"
+            tagID: "2e578c24-2a1a-42b5-a5b5-1cc879991fff"
+            createdAt: "2026-08-06T08:29:13.684694Z"
+      -
+        space: "hx-eso-dev"
+        currentReleaseID: "5c4e4041-e147-4776-8aed-e9e46311be9e"
+        currentReleaseNum: 3
+        currentTagID: "67f01cad-10d3-4eda-b60e-f06412fb62d9"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "b8e54e8e-c74a-4312-a34b-9eda54a36b20"
+            createdAt: "2026-08-03T21:42:31.152949Z"
+          -
+            slug: "release-2"
+            tagID: "36bc0bd3-83d2-4ebc-ac3f-c713b02a9f20"
+            createdAt: "2026-08-03T22:02:02.843104Z"
+          -
+            slug: "release-3"
+            tagID: "67f01cad-10d3-4eda-b60e-f06412fb62d9"
+            createdAt: "2026-08-04T19:16:09.512247Z"
+      -
+        space: "hx-eso-grafana-es-dev"
+        currentReleaseID: "b06a9444-7e63-46f2-8c7e-1a36e1b11b4e"
+        currentReleaseNum: 2
+        currentTagID: "d871d322-4d25-419d-9218-8ec31fa93fdb"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "7b9af7b0-aae1-4df0-af8b-841789d50496"
+            createdAt: "2026-08-03T21:50:24.201087Z"
+          -
+            slug: "release-2"
+            tagID: "d871d322-4d25-419d-9218-8ec31fa93fdb"
+            createdAt: "2026-08-04T20:47:46.200798Z"
+      -
+        space: "hx-eso-store-dev"
+        currentReleaseID: "fd1a9dea-2340-4557-9174-869b740f6eb2"
+        currentReleaseNum: 2
+        currentTagID: "23bf352c-78ef-43f4-bcca-55859967b7c6"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "772d9599-e3c3-4f49-b32b-9d15fd5ee663"
+            createdAt: "2026-08-03T21:49:36.684147Z"
+          -
+            slug: "release-2"
+            tagID: "23bf352c-78ef-43f4-bcca-55859967b7c6"
+            createdAt: "2026-08-04T19:16:15.624178Z"
+      -
+        space: "hx-homer-dev"
+        currentReleaseID: "5f858196-68f6-4e60-aca9-9b8785c4e1de"
+        currentReleaseNum: 3
+        currentTagID: "5a5036e8-c2ef-4401-8066-a8eaf167eea8"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "ac4599cd-b07f-44bd-865b-fca4f86f3c5f"
+            createdAt: "2026-08-03T14:41:14.921952Z"
+          -
+            slug: "release-2"
+            tagID: "b289b6bf-e3ab-428b-a9e2-b1dfd6372679"
+            createdAt: "2026-08-03T14:43:27.750531Z"
+          -
+            slug: "release-3"
+            tagID: "5a5036e8-c2ef-4401-8066-a8eaf167eea8"
+            createdAt: "2026-08-05T11:17:18.653786Z"
+      -
+        space: "hx-kps-crds-dev"
+        currentReleaseID: "bd6668d0-df72-43a6-b435-0c5930247cf7"
+        currentReleaseNum: 3
+        currentTagID: "21d06321-24c4-4a52-aa6b-6c0e78a7aca6"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "c0b7a400-ea79-419a-ac09-d5501ffe094a"
+            createdAt: "2026-08-03T14:58:59.719776Z"
+          -
+            slug: "release-2"
+            tagID: "65bd3bbc-7fdd-4d61-a9a1-fb3620e33220"
+            createdAt: "2026-08-03T15:16:59.990398Z"
+          -
+            slug: "release-3"
+            tagID: "21d06321-24c4-4a52-aa6b-6c0e78a7aca6"
+            createdAt: "2026-08-04T17:58:41.469058Z"
+      -
+        space: "hx-kps-main-dev"
+        currentReleaseID: "980f8060-9b18-4a22-91c3-0bf1641f0507"
+        currentReleaseNum: 2
+        currentTagID: "3cb0bd7d-0f2f-4122-8a0f-60e0f66dc9ec"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "e8c93160-ea8a-4012-84b7-43e381b96c8e"
+            createdAt: "2026-08-03T15:29:22.138338Z"
+          -
+            slug: "release-2"
+            tagID: "3cb0bd7d-0f2f-4122-8a0f-60e0f66dc9ec"
+            createdAt: "2026-08-04T20:48:16.895828Z"
+      -
+        space: "hx-metrics-dev"
+        currentReleaseID: "4c21868a-171d-4540-ad6d-192d7ee72571"
+        currentReleaseNum: 2
+        currentTagID: "f1b00157-c76a-496d-b9d0-08bc170bf8c3"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "78e540bf-1fa2-41c4-bc2f-7804e13c8966"
+            createdAt: "2026-08-03T14:41:06.915846Z"
+          -
+            slug: "release-2"
+            tagID: "f1b00157-c76a-496d-b9d0-08bc170bf8c3"
+            createdAt: "2026-08-05T06:22:51.213212Z"
+      -
+        space: "hx-traefik-dev"
+        currentReleaseID: "1ec76996-9277-476e-8693-d03fe2502276"
+        currentReleaseNum: 4
+        currentTagID: "f3f91a42-9c09-42f2-8fc9-b1f7cdd81d29"
+        retainedTagCount: 4
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "8c592bbf-258b-411d-8db8-07d8a10305bf"
+            createdAt: "2026-08-03T09:36:42.687156Z"
+          -
+            slug: "release-2"
+            tagID: "9928fb03-fb4e-4942-8494-798b14fe0f79"
+            createdAt: "2026-08-05T06:46:38.582573Z"
+          -
+            slug: "release-3"
+            tagID: "f7f2d023-6c49-4d73-93f5-180deb8f2b47"
+            createdAt: "2026-08-05T10:46:03.325988Z"
+          -
+            slug: "release-4"
+            tagID: "f3f91a42-9c09-42f2-8fc9-b1f7cdd81d29"
+            createdAt: "2026-08-05T14:59:40.900917Z"
+      -
+        space: "hx-traefik-prod-a"
+        currentReleaseID: "a6ebe517-671c-4e1b-820e-06150ed5c424"
+        currentReleaseNum: 3
+        currentTagID: "d1bd14af-0456-4760-b777-a8e58a860513"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "1e41181d-2810-4d2f-84c4-798514aeea6b"
+            createdAt: "2026-08-03T10:34:54.548478Z"
+          -
+            slug: "release-2"
+            tagID: "a249ff9f-4bbd-4efd-9b2f-618be59e1915"
+            createdAt: "2026-08-05T11:15:55.601301Z"
+          -
+            slug: "release-3"
+            tagID: "d1bd14af-0456-4760-b777-a8e58a860513"
+            createdAt: "2026-08-05T15:10:05.307093Z"
+      -
+        space: "hx-traefik-prod-b"
+        currentReleaseID: "8a27a050-792d-41c1-bea0-5ba78785c313"
+        currentReleaseNum: 3
+        currentTagID: "b599f028-ca3d-4c5e-9c62-b251d6d66f54"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "b3a25795-66ba-4af1-9260-d8440cfca728"
+            createdAt: "2026-08-03T10:35:10.71519Z"
+          -
+            slug: "release-2"
+            tagID: "c4aa3759-6bdf-4c8b-a129-f39a7674fb44"
+            createdAt: "2026-08-05T11:16:48.822763Z"
+          -
+            slug: "release-3"
+            tagID: "b599f028-ca3d-4c5e-9c62-b251d6d66f54"
+            createdAt: "2026-08-05T15:13:18.246743Z"
+      -
+        space: "hx-traefik-staging"
+        currentReleaseID: "3eed2ed4-72c6-4c21-abac-2b12445dc433"
+        currentReleaseNum: 4
+        currentTagID: "d2814933-7901-428d-b575-f817853fad63"
+        retainedTagCount: 4
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "68f8a472-f568-427a-892f-103e00949fbc"
+            createdAt: "2026-08-03T10:34:39.054615Z"
+          -
+            slug: "release-2"
+            tagID: "8bff28dd-d51a-4731-afbc-7571fb2324d7"
+            createdAt: "2026-08-05T07:12:28.59502Z"
+          -
+            slug: "release-3"
+            tagID: "993e87a7-2e0f-49dc-b23f-3a953599d2a4"
+            createdAt: "2026-08-05T11:15:23.662835Z"
+          -
+            slug: "release-4"
+            tagID: "d2814933-7901-428d-b575-f817853fad63"
+            createdAt: "2026-08-05T15:00:24.225285Z"
+      -
+        space: "hx-web-dev"
+        currentReleaseID: "897396f1-2e77-46d5-b791-fd747ba9ba6b"
+        currentReleaseNum: 8
+        currentTagID: "5b3a5c9b-3396-4547-9739-b6f008e45396"
+        retainedTagCount: 8
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "ce8b377b-9a2f-4129-8b3b-f399ef98b031"
+            createdAt: "2026-08-03T07:29:04.371534Z"
+          -
+            slug: "release-2"
+            tagID: "d540e3f6-6b2b-4ade-9d51-3927139ee398"
+            createdAt: "2026-08-03T07:35:52.454564Z"
+          -
+            slug: "release-3"
+            tagID: "5cd03ddd-1964-433f-9e48-6d21d25f8772"
+            createdAt: "2026-08-03T07:52:30.145238Z"
+          -
+            slug: "release-4"
+            tagID: "03de0e4e-1c3b-423a-a553-fc03aa638aca"
+            createdAt: "2026-08-03T08:05:30.792639Z"
+          -
+            slug: "release-5"
+            tagID: "aaa5c2b6-b474-49a2-8150-f6759f821116"
+            createdAt: "2026-08-03T12:22:09.754076Z"
+          -
+            slug: "release-6"
+            tagID: "99c3a0cc-7f76-4870-9c80-60aa7527beb4"
+            createdAt: "2026-08-05T15:32:48.488883Z"
+          -
+            slug: "release-7"
+            tagID: "c4cc820b-5ffe-46f2-b9f6-91559ba7764a"
+            createdAt: "2026-08-05T16:12:00.198149Z"
+          -
+            slug: "release-8"
+            tagID: "5b3a5c9b-3396-4547-9739-b6f008e45396"
+            createdAt: "2026-08-05T16:35:47.946589Z"
+      -
+        space: "hx-web-platform-dev"
+        currentReleaseID: "4dd4c2ec-f5cf-4000-b7db-7373d455975d"
+        currentReleaseNum: 3
+        currentTagID: "b3211165-6779-48cb-8343-eaa2956924a1"
+        retainedTagCount: 3
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "4f8ea174-eb56-4acd-b93b-e14d26c97fb2"
+            createdAt: "2026-08-03T09:38:08.68796Z"
+          -
+            slug: "release-2"
+            tagID: "20e97f9a-768e-44c4-b977-4a9621aefd45"
+            createdAt: "2026-08-05T17:14:50.194769Z"
+          -
+            slug: "release-3"
+            tagID: "b3211165-6779-48cb-8343-eaa2956924a1"
+            createdAt: "2026-08-05T19:20:04.870077Z"
+      -
+        space: "hx-web-platform-prod-a"
+        currentReleaseID: "3fef3fff-7c7f-4877-8139-123135edcd8b"
+        currentReleaseNum: 2
+        currentTagID: "ed094298-ce86-4ad0-876b-3b838cb89d30"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "1769ea0e-d366-40b6-ade5-71d912c213a7"
+            createdAt: "2026-08-03T10:41:36.651036Z"
+          -
+            slug: "release-2"
+            tagID: "ed094298-ce86-4ad0-876b-3b838cb89d30"
+            createdAt: "2026-08-05T17:15:51.937195Z"
+      -
+        space: "hx-web-platform-prod-b"
+        currentReleaseID: "ce6daab1-1f4c-4cd1-a3b6-b549594f7c11"
+        currentReleaseNum: 2
+        currentTagID: "ef5f2fdb-21b5-44c8-b381-353e8173205c"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "1f44c0d2-1beb-4ce5-89e0-77d4702d13fd"
+            createdAt: "2026-08-03T10:41:39.665996Z"
+          -
+            slug: "release-2"
+            tagID: "ef5f2fdb-21b5-44c8-b381-353e8173205c"
+            createdAt: "2026-08-05T17:16:25.878351Z"
+      -
+        space: "hx-web-platform-staging"
+        currentReleaseID: "2a27726c-5d7a-4e6c-943b-c969b30e86a0"
+        currentReleaseNum: 2
+        currentTagID: "db76aed9-0f2f-4c35-bb61-015d133d237e"
+        retainedTagCount: 2
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "cc28dc63-75ba-42f2-b5dc-51b495516523"
+            createdAt: "2026-08-03T10:41:33.80598Z"
+          -
+            slug: "release-2"
+            tagID: "db76aed9-0f2f-4c35-bb61-015d133d237e"
+            createdAt: "2026-08-05T17:15:20.063562Z"
+      -
+        space: "hx-web-prod-a"
+        currentReleaseID: "86371aba-0b66-491c-a920-4e24bbaae225"
+        currentReleaseNum: 7
+        currentTagID: "c7dee782-5f80-4a07-a17c-0e5e83d71744"
+        retainedTagCount: 7
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "4a47c5b5-e7b2-467c-9e16-678e1c9b9638"
+            createdAt: "2026-08-03T07:41:28.718472Z"
+          -
+            slug: "release-2"
+            tagID: "1f5456b6-3c37-4a55-bfa5-c0f3faf847e2"
+            createdAt: "2026-08-03T07:53:00.576278Z"
+          -
+            slug: "release-3"
+            tagID: "b29c3948-c480-4c90-98ff-883ab9bc3f97"
+            createdAt: "2026-08-03T07:53:49.628769Z"
+          -
+            slug: "release-4"
+            tagID: "c1341143-3315-409f-a91a-611948ac6d28"
+            createdAt: "2026-08-03T13:39:05.080306Z"
+          -
+            slug: "release-5"
+            tagID: "3bac510d-8e1e-4401-87d8-94dfb361690b"
+            createdAt: "2026-08-05T15:59:44.744596Z"
+          -
+            slug: "release-6"
+            tagID: "9ac79801-bced-420e-8e43-aa38547c2835"
+            createdAt: "2026-08-05T16:26:23.330185Z"
+          -
+            slug: "release-7"
+            tagID: "c7dee782-5f80-4a07-a17c-0e5e83d71744"
+            createdAt: "2026-08-05T16:30:56.053778Z"
+      -
+        space: "hx-web-prod-b"
+        currentReleaseID: "709a7b34-7759-4816-b391-c8bb64063e79"
+        currentReleaseNum: 6
+        currentTagID: "218902f4-2e68-4e18-aab0-771a39b1aa0c"
+        retainedTagCount: 6
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "5666f4ed-a52b-4905-9e19-005d4b77dfb9"
+            createdAt: "2026-08-03T07:49:10.513066Z"
+          -
+            slug: "release-2"
+            tagID: "1db518f5-ff7c-49a6-bd9c-2b9beea55d34"
+            createdAt: "2026-08-03T07:53:02.488941Z"
+          -
+            slug: "release-3"
+            tagID: "c1815498-2278-42ce-86d5-34ac48c797a9"
+            createdAt: "2026-08-03T13:49:06.363345Z"
+          -
+            slug: "release-4"
+            tagID: "f93ae4fc-274e-471c-8108-2c3025995a65"
+            createdAt: "2026-08-05T16:01:38.188841Z"
+          -
+            slug: "release-5"
+            tagID: "2d760656-e428-43f8-8e67-763841354457"
+            createdAt: "2026-08-05T16:28:01.631513Z"
+          -
+            slug: "release-6"
+            tagID: "218902f4-2e68-4e18-aab0-771a39b1aa0c"
+            createdAt: "2026-08-05T16:48:49.44897Z"
+      -
+        space: "hx-web-staging"
+        currentReleaseID: "db97164e-da18-4e08-8aba-390b8ef67340"
+        currentReleaseNum: 9
+        currentTagID: "04270e82-df06-4db5-a5c6-d3b52d0bddb7"
+        retainedTagCount: 9
+        contiguousFromOne: true
+        exactCurrentTag: true
+        tags:
+          -
+            slug: "release-1"
+            tagID: "c2715057-94a3-40e9-9885-0cdcdbf2cdef"
+            createdAt: "2026-08-03T07:40:21.209899Z"
+          -
+            slug: "release-2"
+            tagID: "f4495fd3-c9bd-4ba7-ad9b-cbd191ba0ae3"
+            createdAt: "2026-08-03T07:52:31.920328Z"
+          -
+            slug: "release-3"
+            tagID: "7d136803-acf0-4959-ba9d-4b45a686d363"
+            createdAt: "2026-08-03T08:04:26.866737Z"
+          -
+            slug: "release-4"
+            tagID: "5d558ded-5839-40af-89cd-e422ab5b22b0"
+            createdAt: "2026-08-03T08:05:32.601547Z"
+          -
+            slug: "release-5"
+            tagID: "74642af1-e991-4b72-8627-e3599c3ac783"
+            createdAt: "2026-08-03T12:22:11.605621Z"
+          -
+            slug: "release-6"
+            tagID: "e9ed3e4d-5989-4f76-b868-a848e8220f2c"
+            createdAt: "2026-08-05T15:57:54.105356Z"
+          -
+            slug: "release-7"
+            tagID: "2c6dbcff-80aa-4e6d-97bd-8c10ca00d425"
+            createdAt: "2026-08-05T16:14:06.550503Z"
+          -
+            slug: "release-8"
+            tagID: "889a6fe1-3169-4f03-bb0b-75509966c2ea"
+            createdAt: "2026-08-05T16:32:49.073351Z"
+          -
+            slug: "release-9"
+            tagID: "04270e82-df06-4db5-a5c6-d3b52d0bddb7"
+            createdAt: "2026-08-05T16:37:54.830659Z"
+    retainedTagCount: 148
+  argo:
+    applicationInventoryPolicy: "exact-plan-derived-allowlist"
+    deploymentAuthorityPolicy: "targetRevision-latest-is-discovery-only; automated-sync-absent; no-active-operation; no-ApplicationSet-regeneration; ConfigHub-revalidated-ManifestDigest-operation-under-Kubernetes-UID-resourceVersion-CAS"
+    argobotPolicy: "v0.1.6-kubernetes-hard-refresh-only; namespace-argocd; REST-sync-environment-absent"
+    requiresPruningPolicy: "zero"
+    applications:
+      -
+        cluster: "hx-app-dev"
+        name: "argobot-hx-app-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "argobot-hx-app-dev"
+        sourceUnit: "hx-app-dev-argo-apps/argobot-hx-app-dev"
+        expectedRevision: "sha256:0ba241ce5a99837a6d24d8bbc4086c79e4511b4622198353270bc6839d16b947"
+        observedRevision: "sha256:0ba241ce5a99837a6d24d8bbc4086c79e4511b4622198353270bc6839d16b947"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-app-dev-argo-apps"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-app-dev-argo-apps"
+        sourceUnit: "hx-app-dev-argo-apps/root"
+        expectedRevision: "sha256:32b80148b5e15a5721785eeb481b9147a23748ccec2b701ddfa1ea0a322de043"
+        observedRevision: "sha256:32b80148b5e15a5721785eeb481b9147a23748ccec2b701ddfa1ea0a322de043"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 14
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-cm-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cm-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-cm-dev"
+        expectedRevision: "sha256:2e0d50c5b6e233006aabaa4b73cdff53391cc497efca3500c6990441984da251"
+        observedRevision: "sha256:2e0d50c5b6e233006aabaa4b73cdff53391cc497efca3500c6990441984da251"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 50
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-cubbychat-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cubbychat-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-cubbychat-dev"
+        expectedRevision: "sha256:cda318aecd995e12fad48d036b9974ee14d91050f3aaf551643d9a1720507961"
+        observedRevision: "sha256:cda318aecd995e12fad48d036b9974ee14d91050f3aaf551643d9a1720507961"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 10
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-eso-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-eso-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-eso-dev"
+        expectedRevision: "sha256:2e6825dec9a6839d8f69a2d5c9d99be9b4f75c4d5d9fc4aa2ada30efcf55571d"
+        observedRevision: "sha256:2e6825dec9a6839d8f69a2d5c9d99be9b4f75c4d5d9fc4aa2ada30efcf55571d"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 50
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-eso-grafana-es-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-eso-grafana-es-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-eso-grafana-es-dev"
+        expectedRevision: "sha256:c06a17c8e869ae085c38c3668c56af387c2c9b44f6e608075d348d8a535f771c"
+        observedRevision: "sha256:c06a17c8e869ae085c38c3668c56af387c2c9b44f6e608075d348d8a535f771c"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 2
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-eso-store-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-eso-store-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-eso-store-dev"
+        expectedRevision: "sha256:8755fef589a5ee71b549d6a3ee848ec471fbf1b6c6df8f5b7aa4f60ab9e7711a"
+        observedRevision: "sha256:8755fef589a5ee71b549d6a3ee848ec471fbf1b6c6df8f5b7aa4f60ab9e7711a"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 1
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-homer-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-homer-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-homer-dev"
+        expectedRevision: "sha256:caa49b21bf81ef876108bf39a2847a2a7c2db53d1107ec9a8eadb350f5c5ae10"
+        observedRevision: "sha256:caa49b21bf81ef876108bf39a2847a2a7c2db53d1107ec9a8eadb350f5c5ae10"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 8
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-kps-crds-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-kps-crds-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-kps-crds-dev"
+        expectedRevision: "sha256:050f420f2ae55b2cee0ccfb97913db12f7e4640abb1e7b6b0a5f7257a3cc0f86"
+        observedRevision: "sha256:050f420f2ae55b2cee0ccfb97913db12f7e4640abb1e7b6b0a5f7257a3cc0f86"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Error"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 10
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-kps-main-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-kps-main-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-kps-main-dev"
+        expectedRevision: "sha256:c8fc5027f0564d058d1e339352b144472fe3210c2ba39f6e7dbb0250552a514a"
+        observedRevision: "sha256:c8fc5027f0564d058d1e339352b144472fe3210c2ba39f6e7dbb0250552a514a"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 104
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-metrics-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-metrics-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-metrics-dev"
+        expectedRevision: "sha256:5c9faf13ff05c6b5a0e269ff4b68006c87c10fbe86cd5c1236897780ebed34a0"
+        observedRevision: "sha256:5c9faf13ff05c6b5a0e269ff4b68006c87c10fbe86cd5c1236897780ebed34a0"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Failed"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 10
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-traefik-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-traefik-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-traefik-dev"
+        expectedRevision: "sha256:7ab1ce5e6acf3381ffdad16a5afb5db7c9818b630bf6004b008a7581ce8f5fc4"
+        observedRevision: "sha256:7ab1ce5e6acf3381ffdad16a5afb5db7c9818b630bf6004b008a7581ce8f5fc4"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 33
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-web-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-web-dev"
+        expectedRevision: "sha256:e44f4071816e30e98b563fedbd96e0fb5784d293c73c7e2b4562ce6df8d8000f"
+        observedRevision: "sha256:e44f4071816e30e98b563fedbd96e0fb5784d293c73c7e2b4562ce6df8d8000f"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 3
+        requiresPruning: 0
+      -
+        cluster: "hx-app-dev"
+        name: "hx-web-platform-dev"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-platform-dev"
+        sourceUnit: "hx-app-dev-argo-apps/hx-web-platform-dev"
+        expectedRevision: "sha256:00d2ea5fe48835d8a9d5f325e09687a149d937c39fcd2c437593766bb751762a"
+        observedRevision: "sha256:00d2ea5fe48835d8a9d5f325e09687a149d937c39fcd2c437593766bb751762a"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 2
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "argobot-hx-app-prod-a"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "argobot-hx-app-prod-a"
+        sourceUnit: "hx-app-prod-a-argo-apps/argobot-hx-app-prod-a"
+        expectedRevision: "sha256:741815e526c5351d5016056697c786278a21d3899001f8caa6378532d03dd6aa"
+        observedRevision: "sha256:741815e526c5351d5016056697c786278a21d3899001f8caa6378532d03dd6aa"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "hx-app-prod-a-argo-apps"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-app-prod-a-argo-apps"
+        sourceUnit: "hx-app-prod-a-argo-apps/root"
+        expectedRevision: "sha256:4609fdf15d4b086f222bcf6f825fe3ce7b9b7900683adc6f4c04c441bf0cf38a"
+        observedRevision: "sha256:4609fdf15d4b086f222bcf6f825fe3ce7b9b7900683adc6f4c04c441bf0cf38a"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "hx-cm-prod-a"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cm-prod-a"
+        sourceUnit: "hx-app-prod-a-argo-apps/hx-cm-prod-a"
+        expectedRevision: "sha256:cabd665438d96ed200c9bb961bdc30978e5b8b4d4d20a6d03535fe34fca718b0"
+        observedRevision: "sha256:cabd665438d96ed200c9bb961bdc30978e5b8b4d4d20a6d03535fe34fca718b0"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 48
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "hx-cubbychat-prod-a"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cubbychat-prod-a"
+        sourceUnit: "hx-app-prod-a-argo-apps/hx-cubbychat-prod-a"
+        expectedRevision: "sha256:49d2ee594dc2b4fac79efb3c9408df60b8b6ac5e928884ab96b75e0d21484e8a"
+        observedRevision: "sha256:49d2ee594dc2b4fac79efb3c9408df60b8b6ac5e928884ab96b75e0d21484e8a"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 10
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "hx-traefik-prod-a"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-traefik-prod-a"
+        sourceUnit: "hx-app-prod-a-argo-apps/hx-traefik-prod-a"
+        expectedRevision: "sha256:f72f143f7850b03e76892230a81d566edca44d707c9b6a6d857a625559c7aa50"
+        observedRevision: "sha256:f72f143f7850b03e76892230a81d566edca44d707c9b6a6d857a625559c7aa50"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 32
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "hx-web-platform-prod-a"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-platform-prod-a"
+        sourceUnit: "hx-app-prod-a-argo-apps/hx-web-platform-prod-a"
+        expectedRevision: "sha256:aa4d22f6fb66a3b74dd8fca638db8c0613c4b92974bae7bc36de148136674323"
+        observedRevision: "sha256:aa4d22f6fb66a3b74dd8fca638db8c0613c4b92974bae7bc36de148136674323"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 2
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-a"
+        name: "hx-web-prod-a"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-prod-a"
+        sourceUnit: "hx-app-prod-a-argo-apps/hx-web-prod-a"
+        expectedRevision: "sha256:23e0d4db7ada2fc37b3e4c7e945e41a9f1071f067a4c3b99842099fb1aa28c48"
+        observedRevision: "sha256:23e0d4db7ada2fc37b3e4c7e945e41a9f1071f067a4c3b99842099fb1aa28c48"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 3
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "argobot-hx-app-prod-b"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "argobot-hx-app-prod-b"
+        sourceUnit: "hx-app-prod-b-argo-apps/argobot-hx-app-prod-b"
+        expectedRevision: "sha256:d21c082f5bd85ebc6af90f880cb0395379fe76967b9206edca7534596a5dd26d"
+        observedRevision: "sha256:d21c082f5bd85ebc6af90f880cb0395379fe76967b9206edca7534596a5dd26d"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "hx-app-prod-b-argo-apps"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-app-prod-b-argo-apps"
+        sourceUnit: "hx-app-prod-b-argo-apps/root"
+        expectedRevision: "sha256:eeab55039c5b10891bb5040217bc1795f792887068d6dc91876dc58a5bb4b3c4"
+        observedRevision: "sha256:eeab55039c5b10891bb5040217bc1795f792887068d6dc91876dc58a5bb4b3c4"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "hx-cm-prod-b"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cm-prod-b"
+        sourceUnit: "hx-app-prod-b-argo-apps/hx-cm-prod-b"
+        expectedRevision: "sha256:e32682d356a5e244d233c6d259bbf0830156cd8449cd701fe82ed7e7afe0192e"
+        observedRevision: "sha256:e32682d356a5e244d233c6d259bbf0830156cd8449cd701fe82ed7e7afe0192e"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 48
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "hx-cubbychat-prod-b"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cubbychat-prod-b"
+        sourceUnit: "hx-app-prod-b-argo-apps/hx-cubbychat-prod-b"
+        expectedRevision: "sha256:09135166bd373e4d7950a0740eff7ddbf31a4cb7eb438a09fed041e6891edfad"
+        observedRevision: "sha256:09135166bd373e4d7950a0740eff7ddbf31a4cb7eb438a09fed041e6891edfad"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 10
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "hx-traefik-prod-b"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-traefik-prod-b"
+        sourceUnit: "hx-app-prod-b-argo-apps/hx-traefik-prod-b"
+        expectedRevision: "sha256:1ab358364c425bf70f01422474279b495432807251b4078e8f3569d9a3b4b82c"
+        observedRevision: "sha256:1ab358364c425bf70f01422474279b495432807251b4078e8f3569d9a3b4b82c"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 32
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "hx-web-platform-prod-b"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-platform-prod-b"
+        sourceUnit: "hx-app-prod-b-argo-apps/hx-web-platform-prod-b"
+        expectedRevision: "sha256:c0f9f9539c5d5f268242ff3bdf40f9a0b93d386081a8e40c0d7f12616dd39dff"
+        observedRevision: "sha256:c0f9f9539c5d5f268242ff3bdf40f9a0b93d386081a8e40c0d7f12616dd39dff"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 2
+        requiresPruning: 0
+      -
+        cluster: "hx-app-prod-b"
+        name: "hx-web-prod-b"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-prod-b"
+        sourceUnit: "hx-app-prod-b-argo-apps/hx-web-prod-b"
+        expectedRevision: "sha256:df7faec7a7dcf930dd4d425b9a82ab8ac6b9df660fd5ad94b75f139d88967424"
+        observedRevision: "sha256:df7faec7a7dcf930dd4d425b9a82ab8ac6b9df660fd5ad94b75f139d88967424"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 3
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "argobot-hx-app-staging"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "argobot-hx-app-staging"
+        sourceUnit: "hx-app-staging-argo-apps/argobot-hx-app-staging"
+        expectedRevision: "sha256:66307b8eb1b7f6ec680a8c50f37b6d963a23d5050a7ef7c189e4c390f365fa3c"
+        observedRevision: "sha256:66307b8eb1b7f6ec680a8c50f37b6d963a23d5050a7ef7c189e4c390f365fa3c"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "hx-app-staging-argo-apps"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-app-staging-argo-apps"
+        sourceUnit: "hx-app-staging-argo-apps/root"
+        expectedRevision: "sha256:38100655738b0d4f9b3b63c8e2635a13865520db0f089204ac5d352b1a9fff0e"
+        observedRevision: "sha256:38100655738b0d4f9b3b63c8e2635a13865520db0f089204ac5d352b1a9fff0e"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 7
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "hx-cm-staging"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cm-staging"
+        sourceUnit: "hx-app-staging-argo-apps/hx-cm-staging"
+        expectedRevision: "sha256:d60b237d6cda6886a3c908bbba62d587e1fa7695f9500bb723a5dbc24e969b90"
+        observedRevision: "sha256:d60b237d6cda6886a3c908bbba62d587e1fa7695f9500bb723a5dbc24e969b90"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 48
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "hx-cubbychat-staging"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-cubbychat-staging"
+        sourceUnit: "hx-app-staging-argo-apps/hx-cubbychat-staging"
+        expectedRevision: "sha256:b9d06e8aa028134c2b6ad237db74a4c01bbdb79c5dacc79b8e3a6a40dab3aba2"
+        observedRevision: "sha256:b9d06e8aa028134c2b6ad237db74a4c01bbdb79c5dacc79b8e3a6a40dab3aba2"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 10
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "hx-traefik-staging"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-traefik-staging"
+        sourceUnit: "hx-app-staging-argo-apps/hx-traefik-staging"
+        expectedRevision: "sha256:49014d44a9dc2f0b075b91779ca2850831dd193646c71d680282b3a9188f4bc3"
+        observedRevision: "sha256:49014d44a9dc2f0b075b91779ca2850831dd193646c71d680282b3a9188f4bc3"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 32
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "hx-web-platform-staging"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-platform-staging"
+        sourceUnit: "hx-app-staging-argo-apps/hx-web-platform-staging"
+        expectedRevision: "sha256:74aed764f889c55a8fc2df3ddb693ba3322626e5f9eb44170c4680c58a69f810"
+        observedRevision: "sha256:74aed764f889c55a8fc2df3ddb693ba3322626e5f9eb44170c4680c58a69f810"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 2
+        requiresPruning: 0
+      -
+        cluster: "hx-app-staging"
+        name: "hx-web-staging"
+        kind: "configHub-delivery-unit"
+        sourceSpace: "hx-web-staging"
+        sourceUnit: "hx-app-staging-argo-apps/hx-web-staging"
+        expectedRevision: "sha256:6397b2aac57e2c0965e5cd26ff7f82243a4f0aef440a14b9a003f9cd99fe013c"
+        observedRevision: "sha256:6397b2aac57e2c0965e5cd26ff7f82243a4f0aef440a14b9a003f9cd99fe013c"
+        targetRevision: "latest"
+        automatedSyncDisabled: true
+        applicationSetOwnerAbsent: true
+        activeOperation: false
+        operationPhase: "Succeeded"
+        syncSubmissionAuthority: "ConfigHub-revalidated-ManifestDigest-Kubernetes-UID-resourceVersion-CAS"
+        sync: "Synced"
+        health: "Healthy"
+        trackedResources: 3
+        requiresPruning: 0
+    argobotAuthority:
+      -
+        cluster: "hx-app-dev"
+        version: "v0.1.6"
+        deployment:
+          uid: "90c2b53f-cc91-4401-914a-1098d560c08c"
+          generation: 1
+          replicas: 1
+          selectorExact: true
+          rolloutCurrent: true
+          image: "ghcr.io/confighub/argobot:v0.1.6"
+          syncMode: "kubernetes"
+          applicationNamespace: "argocd"
+          refreshType: "hard"
+          restSyncEnvironmentAbsent: true
+          commandOverrideAbsent: true
+          oneContainerNoInit: true
+          duplicateEnvironmentAbsent: true
+        pods:
+          -
+            name: "argobot-fffdfd4f-wkwrb"
+            uid: "9f17a0e3-ac76-4956-a843-0fb46bda6430"
+            runningReady: true
+            image: "ghcr.io/confighub/argobot:v0.1.6"
+            syncMode: "kubernetes"
+            applicationNamespace: "argocd"
+            refreshType: "hard"
+            restSyncEnvironmentAbsent: true
+            commandOverrideAbsent: true
+            oneContainerNoInit: true
+            duplicateEnvironmentAbsent: true
+      -
+        cluster: "hx-app-prod-a"
+        version: "v0.1.6"
+        deployment:
+          uid: "992aaf32-a968-46ec-9cb8-2f13e3824787"
+          generation: 1
+          replicas: 1
+          selectorExact: true
+          rolloutCurrent: true
+          image: "ghcr.io/confighub/argobot:v0.1.6"
+          syncMode: "kubernetes"
+          applicationNamespace: "argocd"
+          refreshType: "hard"
+          restSyncEnvironmentAbsent: true
+          commandOverrideAbsent: true
+          oneContainerNoInit: true
+          duplicateEnvironmentAbsent: true
+        pods:
+          -
+            name: "argobot-fffdfd4f-vjz5m"
+            uid: "75cf48a0-5368-4b92-97b3-3859ff495b10"
+            runningReady: true
+            image: "ghcr.io/confighub/argobot:v0.1.6"
+            syncMode: "kubernetes"
+            applicationNamespace: "argocd"
+            refreshType: "hard"
+            restSyncEnvironmentAbsent: true
+            commandOverrideAbsent: true
+            oneContainerNoInit: true
+            duplicateEnvironmentAbsent: true
+      -
+        cluster: "hx-app-prod-b"
+        version: "v0.1.6"
+        deployment:
+          uid: "b64443cb-0698-4220-b150-f914ee70d9eb"
+          generation: 1
+          replicas: 1
+          selectorExact: true
+          rolloutCurrent: true
+          image: "ghcr.io/confighub/argobot:v0.1.6"
+          syncMode: "kubernetes"
+          applicationNamespace: "argocd"
+          refreshType: "hard"
+          restSyncEnvironmentAbsent: true
+          commandOverrideAbsent: true
+          oneContainerNoInit: true
+          duplicateEnvironmentAbsent: true
+        pods:
+          -
+            name: "argobot-fffdfd4f-nz262"
+            uid: "75d1e701-5496-499d-b49f-a0a727421625"
+            runningReady: true
+            image: "ghcr.io/confighub/argobot:v0.1.6"
+            syncMode: "kubernetes"
+            applicationNamespace: "argocd"
+            refreshType: "hard"
+            restSyncEnvironmentAbsent: true
+            commandOverrideAbsent: true
+            oneContainerNoInit: true
+            duplicateEnvironmentAbsent: true
+      -
+        cluster: "hx-app-staging"
+        version: "v0.1.6"
+        deployment:
+          uid: "e40f83c5-71cc-4278-8d43-4febfbc80cd4"
+          generation: 1
+          replicas: 1
+          selectorExact: true
+          rolloutCurrent: true
+          image: "ghcr.io/confighub/argobot:v0.1.6"
+          syncMode: "kubernetes"
+          applicationNamespace: "argocd"
+          refreshType: "hard"
+          restSyncEnvironmentAbsent: true
+          commandOverrideAbsent: true
+          oneContainerNoInit: true
+          duplicateEnvironmentAbsent: true
+        pods:
+          -
+            name: "argobot-fffdfd4f-blhds"
+            uid: "0bf8ed6d-f640-4c39-8909-7c47c322c6fb"
+            runningReady: true
+            image: "ghcr.io/confighub/argobot:v0.1.6"
+            syncMode: "kubernetes"
+            applicationNamespace: "argocd"
+            refreshType: "hard"
+            restSyncEnvironmentAbsent: true
+            commandOverrideAbsent: true
+            oneContainerNoInit: true
+            duplicateEnvironmentAbsent: true
+    applicationSets:
+      -
+        cluster: "hx-app-dev"
+        count: 0
+        refs:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        count: 0
+        refs:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        count: 0
+        refs:
+          []
+      -
+        cluster: "hx-app-staging"
+        count: 0
+        refs:
+          []
+  durableWorkloads:
+    policy: "classify every Deployment, StatefulSet, DaemonSet, CronJob and Job as exact Argo desired, exact bootstrap, or UID-bound directly owned by a current Argo desired root"
+    danglingTrackingPolicy: "tracking-id-must-identify-the-exact-workload-or-one-exact-controller-owner-in-the-same-expected-Application-status"
+    resourceTypes:
+      - "deployments.apps"
+      - "statefulsets.apps"
+      - "daemonsets.apps"
+      - "cronjobs.batch"
+      - "jobs.batch"
+    bootstrapVersion:
+      argoCD: "v3.4.6"
+      image: "quay.io/argoproj/argocd:v3.4.6"
+    argoDesiredRootCount: 631
+    expectedBootstrapPerCluster: 11
+    expectedBootstrapTotal: 44
+    missingBootstrap:
+      []
+    classifications:
+      argo-status-desired: 46
+      bootstrap-baseline: 44
+      generated-by-argo-desired-root: 2
+    observedCount: 92
+    unclassifiedCount: 0
+    danglingTrackedCount: 0
+    rows:
+      -
+        cluster: "hx-app-dev"
+        key: "apps/DaemonSet/kube-prometheus-stack/kube-prometheus-stack-prometheus-node-exporter"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-prometheus-stack"
+        name: "kube-prometheus-stack-prometheus-node-exporter"
+        uid: "2718b0b1-643b-4dc1-acb9-4bfeec78064a"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:apps/DaemonSet:kube-prometheus-stack/kube-prometheus-stack-prometheus-node-exporter"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "apps/DaemonSet/kube-prometheus-stack/kube-prometheus-stack-prometheus-node-exporter"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/DaemonSet/kube-system/kindnet"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kindnet"
+        uid: "b429c36f-2d54-43e2-a2c1-21334b6251a2"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-network"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/DaemonSet/kube-system/kube-proxy"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kube-proxy"
+        uid: "1b236bb5-6b9a-46ea-9b3d-874dc9ef41bc"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-network-proxy"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argobot/argobot"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argobot"
+        name: "argobot"
+        uid: "90c2b53f-cc91-4401-914a-1098d560c08c"
+        classification: "argo-status-desired"
+        applications:
+          - "argobot-hx-app-dev"
+        trackingID: "argobot-hx-app-dev:apps/Deployment:argobot/argobot"
+        trackingIdentity:
+          application: "argobot-hx-app-dev"
+          key: "apps/Deployment/argobot/argobot"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argocd/argocd-applicationset-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-applicationset-controller"
+        uid: "f77bdb14-2d28-4226-85f9-0a2c79f51f03"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argocd/argocd-dex-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-dex-server"
+        uid: "40dcc857-c58a-4266-becc-48ef580bfbe3"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argocd/argocd-notifications-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-notifications-controller"
+        uid: "4fe7b450-d829-4658-a6f8-cf76ef2136cb"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argocd/argocd-redis"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-redis"
+        uid: "d6f53872-a980-40fe-92a8-8a6eb08ed00f"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argocd/argocd-repo-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-repo-server"
+        uid: "a56ff73e-bf57-4b41-a8c8-f912c61cae1b"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/argocd/argocd-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-server"
+        uid: "043288dc-3ff2-41e8-ab6f-317789439404"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/cert-manager/cert-manager"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager"
+        uid: "9c1cf2a5-cbf8-4086-885f-286d3d805840"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-dev"
+        trackingID: "hx-cm-dev:apps/Deployment:cert-manager/cert-manager"
+        trackingIdentity:
+          application: "hx-cm-dev"
+          key: "apps/Deployment/cert-manager/cert-manager"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-cainjector"
+        uid: "f2eb960e-8f88-4cad-ae12-8e47894520dd"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-dev"
+        trackingID: "hx-cm-dev:apps/Deployment:cert-manager/cert-manager-cainjector"
+        trackingIdentity:
+          application: "hx-cm-dev"
+          key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-webhook"
+        uid: "5423e24c-fa8e-4373-a2e0-3069257c48d9"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-dev"
+        trackingID: "hx-cm-dev:apps/Deployment:cert-manager/cert-manager-webhook"
+        trackingIdentity:
+          application: "hx-cm-dev"
+          key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/cubbychat/backend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "backend"
+        uid: "53d98dbc-eec4-4011-b4da-a95998718c33"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-dev"
+        trackingID: "hx-cubbychat-dev:apps/Deployment:cubbychat/backend"
+        trackingIdentity:
+          application: "hx-cubbychat-dev"
+          key: "apps/Deployment/cubbychat/backend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/cubbychat/frontend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "frontend"
+        uid: "09de0b4d-8bb1-4569-aa45-86915d057f49"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-dev"
+        trackingID: "hx-cubbychat-dev:apps/Deployment:cubbychat/frontend"
+        trackingIdentity:
+          application: "hx-cubbychat-dev"
+          key: "apps/Deployment/cubbychat/frontend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/external-secrets/external-secrets"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "external-secrets"
+        name: "external-secrets"
+        uid: "abf24dbd-7259-4a47-acbb-696bbb0bd863"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-eso-dev"
+        trackingID: "hx-eso-dev:apps/Deployment:external-secrets/external-secrets"
+        trackingIdentity:
+          application: "hx-eso-dev"
+          key: "apps/Deployment/external-secrets/external-secrets"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/external-secrets/external-secrets-cert-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "external-secrets"
+        name: "external-secrets-cert-controller"
+        uid: "689bc8de-fef9-4e81-9c69-d1ec10d5fbb1"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-eso-dev"
+        trackingID: "hx-eso-dev:apps/Deployment:external-secrets/external-secrets-cert-controller"
+        trackingIdentity:
+          application: "hx-eso-dev"
+          key: "apps/Deployment/external-secrets/external-secrets-cert-controller"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/external-secrets/external-secrets-webhook"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "external-secrets"
+        name: "external-secrets-webhook"
+        uid: "22406092-5955-47f2-befc-0dcc0797c940"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-eso-dev"
+        trackingID: "hx-eso-dev:apps/Deployment:external-secrets/external-secrets-webhook"
+        trackingIdentity:
+          application: "hx-eso-dev"
+          key: "apps/Deployment/external-secrets/external-secrets-webhook"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/homer-dashboard/homer-dashboard"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "homer-dashboard"
+        name: "homer-dashboard"
+        uid: "9f6facad-df25-4e1b-9f00-8a6d80053c61"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-homer-dev"
+        trackingID: "hx-homer-dev:apps/Deployment:homer-dashboard/homer-dashboard"
+        trackingIdentity:
+          application: "hx-homer-dev"
+          key: "apps/Deployment/homer-dashboard/homer-dashboard"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/hx-web/hx-web"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "hx-web"
+        name: "hx-web"
+        uid: "3eaf7c40-0aad-4539-b065-89dc844a83ff"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-web-dev"
+        trackingID: "hx-web-dev:apps/Deployment:hx-web/hx-web"
+        trackingIdentity:
+          application: "hx-web-dev"
+          key: "apps/Deployment/hx-web/hx-web"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-grafana"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-prometheus-stack"
+        name: "kube-prometheus-stack-grafana"
+        uid: "7cbe046d-83e8-43b9-8138-10971d07e459"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:apps/Deployment:kube-prometheus-stack/kube-prometheus-stack-grafana"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-grafana"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-kube-state-metrics"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-prometheus-stack"
+        name: "kube-prometheus-stack-kube-state-metrics"
+        uid: "aabeb333-57ea-44cc-ae3e-5c3e1f5fb91f"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:apps/Deployment:kube-prometheus-stack/kube-prometheus-stack-kube-state-metrics"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-kube-state-metrics"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-operator"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-prometheus-stack"
+        name: "kube-prometheus-stack-operator"
+        uid: "4f0db3ab-f2f2-473c-abc0-60e2f83f4c27"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:apps/Deployment:kube-prometheus-stack/kube-prometheus-stack-operator"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-operator"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-prometheus-blackbox-exporter"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-prometheus-stack"
+        name: "kube-prometheus-stack-prometheus-blackbox-exporter"
+        uid: "8fb36f33-c672-4bfc-a7a5-b7f25227815f"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:apps/Deployment:kube-prometheus-stack/kube-prometheus-stack-prometheus-blackbox-exporter"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "apps/Deployment/kube-prometheus-stack/kube-prometheus-stack-prometheus-blackbox-exporter"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/kube-system/coredns"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-system"
+        name: "coredns"
+        uid: "cae6864d-41fa-4b8f-bd07-4f81ead981f7"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-dns"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/local-path-storage/local-path-provisioner"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "local-path-storage"
+        name: "local-path-provisioner"
+        uid: "a9d4fc89-993b-44ef-9f63-9168468d1d85"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-storage"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/metrics-server/metrics-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "metrics-server"
+        name: "metrics-server"
+        uid: "5c6a5b90-e62d-4e98-8d8c-63cade7872a9"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-metrics-dev"
+        trackingID: "hx-metrics-dev:apps/Deployment:metrics-server/metrics-server"
+        trackingIdentity:
+          application: "hx-metrics-dev"
+          key: "apps/Deployment/metrics-server/metrics-server"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/Deployment/traefik/traefik"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "traefik"
+        name: "traefik"
+        uid: "e5c1e45d-8d21-486c-881f-1d2cf0f30cd5"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-traefik-dev"
+        trackingID: "hx-traefik-dev:apps/Deployment:traefik/traefik"
+        trackingIdentity:
+          application: "hx-traefik-dev"
+          key: "apps/Deployment/traefik/traefik"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/StatefulSet/argocd/argocd-application-controller"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "argocd"
+        name: "argocd-application-controller"
+        uid: "68255143-95a0-4e8b-bf03-5bea335cfc17"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/StatefulSet/cubbychat/postgres"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "cubbychat"
+        name: "postgres"
+        uid: "e963fc1e-a918-403d-adaf-c12b203887df"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-dev"
+        trackingID: "hx-cubbychat-dev:apps/StatefulSet:cubbychat/postgres"
+        trackingIdentity:
+          application: "hx-cubbychat-dev"
+          key: "apps/StatefulSet/cubbychat/postgres"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-dev"
+        key: "apps/StatefulSet/kube-prometheus-stack/alertmanager-kube-prometheus-stack-alertmanager"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "kube-prometheus-stack"
+        name: "alertmanager-kube-prometheus-stack-alertmanager"
+        uid: "c0174a06-4f46-4455-bedb-38a199a755cd"
+        classification: "generated-by-argo-desired-root"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:monitoring.coreos.com/Alertmanager:kube-prometheus-stack/kube-prometheus-stack-alertmanager"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "monitoring.coreos.com/Alertmanager/kube-prometheus-stack/kube-prometheus-stack-alertmanager"
+        inheritedTrackingFromDesiredOwner: true
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          -
+            key: "monitoring.coreos.com/Alertmanager/kube-prometheus-stack/kube-prometheus-stack-alertmanager"
+            applications:
+              - "hx-kps-main-dev"
+            controller: true
+            uid: "82c93d1c-12f9-4aa4-8e21-4e9758d1a40d"
+            liveUID: "82c93d1c-12f9-4aa4-8e21-4e9758d1a40d"
+        desiredControllerOwnerRoots:
+          -
+            key: "monitoring.coreos.com/Alertmanager/kube-prometheus-stack/kube-prometheus-stack-alertmanager"
+            applications:
+              - "hx-kps-main-dev"
+            controller: true
+            uid: "82c93d1c-12f9-4aa4-8e21-4e9758d1a40d"
+            liveUID: "82c93d1c-12f9-4aa4-8e21-4e9758d1a40d"
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          -
+            apiVersion: "monitoring.coreos.com/v1"
+            kind: "Alertmanager"
+            namespace: "kube-prometheus-stack"
+            name: "kube-prometheus-stack-alertmanager"
+            uid: "82c93d1c-12f9-4aa4-8e21-4e9758d1a40d"
+            controller: true
+            key: "monitoring.coreos.com/Alertmanager/kube-prometheus-stack/kube-prometheus-stack-alertmanager"
+      -
+        cluster: "hx-app-dev"
+        key: "apps/StatefulSet/kube-prometheus-stack/prometheus-kube-prometheus-stack-prometheus"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "kube-prometheus-stack"
+        name: "prometheus-kube-prometheus-stack-prometheus"
+        uid: "7ebeed6b-a228-4822-8594-f3e899e38816"
+        classification: "generated-by-argo-desired-root"
+        applications:
+          - "hx-kps-main-dev"
+        trackingID: "hx-kps-main-dev:monitoring.coreos.com/Prometheus:kube-prometheus-stack/kube-prometheus-stack-prometheus"
+        trackingIdentity:
+          application: "hx-kps-main-dev"
+          key: "monitoring.coreos.com/Prometheus/kube-prometheus-stack/kube-prometheus-stack-prometheus"
+        inheritedTrackingFromDesiredOwner: true
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          -
+            key: "monitoring.coreos.com/Prometheus/kube-prometheus-stack/kube-prometheus-stack-prometheus"
+            applications:
+              - "hx-kps-main-dev"
+            controller: true
+            uid: "16f2ae5e-12d6-4f15-b0f5-798152aea0fa"
+            liveUID: "16f2ae5e-12d6-4f15-b0f5-798152aea0fa"
+        desiredControllerOwnerRoots:
+          -
+            key: "monitoring.coreos.com/Prometheus/kube-prometheus-stack/kube-prometheus-stack-prometheus"
+            applications:
+              - "hx-kps-main-dev"
+            controller: true
+            uid: "16f2ae5e-12d6-4f15-b0f5-798152aea0fa"
+            liveUID: "16f2ae5e-12d6-4f15-b0f5-798152aea0fa"
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          -
+            apiVersion: "monitoring.coreos.com/v1"
+            kind: "Prometheus"
+            namespace: "kube-prometheus-stack"
+            name: "kube-prometheus-stack-prometheus"
+            uid: "16f2ae5e-12d6-4f15-b0f5-798152aea0fa"
+            controller: true
+            key: "monitoring.coreos.com/Prometheus/kube-prometheus-stack/kube-prometheus-stack-prometheus"
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/DaemonSet/kube-system/kindnet"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kindnet"
+        uid: "f0b4bbb7-b43a-467b-81e9-cf6efa5e32cd"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-network"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/DaemonSet/kube-system/kube-proxy"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kube-proxy"
+        uid: "637f18f8-4634-4ed6-81f3-1bf4e87c7cfe"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-network-proxy"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argobot/argobot"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argobot"
+        name: "argobot"
+        uid: "992aaf32-a968-46ec-9cb8-2f13e3824787"
+        classification: "argo-status-desired"
+        applications:
+          - "argobot-hx-app-prod-a"
+        trackingID: "argobot-hx-app-prod-a:apps/Deployment:argobot/argobot"
+        trackingIdentity:
+          application: "argobot-hx-app-prod-a"
+          key: "apps/Deployment/argobot/argobot"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argocd/argocd-applicationset-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-applicationset-controller"
+        uid: "904c3466-5886-4fc0-acc0-01be4c8f0d80"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argocd/argocd-dex-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-dex-server"
+        uid: "8d6048a2-68d0-4587-b7d2-a53c0958e552"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argocd/argocd-notifications-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-notifications-controller"
+        uid: "7b808ffd-ea68-4d4a-8959-58a760c3feb4"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argocd/argocd-redis"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-redis"
+        uid: "663b15c4-b516-41d7-b685-44b1033918c7"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argocd/argocd-repo-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-repo-server"
+        uid: "99bef4ce-e180-43d4-9164-ef5d60f2a85a"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/argocd/argocd-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-server"
+        uid: "2258b58e-a2a0-4dbe-8c38-d8d2d570c0c0"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/cert-manager/cert-manager"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager"
+        uid: "b40239d6-175f-4715-b9fc-e81aecadb26b"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-prod-a"
+        trackingID: "hx-cm-prod-a:apps/Deployment:cert-manager/cert-manager"
+        trackingIdentity:
+          application: "hx-cm-prod-a"
+          key: "apps/Deployment/cert-manager/cert-manager"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-cainjector"
+        uid: "e911cca6-88a0-4ff2-873d-0caedcbe4fff"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-prod-a"
+        trackingID: "hx-cm-prod-a:apps/Deployment:cert-manager/cert-manager-cainjector"
+        trackingIdentity:
+          application: "hx-cm-prod-a"
+          key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-webhook"
+        uid: "123dc133-dc83-4383-aaf0-cb57916ade21"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-prod-a"
+        trackingID: "hx-cm-prod-a:apps/Deployment:cert-manager/cert-manager-webhook"
+        trackingIdentity:
+          application: "hx-cm-prod-a"
+          key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/cubbychat/backend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "backend"
+        uid: "5a1c63a1-cf95-45d7-a705-977352f80240"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-prod-a"
+        trackingID: "hx-cubbychat-prod-a:apps/Deployment:cubbychat/backend"
+        trackingIdentity:
+          application: "hx-cubbychat-prod-a"
+          key: "apps/Deployment/cubbychat/backend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/cubbychat/frontend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "frontend"
+        uid: "9a66e25e-87c3-474b-819e-58b3c89a419f"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-prod-a"
+        trackingID: "hx-cubbychat-prod-a:apps/Deployment:cubbychat/frontend"
+        trackingIdentity:
+          application: "hx-cubbychat-prod-a"
+          key: "apps/Deployment/cubbychat/frontend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/hx-web/hx-web"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "hx-web"
+        name: "hx-web"
+        uid: "287036cb-9708-43c0-9836-6c4467eb481a"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-web-prod-a"
+        trackingID: "hx-web-prod-a:apps/Deployment:hx-web/hx-web"
+        trackingIdentity:
+          application: "hx-web-prod-a"
+          key: "apps/Deployment/hx-web/hx-web"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/kube-system/coredns"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-system"
+        name: "coredns"
+        uid: "108f9f6f-e392-425d-99c4-09408536c4ef"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-dns"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/local-path-storage/local-path-provisioner"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "local-path-storage"
+        name: "local-path-provisioner"
+        uid: "aeabd9eb-9bd7-42a3-8bb8-d4123553a0c3"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-storage"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/Deployment/traefik/traefik"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "traefik"
+        name: "traefik"
+        uid: "a88792ce-6c05-423a-863e-cf34fa715dfd"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-traefik-prod-a"
+        trackingID: "hx-traefik-prod-a:apps/Deployment:traefik/traefik"
+        trackingIdentity:
+          application: "hx-traefik-prod-a"
+          key: "apps/Deployment/traefik/traefik"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/StatefulSet/argocd/argocd-application-controller"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "argocd"
+        name: "argocd-application-controller"
+        uid: "7fdb118a-5fe9-4bac-ad92-d93737b9d7d5"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        key: "apps/StatefulSet/cubbychat/postgres"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "cubbychat"
+        name: "postgres"
+        uid: "c9108176-5a41-4dac-9c07-aafdfa7089c2"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-prod-a"
+        trackingID: "hx-cubbychat-prod-a:apps/StatefulSet:cubbychat/postgres"
+        trackingIdentity:
+          application: "hx-cubbychat-prod-a"
+          key: "apps/StatefulSet/cubbychat/postgres"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/DaemonSet/kube-system/kindnet"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kindnet"
+        uid: "4e83c149-e6a3-4c2b-9c82-e8704a71c75f"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-network"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/DaemonSet/kube-system/kube-proxy"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kube-proxy"
+        uid: "5480442c-03bf-4864-8a19-46ce80477644"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-network-proxy"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argobot/argobot"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argobot"
+        name: "argobot"
+        uid: "b64443cb-0698-4220-b150-f914ee70d9eb"
+        classification: "argo-status-desired"
+        applications:
+          - "argobot-hx-app-prod-b"
+        trackingID: "argobot-hx-app-prod-b:apps/Deployment:argobot/argobot"
+        trackingIdentity:
+          application: "argobot-hx-app-prod-b"
+          key: "apps/Deployment/argobot/argobot"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argocd/argocd-applicationset-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-applicationset-controller"
+        uid: "cf0f7552-c818-4df3-89e4-dfa66193dbb6"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argocd/argocd-dex-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-dex-server"
+        uid: "96e9df3b-e838-43e9-9c61-44af58710c8c"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argocd/argocd-notifications-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-notifications-controller"
+        uid: "80bdc122-ed7e-4390-8a22-7caa9d77d893"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argocd/argocd-redis"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-redis"
+        uid: "970c923a-a88d-4420-ac38-fbf356cbf259"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argocd/argocd-repo-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-repo-server"
+        uid: "58e967d2-5c42-4524-91aa-93da78b36461"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/argocd/argocd-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-server"
+        uid: "8f4e592c-1152-4922-a24e-c3e634419961"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/cert-manager/cert-manager"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager"
+        uid: "3a5345aa-f203-4fe6-b79d-b0d4e122a796"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-prod-b"
+        trackingID: "hx-cm-prod-b:apps/Deployment:cert-manager/cert-manager"
+        trackingIdentity:
+          application: "hx-cm-prod-b"
+          key: "apps/Deployment/cert-manager/cert-manager"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-cainjector"
+        uid: "854c3bde-3bbb-4b63-83da-2efd961636ec"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-prod-b"
+        trackingID: "hx-cm-prod-b:apps/Deployment:cert-manager/cert-manager-cainjector"
+        trackingIdentity:
+          application: "hx-cm-prod-b"
+          key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-webhook"
+        uid: "90d6aaff-adea-402e-94ee-1c3f2a45bb9a"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-prod-b"
+        trackingID: "hx-cm-prod-b:apps/Deployment:cert-manager/cert-manager-webhook"
+        trackingIdentity:
+          application: "hx-cm-prod-b"
+          key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/cubbychat/backend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "backend"
+        uid: "8d627679-2569-414f-a31f-3d4b28fb9c7d"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-prod-b"
+        trackingID: "hx-cubbychat-prod-b:apps/Deployment:cubbychat/backend"
+        trackingIdentity:
+          application: "hx-cubbychat-prod-b"
+          key: "apps/Deployment/cubbychat/backend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/cubbychat/frontend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "frontend"
+        uid: "9bb7aaf1-2155-4ea3-a6ed-0bde00434723"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-prod-b"
+        trackingID: "hx-cubbychat-prod-b:apps/Deployment:cubbychat/frontend"
+        trackingIdentity:
+          application: "hx-cubbychat-prod-b"
+          key: "apps/Deployment/cubbychat/frontend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/hx-web/hx-web"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "hx-web"
+        name: "hx-web"
+        uid: "f7f36c95-501d-4708-8e10-1c2b78c6e1b9"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-web-prod-b"
+        trackingID: "hx-web-prod-b:apps/Deployment:hx-web/hx-web"
+        trackingIdentity:
+          application: "hx-web-prod-b"
+          key: "apps/Deployment/hx-web/hx-web"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/kube-system/coredns"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-system"
+        name: "coredns"
+        uid: "c0e7b003-9fb4-4fac-9e78-1728a6ba88bb"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-dns"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/local-path-storage/local-path-provisioner"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "local-path-storage"
+        name: "local-path-provisioner"
+        uid: "4dba5a54-8123-48d9-8d39-7256bd788cfe"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-storage"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/Deployment/traefik/traefik"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "traefik"
+        name: "traefik"
+        uid: "e18d920f-6ef5-4a39-a2aa-3441ce2e6dbd"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-traefik-prod-b"
+        trackingID: "hx-traefik-prod-b:apps/Deployment:traefik/traefik"
+        trackingIdentity:
+          application: "hx-traefik-prod-b"
+          key: "apps/Deployment/traefik/traefik"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/StatefulSet/argocd/argocd-application-controller"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "argocd"
+        name: "argocd-application-controller"
+        uid: "748b3c5e-79d6-4c82-bd0d-b7dbdcd273ab"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        key: "apps/StatefulSet/cubbychat/postgres"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "cubbychat"
+        name: "postgres"
+        uid: "d26af72b-a8d5-4a6f-bc23-e35bc0f0177c"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-prod-b"
+        trackingID: "hx-cubbychat-prod-b:apps/StatefulSet:cubbychat/postgres"
+        trackingIdentity:
+          application: "hx-cubbychat-prod-b"
+          key: "apps/StatefulSet/cubbychat/postgres"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/DaemonSet/kube-system/kindnet"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kindnet"
+        uid: "9cdd473a-8717-4a68-84ff-45669d2e208d"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-network"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/DaemonSet/kube-system/kube-proxy"
+        apiVersion: "apps/v1"
+        kind: "DaemonSet"
+        namespace: "kube-system"
+        name: "kube-proxy"
+        uid: "16f3f3bb-a9d0-4b1e-a5d6-d4eb3be27a29"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-network-proxy"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argobot/argobot"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argobot"
+        name: "argobot"
+        uid: "e40f83c5-71cc-4278-8d43-4febfbc80cd4"
+        classification: "argo-status-desired"
+        applications:
+          - "argobot-hx-app-staging"
+        trackingID: "argobot-hx-app-staging:apps/Deployment:argobot/argobot"
+        trackingIdentity:
+          application: "argobot-hx-app-staging"
+          key: "apps/Deployment/argobot/argobot"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argocd/argocd-applicationset-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-applicationset-controller"
+        uid: "3ec6b67b-3ce1-4d5f-91a3-b7f14eb0cbd2"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argocd/argocd-dex-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-dex-server"
+        uid: "0964e57a-d0c8-4fcd-a9c9-afb854edd296"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argocd/argocd-notifications-controller"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-notifications-controller"
+        uid: "d4a5c8dd-189c-4e80-b1d7-37cbac400d5a"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argocd/argocd-redis"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-redis"
+        uid: "b15a88f8-8067-439e-8102-474ad7b177de"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argocd/argocd-repo-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-repo-server"
+        uid: "43c9e8cf-ccd8-48ac-8af0-f5e22b394443"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/argocd/argocd-server"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "argocd"
+        name: "argocd-server"
+        uid: "12b1bbfa-8d3b-4ab8-acc8-2c74ce788256"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/cert-manager/cert-manager"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager"
+        uid: "b9a54486-0172-4c2d-a2f1-8d79f1a6dbaa"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-staging"
+        trackingID: "hx-cm-staging:apps/Deployment:cert-manager/cert-manager"
+        trackingIdentity:
+          application: "hx-cm-staging"
+          key: "apps/Deployment/cert-manager/cert-manager"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-cainjector"
+        uid: "59906f1a-41b6-4468-9194-7da33c22b5f7"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-staging"
+        trackingID: "hx-cm-staging:apps/Deployment:cert-manager/cert-manager-cainjector"
+        trackingIdentity:
+          application: "hx-cm-staging"
+          key: "apps/Deployment/cert-manager/cert-manager-cainjector"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cert-manager"
+        name: "cert-manager-webhook"
+        uid: "740a5c02-17b8-4934-a8c5-8eb1f68428ec"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cm-staging"
+        trackingID: "hx-cm-staging:apps/Deployment:cert-manager/cert-manager-webhook"
+        trackingIdentity:
+          application: "hx-cm-staging"
+          key: "apps/Deployment/cert-manager/cert-manager-webhook"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/cubbychat/backend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "backend"
+        uid: "63496c0d-7b46-434e-a445-76c09fdae99c"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-staging"
+        trackingID: "hx-cubbychat-staging:apps/Deployment:cubbychat/backend"
+        trackingIdentity:
+          application: "hx-cubbychat-staging"
+          key: "apps/Deployment/cubbychat/backend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/cubbychat/frontend"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "cubbychat"
+        name: "frontend"
+        uid: "d51fe427-87d3-4ddb-9ad0-b0f66246d975"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-staging"
+        trackingID: "hx-cubbychat-staging:apps/Deployment:cubbychat/frontend"
+        trackingIdentity:
+          application: "hx-cubbychat-staging"
+          key: "apps/Deployment/cubbychat/frontend"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/hx-web/hx-web"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "hx-web"
+        name: "hx-web"
+        uid: "d3b1383b-9174-4c3d-84ec-bd2f65b34e6b"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-web-staging"
+        trackingID: "hx-web-staging:apps/Deployment:hx-web/hx-web"
+        trackingIdentity:
+          application: "hx-web-staging"
+          key: "apps/Deployment/hx-web/hx-web"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/kube-system/coredns"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "kube-system"
+        name: "coredns"
+        uid: "ea096942-c241-43cf-8e17-4a89616fe660"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kubernetes-dns"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/local-path-storage/local-path-provisioner"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "local-path-storage"
+        name: "local-path-provisioner"
+        uid: "fea338ea-cfe3-453d-a6a7-afd434aea618"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "kind-storage"
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/Deployment/traefik/traefik"
+        apiVersion: "apps/v1"
+        kind: "Deployment"
+        namespace: "traefik"
+        name: "traefik"
+        uid: "967e3216-ed98-4d9e-bb5c-5d5f36db4e30"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-traefik-staging"
+        trackingID: "hx-traefik-staging:apps/Deployment:traefik/traefik"
+        trackingIdentity:
+          application: "hx-traefik-staging"
+          key: "apps/Deployment/traefik/traefik"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/StatefulSet/argocd/argocd-application-controller"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "argocd"
+        name: "argocd-application-controller"
+        uid: "b98c7602-8962-4b8b-913c-860f8bc6fcab"
+        classification: "bootstrap-baseline"
+        applications:
+          []
+        trackingID: null
+        trackingIdentity: null
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: "argocd-runtime"
+        bootstrapRuntimeVersion: "v3.4.6"
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+      -
+        cluster: "hx-app-staging"
+        key: "apps/StatefulSet/cubbychat/postgres"
+        apiVersion: "apps/v1"
+        kind: "StatefulSet"
+        namespace: "cubbychat"
+        name: "postgres"
+        uid: "05672c47-f7ea-4d9e-b218-a99396632a61"
+        classification: "argo-status-desired"
+        applications:
+          - "hx-cubbychat-staging"
+        trackingID: "hx-cubbychat-staging:apps/StatefulSet:cubbychat/postgres"
+        trackingIdentity:
+          application: "hx-cubbychat-staging"
+          key: "apps/StatefulSet/cubbychat/postgres"
+        inheritedTrackingFromDesiredOwner: false
+        bootstrapRole: null
+        bootstrapRuntimeVersion: null
+        desiredOwnerRoots:
+          []
+        desiredControllerOwnerRoots:
+          []
+        staleDesiredOwnerRoots:
+          []
+        ownerReferences:
+          []
+  protectedNamespaces:
+    policy: "retain-the-namespace-and-require-all-ConfigHub-Argo-ownership-metadata-absent"
+    rows:
+      -
+        cluster: "hx-app-dev"
+        namespace: "default"
+        uid: "63b3abb3-48fc-4631-ae42-565e187ae117"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-dev"
+        namespace: "kube-system"
+        uid: "a56cf0d1-aeee-419c-b542-c6c24ae09654"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-dev"
+        namespace: "kube-public"
+        uid: "7b7c988a-131c-4a33-9ba8-de6a02d73fff"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-dev"
+        namespace: "kube-node-lease"
+        uid: "d08c2da8-d635-4dd4-853f-4acb790376bb"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        namespace: "default"
+        uid: "e87d2c49-abad-4c87-98c9-f42052992ad6"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        namespace: "kube-system"
+        uid: "f389ba79-e6d4-40c0-8947-89deb3d9b49a"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        namespace: "kube-public"
+        uid: "18157374-0a32-4cc9-bacc-f67566285641"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-a"
+        namespace: "kube-node-lease"
+        uid: "0e425a73-4d0e-4d28-8446-f270a132bfc4"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        namespace: "default"
+        uid: "473a5621-f804-408f-901f-c8fcf3fa6bfd"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        namespace: "kube-system"
+        uid: "36344355-3fc9-4f2c-b4b9-6541c926860a"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        namespace: "kube-public"
+        uid: "76f47c76-8610-4217-ac1a-02746c7421c7"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-prod-b"
+        namespace: "kube-node-lease"
+        uid: "91fb5c6c-04de-4239-91f2-ce7fbdf3fa2f"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-staging"
+        namespace: "default"
+        uid: "60bb3dfe-0683-4879-b2d1-f423ba45bb92"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-staging"
+        namespace: "kube-system"
+        uid: "778268ef-8107-4c3f-9069-bc0531ffd690"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-staging"
+        namespace: "kube-public"
+        uid: "db5c2f24-a6e8-4b0d-8d77-623c4d19ee7b"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+      -
+        cluster: "hx-app-staging"
+        namespace: "kube-node-lease"
+        uid: "e17e5b02-4443-42e3-9f68-bafdb1b99e45"
+        phase: "Active"
+        staleOwnershipAnnotations:
+          []
+        staleLegacyOwnershipLabels:
+          []
+  findings:
+    []
+status:
+  result: "pass"
+  zeroAuditedResidue: true
+  exactConfigHubInventory: true
+  zeroUnexpectedConfigHubInventory: true
+  exactTriggerFilterInventory: true
+  exactCurrentReleaseInventory: true
+  exactDeploymentAuthority: true
+  zeroArgoRequiresPruning: true
+  zeroUnclassifiedDurableWorkloads: true
+  zeroDanglingTrackedDurableWorkloads: true
+  zeroStaleControllerOwnership: true
+  zeroProtectedNamespaceOwnership: true
+  retainedReleaseHistoryProvedByTags: true
+  orphanCounts:
+    unexpectedConfigHubSpaces: 0
+    missingConfigHubSpaces: 0
+    duplicateConfigHubSpaces: 0
+    unexpectedConfigHubUnits: 0
+    missingConfigHubUnits: 0
+    duplicateConfigHubUnits: 0
+    unexpectedConfigHubLinks: 0
+    missingConfigHubLinks: 0
+    duplicateConfigHubLinks: 0
+    unexpectedConfigHubTargets: 0
+    missingConfigHubTargets: 0
+    duplicateConfigHubTargets: 0
+    unexpectedConfigHubTriggers: 0
+    missingConfigHubTriggers: 0
+    duplicateConfigHubTriggers: 0
+    triggerContractDrift: 0
+    unexpectedConfigHubFilters: 0
+    missingConfigHubFilters: 0
+    duplicateConfigHubFilters: 0
+    filterContractDrift: 0
+    triggerFilterAttachmentDrift: 0
+    orphanReleaseTags: 0
+    missingReleaseTags: 0
+    duplicateConfigHubTags: 0
+    releaseTagContractDrift: 0
+    orphanReleases: 0
+    missingCurrentReleases: 0
+    releaseDigestDrift: 0
+    releaseUnitCountDrift: 0
+    unexpectedArgoApplications: 0
+    missingArgoApplications: 0
+    argoApplicationContractDrift: 0
+    argoApplicationAuthorityDrift: 0
+    applicationUnitAuthorityDrift: 0
+    argoActiveOperations: 0
+    argobotAuthorityDrift: 0
+    unexpectedArgoApplicationSets: 0
+    requiresPruning: 0
+    unclassifiedDurableWorkloads: 0
+    danglingTrackedDurableWorkloads: 0
+    staleControllerOwnerUIDs: 0
+    missingDesiredOwnerRoots: 0
+    desiredOwnerRootIdentityDrift: 0
+    missingDesiredOwnerUIDs: 0
+    missingBootstrapDurableWorkloads: 0
+    argoBootstrapRuntimeDrift: 0
+    protectedNamespaceOwnership: 0
+  findingCount: 0
+  openingClosingSnapshotStable: true

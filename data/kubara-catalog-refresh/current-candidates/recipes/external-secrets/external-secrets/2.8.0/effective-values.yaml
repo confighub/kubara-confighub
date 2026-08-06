@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "external-secrets-external-secrets-2.8.0-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "cb522da8788d9f1badb6ff7912179dfb2b2f61d1f7ecf6b778571c3193651fc7"
+  mergedValuesCaptured: false
+  values:
+    {}

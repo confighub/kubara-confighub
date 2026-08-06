@@ -1,0 +1,26 @@
+apiVersion: catalog.confighub.com/v1alpha1
+kind: SourceLock
+metadata:
+  name: kubara-local-platform-v0-12-0
+spec:
+  source:
+    name: Kubara
+    repository: https://github.com/kubara-io/kubara
+    version: v0.12.0
+    commit: ad039dd3e038c8580592b3b9134c2165a426344d
+  release:
+    asset: kubara_0.12.0_darwin_arm64.tar.gz
+    sha256: 5ef36e275818940aa25dfe59c9fc90ee625653229a9cb40dafa16afa6573b2cf
+    checksums: https://github.com/kubara-io/kubara/releases/download/v0.12.0/kubara_0.12.0_checksums.txt
+  generation:
+    command:
+      - kubara
+      - --work-dir
+      - WORK_DIR
+      - generate
+      - --helm
+    config: examples/kubara/local-platform/source/config.yaml
+    valuesOverride: examples/kubara/local-platform/source/values-helm-expt-paths.yaml
+    helmKubeVersion: 1.34.0
+    releaseName: kubara-platform
+    namespace: argocd

@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "kyverno-kyverno-policies-3.8.2"
+spec:
+  readiness:
+    status: "packaged-with-controls"
+    chart: "kyverno/kyverno-policies"
+    version: "3.8.2"
+    variants:
+      - "default"
+    helmObjectsByVariant:
+      default: 11
+    cubInstallObjectsByVariant:
+      default: 12
+    helmMatchByVariant:
+      default: "11/11"
+    scanGate: "warn-production-blocked"
+    nextAction: "select a reviewed configuration and complete target-specific live qualification before production"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"

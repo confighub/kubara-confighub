@@ -1,0 +1,49 @@
+apiVersion: catalog.confighub.com/v1alpha1
+kind: PlatformRouteIntent
+metadata:
+  name: kubara-local-platform-v0-12-0
+spec:
+  source:
+    type: kubara
+    record: examples/kubara/local-platform/source-lock.yaml
+  renderedObjects: examples/kubara/local-platform/rendered/release-objects.yaml
+  routes:
+    - id: argocd-crds-first
+      reason: Argo CD custom resources cannot be applied until their three CRDs exist and report Established.
+      objects:
+        - customresourcedefinitions.apiextensions.k8s.io/applications.argoproj.io
+        - customresourcedefinitions.apiextensions.k8s.io/applicationsets.argoproj.io
+        - customresourcedefinitions.apiextensions.k8s.io/appprojects.argoproj.io
+      action: apply the CRDs first and wait for Established before applying Argo CD custom resources
+      status: recorded-not-live
+    - id: argocd-redis-secret-init
+      reason: The upstream Argo CD chart marks four resources as a Helm pre-install and pre-upgrade hook so a Job can create the Redis Secret before Argo CD starts.
+      objects:
+        - serviceaccounts/kubara-platform-argocd-redis-secret-init
+        - roles.rbac.authorization.k8s.io/kubara-platform-argocd-redis-secret-init
+        - rolebindings.rbac.authorization.k8s.io/kubara-platform-argocd-redis-secret-init
+        - jobs.batch/kubara-platform-argocd-redis-secret-init
+      action: apply the hook RBAC and Job, wait for the Job to complete, record the result, then continue
+      status: recorded-not-live
+    - id: external-secrets-crd
+      reason: The render contains a ClusterExternalSecret, so the External Secrets CRD must exist before that object can be applied.
+      objects:
+        - clusterexternalsecrets.external-secrets.io/image-pull-secret-ces
+      targetFacts:
+        - external-secrets.io/v1 ClusterExternalSecret is served
+        - ClusterSecretStore test-cluster-local exists
+        - remote key test-cluster/local/cluster_secrets/docker_config exists when a private image pull Secret is required
+      action: check the CRD and Secret-store facts before applying the ClusterExternalSecret
+      status: recorded-not-live
+    - id: rendered-secrets
+      reason: cub variant upload does not upload rendered Secret objects, including Secrets whose current data is not sensitive.
+      objects:
+        - secrets/argocd-secret
+        - secrets/cluster-kubernetes.default.svc
+      action: create or bind these two Secrets through the approved Secret path before applying the remaining objects
+      status: recorded-not-live
+  delivery:
+    configHubUpload: pass
+    configHubUploadReceipt: examples/kubara/local-platform/confighub-upload-receipt.yaml
+    argoCdReconciliation: not-run
+    platformApplicationsHealthy: not-run

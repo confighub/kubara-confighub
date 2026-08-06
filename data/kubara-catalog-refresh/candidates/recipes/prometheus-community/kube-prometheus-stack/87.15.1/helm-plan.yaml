@@ -1,0 +1,40 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.15.1"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "prometheus-community/kube-prometheus-stack"
+    version: "87.15.1"
+    variants:
+      - "default"
+      - "no-crds"
+      - "existing-secret"
+    helmObjectsByVariant:
+      default: 125
+      no-crds: 115
+      existing-secret: 124
+    cubInstallObjectsByVariant:
+      default: 126
+      no-crds: 116
+      existing-secret: 125
+    helmMatchByVariant:
+      default: "125/125"
+      no-crds: "115/115"
+      existing-secret: "124/124"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"
+    - "revisions/no-crds/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/render-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/scan-receipt.yaml"
+    - "revisions/no-crds/r001/receipts/install-gate.yaml"
+    - "revisions/existing-secret/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/existing-secret/r001/receipts/render-receipt.yaml"
+    - "revisions/existing-secret/r001/receipts/scan-receipt.yaml"
+    - "revisions/existing-secret/r001/receipts/install-gate.yaml"

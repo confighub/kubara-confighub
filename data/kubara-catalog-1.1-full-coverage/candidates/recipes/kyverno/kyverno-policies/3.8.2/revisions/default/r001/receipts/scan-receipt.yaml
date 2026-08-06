@@ -1,0 +1,20 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "kyverno-policies-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"
+  result: "pass"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "743f6ce209a0e83d5ed628ed507a02c74b97ccb48779cf65c261c743d20c5331"
+  findingCounts:
+    critical: 0
+    high: 0
+    medium: 0
+    low: 0
+    info: 0
+  findings:
+    []

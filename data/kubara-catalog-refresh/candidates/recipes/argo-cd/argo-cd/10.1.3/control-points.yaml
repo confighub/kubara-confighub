@@ -1,0 +1,57 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "argo-cd-argo-cd-10.1.3"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      note: "chart declares redis-ha dependency; offline candidate variants keep it disabled but lock its metadata."
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+      note: "Kubernetes API and version branches are bound to the named Kubernetes capability profile."
+    -
+      category: "crd-policy"
+      status: "variant-controlled-and-target-fact"
+      variants:
+        default: 3
+        no-crds: 0
+      note: "CRDs are ordinary rendered objects in the default variant and required target facts for the no-crds variant."
+    -
+      category: "hook-policy"
+      status: "handled-for-render"
+      policy: "no-hooks"
+      note: "Chart source contains Helm hooks; the proof render excludes hooks and lifecycle policy must handle them before production."
+    -
+      category: "hook-generated-secret"
+      status: "target-fact-for-config-only-lanes"
+      object: "v1|Secret|argocd|argocd-redis"
+      note: "Regular Helm creates this Secret via the chart secret-init path; config-only lanes stage it explicitly before workloads start."
+    -
+      category: "cluster-rbac"
+      status: "scan-and-review"
+      evidence: "scan receipts"
+    -
+      category: "stateful-workload"
+      status: "scan-and-review"
+      object: "apps/v1|StatefulSet|argocd|argo-cd-argocd-application-controller"
+    -
+      category: "tpl"
+      status: "controlled-by-empty-defaults"
+      note: "extraObjects uses tpl; offline candidate variants do not set that value."
+    -
+      category: "gitops-handoff"
+      status: "documented"
+      note: "Argo CD is itself a GitOps controller; ConfigHub OCI publication remains the default handoff pattern for this project."
+    -
+      category: "installer-support-object"
+      status: "handled"
+      object: "v1|Namespace||argocd"

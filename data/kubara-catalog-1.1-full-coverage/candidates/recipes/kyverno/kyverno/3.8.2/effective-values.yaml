@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "kyverno-kyverno-3.8.2-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "b39e23d0a5addc6615721c172c1f0549402a728a3e4978dd54bb323e09c728db"
+  mergedValuesCaptured: false
+  values:
+    {}

@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter"
+  version: "11.15.1"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "prometheus-blackbox-exporter chart defaults variant rendered from prometheus-community/prometheus-blackbox-exporter@11.15.1"

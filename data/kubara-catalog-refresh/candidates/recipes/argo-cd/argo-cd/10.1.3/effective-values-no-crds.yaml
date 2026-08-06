@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "argo-cd-argo-cd-10.1.3-no-crds"
+spec:
+  files:
+    -
+      path: "effective-values-no-crds.yaml"
+      source: "inline-proof"
+      sha256: "bcb9c1939cd600a61bcc3f8ce9087ad470b9e095940be6891a2c5242e2ce4cef"
+  mergedValuesCaptured: false
+  values:
+    crds:
+      install: false

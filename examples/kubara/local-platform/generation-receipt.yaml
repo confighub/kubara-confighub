@@ -1,0 +1,121 @@
+apiVersion: catalog.confighub.com/v1alpha1
+kind: SourceGenerationReceipt
+metadata:
+  name: kubara-local-platform-v0-12-0
+spec:
+  source:
+    name: Kubara
+    version: v0.12.0
+    commit: ad039dd3e038c8580592b3b9134c2165a426344d
+    lock: examples/kubara/local-platform/source-lock.yaml
+  generationInputs:
+    cluster: test-cluster
+    stage: local
+    clusterType: hub
+    enabledServices:
+      - argocd
+      - cert-manager
+      - external-secrets
+      - homer-dashboard
+      - kube-prometheus-stack
+      - metrics-server
+      - traefik
+    helmKubeVersion: 1.34.0
+  commands:
+    generate:
+      - kubara
+      - --work-dir
+      - WORK_DIR
+      - generate
+      - --helm
+    render:
+      - helm
+      - template
+      - kubara-platform
+      - generated/platform-components/helm/argo-cd
+      - --namespace
+      - argocd
+      - --kube-version
+      - 1.34.0
+      - -f
+      - generated/platform-configs/test-cluster/helm/argo-cd/values.generated.yaml
+      - -f
+      - generated/platform-configs/test-cluster/helm/argo-cd/values-helm-expt-paths.yaml
+    checkDownstreamHomerValues:
+      - helm
+      - template
+      - kubara-homer
+      - generated/platform-components/helm/homer-dashboard
+      - --namespace
+      - homer-dashboard
+      - -f
+      - generated/platform-configs/test-cluster/helm/homer-dashboard/values.generated.yaml
+      - -f
+      - generated/platform-configs/test-cluster/helm/homer-dashboard/values-homer-links.yaml
+  outputs:
+    generatedSource: examples/kubara/local-platform/generated
+    generatedChecksums: examples/kubara/local-platform/generated/checksums.txt
+    renderedObjects: examples/kubara/local-platform/rendered/release-objects.yaml
+    renderedInventory: examples/kubara/local-platform/rendered/object-inventory.json
+    renderedChecksums: examples/kubara/local-platform/rendered/checksums.txt
+    generatedFileCount: 113
+    objectCount: 77
+    kinds:
+      ApplicationSet: 17
+      AppProject: 2
+      ClusterExternalSecret: 1
+      ClusterRole: 5
+      ClusterRoleBinding: 2
+      ConfigMap: 7
+      CustomResourceDefinition: 3
+      Deployment: 5
+      Ingress: 1
+      Job: 1
+      Namespace: 1
+      NetworkPolicy: 5
+      Role: 6
+      RoleBinding: 6
+      Secret: 2
+      Service: 6
+      ServiceAccount: 6
+      StatefulSet: 1
+    routeIntent: examples/kubara/local-platform/route-intent.yaml
+    configHubUploadReceipt: examples/kubara/local-platform/confighub-upload-receipt.yaml
+    literalConfigOciManifest: examples/kubara/local-platform/local-config-oci-manifest.json
+    literalConfigOciLayout: examples/kubara/local-platform/oci-layout
+    literalConfigOciDigest: sha256:b5cc98615a93c708870ecc80d92af488e7a7e517c8da8c8af0bc3b6ae5bfdf54
+  artifacts:
+    source:
+      role: kubara-generated-source
+      format: helm-charts-and-cluster-values
+    literalConfiguration:
+      role: literal-configuration
+      format: multi-document-yaml-layer
+      localReference: oci://localhost:5001/kubara-local-platform-config:0.12.0
+      publicTarget: oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kubara-local-platform-config:0.12.0
+      digest: sha256:b5cc98615a93c708870ecc80d92af488e7a7e517c8da8c8af0bc3b6ae5bfdf54
+    configHubRelease:
+      role: delivery
+      status: not-run
+  routing:
+    crds: 3
+    helmHookObjects: 4
+    renderedSecrets: 2
+    externalSecretsPrerequisite: 1
+    record: examples/kubara/local-platform/route-intent.yaml
+status:
+  kubaraGenerate: pass
+  helmDependencyBuild: pass
+  helmTemplate: pass
+  downstreamHomerTemplate: pass
+  routeAnalysis: pass
+  localOciLayout: pass
+  localRegistryPush: pass
+  localRegistryPull: pass
+  publicOciPush: not-run
+  publicOciPull: not-run
+  configHubUpload: pass
+  routeExecution: not-run
+  liveArgoReconciliation: not-run
+  livePlatformHealth: not-run
+  claim: Kubara v0.12.0 generated the committed Helm source and cluster values. A normal values override replaces the portal placeholder, and the effective Homer render was checked. The generated Argo CD chart rendered 77 objects, and those exact objects are stored in a verified local OCI layout. ConfigHub pulled that artifact and recorded the 75 non-Secret objects in one policy-covered Unit; the two omitted Secrets and the special handling for three CRDs, four Helm hook resources, and one External Secrets prerequisite remain recorded but have not been executed on a live cluster.

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: cubbychat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cubbychat-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cubbychat-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/confighub/cubbychat/frontend@sha256:4e2c305b56af8414fab8f1ee2c3b075d96d7f60a7bd9f1c73c733e0ee81dffe5
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              memory: 100Mi
+            limits:
+              memory: 200Mi

@@ -1,0 +1,577 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCompatibilityProfileIndex"
+metadata:
+  name: "kubara-component-catalog-alignment"
+spec:
+  serviceCount: 7
+  services:
+    -
+      key: "argocd"
+      profile: "services/argocd.yaml"
+    -
+      key: "cert-manager"
+      profile: "services/cert-manager.yaml"
+    -
+      key: "external-secrets"
+      profile: "services/external-secrets.yaml"
+    -
+      key: "homer-dashboard"
+      profile: "services/homer-dashboard.yaml"
+    -
+      key: "kube-prometheus-stack"
+      profile: "services/kube-prometheus-stack.yaml"
+    -
+      key: "metrics-server"
+      profile: "services/metrics-server.yaml"
+    -
+      key: "traefik"
+      profile: "services/traefik.yaml"
+  sharedDependencies:
+    -
+      key: "template-library"
+      profile: "template-library.yaml"
+      deployable: false
+  bootstrapConcerns:
+    -
+      key: "bootstrap-crds"
+      profile: "bootstrap-crds.yaml"
+      deployable: true
+      userSelectable: false
+      platformRoleCounted: false
+  passthroughServiceCount: 10
+  passthroughServices:
+    -
+      key: "external-dns"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/external-dns.yaml"
+            sha256: "ea1d711ade24c0d39af93aeab3dbda4596ad671563e2e6f3bd73b3a391394fdd"
+            bytes: 219
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "external-dns"
+          wrapper:
+            path: "general/platform-components/helm/external-dns"
+            tree:
+              fileCount: 8
+              bytes: 3167
+              treeSha256: "95a4efd4141edfd45818313c412c84ad3a33e60ccd67d111d0a7c47348b0a7fe"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/external-dns/values.generated.yaml.tplt"
+            sha256: "61cebf6cbd1d95606229cc0cbe94c0b94b219d93cd5fd48df39817fd923e9629"
+            bytes: 5119
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/external-dns.yaml"
+            sha256: "ea1d711ade24c0d39af93aeab3dbda4596ad671563e2e6f3bd73b3a391394fdd"
+            bytes: 219
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "external-dns"
+          wrapper:
+            path: "general/platform-components/helm/external-dns"
+            tree:
+              fileCount: 8
+              bytes: 3166
+              treeSha256: "201b719bc2f67d9ffbc00b70d57a7d98501a2cbea9ce9aba3f37fa65379cec44"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/external-dns/values.generated.yaml.tplt"
+            sha256: "61cebf6cbd1d95606229cc0cbe94c0b94b219d93cd5fd48df39817fd923e9629"
+            bytes: 5119
+    -
+      key: "kyverno"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/kyverno.yaml"
+            sha256: "c578582113d5d286ff5f2b81b2fcc55556d5b56eec02ba5db0a141c7f663dfa6"
+            bytes: 207
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "kyverno"
+          wrapper:
+            path: "general/platform-components/helm/kyverno"
+            tree:
+              fileCount: 6
+              bytes: 3519
+              treeSha256: "d794edf0d9ca45cc11910dc0da64b9904a444f24999ed5154f93dfe5b5fea4dd"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/kyverno/values.generated.yaml.tplt"
+            sha256: "8b4f0729f0d24ee58b7e8d6d8e9de95fa4fc87d798766e82ac0b9d90bb4152c9"
+            bytes: 1649
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/kyverno.yaml"
+            sha256: "c578582113d5d286ff5f2b81b2fcc55556d5b56eec02ba5db0a141c7f663dfa6"
+            bytes: 207
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "kyverno"
+          wrapper:
+            path: "general/platform-components/helm/kyverno"
+            tree:
+              fileCount: 6
+              bytes: 3515
+              treeSha256: "b366ff0def26c07cd6fe8e520ef8012f4abb3d7670e664472700e0ecacaa9065"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/kyverno/values.generated.yaml.tplt"
+            sha256: "8b4f0729f0d24ee58b7e8d6d8e9de95fa4fc87d798766e82ac0b9d90bb4152c9"
+            bytes: 1649
+    -
+      key: "kyverno-policies"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/kyverno-policies.yaml"
+            sha256: "40d609e92be8247a7fe5b92ba33b0fcd6086298b21ccc9d169fd7ede640f2013"
+            bytes: 225
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "kyverno-policies"
+          wrapper:
+            path: "general/platform-components/helm/kyverno-policies"
+            tree:
+              fileCount: 27
+              bytes: 60670
+              treeSha256: "2d49f7ded4dfa4fc844d7fb23291530ab8ed16c755aa36f8fbe60604d3686cfc"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/kyverno-policies/values.generated.yaml.tplt"
+            sha256: "5e6cde3e638d3c50e000e3dfa0d064a6f7f429e35d1a5c1fc1a619db677e06eb"
+            bytes: 413
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/kyverno-policies.yaml"
+            sha256: "40d609e92be8247a7fe5b92ba33b0fcd6086298b21ccc9d169fd7ede640f2013"
+            bytes: 225
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "kyverno-policies"
+          wrapper:
+            path: "general/platform-components/helm/kyverno-policies"
+            tree:
+              fileCount: 27
+              bytes: 60670
+              treeSha256: "2d49f7ded4dfa4fc844d7fb23291530ab8ed16c755aa36f8fbe60604d3686cfc"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/kyverno-policies/values.generated.yaml.tplt"
+            sha256: "5e6cde3e638d3c50e000e3dfa0d064a6f7f429e35d1a5c1fc1a619db677e06eb"
+            bytes: 413
+    -
+      key: "kyverno-policy-reporter"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/kyverno-policy-reporter.yaml"
+            sha256: "1f77e23eb9edc0985f8fa5a6d568dfc6f80fe22cb52b7eb731c0a07bcd5d1137"
+            bytes: 239
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "kyverno-policy-reporter"
+          wrapper:
+            path: "general/platform-components/helm/kyverno-policy-reporter"
+            tree:
+              fileCount: 7
+              bytes: 3247
+              treeSha256: "ed22809c0f69241f32e2ca86affd4cb7736dced5139c20bfe7bc6ec80dc11b9f"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/kyverno-policy-reporter/values.generated.yaml.tplt"
+            sha256: "0497a11efccba0b4c8e614f47b21ef3167dce951cd25fe60e504e9285456f66b"
+            bytes: 2252
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/kyverno-policy-reporter.yaml"
+            sha256: "1f77e23eb9edc0985f8fa5a6d568dfc6f80fe22cb52b7eb731c0a07bcd5d1137"
+            bytes: 239
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "kyverno-policy-reporter"
+          wrapper:
+            path: "general/platform-components/helm/kyverno-policy-reporter"
+            tree:
+              fileCount: 7
+              bytes: 3312
+              treeSha256: "27b3e6c5ebb16cce27225d6caaf0bd0dffadbfc2cab02c6b3a0b1ff01a15402e"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/kyverno-policy-reporter/values.generated.yaml.tplt"
+            sha256: "0497a11efccba0b4c8e614f47b21ef3167dce951cd25fe60e504e9285456f66b"
+            bytes: 2252
+    -
+      key: "loki"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/loki.yaml"
+            sha256: "87deea205598ab1e8285191486ebb8930ad06c8d92de0aa03f608fd4abf56292"
+            bytes: 206
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "loki"
+          wrapper:
+            path: "general/platform-components/helm/loki"
+            tree:
+              fileCount: 6
+              bytes: 8972
+              treeSha256: "c13bc2fd245093010414766bebae5b30305e518bdd1270c58cb55948c86b8e1f"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/loki/values.generated.yaml.tplt"
+            sha256: "f08ad4ca5dcb6f47a608174273baf93c85335bdcfb4cb1dd9eea8e70b9ab02ba"
+            bytes: 2389
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/loki.yaml"
+            sha256: "87deea205598ab1e8285191486ebb8930ad06c8d92de0aa03f608fd4abf56292"
+            bytes: 206
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "loki"
+          wrapper:
+            path: "general/platform-components/helm/loki"
+            tree:
+              fileCount: 6
+              bytes: 9034
+              treeSha256: "d831def2924489448620a9e93d2433bbace35b63aa1ad16d69e7d8f21b4a1994"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/loki/values.generated.yaml.tplt"
+            sha256: "f08ad4ca5dcb6f47a608174273baf93c85335bdcfb4cb1dd9eea8e70b9ab02ba"
+            bytes: 2389
+    -
+      key: "longhorn"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/longhorn.yaml"
+            sha256: "27ca5d066d612856e85c7a0feb8a1e95ad7c37a26a1ad10b09729209f6463496"
+            bytes: 209
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "longhorn"
+          wrapper:
+            path: "general/platform-components/helm/longhorn"
+            tree:
+              fileCount: 7
+              bytes: 3381
+              treeSha256: "f51c71ee15205697adfa82b523ab4743fbc7fb06a734cb1b30beca6159f9094f"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/longhorn/values.generated.yaml.tplt"
+            sha256: "fbf3b6768955af3e2ef8979d21cb94589e61ef3d4c3cf3a407e85623e31678ee"
+            bytes: 2375
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/longhorn.yaml"
+            sha256: "27ca5d066d612856e85c7a0feb8a1e95ad7c37a26a1ad10b09729209f6463496"
+            bytes: 209
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "longhorn"
+          wrapper:
+            path: "general/platform-components/helm/longhorn"
+            tree:
+              fileCount: 7
+              bytes: 3380
+              treeSha256: "8b0fb83a9712876b8c02b23d11e949e1151c0100d4957bf4418690921cfb08b3"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/longhorn/values.generated.yaml.tplt"
+            sha256: "fbf3b6768955af3e2ef8979d21cb94589e61ef3d4c3cf3a407e85623e31678ee"
+            bytes: 2375
+    -
+      key: "metallb"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/metallb.yaml"
+            sha256: "eebfc53f58242f53319af97148296e421ad37ea2825aaba922d636002264be4d"
+            bytes: 865
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "metallb"
+          wrapper:
+            path: "general/platform-components/helm/metallb"
+            tree:
+              fileCount: 8
+              bytes: 3189
+              treeSha256: "6faff5e90c3884d0663738fd8df6a32ada6051f5839eb7d36a60a10d5f73cc5d"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/metallb/values.generated.yaml.tplt"
+            sha256: "4275b4425d7bccf823c5f389b54dc56478b77862fda56f0e1fc25a246e462277"
+            bytes: 921
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/metallb.yaml"
+            sha256: "eebfc53f58242f53319af97148296e421ad37ea2825aaba922d636002264be4d"
+            bytes: 865
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "metallb"
+          wrapper:
+            path: "general/platform-components/helm/metallb"
+            tree:
+              fileCount: 8
+              bytes: 3169
+              treeSha256: "1239c5a4ee43ca5b128ee0bf25fc3aeaf8b5eff22349b3d1af7dcdd3b20954c2"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/metallb/values.generated.yaml.tplt"
+            sha256: "4275b4425d7bccf823c5f389b54dc56478b77862fda56f0e1fc25a246e462277"
+            bytes: 921
+    -
+      key: "oauth2-proxy"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/oauth2-proxy.yaml"
+            sha256: "0baebee8a921cf0e674e98e280dbb48978a25a82073c667decbf46182c4e85d5"
+            bytes: 217
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "oauth2-proxy"
+          wrapper:
+            path: "general/platform-components/helm/oauth2-proxy"
+            tree:
+              fileCount: 9
+              bytes: 3703
+              treeSha256: "11b5ec142438ef36f3fe11d8ecb4b948ce179eca649dc32a6fda84a298ae723b"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/oauth2-proxy/values.generated.yaml.tplt"
+            sha256: "e23c0b536630ad4bc578721feeeb87f475f25284f69649bf149eb44e2a2a0f2e"
+            bytes: 3065
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/oauth2-proxy.yaml"
+            sha256: "0baebee8a921cf0e674e98e280dbb48978a25a82073c667decbf46182c4e85d5"
+            bytes: 217
+            defaultStatus: "enabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "oauth2-proxy"
+          wrapper:
+            path: "general/platform-components/helm/oauth2-proxy"
+            tree:
+              fileCount: 9
+              bytes: 3702
+              treeSha256: "cd2f3d12b15d93cbbffb62be2f96f88622ab0cc489d1c8efc88f60ca1d72aaed"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/oauth2-proxy/values.generated.yaml.tplt"
+            sha256: "e23c0b536630ad4bc578721feeeb87f475f25284f69649bf149eb44e2a2a0f2e"
+            bytes: 3065
+    -
+      key: "reloader"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/reloader.yaml"
+            sha256: "5cba51bc1ffc3f390849c7d48b3f2001b62814b52567bcd2ef1e34d9baaa3168"
+            bytes: 224
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "reloader"
+          wrapper:
+            path: "general/platform-components/helm/reloader"
+            tree:
+              fileCount: 5
+              bytes: 31347
+              treeSha256: "62cd81e3124d58c906514cb6024ce98e008b2f3049ea977bffa25f8efd03af25"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            status: "absent-upstream"
+            path: "general/platform-configs/helm/reloader/values.generated.yaml.tplt"
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/reloader.yaml"
+            sha256: "5cba51bc1ffc3f390849c7d48b3f2001b62814b52567bcd2ef1e34d9baaa3168"
+            bytes: 224
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "reloader"
+          wrapper:
+            path: "general/platform-components/helm/reloader"
+            tree:
+              fileCount: 5
+              bytes: 31346
+              treeSha256: "536447c6ff641ed7c1e38e196b477d5b47ce8e0f43a19e804e00dfe34dda3985"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            status: "absent-upstream"
+            path: "general/platform-configs/helm/reloader/values.generated.yaml.tplt"
+    -
+      key: "velero"
+      reviewStatus: "byte-preserved-unreviewed"
+      configHubMappingStatus: "not-assessed-by-seven-role-adapter"
+      sourceLines:
+        -
+          sourceLine: "kubara-catalogs-1.1.0-release"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/velero.yaml"
+            sha256: "e31e44c7da59d40f02183ae9dd4283b239bfd9c3181810ad9cf69ae7e6744901"
+            bytes: 1377
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "velero"
+          wrapper:
+            path: "general/platform-components/helm/velero"
+            tree:
+              fileCount: 8
+              bytes: 4010
+              treeSha256: "35332ed4b2355924e3629ef5f94fe4335d25f01fef4a92224d301d7f62f68281"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/velero/values.generated.yaml.tplt"
+            sha256: "2942c33404d4bdf4b3eaef7af70b906c233555420a72a2200ee7d8a120eba72d"
+            bytes: 3308
+        -
+          sourceLine: "kubara-catalogs-1.1.0-observed-head"
+          catalog: "general"
+          serviceDefinition:
+            path: "general/services/velero.yaml"
+            sha256: "e31e44c7da59d40f02183ae9dd4283b239bfd9c3181810ad9cf69ae7e6744901"
+            bytes: 1377
+            defaultStatus: "disabled"
+            clusterTypes:
+              - "hub"
+              - "spoke"
+            chartPath: "velero"
+          wrapper:
+            path: "general/platform-components/helm/velero"
+            tree:
+              fileCount: 8
+              bytes: 4079
+              treeSha256: "67ef3430980c8447483a0fb974205b5d0cb889a8096c6e00309941b321cadd6c"
+              digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+          configTemplate:
+            path: "general/platform-configs/helm/velero/values.generated.yaml.tplt"
+            sha256: "2942c33404d4bdf4b3eaef7af70b906c233555420a72a2200ee7d8a120eba72d"
+            bytes: 3308
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      repository: "https://github.com/kubara-io/kubara.git"
+      commit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+      repositoryTree: "92cb8480e662d53906418c8c1e0b6f7bbd545f40"
+      selectedTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      distributionStatus: "embedded-in-kubara-v0.12.0"
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      repository: "https://github.com/kubara-io/catalogs.git"
+      commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+      repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+      selectedTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      repository: "https://github.com/kubara-io/catalogs.git"
+      commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+      repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+      selectedTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+  currentCatalogVersionDeltasNotInConfigHubRoot:
+    []
+  currentCatalogRootDeltaCount: 0
+  exactRevisionRule: "compare generated or OCI results only with the snapshot from the exact source commit that produced them"

@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "grafana-alloy-1.11.0"
+spec:
+  chart:
+    repository: "grafana"
+    name: "alloy"
+    version: "1.11.0"
+  package:
+    path: "data/kubara-catalog-1.1-full-coverage/candidates/packages/grafana/alloy/1.11.0"
+    name: "grafana-alloy"
+    version: "1.11.0"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "f023705f59a2e7162955f9405d2705d9c2bacee19bb1f7c353e68800b40ccb86"
+        bytes: 384
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "d6e75fca48c764892e27664e0137148e30e34428763f411ef4eca669720e2ba6"
+        bytes: 16687
+      -
+        path: "installer.yaml"
+        sha256: "290f764b0a3302164d3bf815b0264dfeebbc3bd10946b60ce8b1efecaa6679fa"
+        bytes: 293
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-1.1-full-coverage/candidates/packages/grafana/alloy/1.11.0 -o <tmp>/alloy-1.11.0.tgz"
+    sha256: "1c852abf30f2d7c4e801f923f8feab4c620e51603c4a00a57f3fb3a99dd0112b"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-1.1-full-coverage/candidates/packages/grafana/alloy/1.11.0 --base default --work-dir <tmp> --non-interactive --namespace alloy"
+      helmReleaseObjectCount: 7
+      cubInstallObjectCountIncludingSupport: 8
+      semanticObjectMatches: "7/7"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||alloy"

@@ -1,0 +1,133 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "kyverno-kyverno-policies-3.8.2"
+  chart: "kyverno/kyverno-policies"
+  version: "3.8.2"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "kyverno/kyverno-policies"
+    version: "3.8.2"
+    appVersion: "v1.18.2"
+    sourceLock: "recipes/kyverno/kyverno-policies/3.8.2/source-lock.yaml"
+    dependencyLock: "recipes/kyverno/kyverno-policies/3.8.2/dependency-lock.yaml"
+    repository: "https://kyverno.github.io/kyverno"
+    packageSHA256: "a9e9377c7f068842274b9fce133832a4579c81429cb099a5956bb33bd66a0ccc"
+  recipe:
+    path: "recipes/kyverno/kyverno-policies/3.8.2/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/kyverno/kyverno-policies/3.8.2/helm-plan.yaml"
+    chartDossier: "recipes/kyverno/kyverno-policies/3.8.2/chart-dossier.yaml"
+    controlPoints: "recipes/kyverno/kyverno-policies/3.8.2/control-points.yaml"
+    valueModel: "recipes/kyverno/kyverno-policies/3.8.2/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/kyverno/kyverno-policies/3.8.2/helm-pain-report.yaml"
+    controlPointCategories:
+      - "capability-profile"
+      - "catalog-coverage"
+      - "dependency-lock"
+      - "source-lock"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/kyverno/kyverno-policies/3.8.2/catalog-status.yaml"
+    status: "proof-grade"
+    supportLevel: "machine-proof-only"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/kyverno/kyverno-policies/3.8.2"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kyverno-kyverno-policies:3.8.2"
+    installer: "packages/kyverno/kyverno-policies/3.8.2/installer.yaml"
+    receipt: "recipes/kyverno/kyverno-policies/3.8.2/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "e7d016fe4f673dc4887602f3408e0f7ecae189da78d71d48673fcca781487a0e"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/kyverno/kyverno-policies/3.8.2/bases/default"
+        default: true
+        description: "kyverno-policies chart defaults variant rendered from kyverno/kyverno-policies@3.8.2"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/kyverno/kyverno-policies/3.8.2/variants/default/variant.yaml"
+      namespace: "kyverno"
+      releaseName: "kyverno-policies"
+      valuesProfile: "recipes/kyverno/kyverno-policies/3.8.2/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        {}
+      targetFactSummary: "none"
+      packageBase:
+        name: "default"
+        path: "packages/kyverno/kyverno-policies/3.8.2/bases/default"
+        default: true
+        description: "kyverno-policies chart defaults variant rendered from kyverno/kyverno-policies@3.8.2"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kyverno-kyverno-policies:3.8.2 --base default --work-dir <tmp> --non-interactive --namespace kyverno"
+        helmReleaseObjectCount: 11
+        cubInstallObjectCountIncludingSupport: 12
+        semanticObjectMatches: "11/11"
+        separatedSecretCount: 0
+        allowedCubOnlyObjects:
+          - "v1|Namespace||kyverno"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/variant-revision.yaml"
+          digest: "c74f343ed1067e3252ea718264e77b12c4a83db3b1717147433379c6d870d0cd"
+          renderedObjectSetSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"
+          renderedObjects: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 11
+          helmObjectCount: 11
+          cubInstallObjectCountIncludingSupport: 12
+          semanticObjectMatches: "11/11"
+          separatedSecretFiles: 0
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/kyverno/kyverno-policies/3.8.2/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "5049b2e9cb54b8d2fa8e70cdf606a3be6ce9d13f081354067ff877c3174454f1"

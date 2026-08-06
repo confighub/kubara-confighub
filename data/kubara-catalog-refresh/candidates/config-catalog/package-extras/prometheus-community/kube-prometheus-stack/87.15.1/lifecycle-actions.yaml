@@ -1,0 +1,72 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "PackagedLifecycleActions"
+metadata:
+  name: "prometheus-community-kube-prometheus-stack-87-15-1"
+spec:
+  bases:
+    -
+      actions:
+        -
+          automatic: false
+          invokedBy: "packaged-requirement"
+          name: "Install and establish the ten CRDs"
+          phase: "pre-apply"
+          source: "prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          automatic: false
+          invokedBy: "packaged-requirement"
+          name: "Create or keep the admission Secret"
+          phase: "pre-apply"
+          script: "prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+        -
+          automatic: false
+          invokedBy: "generated-try-script"
+          name: "Patch and check the admission webhook"
+          phase: "post-apply"
+          script: "prerequisites/kube-prometheus-stack-lifecycle/finish.sh"
+      name: "default"
+    -
+      actions:
+        -
+          automatic: false
+          invokedBy: "packaged-requirement"
+          name: "Check or install the ten platform-owned CRDs"
+          phase: "pre-apply"
+          source: "prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          automatic: false
+          invokedBy: "packaged-requirement"
+          name: "Create or keep the admission Secret"
+          phase: "pre-apply"
+          script: "prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+        -
+          automatic: false
+          invokedBy: "generated-try-script"
+          name: "Patch and check the admission webhook"
+          phase: "post-apply"
+          script: "prerequisites/kube-prometheus-stack-lifecycle/finish.sh"
+      name: "no-crds"
+    -
+      actions:
+        -
+          automatic: false
+          invokedBy: "packaged-requirement"
+          name: "Install and establish the ten CRDs"
+          phase: "pre-apply"
+          source: "prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          automatic: false
+          invokedBy: "packaged-requirement"
+          name: "Create or keep the admission Secret"
+          phase: "pre-apply"
+          script: "prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+        -
+          automatic: false
+          invokedBy: "generated-try-script"
+          name: "Patch and check the admission webhook"
+          phase: "post-apply"
+          script: "prerequisites/kube-prometheus-stack-lifecycle/finish.sh"
+      name: "existing-secret"
+  chart: "prometheus-community/kube-prometheus-stack"
+  namespace: "monitoring"
+  version: "87.15.1"

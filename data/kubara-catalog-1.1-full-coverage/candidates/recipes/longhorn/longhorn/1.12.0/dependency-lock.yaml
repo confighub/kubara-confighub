@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "longhorn-longhorn-1.12.0"
+spec:
+  chart: "longhorn/longhorn"
+  version: "1.12.0"
+  dependencies:
+    []

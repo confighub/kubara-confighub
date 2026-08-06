@@ -1,0 +1,564 @@
+{
+  "objectCount": 77,
+  "kinds": {
+    "ApplicationSet": 17,
+    "AppProject": 2,
+    "ClusterExternalSecret": 1,
+    "ClusterRole": 5,
+    "ClusterRoleBinding": 2,
+    "ConfigMap": 7,
+    "CustomResourceDefinition": 3,
+    "Deployment": 5,
+    "Ingress": 1,
+    "Job": 1,
+    "Namespace": 1,
+    "NetworkPolicy": 5,
+    "Role": 6,
+    "RoleBinding": 6,
+    "Secret": 2,
+    "Service": 6,
+    "ServiceAccount": 6,
+    "StatefulSet": 1
+  },
+  "objects": [
+    {
+      "apiVersion": "apiextensions.k8s.io/v1",
+      "identity": "apiextensions.k8s.io/v1|CustomResourceDefinition||applications.argoproj.io",
+      "kind": "CustomResourceDefinition",
+      "name": "applications.argoproj.io",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "apiextensions.k8s.io/v1",
+      "identity": "apiextensions.k8s.io/v1|CustomResourceDefinition||applicationsets.argoproj.io",
+      "kind": "CustomResourceDefinition",
+      "name": "applicationsets.argoproj.io",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "apiextensions.k8s.io/v1",
+      "identity": "apiextensions.k8s.io/v1|CustomResourceDefinition||appprojects.argoproj.io",
+      "kind": "CustomResourceDefinition",
+      "name": "appprojects.argoproj.io",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "apps/v1",
+      "identity": "apps/v1|Deployment|argocd|kubara-platform-argocd-applicationset-controller",
+      "kind": "Deployment",
+      "name": "kubara-platform-argocd-applicationset-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "apps/v1",
+      "identity": "apps/v1|Deployment|argocd|kubara-platform-argocd-dex-server",
+      "kind": "Deployment",
+      "name": "kubara-platform-argocd-dex-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "apps/v1",
+      "identity": "apps/v1|Deployment|argocd|kubara-platform-argocd-redis",
+      "kind": "Deployment",
+      "name": "kubara-platform-argocd-redis",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "apps/v1",
+      "identity": "apps/v1|Deployment|argocd|kubara-platform-argocd-repo-server",
+      "kind": "Deployment",
+      "name": "kubara-platform-argocd-repo-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "apps/v1",
+      "identity": "apps/v1|Deployment|argocd|kubara-platform-argocd-server",
+      "kind": "Deployment",
+      "name": "kubara-platform-argocd-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "apps/v1",
+      "identity": "apps/v1|StatefulSet|argocd|kubara-platform-argocd-application-controller",
+      "kind": "StatefulSet",
+      "name": "kubara-platform-argocd-application-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|AppProject|argocd|default",
+      "kind": "AppProject",
+      "name": "default",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|AppProject|argocd|test-cluster-local",
+      "kind": "AppProject",
+      "name": "test-cluster-local",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|argocd",
+      "kind": "ApplicationSet",
+      "name": "argocd",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|cert-manager",
+      "kind": "ApplicationSet",
+      "name": "cert-manager",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|external-dns",
+      "kind": "ApplicationSet",
+      "name": "external-dns",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|external-secrets",
+      "kind": "ApplicationSet",
+      "name": "external-secrets",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|homer-dashboard",
+      "kind": "ApplicationSet",
+      "name": "homer-dashboard",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|kube-prometheus-stack",
+      "kind": "ApplicationSet",
+      "name": "kube-prometheus-stack",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|kyverno",
+      "kind": "ApplicationSet",
+      "name": "kyverno",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|kyverno-policies",
+      "kind": "ApplicationSet",
+      "name": "kyverno-policies",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|kyverno-policy-reporter",
+      "kind": "ApplicationSet",
+      "name": "kyverno-policy-reporter",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|loki",
+      "kind": "ApplicationSet",
+      "name": "loki",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|longhorn",
+      "kind": "ApplicationSet",
+      "name": "longhorn",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|metallb",
+      "kind": "ApplicationSet",
+      "name": "metallb",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|metrics-server",
+      "kind": "ApplicationSet",
+      "name": "metrics-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|oauth2-proxy",
+      "kind": "ApplicationSet",
+      "name": "oauth2-proxy",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|reloader",
+      "kind": "ApplicationSet",
+      "name": "reloader",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|traefik",
+      "kind": "ApplicationSet",
+      "name": "traefik",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "argoproj.io/v1alpha1",
+      "identity": "argoproj.io/v1alpha1|ApplicationSet|argocd|velero",
+      "kind": "ApplicationSet",
+      "name": "velero",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "batch/v1",
+      "identity": "batch/v1|Job|argocd|kubara-platform-argocd-redis-secret-init",
+      "kind": "Job",
+      "name": "kubara-platform-argocd-redis-secret-init",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "external-secrets.io/v1",
+      "identity": "external-secrets.io/v1|ClusterExternalSecret||image-pull-secret-ces",
+      "kind": "ClusterExternalSecret",
+      "name": "image-pull-secret-ces",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "identity": "networking.k8s.io/v1|Ingress|argocd|kubara-platform-argocd-server-grpc",
+      "kind": "Ingress",
+      "name": "kubara-platform-argocd-server-grpc",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "identity": "networking.k8s.io/v1|NetworkPolicy|argocd|kubara-platform-argocd-application-controller",
+      "kind": "NetworkPolicy",
+      "name": "kubara-platform-argocd-application-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "identity": "networking.k8s.io/v1|NetworkPolicy|argocd|kubara-platform-argocd-dex-server",
+      "kind": "NetworkPolicy",
+      "name": "kubara-platform-argocd-dex-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "identity": "networking.k8s.io/v1|NetworkPolicy|argocd|kubara-platform-argocd-redis",
+      "kind": "NetworkPolicy",
+      "name": "kubara-platform-argocd-redis",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "identity": "networking.k8s.io/v1|NetworkPolicy|argocd|kubara-platform-argocd-repo-server",
+      "kind": "NetworkPolicy",
+      "name": "kubara-platform-argocd-repo-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "identity": "networking.k8s.io/v1|NetworkPolicy|argocd|kubara-platform-argocd-server",
+      "kind": "NetworkPolicy",
+      "name": "kubara-platform-argocd-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kubara-platform-argocd-application-controller",
+      "kind": "ClusterRoleBinding",
+      "name": "kubara-platform-argocd-application-controller",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRoleBinding||kubara-platform-argocd-server",
+      "kind": "ClusterRoleBinding",
+      "name": "kubara-platform-argocd-server",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRole||kubara-platform-argocd-aggregate-to-admin",
+      "kind": "ClusterRole",
+      "name": "kubara-platform-argocd-aggregate-to-admin",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRole||kubara-platform-argocd-aggregate-to-edit",
+      "kind": "ClusterRole",
+      "name": "kubara-platform-argocd-aggregate-to-edit",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRole||kubara-platform-argocd-aggregate-to-view",
+      "kind": "ClusterRole",
+      "name": "kubara-platform-argocd-aggregate-to-view",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRole||kubara-platform-argocd-application-controller",
+      "kind": "ClusterRole",
+      "name": "kubara-platform-argocd-application-controller",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|ClusterRole||kubara-platform-argocd-server",
+      "kind": "ClusterRole",
+      "name": "kubara-platform-argocd-server",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-application-controller",
+      "kind": "RoleBinding",
+      "name": "kubara-platform-argocd-application-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-applicationset-controller",
+      "kind": "RoleBinding",
+      "name": "kubara-platform-argocd-applicationset-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-dex-server",
+      "kind": "RoleBinding",
+      "name": "kubara-platform-argocd-dex-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-redis-secret-init",
+      "kind": "RoleBinding",
+      "name": "kubara-platform-argocd-redis-secret-init",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-repo-server",
+      "kind": "RoleBinding",
+      "name": "kubara-platform-argocd-repo-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-server",
+      "kind": "RoleBinding",
+      "name": "kubara-platform-argocd-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-application-controller",
+      "kind": "Role",
+      "name": "kubara-platform-argocd-application-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-applicationset-controller",
+      "kind": "Role",
+      "name": "kubara-platform-argocd-applicationset-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-dex-server",
+      "kind": "Role",
+      "name": "kubara-platform-argocd-dex-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-redis-secret-init",
+      "kind": "Role",
+      "name": "kubara-platform-argocd-redis-secret-init",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-repo-server",
+      "kind": "Role",
+      "name": "kubara-platform-argocd-repo-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "rbac.authorization.k8s.io/v1",
+      "identity": "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-server",
+      "kind": "Role",
+      "name": "kubara-platform-argocd-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|argocd-cm",
+      "kind": "ConfigMap",
+      "name": "argocd-cm",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|argocd-cmd-params-cm",
+      "kind": "ConfigMap",
+      "name": "argocd-cmd-params-cm",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|argocd-gpg-keys-cm",
+      "kind": "ConfigMap",
+      "name": "argocd-gpg-keys-cm",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|argocd-rbac-cm",
+      "kind": "ConfigMap",
+      "name": "argocd-rbac-cm",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|argocd-ssh-known-hosts-cm",
+      "kind": "ConfigMap",
+      "name": "argocd-ssh-known-hosts-cm",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|argocd-tls-certs-cm",
+      "kind": "ConfigMap",
+      "name": "argocd-tls-certs-cm",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ConfigMap|argocd|kubara-platform-argocd-redis-health-configmap",
+      "kind": "ConfigMap",
+      "name": "kubara-platform-argocd-redis-health-configmap",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Namespace||argocd",
+      "kind": "Namespace",
+      "name": "argocd",
+      "namespace": ""
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Secret|argocd|argocd-secret",
+      "kind": "Secret",
+      "name": "argocd-secret",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Secret|argocd|cluster-kubernetes.default.svc",
+      "kind": "Secret",
+      "name": "cluster-kubernetes.default.svc",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ServiceAccount|argocd|argocd-application-controller",
+      "kind": "ServiceAccount",
+      "name": "argocd-application-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ServiceAccount|argocd|argocd-applicationset-controller",
+      "kind": "ServiceAccount",
+      "name": "argocd-applicationset-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ServiceAccount|argocd|argocd-dex-server",
+      "kind": "ServiceAccount",
+      "name": "argocd-dex-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ServiceAccount|argocd|argocd-server",
+      "kind": "ServiceAccount",
+      "name": "argocd-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ServiceAccount|argocd|kubara-platform-argocd-redis-secret-init",
+      "kind": "ServiceAccount",
+      "name": "kubara-platform-argocd-redis-secret-init",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|ServiceAccount|argocd|kubara-platform-argocd-repo-server",
+      "kind": "ServiceAccount",
+      "name": "kubara-platform-argocd-repo-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Service|argocd|kubara-platform-argocd-application-controller-metrics",
+      "kind": "Service",
+      "name": "kubara-platform-argocd-application-controller-metrics",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Service|argocd|kubara-platform-argocd-applicationset-controller",
+      "kind": "Service",
+      "name": "kubara-platform-argocd-applicationset-controller",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Service|argocd|kubara-platform-argocd-dex-server",
+      "kind": "Service",
+      "name": "kubara-platform-argocd-dex-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Service|argocd|kubara-platform-argocd-redis",
+      "kind": "Service",
+      "name": "kubara-platform-argocd-redis",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Service|argocd|kubara-platform-argocd-repo-server",
+      "kind": "Service",
+      "name": "kubara-platform-argocd-repo-server",
+      "namespace": "argocd"
+    },
+    {
+      "apiVersion": "v1",
+      "identity": "v1|Service|argocd|kubara-platform-argocd-server",
+      "kind": "Service",
+      "name": "kubara-platform-argocd-server",
+      "namespace": "argocd"
+    }
+  ]
+}

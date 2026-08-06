@@ -1,0 +1,545 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraCurrentPlatformGenerationReceipt"
+metadata:
+  name: "kubara-v0-13-0-four-cluster-platform"
+spec:
+  source:
+    config: "examples/kubara/current-platform/source/config.yaml"
+    sourceLock: "examples/kubara/current-platform/source-lock.yaml"
+    componentArtifacts: "examples/kubara/current-platform/component-artifacts.yaml"
+    sourceChecksums: "examples/kubara/current-platform/source-checksums.txt"
+    sourceChecksumsSha256: "e9b774fede14731090988bc67804e9a01d8db44bb439de8c726467cbf7703ffc"
+  tools:
+    kubaraVersion: "v0.13.0"
+    kubaraBinarySha256: "72642ce49aa5e9d13aeb4441aebc4c4530c7427c0d0aacbcee7b97e249f57183"
+    helmVersion: "v4.1.4+g05fa379"
+    orasVersion: "Version:    1.3.2+Homebrew"
+  platform:
+    hub: "hx-app-dev"
+    spokes:
+      - "hx-app-staging"
+      - "hx-app-prod-a"
+      - "hx-app-prod-b"
+    enabledServices:
+      hx-app-dev:
+        - "cert-manager"
+        - "external-secrets"
+        - "homer-dashboard"
+        - "kube-prometheus-stack"
+        - "metrics-server"
+        - "traefik"
+      hx-app-staging:
+        - "cert-manager"
+        - "traefik"
+      hx-app-prod-a:
+        - "cert-manager"
+        - "traefik"
+      hx-app-prod-b:
+        - "cert-manager"
+        - "traefik"
+    renderCount: 13
+    renderArithmetic: "1 hub Argo + 2 shared services x 4 clusters + 4 additional hub services = 13"
+  catalogs:
+    parityReceipt: "examples/kubara/current-platform/catalog-parity-receipt.yaml"
+    publicReferencesPreservedInSource: true
+    temporaryLocalSubstitutionOnly: true
+  artifacts:
+    -
+      service: "argo-cd"
+      dependency: "argo-cd"
+      version: "10.2.1"
+      sourceURL: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.2.1/argo-cd-10.2.1.tgz"
+      sha256: "27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885"
+      result: "verified"
+    -
+      service: "cert-manager"
+      dependency: "cert-manager"
+      version: "v1.21.0"
+      sourceURL: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+      sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      result: "verified"
+    -
+      service: "external-secrets"
+      dependency: "external-secrets"
+      version: "2.8.0"
+      sourceURL: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.8.0/external-secrets-2.8.0.tgz"
+      sha256: "251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd"
+      result: "verified"
+    -
+      service: "kube-prometheus-stack"
+      dependency: "kube-prometheus-stack"
+      version: "87.19.2"
+      sourceURL: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.19.2/kube-prometheus-stack-87.19.2.tgz"
+      sha256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+      result: "verified"
+    -
+      service: "kube-prometheus-stack"
+      dependency: "prometheus-blackbox-exporter"
+      version: "11.15.1"
+      sourceURL: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+      sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+      result: "verified"
+    -
+      service: "metrics-server"
+      dependency: "metrics-server"
+      version: "3.13.1"
+      sourceURL: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+      sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+      result: "verified"
+    -
+      service: "traefik"
+      dependency: "traefik"
+      version: "41.0.2"
+      sourceURL: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+      sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      manifestDigest: "sha256:b64212403e056c14dbcac5bfd0030f89f0e08fccae370dd7cd96592ee745848e"
+      result: "verified"
+  overrides:
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-dev/helm/argo-cd/values-repository-paths.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/argo-cd"
+      sha256: "098ac6f8ea0c377c1140b387b2acf0e82eeb3e1d2c736f1df349d1430e8794f3"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-dev/helm/cert-manager/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/cert-manager"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-dev/helm/homer-dashboard/values-project-links.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/homer-dashboard"
+      sha256: "9539796ad6952e0999448bb4c89b1cb7aeb982f5511d63498abdb00a170d8e7f"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-dev/helm/metrics-server/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/metrics-server"
+      sha256: "ce8c2f62991eac0097f1d0bcb566f302ebc5cc06a034ac7afbc35c19d6d3b3c2"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-staging/helm/cert-manager/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-staging/helm/cert-manager"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-prod-a/helm/cert-manager/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-a/helm/cert-manager"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-prod-b/helm/cert-manager/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-b/helm/cert-manager"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-dev/helm/traefik/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/traefik"
+      sha256: "f388358fd18f9f089e1a14323a996d80fdf57a638af66d49f8cd2ad825daca1e"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-staging/helm/traefik/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-staging/helm/traefik"
+      sha256: "2adc8f267183bf85a53bee677f14cef96decb10e908c5081a8833db00ebb66bb"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-prod-a/helm/traefik/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-a/helm/traefik"
+      sha256: "f97dbe7bfb19933af70bbc4a2a3d1e7834c684f283222ed56641f2152852a5d1"
+    -
+      source: "examples/kubara/current-platform/source/overrides/hx-app-prod-b/helm/traefik/values-kind.yaml"
+      destination: "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-b/helm/traefik"
+      sha256: "ac839be62678128e7de1f8e3f3fab8bd1e3e15e42a1d33f2d74e89abcfdcb400"
+  outputs:
+    generatedRoot: "examples/kubara/current-platform/generated"
+    generatedFileCount: 135
+    generatedChecksums: "examples/kubara/current-platform/generated-checksums.txt"
+    generatedChecksumsSha256: "2e4d94f68b77c1f5a08bba34600d27d4f8df4645ab10925e0980941e6145b0ad"
+    effectiveRenderRoot: "examples/kubara/current-platform/effective-renders"
+    effectiveRenderChecksums: "examples/kubara/current-platform/effective-render-checksums.txt"
+    effectiveRenderChecksumsSha256: "c8cffe54e2acc5b7dbc399e470b5fa462e9205d6734e6f3d1e8bd70613b32206"
+    renders:
+      -
+        cluster: "hx-app-dev"
+        service: "argo-cd"
+        releaseName: "argo-cd"
+        namespace: "argocd"
+        values:
+          - "platform-configs/hx-app-dev/helm/argo-cd/values.generated.yaml"
+          - "platform-configs/hx-app-dev/helm/argo-cd/values-repository-paths.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/argo-cd/release-objects.yaml"
+        sha256: "3881930e58f377be7074eda757a17e304825a3104183f477cfadb4cb87c57bb8"
+        objectCount: 86
+        kinds:
+          ApplicationSet: 17
+          AppProject: 2
+          ClusterExternalSecret: 1
+          ClusterRole: 5
+          ClusterRoleBinding: 2
+          ConfigMap: 8
+          CustomResourceDefinition: 3
+          Deployment: 5
+          ExternalSecret: 3
+          Ingress: 1
+          Job: 2
+          Namespace: 1
+          NetworkPolicy: 5
+          Role: 7
+          RoleBinding: 7
+          Secret: 2
+          Service: 6
+          ServiceAccount: 7
+          ServiceMonitor: 1
+          StatefulSet: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "argo-cd"
+            version: "10.2.1"
+            sha256: "27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885"
+      -
+        cluster: "hx-app-dev"
+        service: "cert-manager"
+        releaseName: "cert-manager"
+        namespace: "cert-manager"
+        values:
+          - "platform-configs/hx-app-dev/helm/cert-manager/values.generated.yaml"
+          - "platform-configs/hx-app-dev/helm/cert-manager/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/cert-manager/release-objects.yaml"
+        sha256: "d42bd87d5d10982edf3d3c308769c3fba802df70bfca68e10600a76114e95ee7"
+        objectCount: 54
+        kinds:
+          ClusterIssuer: 1
+          ClusterRole: 13
+          ClusterRoleBinding: 10
+          CustomResourceDefinition: 6
+          Deployment: 3
+          Job: 1
+          MutatingWebhookConfiguration: 1
+          Namespace: 1
+          PrometheusRule: 1
+          Role: 4
+          RoleBinding: 4
+          Service: 3
+          ServiceAccount: 4
+          ServiceMonitor: 1
+          ValidatingWebhookConfiguration: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "cert-manager"
+            version: "v1.21.0"
+            sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      -
+        cluster: "hx-app-dev"
+        service: "external-secrets"
+        releaseName: "external-secrets"
+        namespace: "external-secrets"
+        values:
+          - "platform-configs/hx-app-dev/helm/external-secrets/values.generated.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/external-secrets/release-objects.yaml"
+        sha256: "b90bd5215ed87a67cd9b2754f04865a20e40b805fe1349e93de25770b0a69292"
+        objectCount: 50
+        kinds:
+          ClusterRole: 5
+          ClusterRoleBinding: 2
+          CustomResourceDefinition: 25
+          Deployment: 3
+          Namespace: 1
+          Role: 1
+          RoleBinding: 1
+          Secret: 1
+          Service: 3
+          ServiceAccount: 3
+          ServiceMonitor: 3
+          ValidatingWebhookConfiguration: 2
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "external-secrets"
+            version: "2.8.0"
+            sha256: "251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd"
+      -
+        cluster: "hx-app-dev"
+        service: "homer-dashboard"
+        releaseName: "homer-dashboard"
+        namespace: "homer-dashboard"
+        values:
+          - "platform-configs/hx-app-dev/helm/homer-dashboard/values.generated.yaml"
+          - "platform-configs/hx-app-dev/helm/homer-dashboard/values-project-links.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/homer-dashboard/release-objects.yaml"
+        sha256: "0810f86226a13a70f24a345af9560536f773f054fb75a7cbaf2202ab64858d2d"
+        objectCount: 8
+        kinds:
+          ConfigMap: 4
+          Deployment: 1
+          Namespace: 1
+          Service: 1
+          ServiceMonitor: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          []
+      -
+        cluster: "hx-app-dev"
+        service: "kube-prometheus-stack"
+        releaseName: "kube-prometheus-stack"
+        namespace: "kube-prometheus-stack"
+        values:
+          - "platform-configs/hx-app-dev/helm/kube-prometheus-stack/values.generated.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/kube-prometheus-stack/release-objects.yaml"
+        sha256: "a9c778d0a46b42a05f4296c6ab34fc75c62a5fb1efd5e1906ab10a7a25edaf92"
+        objectCount: 116
+        kinds:
+          Alertmanager: 1
+          Certificate: 2
+          ClusterRole: 4
+          ClusterRoleBinding: 4
+          ConfigMap: 29
+          CustomResourceDefinition: 10
+          DaemonSet: 1
+          Deployment: 4
+          ExternalSecret: 1
+          Issuer: 2
+          MutatingWebhookConfiguration: 1
+          Namespace: 1
+          Prometheus: 1
+          PrometheusRule: 30
+          Secret: 1
+          Service: 8
+          ServiceAccount: 7
+          ServiceMonitor: 8
+          ValidatingWebhookConfiguration: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "kube-prometheus-stack"
+            version: "87.19.2"
+            sha256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+          -
+            dependency: "prometheus-blackbox-exporter"
+            version: "11.15.1"
+            sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+      -
+        cluster: "hx-app-dev"
+        service: "metrics-server"
+        releaseName: "metrics-server"
+        namespace: "metrics-server"
+        values:
+          - "platform-configs/hx-app-dev/helm/metrics-server/values.generated.yaml"
+          - "platform-configs/hx-app-dev/helm/metrics-server/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/metrics-server/release-objects.yaml"
+        sha256: "da40e4395191e57b4a67b579a9b9e171461e960d9df22ae108bf2d262fa65f69"
+        objectCount: 10
+        kinds:
+          APIService: 1
+          ClusterRole: 2
+          ClusterRoleBinding: 2
+          Deployment: 1
+          Namespace: 1
+          RoleBinding: 1
+          Service: 1
+          ServiceAccount: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "metrics-server"
+            version: "3.13.1"
+            sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+      -
+        cluster: "hx-app-dev"
+        service: "traefik"
+        releaseName: "traefik"
+        namespace: "traefik"
+        values:
+          - "platform-configs/hx-app-dev/helm/traefik/values.generated.yaml"
+          - "platform-configs/hx-app-dev/helm/traefik/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-dev/traefik/release-objects.yaml"
+        sha256: "0c39aaa4266218d7c9cd5c29f8fd303b832d53345176fbd7bd2a94a14909ca7c"
+        objectCount: 33
+        kinds:
+          ClusterRole: 1
+          ClusterRoleBinding: 1
+          CustomResourceDefinition: 25
+          Deployment: 1
+          IngressClass: 1
+          Namespace: 1
+          Service: 1
+          ServiceAccount: 1
+          ServiceMonitor: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "traefik"
+            version: "41.0.2"
+            sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      -
+        cluster: "hx-app-staging"
+        service: "cert-manager"
+        releaseName: "cert-manager"
+        namespace: "cert-manager"
+        values:
+          - "platform-configs/hx-app-staging/helm/cert-manager/values.generated.yaml"
+          - "platform-configs/hx-app-staging/helm/cert-manager/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-staging/cert-manager/release-objects.yaml"
+        sha256: "d7cc5ad406be55803cc8c8f267631812051d82dd649863a89f87c2db0ed0690d"
+        objectCount: 52
+        kinds:
+          ClusterIssuer: 1
+          ClusterRole: 13
+          ClusterRoleBinding: 10
+          CustomResourceDefinition: 6
+          Deployment: 3
+          Job: 1
+          MutatingWebhookConfiguration: 1
+          Namespace: 1
+          Role: 4
+          RoleBinding: 4
+          Service: 3
+          ServiceAccount: 4
+          ValidatingWebhookConfiguration: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "cert-manager"
+            version: "v1.21.0"
+            sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      -
+        cluster: "hx-app-staging"
+        service: "traefik"
+        releaseName: "traefik"
+        namespace: "traefik"
+        values:
+          - "platform-configs/hx-app-staging/helm/traefik/values.generated.yaml"
+          - "platform-configs/hx-app-staging/helm/traefik/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-staging/traefik/release-objects.yaml"
+        sha256: "3ebec65bab14e1f48da29496d979c7463741f2e6f2697e46752a582d6d77633c"
+        objectCount: 32
+        kinds:
+          ClusterRole: 1
+          ClusterRoleBinding: 1
+          CustomResourceDefinition: 25
+          Deployment: 1
+          IngressClass: 1
+          Namespace: 1
+          Service: 1
+          ServiceAccount: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "traefik"
+            version: "41.0.2"
+            sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      -
+        cluster: "hx-app-prod-a"
+        service: "cert-manager"
+        releaseName: "cert-manager"
+        namespace: "cert-manager"
+        values:
+          - "platform-configs/hx-app-prod-a/helm/cert-manager/values.generated.yaml"
+          - "platform-configs/hx-app-prod-a/helm/cert-manager/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-prod-a/cert-manager/release-objects.yaml"
+        sha256: "27f69adde8d447b0294205f65d9d19685c987a4b2ad573271e3edbb239f0a75a"
+        objectCount: 52
+        kinds:
+          ClusterIssuer: 1
+          ClusterRole: 13
+          ClusterRoleBinding: 10
+          CustomResourceDefinition: 6
+          Deployment: 3
+          Job: 1
+          MutatingWebhookConfiguration: 1
+          Namespace: 1
+          Role: 4
+          RoleBinding: 4
+          Service: 3
+          ServiceAccount: 4
+          ValidatingWebhookConfiguration: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "cert-manager"
+            version: "v1.21.0"
+            sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      -
+        cluster: "hx-app-prod-a"
+        service: "traefik"
+        releaseName: "traefik"
+        namespace: "traefik"
+        values:
+          - "platform-configs/hx-app-prod-a/helm/traefik/values.generated.yaml"
+          - "platform-configs/hx-app-prod-a/helm/traefik/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-prod-a/traefik/release-objects.yaml"
+        sha256: "f3f494ffb978b154e083493974f39221f32ce5ec047f3e4caaced3d3310e3d81"
+        objectCount: 32
+        kinds:
+          ClusterRole: 1
+          ClusterRoleBinding: 1
+          CustomResourceDefinition: 25
+          Deployment: 1
+          IngressClass: 1
+          Namespace: 1
+          Service: 1
+          ServiceAccount: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "traefik"
+            version: "41.0.2"
+            sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      -
+        cluster: "hx-app-prod-b"
+        service: "cert-manager"
+        releaseName: "cert-manager"
+        namespace: "cert-manager"
+        values:
+          - "platform-configs/hx-app-prod-b/helm/cert-manager/values.generated.yaml"
+          - "platform-configs/hx-app-prod-b/helm/cert-manager/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-prod-b/cert-manager/release-objects.yaml"
+        sha256: "ddab0a44c5efc491c6132223fff6b88ecd2da5abdd77e73af1887f7593aef70a"
+        objectCount: 52
+        kinds:
+          ClusterIssuer: 1
+          ClusterRole: 13
+          ClusterRoleBinding: 10
+          CustomResourceDefinition: 6
+          Deployment: 3
+          Job: 1
+          MutatingWebhookConfiguration: 1
+          Namespace: 1
+          Role: 4
+          RoleBinding: 4
+          Service: 3
+          ServiceAccount: 4
+          ValidatingWebhookConfiguration: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "cert-manager"
+            version: "v1.21.0"
+            sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      -
+        cluster: "hx-app-prod-b"
+        service: "traefik"
+        releaseName: "traefik"
+        namespace: "traefik"
+        values:
+          - "platform-configs/hx-app-prod-b/helm/traefik/values.generated.yaml"
+          - "platform-configs/hx-app-prod-b/helm/traefik/values-kind.yaml"
+        output: "examples/kubara/current-platform/effective-renders/hx-app-prod-b/traefik/release-objects.yaml"
+        sha256: "9d5ce0593524ae3e9b2aaf99ec8fddf4a8c57332b9a07bff91f24456a034a4a1"
+        objectCount: 32
+        kinds:
+          ClusterRole: 1
+          ClusterRoleBinding: 1
+          CustomResourceDefinition: 25
+          Deployment: 1
+          IngressClass: 1
+          Namespace: 1
+          Service: 1
+          ServiceAccount: 1
+        deterministicDoubleRender: true
+        exactArtifacts:
+          -
+            dependency: "traefik"
+            version: "41.0.2"
+            sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+  claimBoundary:
+    - "Catalog parity is byte-for-byte generation evidence, not a live reconciliation claim."
+    - "Effective renders are deterministic Helm desired state with exact chart archives; they are not workload-health evidence."
+    - "The committed source retains Kubara's official OCI references; only clean temporary generation configs use the pinned local catalog trees."
+status:
+  result: "offline-generation-and-render-pass"
+  kubaraGeneration: "pass"
+  catalogParity: "pass"
+  exactArtifactVerification: "pass"
+  deterministicDoubleRender: "pass"
+  liveReconciliation: "not-observed-by-this-receipt"

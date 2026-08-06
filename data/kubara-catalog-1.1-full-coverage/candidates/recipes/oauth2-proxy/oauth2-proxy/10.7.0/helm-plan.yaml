@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  readiness:
+    status: "packaged-with-controls"
+    chart: "oauth2-proxy/oauth2-proxy"
+    version: "10.7.0"
+    variants:
+      - "default"
+    helmObjectsByVariant:
+      default: 5
+    cubInstallObjectsByVariant:
+      default: 6
+    helmMatchByVariant:
+      default: "5/5"
+    scanGate: "warn-production-blocked"
+    nextAction: "select a reviewed configuration and complete target-specific live qualification before production"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"

@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  chart:
+    repository: "traefik"
+    name: "traefik"
+    version: "41.0.2"
+  package:
+    path: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+    name: "traefik-traefik"
+    version: "41.0.2"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "b70f0c2258ba7f2ab73fe6502e1778add3ff8caf1e7c9b896907ccbf0a24376a"
+        bytes: 366
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "460d20fb9271461c0ccf38da58c7aa940fd691aca94b48cf76aed24465a982ac"
+        bytes: 432022
+      -
+        path: "installer.yaml"
+        sha256: "1091f37614dd2c7c6a3135f3c2a992328cbebaa363b290adb3e53305548565dd"
+        bytes: 299
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2 -o <tmp>/traefik-41.0.2.tgz"
+    sha256: "08d4aee1a424b573e64643fb9d55c2af5cc4a62439235f40ce6b10b27ca682e7"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2 --base default --work-dir <tmp> --non-interactive --namespace traefik"
+      helmReleaseObjectCount: 31
+      cubInstallObjectCountIncludingSupport: 32
+      semanticObjectMatches: "31/31"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||traefik"

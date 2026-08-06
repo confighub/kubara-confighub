@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1-default"
+spec:
+  files:
+    -
+      path: "effective-values.yaml"
+      source: "inline-proof"
+      sha256: "d75711265610cd715f04f18238a58a2dfeaa9877f8a99081f6a9acf046c875d2"
+  mergedValuesCaptured: false
+  values:
+    args:
+      - "--kubelet-insecure-tls"

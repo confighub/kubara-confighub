@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "metrics-server-external-tls-ca-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+    objectCount: 9
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 10
+    uploadedManifestFiles: 10
+    separatedSecretFiles: 0
+    semanticObjectMatches: "9/9"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||kube-system"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-candidates:verify"

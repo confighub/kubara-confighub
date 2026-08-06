@@ -1,0 +1,230 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraOciDeliveryProofReceipt"
+metadata:
+  name: "kubara-local-platform-oci-delivery"
+spec:
+  recordedAt: "2026-07-27T04:56:30.404Z"
+  flow:
+    path: "Kubara -> ConfigHub review -> route work -> OCI -> bootstrap Argo CD -> Kubara Argo CD -> Metrics Server"
+    portableShape: "work -> OCI"
+    access:
+      configHubReview: "ConfigHub account and server required"
+      routeWork: "local target-side commands; no ConfigHub Server required"
+      portablePull: "anonymous; no ConfigHub account required"
+  source:
+    renderedObjects: "examples/kubara/local-platform/rendered/release-objects.yaml"
+    sourceLock: "examples/kubara/local-platform/source-lock.yaml"
+    routeIntent: "examples/kubara/local-platform/route-intent.yaml"
+    rawObjectCount: 77
+    nonSecretObjectCount: 75
+    rawSha256: "fa12bcd9947b46b9423f4876b39fc22c764613574319bcf8a532921ec716c541"
+    canonicalNonSecretSha256: "2989d1d9a223a68e1fe5961f7edb7969884b9b38b5fa805831dadf0f530c078b"
+  configHubReview:
+    organization: "helm-catalog"
+    space: "kubara-local-platform-v0-12-0"
+    unit: "release-objects"
+    unitId: "35144adb-8095-4f20-a1b5-1bd8ab480d74"
+    revision: 2
+    contentHash: 1407374650
+    dataHash: "222de125a8c4b342365997921973ee45604b7e40e10101cdb24202b883573c9e"
+    policy:
+      profile: "catalog-standard"
+      resourceClass: "system-configuration"
+      approvalGate: "platform/require-approval/vet-approvedby"
+      gateStateAtRunStart: "satisfied"
+      temporaryTarget: "kubara-local-platform-v0-12-0/kubara-proof-20260727045336"
+      temporaryReleaseTarget: "kubara-local-platform-v0-12-0/kubara-proof-20260727045336"
+    beforeApproval:
+      result: "blocked"
+      dryRun: true
+      gate: "platform/require-approval/vet-approvedby"
+      contentHashUnchanged: true
+      observation: "Observed by guarded run 20260727043744 before approval; the failed dry-run did not create a durable UnitEvent."
+      durableServerEvent: false
+    approval:
+      revision: 2
+      recordedApprovals: 1
+      approverIdentityRecordedInReceipt: false
+      contentHashUnchanged: true
+      action: "already-recorded-before-resume"
+    afterApproval:
+      result: "allowed"
+      dryRun: true
+    approvedDataMatchesCommittedObjects: true
+    privateRelease:
+      reference: "oci://oci.hub.confighub.com:443/space/kubara-local-platform-v0-12-0:latest"
+      manifestDigest: "sha256:2331e1684a4ee56bab2fe38c925aa12d76ad5ec8d13f91f5d1d467614ceff9aa"
+      bundleDigest: ""
+      releaseId: "f4bc473b-4d47-4528-a4ec-5baf1afb519b"
+      action: "reused-existing-latest"
+      usedForPortableDelivery: false
+  preparation:
+    approvedObjectCount: 75
+    outputObjectCount: 69
+    unchangedObjectCount: 66
+    changedObjects:
+      -
+        identity: "argoproj.io/v1alpha1|AppProject|argocd|test-cluster-local"
+        path: "spec.sourceRepos"
+        reason: "Allow the public helm-expt repository used by the generated ApplicationSets."
+      -
+        identity: "argoproj.io/v1alpha1|ApplicationSet|argocd|metrics-server"
+        path: "spec.template.spec.sources[1].helm.values"
+        reason: "Use --kubelet-insecure-tls only for the throwaway kind target."
+      -
+        identity: "apps/v1|Deployment|argocd|kubara-platform-argocd-dex-server"
+        path: "spec.replicas"
+        reason: "Do not run Dex on the throwaway target because this Kubara configuration does not provide a Dex login configuration."
+    executedBeforeDelivery:
+      - "v1|ServiceAccount|argocd|kubara-platform-argocd-redis-secret-init"
+      - "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-redis-secret-init"
+      - "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-redis-secret-init"
+      - "batch/v1|Job|argocd|kubara-platform-argocd-redis-secret-init"
+    deferredObjects:
+      -
+        identity: "external-secrets.io/v1|ClusterExternalSecret||image-pull-secret-ces"
+        reason: "The small live lane does not install External Secrets or a ClusterSecretStore, so the ClusterExternalSecret remains deferred."
+      -
+        identity: "networking.k8s.io/v1|Ingress|argocd|kubara-platform-argocd-server-grpc"
+        reason: "The throwaway kind target has no ingress controller, so its Argo CD gRPC Ingress remains deferred."
+  routes:
+    crdsFirst:
+      result: "pass"
+      namespace: "argocd"
+      crds:
+        - "applications.argoproj.io"
+        - "applicationsets.argoproj.io"
+        - "appprojects.argoproj.io"
+      established: 3
+    targetSecrets:
+      result: "pass"
+      names:
+        - "argocd/argocd-secret"
+        - "argocd/cluster-kubernetes.default.svc"
+      secretDataRecorded: false
+      selectedServices:
+        - "metrics-server"
+      disabledServices:
+        - "argocd"
+        - "cert-manager"
+        - "external-dns"
+        - "external-secrets"
+        - "homer-dashboard"
+        - "kube-prometheus-stack"
+        - "kyverno"
+        - "kyverno-policies"
+        - "kyverno-policy-reporter"
+        - "loki"
+        - "longhorn"
+        - "metallb"
+        - "oauth2-proxy"
+        - "reloader"
+        - "traefik"
+        - "velero"
+    redisInitializer:
+      result: "pass"
+      objects:
+        - "v1|ServiceAccount|argocd|kubara-platform-argocd-redis-secret-init"
+        - "rbac.authorization.k8s.io/v1|Role|argocd|kubara-platform-argocd-redis-secret-init"
+        - "rbac.authorization.k8s.io/v1|RoleBinding|argocd|kubara-platform-argocd-redis-secret-init"
+        - "batch/v1|Job|argocd|kubara-platform-argocd-redis-secret-init"
+      job: "argocd/kubara-platform-argocd-redis-secret-init"
+      generatedSecret: "argocd/argocd-redis"
+      generatedDataKeys:
+        - "auth"
+      secretDataRecorded: false
+    externalSecrets:
+      result: "deferred"
+      object: "external-secrets.io/v1|ClusterExternalSecret||image-pull-secret-ces"
+      reason: "External Secrets, its ClusterSecretStore, and the remote key are outside this small live lane."
+    ingress:
+      result: "deferred"
+      object: "networking.k8s.io/v1|Ingress|argocd|kubara-platform-argocd-server-grpc"
+      reason: "The throwaway kind target has no ingress controller."
+  portableRelease:
+    reference: "oci://127.0.0.1:32804/kubara-local-platform:latest"
+    clusterReference: "oci://host.docker.internal:32804/kubara-local-platform"
+    manifestDigest: "sha256:2285659325b97e5bc0093a1b230323bcebd95164874846c16497911c3ddb910f"
+    objectCount: 69
+    preparedDataSha256: "0a0d877dd9ba8be80a2405ca0ff53270a9fc8f27aeb915e04eb956b5e130e8ad"
+    pulledDataSha256: "0a0d877dd9ba8be80a2405ca0ff53270a9fc8f27aeb915e04eb956b5e130e8ad"
+    objectsMatchPreparedData: true
+    anonymousPull: true
+    registryLifetime: "temporary"
+  cluster:
+    name: "hx-kubara-20260727045336"
+    creationCommand: "kind create cluster"
+    bootstrapArgo:
+      version: "v3.4.5"
+      source: "https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.5/manifests/install.yaml"
+      sourceSha256: "cdf6758b489d25641c2a1fd835642543aaa64fe530867d0136a83ddf3dafe456"
+      namespace: "bootstrap-argocd"
+      transformedObjectCount: 59
+      clusterRoleBindings:
+        - "argocd-application-controller"
+        - "argocd-applicationset-controller"
+        - "argocd-server"
+      deployments:
+        - "argocd-applicationset-controller"
+        - "argocd-dex-server"
+        - "argocd-notifications-controller"
+        - "argocd-redis"
+        - "argocd-repo-server"
+        - "argocd-server"
+      statefulSets:
+        - "argocd-application-controller"
+      result: "pass"
+    bootstrapApplication:
+      result: "pass"
+      sync: "Synced"
+      health: "Healthy"
+      revision: "sha256:2285659325b97e5bc0093a1b230323bcebd95164874846c16497911c3ddb910f"
+      expectedRevision: "sha256:2285659325b97e5bc0093a1b230323bcebd95164874846c16497911c3ddb910f"
+      digestMatchesPortableOci: true
+    kubara:
+      result: "pass"
+      argoCore:
+        namespace: "argocd"
+        deployments:
+          - "kubara-platform-argocd-applicationset-controller"
+          - "kubara-platform-argocd-dex-server"
+          - "kubara-platform-argocd-redis"
+          - "kubara-platform-argocd-repo-server"
+          - "kubara-platform-argocd-server"
+        statefulSets:
+          - "kubara-platform-argocd-application-controller"
+        ready: true
+      selectedApplications:
+        - "test-cluster-metrics-server"
+      selectedApplication:
+        name: "test-cluster-metrics-server"
+        sync: "Synced"
+        health: "Healthy"
+        revision: ""
+      workload:
+        namespace: "metrics-server"
+        deployments:
+          -
+            name: "metrics-server"
+            desired: 1
+            available: 1
+            observedGenerationMatches: true
+        ready: true
+  cleanup:
+    unitTarget: "pass"
+    spaceReleaseTarget: "pass"
+    temporaryTarget: "pass"
+    cluster: "pass"
+    registry: "pass"
+    localFiles: "pass"
+  limits:
+    - "The public OCI used a temporary registry."
+    - "The blocked pre-approval dry-run was observed in guarded run 20260727043744, but ConfigHub did not retain a UnitEvent for the failed dry-run."
+    - "The route selected Metrics Server as the one downstream platform service; it did not install every service enabled in the original local-evaluation profile."
+    - "The ClusterExternalSecret stayed deferred because this lane did not install External Secrets, a ClusterSecretStore, or its remote key."
+    - "The Argo CD gRPC Ingress stayed deferred because this lane did not install an ingress controller."
+    - "The local-kind Metrics Server adjustment adds --kubelet-insecure-tls for this throwaway cluster and is not a production recommendation."
+    - "The proof uses one cluster. It does not prove a multi-cluster Kubara promotion wave."
+status:
+  result: "pass"
+  claim: "ConfigHub approved the exact Kubara base, target-side route work installed its prerequisites and ran the Redis initializer, a portable OCI delivered the prepared configuration through Argo CD, Kubara Argo CD became ready, and the selected Metrics Server application became Synced and Healthy."

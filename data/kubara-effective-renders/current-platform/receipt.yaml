@@ -1,0 +1,560 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraEffectiveRenderReceipt"
+metadata:
+  name: "current-platform-v0.13.0"
+spec:
+  profile:
+    id: "current-platform"
+    role: "primary-current"
+  source:
+    kubaraVersion: "v0.13.0"
+    kubaraCommit: "096ed84d116e5316852537046cc61d15a1e1c304"
+    catalogVersion: "1.1.0"
+    fixture: "examples/kubara/current-platform"
+    sourceLock: "examples/kubara/current-platform/source-lock.yaml"
+    artifactIndex: "examples/kubara/current-platform/component-artifacts.yaml"
+    config: "examples/kubara/current-platform/source/config.yaml"
+    sourceChecksums: "data/kubara-effective-renders/current-platform/source-checksums.txt"
+    sourceChecksumsSha256: "a133ec19c9fbdcfb01b2678768b929bfad705d747591f1678f13203296a230f6"
+  renderProfile:
+    kubeVersion: "1.35.0"
+    helmVersion: "v4.1.4"
+    includeCrds: true
+    includeHooks: true
+    skipTests: true
+    apiVersions:
+      - "argoproj.io/v1alpha1"
+      - "argoproj.io/v1alpha1/Application"
+      - "argoproj.io/v1alpha1/ApplicationSet"
+      - "cert-manager.io/v1"
+      - "cert-manager.io/v1/Certificate"
+      - "cert-manager.io/v1/ClusterIssuer"
+      - "external-secrets.io/v1"
+      - "external-secrets.io/v1/ClusterExternalSecret"
+      - "external-secrets.io/v1/ClusterSecretStore"
+      - "external-secrets.io/v1/ExternalSecret"
+      - "monitoring.coreos.com/v1"
+      - "monitoring.coreos.com/v1/PodMonitor"
+      - "monitoring.coreos.com/v1/PrometheusRule"
+      - "monitoring.coreos.com/v1/ServiceMonitor"
+      - "traefik.io/v1alpha1"
+      - "traefik.io/v1alpha1/IngressRoute"
+      - "traefik.io/v1alpha1/Middleware"
+  clusters:
+    -
+      name: "hx-app-dev"
+      stage: "dev"
+      type: "hub"
+      argoSelfManaged: "enabled"
+    -
+      name: "hx-app-staging"
+      stage: "staging"
+      type: "spoke"
+      argoSelfManaged: "disabled"
+    -
+      name: "hx-app-prod-a"
+      stage: "prod"
+      type: "spoke"
+      argoSelfManaged: "disabled"
+    -
+      name: "hx-app-prod-b"
+      stage: "prod"
+      type: "spoke"
+      argoSelfManaged: "disabled"
+  instances:
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "argo-cd"
+      kubaraService: "argo-cd"
+      releaseName: "argo-cd"
+      namespace: "argocd"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/argo-cd/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/argo-cd/values-repository-paths.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/argo-cd.yaml"
+      sha256: "3881930e58f377be7074eda757a17e304825a3104183f477cfadb4cb87c57bb8"
+      objectCount: 86
+      kinds:
+        ApplicationSet: 17
+        AppProject: 2
+        ClusterExternalSecret: 1
+        ClusterRole: 5
+        ClusterRoleBinding: 2
+        ConfigMap: 8
+        CustomResourceDefinition: 3
+        Deployment: 5
+        ExternalSecret: 3
+        Ingress: 1
+        Job: 2
+        Namespace: 1
+        NetworkPolicy: 5
+        Role: 7
+        RoleBinding: 7
+        Secret: 2
+        Service: 6
+        ServiceAccount: 7
+        ServiceMonitor: 1
+        StatefulSet: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "argo-cd-10.2.1.tgz"
+          sha256: "27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "cert-manager"
+      kubaraService: "cert-manager"
+      releaseName: "cert-manager"
+      namespace: "cert-manager"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/cert-manager/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/cert-manager/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/cert-manager.yaml"
+      sha256: "d42bd87d5d10982edf3d3c308769c3fba802df70bfca68e10600a76114e95ee7"
+      objectCount: 54
+      kinds:
+        ClusterIssuer: 1
+        ClusterRole: 13
+        ClusterRoleBinding: 10
+        CustomResourceDefinition: 6
+        Deployment: 3
+        Job: 1
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        PrometheusRule: 1
+        Role: 4
+        RoleBinding: 4
+        Service: 3
+        ServiceAccount: 4
+        ServiceMonitor: 1
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "cert-manager-v1.21.0.tgz"
+          sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "external-secrets"
+      kubaraService: "external-secrets"
+      releaseName: "external-secrets"
+      namespace: "external-secrets"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/external-secrets/values.generated.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/external-secrets.yaml"
+      sha256: "b90bd5215ed87a67cd9b2754f04865a20e40b805fe1349e93de25770b0a69292"
+      objectCount: 50
+      kinds:
+        ClusterRole: 5
+        ClusterRoleBinding: 2
+        CustomResourceDefinition: 25
+        Deployment: 3
+        Namespace: 1
+        Role: 1
+        RoleBinding: 1
+        Secret: 1
+        Service: 3
+        ServiceAccount: 3
+        ServiceMonitor: 3
+        ValidatingWebhookConfiguration: 2
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "external-secrets-2.8.0.tgz"
+          sha256: "251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "homer-dashboard"
+      kubaraService: "homer-dashboard"
+      releaseName: "homer-dashboard"
+      namespace: "homer-dashboard"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/homer-dashboard/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/homer-dashboard/values-project-links.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/homer-dashboard.yaml"
+      sha256: "0810f86226a13a70f24a345af9560536f773f054fb75a7cbaf2202ab64858d2d"
+      objectCount: 8
+      kinds:
+        ConfigMap: 4
+        Deployment: 1
+        Namespace: 1
+        Service: 1
+        ServiceMonitor: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "kube-prometheus-stack"
+      kubaraService: "kube-prometheus-stack"
+      releaseName: "kube-prometheus-stack"
+      namespace: "kube-prometheus-stack"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/kube-prometheus-stack/values.generated.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/kube-prometheus-stack.yaml"
+      sha256: "a9c778d0a46b42a05f4296c6ab34fc75c62a5fb1efd5e1906ab10a7a25edaf92"
+      objectCount: 116
+      kinds:
+        Alertmanager: 1
+        Certificate: 2
+        ClusterRole: 4
+        ClusterRoleBinding: 4
+        ConfigMap: 29
+        CustomResourceDefinition: 10
+        DaemonSet: 1
+        Deployment: 4
+        ExternalSecret: 1
+        Issuer: 2
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        Prometheus: 1
+        PrometheusRule: 30
+        Secret: 1
+        Service: 8
+        ServiceAccount: 7
+        ServiceMonitor: 8
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "kube-prometheus-stack-87.19.2.tgz"
+          sha256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "prometheus-blackbox-exporter-11.15.1.tgz"
+          sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "metrics-server"
+      kubaraService: "metrics-server"
+      releaseName: "metrics-server"
+      namespace: "metrics-server"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/metrics-server/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/metrics-server/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/metrics-server.yaml"
+      sha256: "da40e4395191e57b4a67b579a9b9e171461e960d9df22ae108bf2d262fa65f69"
+      objectCount: 10
+      kinds:
+        APIService: 1
+        ClusterRole: 2
+        ClusterRoleBinding: 2
+        Deployment: 1
+        Namespace: 1
+        RoleBinding: 1
+        Service: 1
+        ServiceAccount: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "metrics-server-3.13.1.tgz"
+          sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-dev"
+      stage: "dev"
+      clusterType: "hub"
+      component: "traefik"
+      kubaraService: "traefik"
+      releaseName: "traefik"
+      namespace: "traefik"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/traefik/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-dev/helm/traefik/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-dev/traefik.yaml"
+      sha256: "0c39aaa4266218d7c9cd5c29f8fd303b832d53345176fbd7bd2a94a14909ca7c"
+      objectCount: 33
+      kinds:
+        ClusterRole: 1
+        ClusterRoleBinding: 1
+        CustomResourceDefinition: 25
+        Deployment: 1
+        IngressClass: 1
+        Namespace: 1
+        Service: 1
+        ServiceAccount: 1
+        ServiceMonitor: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+        -
+          file: "traefik-41.0.2.tgz"
+          sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+    -
+      cluster: "hx-app-prod-a"
+      stage: "prod"
+      clusterType: "spoke"
+      component: "cert-manager"
+      kubaraService: "cert-manager"
+      releaseName: "cert-manager"
+      namespace: "cert-manager"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-a/helm/cert-manager/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-a/helm/cert-manager/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-prod-a/cert-manager.yaml"
+      sha256: "27f69adde8d447b0294205f65d9d19685c987a4b2ad573271e3edbb239f0a75a"
+      objectCount: 52
+      kinds:
+        ClusterIssuer: 1
+        ClusterRole: 13
+        ClusterRoleBinding: 10
+        CustomResourceDefinition: 6
+        Deployment: 3
+        Job: 1
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        Role: 4
+        RoleBinding: 4
+        Service: 3
+        ServiceAccount: 4
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "cert-manager-v1.21.0.tgz"
+          sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-prod-a"
+      stage: "prod"
+      clusterType: "spoke"
+      component: "traefik"
+      kubaraService: "traefik"
+      releaseName: "traefik"
+      namespace: "traefik"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-a/helm/traefik/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-a/helm/traefik/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-prod-a/traefik.yaml"
+      sha256: "f3f494ffb978b154e083493974f39221f32ce5ec047f3e4caaced3d3310e3d81"
+      objectCount: 32
+      kinds:
+        ClusterRole: 1
+        ClusterRoleBinding: 1
+        CustomResourceDefinition: 25
+        Deployment: 1
+        IngressClass: 1
+        Namespace: 1
+        Service: 1
+        ServiceAccount: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+        -
+          file: "traefik-41.0.2.tgz"
+          sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+    -
+      cluster: "hx-app-prod-b"
+      stage: "prod"
+      clusterType: "spoke"
+      component: "cert-manager"
+      kubaraService: "cert-manager"
+      releaseName: "cert-manager"
+      namespace: "cert-manager"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-b/helm/cert-manager/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-b/helm/cert-manager/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-prod-b/cert-manager.yaml"
+      sha256: "ddab0a44c5efc491c6132223fff6b88ecd2da5abdd77e73af1887f7593aef70a"
+      objectCount: 52
+      kinds:
+        ClusterIssuer: 1
+        ClusterRole: 13
+        ClusterRoleBinding: 10
+        CustomResourceDefinition: 6
+        Deployment: 3
+        Job: 1
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        Role: 4
+        RoleBinding: 4
+        Service: 3
+        ServiceAccount: 4
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "cert-manager-v1.21.0.tgz"
+          sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-prod-b"
+      stage: "prod"
+      clusterType: "spoke"
+      component: "traefik"
+      kubaraService: "traefik"
+      releaseName: "traefik"
+      namespace: "traefik"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-b/helm/traefik/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-prod-b/helm/traefik/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-prod-b/traefik.yaml"
+      sha256: "9d5ce0593524ae3e9b2aaf99ec8fddf4a8c57332b9a07bff91f24456a034a4a1"
+      objectCount: 32
+      kinds:
+        ClusterRole: 1
+        ClusterRoleBinding: 1
+        CustomResourceDefinition: 25
+        Deployment: 1
+        IngressClass: 1
+        Namespace: 1
+        Service: 1
+        ServiceAccount: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+        -
+          file: "traefik-41.0.2.tgz"
+          sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+    -
+      cluster: "hx-app-staging"
+      stage: "staging"
+      clusterType: "spoke"
+      component: "cert-manager"
+      kubaraService: "cert-manager"
+      releaseName: "cert-manager"
+      namespace: "cert-manager"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-staging/helm/cert-manager/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-staging/helm/cert-manager/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-staging/cert-manager.yaml"
+      sha256: "d7cc5ad406be55803cc8c8f267631812051d82dd649863a89f87c2db0ed0690d"
+      objectCount: 52
+      kinds:
+        ClusterIssuer: 1
+        ClusterRole: 13
+        ClusterRoleBinding: 10
+        CustomResourceDefinition: 6
+        Deployment: 3
+        Job: 1
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        Role: 4
+        RoleBinding: 4
+        Service: 3
+        ServiceAccount: 4
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "cert-manager-v1.21.0.tgz"
+          sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "hx-app-staging"
+      stage: "staging"
+      clusterType: "spoke"
+      component: "traefik"
+      kubaraService: "traefik"
+      releaseName: "traefik"
+      namespace: "traefik"
+      values:
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-staging/helm/traefik/values.generated.yaml"
+        - "examples/kubara/current-platform/generated/platform-configs/hx-app-staging/helm/traefik/values-kind.yaml"
+      output: "data/kubara-effective-renders/current-platform/hx-app-staging/traefik.yaml"
+      sha256: "3ebec65bab14e1f48da29496d979c7463741f2e6f2697e46752a582d6d77633c"
+      objectCount: 32
+      kinds:
+        ClusterRole: 1
+        ClusterRoleBinding: 1
+        CustomResourceDefinition: 25
+        Deployment: 1
+        IngressClass: 1
+        Namespace: 1
+        Service: 1
+        ServiceAccount: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+        -
+          file: "traefik-41.0.2.tgz"
+          sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+  renderChecksums: "data/kubara-effective-renders/current-platform/render-checksums.txt"
+  renderChecksumsSha256: "d84967cf0afe26d040a0265edd9c678f7b8cd6f040e12f52dc4861a7336fc9f0"
+  claimBoundary:
+    - "These are offline Helm renders of committed Kubara-generated wrappers and per-cluster values."
+    - "API versions are declared explicitly so cross-component custom resources appear in each cluster's aggregate desired-state corpus."
+    - "A rendered object is desired-state evidence, not proof that a controller created it or that a live cluster reconciled it."
+status:
+  result: "offline-render-pass"
+  liveReconciliation: "not-observed-by-this-receipt"

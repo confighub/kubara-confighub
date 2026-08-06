@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hx-web
+  namespace: hx-web
+spec:
+  selector:
+    app.kubernetes.io/name: hx-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

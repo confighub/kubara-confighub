@@ -1,0 +1,63 @@
+version: v1alpha3
+clusters:
+  - name: test-cluster
+    stage: local
+    type: hub
+    dnsName: test-cluster-local.traefik.me
+    ssoOrg: local
+    ssoTeam: local
+    ingressClassName: traefik
+    argocd:
+      repo:
+        https:
+          configs:
+            url: https://github.com/confighub/helm-expt.git
+            targetRevision: main
+          components:
+            url: https://github.com/confighub/helm-expt.git
+            targetRevision: main
+    services:
+      argocd:
+        status: enabled
+      cert-manager:
+        status: enabled
+        config:
+          clusterIssuer:
+            email: platform@example.com
+            name: letsencrypt-staging
+            server: https://acme-staging-v02.api.letsencrypt.org/directory
+      external-dns:
+        status: disabled
+      external-secrets:
+        status: enabled
+      homer-dashboard:
+        status: enabled
+      kube-prometheus-stack:
+        status: enabled
+      kyverno:
+        status: disabled
+      kyverno-policies:
+        status: disabled
+      kyverno-policy-reporter:
+        status: disabled
+      loki:
+        status: disabled
+      longhorn:
+        status: disabled
+      metallb:
+        status: disabled
+      metrics-server:
+        status: enabled
+      oauth2-proxy:
+        status: disabled
+      reloader:
+        status: disabled
+      traefik:
+        status: enabled
+      velero:
+        status: disabled
+        config:
+          backupMode: fs-backup
+          backupStorage:
+            create: true
+            region: eu01

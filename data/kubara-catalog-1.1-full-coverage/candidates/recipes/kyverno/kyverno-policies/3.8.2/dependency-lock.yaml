@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "kyverno-kyverno-policies-3.8.2"
+spec:
+  chart: "kyverno/kyverno-policies"
+  version: "3.8.2"
+  dependencies:
+    []

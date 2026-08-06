@@ -1,0 +1,27 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "kyverno-kyverno-3.8.2"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      dependencyCount: 5
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+    -
+      category: "crd-lifecycle"
+      status: "review-required"
+      count: 22
+    -
+      category: "catalog-coverage"
+      status: "packaged-with-controls"
+      note: "exact source and deterministic package are retained; live qualification and production support remain separate gates"

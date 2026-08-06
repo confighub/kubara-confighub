@@ -1,0 +1,188 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack"
+  version: "87.19.2"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "kube-prometheus-stack default with Grafana password bound variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "CRD alertmanagerconfigs.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD alertmanagers.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD podmonitors.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD probes.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheusagents.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheuses.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheusrules.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD scrapeconfigs.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD servicemonitors.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD thanosrulers.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "Secret monitoring/kube-prometheus-stack-admission keys ca,cert,key"
+          namespace: "monitoring"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+    -
+      name: "no-crds"
+      path: "bases/no-crds"
+      description: "kube-prometheus-stack CRDs disabled variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "CRD alertmanagerconfigs.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD alertmanagers.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD podmonitors.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD probes.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheusagents.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheuses.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheusrules.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD scrapeconfigs.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD servicemonitors.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "CRD thanosrulers.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        -
+          kind: "ClusterFeature"
+          name: "Secret monitoring/kube-prometheus-stack-admission keys ca,cert,key"
+          namespace: "monitoring"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+    -
+      name: "existing-secret"
+      path: "bases/existing-secret"
+      description: "kube-prometheus-stack Grafana credentials from an existing Secret variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "CRD alertmanagerconfigs.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD alertmanagers.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD podmonitors.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD probes.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheusagents.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheuses.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD prometheusrules.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD scrapeconfigs.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD servicemonitors.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "CRD thanosrulers.monitoring.coreos.com"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          applyMode: "server-side-force-conflicts"
+        -
+          kind: "ClusterFeature"
+          name: "Secret monitoring/grafana-admin-credentials keys admin-user,admin-password"
+          namespace: "monitoring"
+          suggestedSource: "ExternalSecret monitoring/grafana-admin-credentials or an equivalent target-owned Secret"
+        -
+          kind: "ClusterFeature"
+          name: "Secret monitoring/kube-prometheus-stack-admission keys ca,cert,key"
+          namespace: "monitoring"
+          suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+  collector:
+    command: "/bin/sh"
+    args:
+      - "collector/target-facts.sh"
+    description: "Records target-fact bindings and can live-check cluster-visible Secret and CRD requirements."

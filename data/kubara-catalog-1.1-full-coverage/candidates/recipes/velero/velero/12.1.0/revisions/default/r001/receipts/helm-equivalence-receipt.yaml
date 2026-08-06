@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "velero-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "98ae56afed33da670906bb8ea003f7abd1ec19e4bbc42244590bc2e97f772d3f"
+    objectCount: 23
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 24
+    uploadedManifestFiles: 24
+    separatedSecretFiles: 1
+    semanticObjectMatches: "23/23"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||velero"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-1.1-full-coverage:compare"

@@ -1,0 +1,25 @@
+apiVersion: evidence.confighub.com/v1alpha1
+kind: KubaraMiniIDPApplicationSourceLock
+metadata:
+  name: kubara-confighub-mini-idp-apps
+spec:
+  hxWeb:
+    source: local-reviewed-fixture
+    image:
+      original: nginx:1.27
+      pinned: nginx@sha256:6784fb0834aa7dbbe12e3d7471e69c290df3e6ba810dc38b34ae33d3c1c05f7d
+  cubbychat:
+    upstream:
+      repository: https://github.com/confighub/cubbychat.git
+      commit: e9e76a076924d95897c3ede7a0f21cec523c4f6f
+      path: simple/config-data.yaml
+    adaptations:
+      - split the aggregate source into one-resource files for ConfigHub revision history
+      - add an explicit Namespace, Certificate, and Traefik Ingress
+      - move database references behind a named demo Secret
+      - pin every workload image to the observed multi-platform manifest digest
+    images:
+      postgres: postgres@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20
+      backend: ghcr.io/confighub/cubbychat/backend@sha256:0d8342bcb139662ab76b962609f3f99da0b3aaa050a97ad7230eb0c73f440755
+      frontend: ghcr.io/confighub/cubbychat/frontend@sha256:4e2c305b56af8414fab8f1ee2c3b075d96d7f60a7bd9f1c73c733e0ee81dffe5
+    boundary: the committed credential values are demo-only and must be replaced by an ExternalSecret or another target-owned Secret in a real platform

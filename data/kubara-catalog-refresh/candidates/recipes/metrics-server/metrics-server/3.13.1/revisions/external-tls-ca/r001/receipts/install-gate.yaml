@@ -1,0 +1,21 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "metrics-server-external-tls-ca-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+  decision: "blocked"
+  allowedScopes:
+    - "offline-local-evaluation"
+  blockedScopes:
+    - "live-cluster"
+    - "root-catalog-promotion"
+    - "production"
+  reasons:
+    - "Helm equivalence passed for external-tls-ca"
+    - "APIService availability needs a fresh observation receipt after apply"
+    - "Cluster-scoped RBAC needs production review"
+    - "requires target Secret kube-system/metrics-server-tls with tls.crt and tls.key, plus an APIService caBundle that matches the Secret certificate authority"
+    - "live qualification has not run"
+    - "Kubara ServiceDefinition, wrapper, defaults, and additions compatibility is incomplete"

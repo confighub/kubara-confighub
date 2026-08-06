@@ -1,0 +1,71 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "external-secrets-external-secrets-2.7.0"
+spec:
+  chart:
+    repository: "external-secrets"
+    name: "external-secrets"
+    version: "2.7.0"
+  package:
+    path: "data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0"
+    name: "external-secrets-external-secrets"
+    version: "2.7.0"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "a568b1b65f059ebd2d92603e7ee9f7dce003cb362d2737b6bb03b7ade6e8e951"
+        bytes: 392
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "33f0d74470d5f0a3affc7589a1929d5dc6cd1a30b557ccfb624545820a0a0d11"
+        bytes: 1899916
+      -
+        path: "bases/no-crds/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/no-crds/upstream.yaml"
+        sha256: "63eae27464b7c2c352d5b4fd8c1c7aa21c6e04cf024ca530206b0f6b2d9819d1"
+        bytes: 22325
+      -
+        path: "collector/target-facts.sh"
+        sha256: "42ab81ea61c5d7fb6ea47af3be9d3ba1cffd140d950da541774c758dd26cc779"
+        bytes: 12029
+      -
+        path: "installer.yaml"
+        sha256: "c04c5a6222df46777ec7f665904ebe03f6d134135721bad0ab19543eb775f872"
+        bytes: 7438
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0 -o <tmp>/external-secrets-2.7.0.tgz"
+    sha256: "39defade94b1701477f66f99fa6f63981dac45fa9269ff5afea6456f6a7d5421"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0 --base default --work-dir <tmp> --non-interactive --namespace external-secrets"
+      helmReleaseObjectCount: 43
+      cubInstallObjectCountIncludingSupport: 44
+      semanticObjectMatches: "43/43"
+      separatedSecretCount: 1
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||external-secrets"
+    -
+      variant: "no-crds"
+      base: "no-crds"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0 --base no-crds --work-dir <tmp> --non-interactive --namespace external-secrets"
+      helmReleaseObjectCount: 19
+      cubInstallObjectCountIncludingSupport: 20
+      semanticObjectMatches: "19/19"
+      separatedSecretCount: 1
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||external-secrets"

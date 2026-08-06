@@ -1,0 +1,71 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraConfigHubGuiEvidenceReceipt"
+metadata:
+  name: "kubara-config-hub-six-frame-gui-tour"
+spec:
+  sourceCommit: "5d69eb0447eed52a5e1b7f20617d98a742d65f3c"
+  organizationExternalID: "58b23b85-9699-4384-bd57-80ef695a1d58"
+  organizationInternalID: "12c33fa8-00b1-4011-ad3e-19d56458b29c"
+  faithfulReceiptSHA256: "76c2ed7d7c36f65eea1deae08d843d944f15e5d5e9c5e2b9c2097fa3a2d9ef61"
+  miniIdpReceiptSHA256: "8b26167c50773baad5f144c2d64625de4129d2d82edf5b33c7801dd9056e8238"
+  orphanReceiptSHA256: "c588c4882ed5de66d4dde68cf0f09f94ee9b976bca740e14cec4c6796bebdb23"
+  matrixSHA256: "d03cd48285f2844c4eae3b550f05f3e0e64a8f0c945b7cdc512aceed426520e6"
+  wiringSHA256: "fdc8637d5dfc0f139a2b43d9fadcdba0fdc873847225c5a597a5c1ef287609a7"
+  images:
+    -
+      path: "docs/images/kubara/01-platform-contract.png"
+      sha256: "0b1f65b7164e269237593cfeee2fd74304b5587380298df6088d664fd9231e87"
+      capturedAt: "2026-08-06T10:13:30.520Z"
+      visibleIdentities:
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      sensitiveValues: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The hx-platform/platform-contract Unit's configuration in the ConfigHub GUI: the platform contract header and breadcrumb, the exact Git source identity for configs and components, the catalog references, and the unit navigation tabs."
+      claimBoundary: "The frame shows the navigable platform contract record; receipt status and live convergence are proved by the bound receipts, not by this image."
+    -
+      path: "docs/images/kubara/02-component-catalog.png"
+      sha256: "df10b5593d3ed94d3ee0d7e2469964c72468cf646fd8d05fd99683e16efb2c2a"
+      capturedAt: "2026-08-06T10:10:02.091Z"
+      visibleIdentities:
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      sensitiveValues: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The traefik component in the component-first Catalog: the base definition and the four per-cluster instances, each Healthy and Synced at its retained release (rel-4 on dev and staging, rel-3 on both production targets), with ConfigHub's upstream Stale departure signal kept visible."
+      claimBoundary: "Stale means newer retained definition revisions exist upstream of the pinned instances; it is not evidence that Argo is OutOfSync. Release digest, sync, health, and readiness are proved separately in the platform matrix."
+    -
+      path: "docs/images/kubara/03-delivery-lanes.png"
+      sha256: "ad5c38171bb127a3cc0d824670bb38e26e757a769e90084703ff8f066fb8a703"
+      capturedAt: "2026-08-06T10:31:25.348Z"
+      visibleIdentities:
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      sensitiveValues: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "Units filtered to Component argo-cd: the faithful Kubara hub definition (hx-argo-base), the adapted refresh-only runtime (hx-argo-runtime-base), the gated kubara-argo-definition in hx-platform, and the four per-cluster root delivery Applications, each bound to its target."
+      claimBoundary: "The frame shows both retained lanes and the four target relationships; deployment authority remains the exact ConfigHub release digest, proved by the bound receipts."
+    -
+      path: "docs/images/kubara/04-application-four-clusters.png"
+      sha256: "008ee6992a129d471f1e52d116421a63be503727354d46cb94aee0f46404954f"
+      capturedAt: "2026-08-06T10:17:18.598Z"
+      visibleIdentities:
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      sensitiveValues: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The hx-web application in one frame: base and platform-binding definitions fanning to dev (rel-8), staging (rel-9), production A (rel-7), and production B (rel-6), every placement Healthy and Synced, with the one-target rollback visible as production B's older retained release and departure signals kept honest."
+      claimBoundary: "Approval, promotion, departure, and rollback history live on the Unit revision records and receipts; this frame shows the four placements and their exact retained releases together."
+    -
+      path: "docs/images/kubara/05-native-links.png"
+      sha256: "6fe2cbc5f010f9edc4acc55cb9e281aeaf69d0050bcb63bf20d49c5946dcfd43"
+      capturedAt: "2026-08-06T10:33:30.030Z"
+      visibleIdentities:
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      sensitiveValues: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The hx-cubbychat development Unit's Links: needs-traefik to hx-traefik in hx-traefik-dev, needs-cert-manager to hx-cm in hx-cm-dev (both NeedsProvides), and the upgrade-hx-cubbychat UpgradeUnit link to the base definition — each with both ends visible."
+      claimBoundary: "These are the curated native Link intents; the complete extracted wiring graph remains the engineering view and is bound separately."
+    -
+      path: "docs/images/kubara/06-fleet-matrix-clean-inventory.png"
+      sha256: "369fa49cfbfa8c3e2645b252fe937753537e06b1f6e14b92079c80d72675d0b4"
+      capturedAt: "2026-08-06T09:57:26.807Z"
+      visibleIdentities:
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      sensitiveValues: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The generated fleet matrix page: all 36 component/application-by-cluster cells with observed, disabled, sync, health, and version columns, the live overlay receipt identity, and the exact scoped residue audit identity (accepted-current-scoped-residue-clean with its SHA-256 and observation time) proving zero audited residue."
+      claimBoundary: "The matrix separates desired placement from observed release, sync, health, and readiness; the residue audit does not claim a complete inventory of every Kubernetes resource type."
+status:
+  result: "pass"
+  sourceCurrent: true

@@ -1,0 +1,83 @@
+apiVersion: import.confighub.com/v1alpha1
+kind: KubaraApplicationRelease
+metadata:
+  name: payments
+spec:
+  destination:
+    organization: Acme Kubara
+    context: acme-kubara
+    organizationExternalID: 30000000-0000-4000-8000-000000000001
+    organizationID: 30000000-0000-4000-8000-000000000002
+    serverURL: https://hub.confighub.example
+    spaceReleaseOCIBase: oci://oci.hub.confighub.example:443/space
+  source:
+    repository: https://github.com/acme/payments.git
+    commit: "1111111111111111111111111111111111111111"
+    path: deploy
+    treeSHA256: sha256:1111111111111111111111111111111111111111111111111111111111111111
+    credentialScanReportSHA256: sha256:2222222222222222222222222222222222222222222222222222222222222222
+  targets:
+    dev:
+      environment: Dev
+      promoteFrom: null
+      source:
+        space: payments-dev
+        unit: payments
+        unitID: 10000000-0000-4000-8000-000000000001
+        headRevisionNum: 1
+        dataHash: "3333333333333333333333333333333333333333333333333333333333333333"
+        releaseBundleDigest: sha256:4444444444444444444444444444444444444444444444444444444444444444
+        releaseManifestDigest: sha256:5555555555555555555555555555555555555555555555555555555555555555
+      delivery:
+        appsSpace: acme-dev-argo-apps
+        unit: payments
+        targetRef: acme-dev/target
+        targetID: 20000000-0000-4000-8000-000000000001
+        namespace: payments
+        clusterContext: acme-dev
+        clusterIdentityUID: 40000000-0000-4000-8000-000000000001
+        argoNamespace: argocd
+        rootApplication: root
+      approval:
+        required: false
+        authority: exact-unit-id-head-revision-and-data-hash
+      health:
+        contract: argo-synced-and-healthy-exact-source-manifest
+        evidenceRef: evidence://apps/payments/dev
+    prod:
+      environment: Prod
+      promoteFrom: dev
+      source:
+        space: payments-prod
+        unit: payments
+        unitID: 10000000-0000-4000-8000-000000000002
+        headRevisionNum: 1
+        dataHash: "6666666666666666666666666666666666666666666666666666666666666666"
+        releaseBundleDigest: sha256:7777777777777777777777777777777777777777777777777777777777777777
+        releaseManifestDigest: sha256:8888888888888888888888888888888888888888888888888888888888888888
+      delivery:
+        appsSpace: acme-prod-argo-apps
+        unit: payments
+        targetRef: acme-prod/target
+        targetID: 20000000-0000-4000-8000-000000000002
+        namespace: payments
+        clusterContext: acme-prod
+        clusterIdentityUID: 40000000-0000-4000-8000-000000000002
+        argoNamespace: argocd
+        rootApplication: root
+      approval:
+        required: true
+        authority: exact-unit-id-head-revision-and-data-hash
+      health:
+        contract: argo-synced-and-healthy-exact-source-manifest
+        evidenceRef: evidence://apps/payments/prod
+  promotion:
+    mode: explicit-reviewed-upgrade-unit
+    departures: preserve-reviewed-target-departures
+    rollback: target-local-exact-revision
+  policy:
+    deliveryAuthority: exact-source-release-manifest-digest
+    automatedSync: false
+    mutableTagsAreAuthority: false
+    applicationSetsAccepted: false
+    targetFactsInSource: false

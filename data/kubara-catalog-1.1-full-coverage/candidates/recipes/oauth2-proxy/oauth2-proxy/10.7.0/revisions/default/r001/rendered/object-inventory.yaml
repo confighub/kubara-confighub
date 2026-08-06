@@ -1,0 +1,39 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0-default-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "1e6b5312d0e3ec8d8c0e306fb995604d377c89207409e35f2934f3526ac54abc"
+  objectCount: 5
+  objects:
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|oauth2-proxy|oauth2-proxy"
+      kind: "Deployment"
+      name: "oauth2-proxy"
+      namespace: "oauth2-proxy"
+    -
+      apiVersion: "v1"
+      identity: "v1|ConfigMap|oauth2-proxy|oauth2-proxy"
+      kind: "ConfigMap"
+      name: "oauth2-proxy"
+      namespace: "oauth2-proxy"
+    -
+      apiVersion: "v1"
+      identity: "v1|Secret|oauth2-proxy|oauth2-proxy"
+      kind: "Secret"
+      name: "oauth2-proxy"
+      namespace: "oauth2-proxy"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|oauth2-proxy|oauth2-proxy"
+      kind: "ServiceAccount"
+      name: "oauth2-proxy"
+      namespace: "oauth2-proxy"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|oauth2-proxy|oauth2-proxy"
+      kind: "Service"
+      name: "oauth2-proxy"
+      namespace: "oauth2-proxy"

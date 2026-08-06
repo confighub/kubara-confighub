@@ -1,0 +1,24 @@
+apiVersion: helm-expt.confighub.com/v1alpha1
+kind: CatalogStatus
+metadata:
+  name: "external-secrets-external-secrets-2.8.0"
+spec:
+  chart: "external-secrets/external-secrets"
+  version: "2.8.0"
+  status: "catalog-candidate"
+  supportLevel: "promotion-review-needed"
+  supportedScopes:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  supportedVariants:
+    []
+  candidateVariants:
+    - "default"
+    - "no-crds"
+  deferredVariants: []
+  review:
+    lastReviewed: "2026-05-27"
+    humanReviewRequired: true
+    productReviewRequired: true
+  notes:
+    - "Machine proof exists; human product review must confirm the supported variants and production dispositions."

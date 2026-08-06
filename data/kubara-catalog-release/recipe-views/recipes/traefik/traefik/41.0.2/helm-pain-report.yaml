@@ -1,0 +1,87 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPainReport"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  chart:
+    name: "traefik/traefik"
+    version: "41.0.2"
+    source: "oci://ghcr.io/traefik/helm"
+    digest: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+  supportedScopeStatus: "no-unhandled-pain-points-for-supported-scopes"
+  supportedScopes:
+    []
+  supportedVariants:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  notes:
+    - "The exact Kubara OCI chart layer renders 31 objects with chart defaults, including 25 CRDs."
+    - "The OCI layer digest is required because the same version from the Helm repository is a different archive."
+    - "This exact upstream-package proof is suitable for additive root retention after the separate live-qualification gate passes; CRD lifecycle and Kubara wrapper compatibility remain separate."
+  painPoints:
+    -
+      id: "source-lock"
+      detectedPainPoint: "source-lock requires source-lock.yaml"
+      evidence:
+        - "source-lock.yaml"
+      configHubHome: "source-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "source-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "dependency-lock"
+      detectedPainPoint: "dependency-lock requires dependency-lock.yaml"
+      evidence:
+        - "dependency-lock.yaml"
+      configHubHome: "dependency-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "dependency-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "capability-profile"
+      detectedPainPoint: "capability-profile is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "capability-profile"
+      disposition: "handled-by-capability-profile"
+      linkedReceipt: "revisions/default/r001/receipts/render-receipt.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "crd-lifecycle"
+      detectedPainPoint: "crd-lifecycle is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "lifecycle-policy"
+      disposition: "handled-by-lifecycle-policy"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "review-required"
+    -
+      id: "root-retention"
+      detectedPainPoint: "the promotion orchestrator separately requires all exact-version live lanes before additive root copy"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "recipe"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "qualification-gated"
+    -
+      id: "scan-gate"
+      detectedPainPoint: "Current scan gate is warn-review-before-production"
+      evidence:
+        - "helm-plan.yaml"
+        - "scan receipts"
+        - "install gates"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "warn-review-before-production"
+    -
+      id: "value-model-diagnostics"
+      detectedPainPoint: "Helm values can be unknown, dead, misspelled, shadowed, or ignored unless the values model records the analysis boundary."
+      evidence:
+        - "value-model.yaml"
+      configHubHome: "value-model"
+      disposition: "absorbed-into-value-model"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "unknown=not-exhaustively-checked-in-root-retention-proof; dead=not-exhaustively-checked-in-root-retention-proof; ignored=not-exhaustively-checked-in-root-retention-proof"
+  answerForSkepticalHelmUser: "traefik/traefik@41.0.2 maps its detected Helm pain to 7 ConfigHub control areas: source-lock, dependency-lock, capability-profile, lifecycle-policy, recipe, scan-gate, value-model. Supported scopes have explicit variants, receipts, scans/gates, and control-point dispositions; production readiness remains not-reviewed-for-production."

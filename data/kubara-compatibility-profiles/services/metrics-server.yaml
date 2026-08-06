@@ -1,0 +1,267 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCompatibilityProfile"
+metadata:
+  name: "metrics-server"
+spec:
+  kubaraServiceKey: "metrics-server"
+  aliases:
+    - "metrics-server"
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      provenance:
+        repository: "https://github.com/kubara-io/kubara.git"
+        commit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+        repositoryTree: "92cb8480e662d53906418c8c1e0b6f7bbd545f40"
+        releaseTags:
+          []
+        distributionStatus: "embedded-in-kubara-v0.12.0"
+      sourceCatalog:
+        name: "built-in"
+        version: "embedded-in-v0.12.0"
+        manifest:
+          status: "absent-in-upstream-built-in-layout"
+      serviceDefinition:
+        path: "services/metrics-server.yaml"
+        sha256: "08d4380e94a34945544dcb659da32efb4b83b8b834bde13ce7a9198ba16a21e5"
+        bytes: 236
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "metrics-server"
+        category: "observability"
+        chartPath: "metrics-server"
+        defaultStatus: "disabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "platform-components/helm/metrics-server"
+        chartYaml:
+          path: "platform-components/helm/metrics-server/Chart.yaml"
+          sha256: "c069858516c6a4e83a6198ac7d73526b2375a14cff8b146f86ae77b0d8f5f752"
+          bytes: 333
+        name: "metrics-server"
+        version: "0.1.0"
+        tree:
+          fileCount: 6
+          bytes: 1899
+          treeSha256: "d0efa18a795da9ccf15a60ba34689fccf03021ac7029c6617253d8b9bf98526e"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "platform-configs/helm/metrics-server/values.generated.yaml.tplt"
+        sha256: "77258f03144ff921475ca78d307e7b5b3d237112bb5a043438c5e5c94bf6615a"
+        bytes: 493
+      serviceSliceTree:
+        fileCount: 8
+        bytes: 2628
+        treeSha256: "e07b8e3848b39b58558f9960276cac1fe0901a925e7d07b9478b8aec8e1baaf5"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:metrics-server/metrics-server"
+          chartDependency:
+            name: "metrics-server"
+            version: "3.13.1"
+            repository: "https://kubernetes-sigs.github.io/metrics-server"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/metrics-server/metrics-server/3.13.1"
+              package: "packages/metrics-server/metrics-server/3.13.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/metrics-server/metrics-server/3.13.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/metrics-server/metrics-server/3.13.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+        repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+        releaseTags:
+          - "bootstrap-1.1.0"
+          - "general-1.1.0"
+        distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+      sourceCatalog:
+        name: "general"
+        version: "1.1.0"
+        manifest:
+          path: "general/Catalog.yaml"
+          sha256: "0ace12c931982d63f4ebeb8b39b1e8f7d8ef5864d7e28736bf2e5668df7d8bdf"
+          bytes: 188
+      serviceDefinition:
+        path: "general/services/metrics-server.yaml"
+        sha256: "67e0809743c93993fa5864c1ffa647a9b323feb0a10681a80a0f339d05660b9f"
+        bytes: 227
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "metrics-server"
+        category: "observability"
+        chartPath: "metrics-server"
+        defaultStatus: "disabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "general/platform-components/helm/metrics-server"
+        chartYaml:
+          path: "general/platform-components/helm/metrics-server/Chart.yaml"
+          sha256: "c069858516c6a4e83a6198ac7d73526b2375a14cff8b146f86ae77b0d8f5f752"
+          bytes: 333
+        name: "metrics-server"
+        version: "0.1.0"
+        tree:
+          fileCount: 6
+          bytes: 1895
+          treeSha256: "a4a44450472c7490c859264fbaffd14923044fd28c0f1506fd8e426cecd62adb"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "general/platform-configs/helm/metrics-server/values.generated.yaml.tplt"
+        sha256: "77258f03144ff921475ca78d307e7b5b3d237112bb5a043438c5e5c94bf6615a"
+        bytes: 493
+      serviceSliceTree:
+        fileCount: 8
+        bytes: 2615
+        treeSha256: "7ce80d0d0582bdffaeef4af0442673ab885a2b352f99f8d1d7cb331c861fd92c"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:metrics-server/metrics-server"
+          chartDependency:
+            name: "metrics-server"
+            version: "3.13.1"
+            repository: "https://kubernetes-sigs.github.io/metrics-server"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/metrics-server/metrics-server/3.13.1"
+              package: "packages/metrics-server/metrics-server/3.13.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/metrics-server/metrics-server/3.13.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/metrics-server/metrics-server/3.13.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+        repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+        releaseTags:
+          []
+        distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+      sourceCatalog:
+        name: "general"
+        version: "1.1.0"
+        manifest:
+          path: "general/Catalog.yaml"
+          sha256: "0ace12c931982d63f4ebeb8b39b1e8f7d8ef5864d7e28736bf2e5668df7d8bdf"
+          bytes: 188
+      serviceDefinition:
+        path: "general/services/metrics-server.yaml"
+        sha256: "67e0809743c93993fa5864c1ffa647a9b323feb0a10681a80a0f339d05660b9f"
+        bytes: 227
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "metrics-server"
+        category: "observability"
+        chartPath: "metrics-server"
+        defaultStatus: "disabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "general/platform-components/helm/metrics-server"
+        chartYaml:
+          path: "general/platform-components/helm/metrics-server/Chart.yaml"
+          sha256: "c069858516c6a4e83a6198ac7d73526b2375a14cff8b146f86ae77b0d8f5f752"
+          bytes: 333
+        name: "metrics-server"
+        version: "0.1.0"
+        tree:
+          fileCount: 6
+          bytes: 1894
+          treeSha256: "f0e05c948b810c05a364981f264dcf2152f22aa9274ad324450e540bfb498dfa"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "general/platform-configs/helm/metrics-server/values.generated.yaml.tplt"
+        sha256: "77258f03144ff921475ca78d307e7b5b3d237112bb5a043438c5e5c94bf6615a"
+        bytes: 493
+      serviceSliceTree:
+        fileCount: 8
+        bytes: 2614
+        treeSha256: "ecfa389717a76c2a3ce933f45f7d1da899b20a2e8cbc38962195a2b6827f1669"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:metrics-server/metrics-server"
+          chartDependency:
+            name: "metrics-server"
+            version: "3.13.1"
+            repository: "https://kubernetes-sigs.github.io/metrics-server"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/metrics-server/metrics-server/3.13.1"
+              package: "packages/metrics-server/metrics-server/3.13.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/metrics-server/metrics-server/3.13.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/metrics-server/metrics-server/3.13.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+  contract:
+    serviceDefinition: "retained-byte-for-byte"
+    wrapper: "retained-byte-for-byte"
+    configTemplate: "retained-byte-for-byte"
+    platformSpecialization: "remains-a-separate-config-step"
+    aiRequired: false

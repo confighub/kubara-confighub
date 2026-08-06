@@ -1,0 +1,267 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCompatibilityProfile"
+metadata:
+  name: "traefik"
+spec:
+  kubaraServiceKey: "traefik"
+  aliases:
+    - "traefik"
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      provenance:
+        repository: "https://github.com/kubara-io/kubara.git"
+        commit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+        repositoryTree: "92cb8480e662d53906418c8c1e0b6f7bbd545f40"
+        releaseTags:
+          []
+        distributionStatus: "embedded-in-kubara-v0.12.0"
+      sourceCatalog:
+        name: "built-in"
+        version: "embedded-in-v0.12.0"
+        manifest:
+          status: "absent-in-upstream-built-in-layout"
+      serviceDefinition:
+        path: "services/traefik.yaml"
+        sha256: "5adffa4a51feef8079a20445757ca57bc69f4b3d693a41713265c4079da82591"
+        bytes: 218
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "traefik"
+        category: "networking"
+        chartPath: "traefik"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "platform-components/helm/traefik"
+        chartYaml:
+          path: "platform-components/helm/traefik/Chart.yaml"
+          sha256: "6185750b3a8673725c628836dfbe7d63c69717ece4c2536b5f59c0e82fcfc286"
+          bytes: 273
+        name: "traefik"
+        version: "2.1.0"
+        tree:
+          fileCount: 7
+          bytes: 2253
+          treeSha256: "2841b141c347a3d9acfb94b19fef2f19422455a8679287214614cd7a94ed2751"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "platform-configs/helm/traefik/values.generated.yaml.tplt"
+        sha256: "0794172fd94d59f9ba93f7b08a83e904f7fd8f960648f84d8a84c0f8f5aeaa06"
+        bytes: 2635
+      serviceSliceTree:
+        fileCount: 9
+        bytes: 5106
+        treeSha256: "2c8e20970390ad9a93bdd722ec2fb4a9982c198660d7f5bc27590a7640324256"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:traefik/traefik"
+          chartDependency:
+            name: "traefik"
+            version: "41.0.2"
+            repository: "oci://ghcr.io/traefik/helm"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/traefik/traefik/41.0.2"
+              package: "packages/traefik/traefik/41.0.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/traefik/traefik/41.0.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/traefik/traefik/41.0.2"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+        repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+        releaseTags:
+          - "bootstrap-1.1.0"
+          - "general-1.1.0"
+        distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+      sourceCatalog:
+        name: "general"
+        version: "1.1.0"
+        manifest:
+          path: "general/Catalog.yaml"
+          sha256: "0ace12c931982d63f4ebeb8b39b1e8f7d8ef5864d7e28736bf2e5668df7d8bdf"
+          bytes: 188
+      serviceDefinition:
+        path: "general/services/traefik.yaml"
+        sha256: "989bc2269cf4eb0c94bbbdc520c4b4f34ba623cbdf36279095c0467268051c42"
+        bytes: 209
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "traefik"
+        category: "networking"
+        chartPath: "traefik"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "general/platform-components/helm/traefik"
+        chartYaml:
+          path: "general/platform-components/helm/traefik/Chart.yaml"
+          sha256: "6185750b3a8673725c628836dfbe7d63c69717ece4c2536b5f59c0e82fcfc286"
+          bytes: 273
+        name: "traefik"
+        version: "2.1.0"
+        tree:
+          fileCount: 7
+          bytes: 2253
+          treeSha256: "2841b141c347a3d9acfb94b19fef2f19422455a8679287214614cd7a94ed2751"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "general/platform-configs/helm/traefik/values.generated.yaml.tplt"
+        sha256: "0794172fd94d59f9ba93f7b08a83e904f7fd8f960648f84d8a84c0f8f5aeaa06"
+        bytes: 2635
+      serviceSliceTree:
+        fileCount: 9
+        bytes: 5097
+        treeSha256: "b2446d1d6cc76b6561a111a65a29ba191f4c31074ab8af238b647c5e9fb654c9"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:traefik/traefik"
+          chartDependency:
+            name: "traefik"
+            version: "41.0.2"
+            repository: "oci://ghcr.io/traefik/helm"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/traefik/traefik/41.0.2"
+              package: "packages/traefik/traefik/41.0.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/traefik/traefik/41.0.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/traefik/traefik/41.0.2"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+        repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+        releaseTags:
+          []
+        distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+      sourceCatalog:
+        name: "general"
+        version: "1.1.0"
+        manifest:
+          path: "general/Catalog.yaml"
+          sha256: "0ace12c931982d63f4ebeb8b39b1e8f7d8ef5864d7e28736bf2e5668df7d8bdf"
+          bytes: 188
+      serviceDefinition:
+        path: "general/services/traefik.yaml"
+        sha256: "989bc2269cf4eb0c94bbbdc520c4b4f34ba623cbdf36279095c0467268051c42"
+        bytes: 209
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "traefik"
+        category: "networking"
+        chartPath: "traefik"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "general/platform-components/helm/traefik"
+        chartYaml:
+          path: "general/platform-components/helm/traefik/Chart.yaml"
+          sha256: "6185750b3a8673725c628836dfbe7d63c69717ece4c2536b5f59c0e82fcfc286"
+          bytes: 273
+        name: "traefik"
+        version: "2.1.0"
+        tree:
+          fileCount: 7
+          bytes: 2344
+          treeSha256: "4d8c4226e403ce2a7c8d6a065320daf64b482caca459d36c2faead337c279e3b"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "general/platform-configs/helm/traefik/values.generated.yaml.tplt"
+        sha256: "0794172fd94d59f9ba93f7b08a83e904f7fd8f960648f84d8a84c0f8f5aeaa06"
+        bytes: 2635
+      serviceSliceTree:
+        fileCount: 9
+        bytes: 5188
+        treeSha256: "ad031d6bc7cfda26b7f18415c0eb2db0a0439d285936ee387dae47a57f232cf9"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:traefik/traefik"
+          chartDependency:
+            name: "traefik"
+            version: "41.0.2"
+            repository: "oci://ghcr.io/traefik/helm"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/traefik/traefik/41.0.2"
+              package: "packages/traefik/traefik/41.0.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/traefik/traefik/41.0.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/traefik/traefik/41.0.2"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+  contract:
+    serviceDefinition: "retained-byte-for-byte"
+    wrapper: "retained-byte-for-byte"
+    configTemplate: "retained-byte-for-byte"
+    platformSpecialization: "remains-a-separate-config-step"
+    aiRequired: false

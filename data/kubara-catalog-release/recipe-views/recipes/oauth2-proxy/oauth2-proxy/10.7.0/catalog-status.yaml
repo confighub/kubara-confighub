@@ -1,0 +1,23 @@
+apiVersion: helm-expt.confighub.com/v1alpha1
+kind: CatalogStatus
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  chart: "oauth2-proxy/oauth2-proxy"
+  version: "10.7.0"
+  status: "proof-grade"
+  supportLevel: "machine-proof-only"
+  supportedScopes:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  supportedVariants:
+    []
+  candidateVariants:
+    - "default"
+  deferredVariants: []
+  review:
+    lastReviewed: "2026-05-27"
+    humanReviewRequired: true
+    productReviewRequired: true
+  notes:
+    - "Machine proof exists; catalog support is not claimed until variant and product review are complete."

@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "stakater-reloader-2.2.14"
+spec:
+  readiness:
+    status: "packaged-with-controls"
+    chart: "stakater/reloader"
+    version: "2.2.14"
+    variants:
+      - "default"
+    helmObjectsByVariant:
+      default: 6
+    cubInstallObjectsByVariant:
+      default: 7
+    helmMatchByVariant:
+      default: "6/6"
+    scanGate: "warn-production-blocked"
+    nextAction: "select a reviewed configuration and complete target-specific live qualification before production"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"

@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "traefik-traefik"
+  version: "41.0.2"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/traefik/traefik/41.0.2"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/traefik/traefik/41.0.2"
+      - "--non-interactive"
+      - "--namespace"
+      - "traefik"
+  variants:
+    - "variants/default/variant.yaml"

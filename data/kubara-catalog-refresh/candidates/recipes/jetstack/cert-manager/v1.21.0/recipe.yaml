@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "jetstack-cert-manager"
+  version: "v1.21.0"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/jetstack/cert-manager/v1.21.0"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/jetstack/cert-manager/v1.21.0"
+      - "--non-interactive"
+      - "--namespace"
+      - "cert-manager"
+  variants:
+    - "variants/default/variant.yaml"
+    - "variants/crds-enabled/variant.yaml"

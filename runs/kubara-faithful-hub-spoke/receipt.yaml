@@ -1,0 +1,198 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "KubaraFaithfulHubSpokeProofReceipt"
+metadata:
+  name: "kubara-v0-13-0-faithful-hub-spoke"
+spec:
+  observedAt: "2026-08-05T14:37:39.550Z"
+  execution: "serial-live-lock"
+  source:
+    kubara:
+      version: "v0.13.0"
+      commit: "096ed84d116e5316852537046cc61d15a1e1c304"
+      binarySha256: "72642ce49aa5e9d13aeb4441aebc4c4530c7427c0d0aacbcee7b97e249f57183"
+      binaryDigestCheck: "pass"
+    catalogs:
+      version: "1.1.0"
+      commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+      snapshot: "data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-release/source"
+    currentExample:
+      config: "examples/kubara/current-platform/source/config.yaml"
+      configSha256: "7260fe438066413c1bc44b5f674e4441e3ae9873146e860d4188ef518abc1211"
+      generatedRoot: "examples/kubara/current-platform/generated"
+      generatedFileCount: 135
+      generatedSha256: "e055676c295979e589f4ccad2b371d30252ff7ada8531147b32f28b77bd3be19"
+    git:
+      repository: "https://github.com/confighub/helm-expt.git"
+      targetRevision: "main"
+      commit: "5d69eb0447eed52a5e1b7f20617d98a742d65f3c"
+      currentExampleReachable: true
+      generatedSha256: "e055676c295979e589f4ccad2b371d30252ff7ada8531147b32f28b77bd3be19"
+      generatedFileCount: 135
+      exactBoundaryFiles:
+        - "source/config.yaml"
+        - "source-lock.yaml"
+        - "component-artifacts.yaml"
+    contract:
+      zeroRepoint: true
+      gitRepository: "https://github.com/confighub/helm-expt.git"
+      targetRevision: "main"
+      platformComponentsPath: "examples/kubara/current-platform/generated/platform-components/helm"
+      platformConfigsPath: "examples/kubara/current-platform/generated/platform-configs"
+      project: "hx-app-dev-dev"
+      allowedSourceRepos:
+        - "https://github.com/confighub/helm-expt.git"
+      valuesFiles:
+        - "platform-configs/hx-app-dev/helm/argo-cd/values.generated.yaml"
+        - "platform-configs/hx-app-dev/helm/argo-cd/values-repository-paths.yaml"
+      applicationSetTemplateSha256: "7b8635a7b7672738d7cd1d069eabec0c15e0b6492a6aa2581197358377648258"
+      appProjectTemplateSha256: "c6044ac184527abb6fa8a57025d342242acc41c89efbaa1dffc0d5c15e472170"
+      clusterExternalSecretTemplateSha256: "333276367089854ef4b2c9769c981c418fc1ae187ac2e7895e778468e6bf31ec"
+  onboarding:
+    clusterAdd:
+      command: "kubara --catalog <kubara-catalogs-1.1.0-release/general> cluster add hx-app-staging"
+      result: "pass"
+      createdType: "spoke"
+      persistedCatalogChoice: true
+      sourceEntryRestoredBeforeGeneration: true
+    hub:
+      logicalName: "hx-app-dev"
+      stage: "dev"
+      kindCluster: "hx-kubara-faithful-hub"
+    spoke:
+      logicalName: "hx-app-staging"
+      stage: "staging"
+      kindCluster: "hx-kubara-faithful-spoke"
+  configHub:
+    planCheckAndApproval:
+      check:
+        result: "pass"
+        readBackMatches: true
+        dataHashMatches: true
+      unit:
+        ref: "hx-platform/faithful-hub-spoke-plan"
+        id: "d4387012-e0f5-420a-a524-3ca2bd8d9cb1"
+        headRevisionNum: 4
+        dataHash: "0301dcac409dfe98eebf8d2f73a66b34d90d2c266b500649a64bbc26a5d8f76d"
+        contentHash: -1802860678
+        provider: "None"
+        targetID: null
+        action: "updated"
+      approval:
+        revision: 4
+        recordedApprovals: 1
+        approverIdentityRecordedInReceipt: false
+        action: "approved-head-revision"
+    observedAttestation:
+      check:
+        result: "pass"
+        readBackMatches: true
+        dataHashMatches: true
+      unit:
+        ref: "hx-platform/faithful-hub-spoke-attestation"
+        id: "ff684240-725e-407a-8dfb-55f592541f16"
+        headRevisionNum: 3
+        dataHash: "60ffa63025b940147d5e7b6017eabb57c9c066e8221aabacc8308de463533f9a"
+        contentHash: -412016539
+        provider: "None"
+        targetID: null
+        action: "updated"
+      approval:
+        revision: 3
+        recordedApprovals: 1
+        approverIdentityRecordedInReceipt: false
+        action: "approved-head-revision"
+    ordering:
+      planApprovedBeforeKindAndKubaraMutation: true
+      observedAttestationApprovedAfterConvergence: true
+    githubStatus:
+      enforced: false
+      context: null
+      claim: "not-proven"
+      detail: "This proof records ConfigHub Units and approvals. It neither creates nor claims an enforced GitHub commit status."
+  secretRoute:
+    backend: "OpenBao dev-mode local evaluation"
+    operator: "External Secrets Operator"
+    clusterSecretStore: "hx-app-dev-dev"
+    documentedRemotePath: "hx-app-dev/dev/argocd/hx-app-staging-staging"
+    remoteProperty: "kubeconfig"
+    rewrittenServer: "https://192.168.97.7:6443"
+    rewrittenKubeconfigSha256: "cf4e2fccd39afef3e701164fac0f66ec673bbd6420005767222ed2933c0cb0e0"
+    apiServerCertificateIncludesRewrittenIP: true
+    hubNodeCanReachSpokeAPI: true
+    openBao:
+      chart: "openbao/openbao"
+      chartVersion: "0.28.3"
+      chartUrl: "https://github.com/openbao/openbao-helm/releases/download/openbao-0.28.3/openbao-0.28.3.tgz"
+      chartSha256: "8612ab52ca1383b61dbf54c0a40691aaeba2bb9f4e542134c9ad06fce15a907c"
+      namespace: "openbao"
+      mode: "dev"
+      kubaraLocalPattern: true
+      broadEvaluationOnlyPolicy: true
+      rootTokenRecorded: false
+      result: "pass"
+    valueReadBackMatches: true
+    secretDataRecorded: false
+  argo:
+    registration:
+      result: "pass"
+      mechanism: "Kubara-generated ExternalSecret -> Argo CD cluster Secret"
+      externalSecret: "argocd/hx-app-staging-es"
+      clusterSecret: "argocd/hx-app-staging-cluster-secret"
+      registeredName: "hx-app-staging"
+      registeredProject: "hx-app-dev-dev"
+      registeredServer: "https://192.168.97.7:6443"
+      secretConfigPresent: true
+      clientCertificateAuthMaterialPresent: true
+      secretDataRecorded: false
+    sourceIntegrity:
+      result: "pass"
+      zeroRepoint: true
+      applicationSet: "cert-manager"
+      appProject: "hx-app-dev-dev"
+      gitRepository: "https://github.com/confighub/helm-expt.git"
+      targetRevision: "main"
+      platformComponentsPath: "examples/kubara/current-platform/generated/platform-components/helm"
+      platformConfigsPath: "examples/kubara/current-platform/generated/platform-configs"
+      allowedSourceRepos:
+        - "https://github.com/confighub/helm-expt.git"
+    application:
+      name: "hx-app-staging-cert-manager"
+      destinationName: "hx-app-staging"
+      sync: "Synced"
+      health: "Healthy"
+      revisions:
+        - "5d69eb0447eed52a5e1b7f20617d98a742d65f3c"
+        - "5d69eb0447eed52a5e1b7f20617d98a742d65f3c"
+      component: "cert-manager"
+      version: "v1.21.0"
+    workload:
+      namespace: "cert-manager"
+      deployments:
+        -
+          name: "cert-manager"
+          desired: 1
+          available: 1
+        -
+          name: "cert-manager-cainjector"
+          desired: 1
+          available: 1
+        -
+          name: "cert-manager-webhook"
+          desired: 1
+          available: 1
+      ready: true
+  cleanup:
+    hubCluster: "pass"
+    spokeCluster: "pass"
+    baselineRestored: true
+    localFiles: "pass"
+    configHubAttestations: "retained-as-proof"
+  limits:
+    - "The proof uses Kubara's local-evaluation OpenBao pattern. Dev-mode OpenBao is not a production secret backend."
+    - "ConfigHub approval is recorded on Provider None attestation Units; this receipt does not claim a server-side deployment gate or an enforced GitHub status."
+    - "The two fresh kind clusters prove one hub and one registered spoke, not production scale or high availability."
+    - "The selected downstream convergence witness is cert-manager; other enabled applications may still be reconciling when this proof completes."
+    - "No kubeconfig, client key, bearer token, ConfigHub identity, or ConfigHub credential is stored in the receipt."
+status:
+  result: "pass"
+  claim: "Kubara v0.13 generated and bootstrapped its unchanged Git/AppSet/AppProject topology, External Secrets materialized the documented OpenBao-backed spoke credential, the hub registered the spoke, and cert-manager became Synced and Healthy there after ConfigHub recorded plan approval."

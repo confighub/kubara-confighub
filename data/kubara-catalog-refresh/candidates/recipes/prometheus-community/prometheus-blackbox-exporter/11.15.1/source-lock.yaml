@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "prometheus-community"
+  repositoryURL: "https://prometheus-community.github.io/helm-charts"
+  chart: "prometheus-blackbox-exporter"
+  version: "11.15.1"
+  appVersion: "v0.28.0"
+  packageSHA256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+  packageBytes: 13353
+  exactArtifact:
+    url: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+    sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+    resolution: "artifact-addressed"
+  evidence:
+    candidateRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

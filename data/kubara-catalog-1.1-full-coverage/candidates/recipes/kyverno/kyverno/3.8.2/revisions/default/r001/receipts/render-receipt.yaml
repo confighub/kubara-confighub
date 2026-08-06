@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "kyverno-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "68e6f54138f46f690a63bb13859bca9ae0c042cea43bb271615bac97a9d7bfb6"
+    dependencyLockSHA256: "dcf1060679d8274f4436480daf8c0cb75badc0a83560c9c898fb7272662d3a3f"
+    effectiveValuesSHA256: "c62de494f0e9a5a62fc40cd885e5eff2f6c29854c2b2be9a5ced713a871f29d9"
+  outputs:
+    renderedObjectSetSHA256: "1596c72d8cde36995d7cd32ff3e953830da1763a59a25459c53ae4e4d425506d"
+    renderedObjectInventorySHA256: "6c9d3befc89f07874aaf7bb210134c0cb5e4ec82ada5887371a33991d10835c3"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 69
+    renderedSecretCount: 0
+    secretCountSeparatedByCubInstall: 0

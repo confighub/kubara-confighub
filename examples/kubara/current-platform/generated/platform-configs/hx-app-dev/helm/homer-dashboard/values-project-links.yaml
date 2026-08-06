@@ -1,0 +1,31 @@
+dashboardConfig:
+  services:
+    - name: Tools
+      items:
+        - name: Argo CD
+          logo: /assets/tools/argocd.png
+          url: /argocd/
+          subtitle: GitOps delivery dashboard
+          target: _blank
+        - name: Grafana
+          logo: /assets/tools/grafana.png
+          url: /grafana/
+          subtitle: Monitoring dashboards
+          target: _blank
+        - name: Prometheus
+          logo: /assets/tools/prometheus.png
+          url: /prometheus/
+          subtitle: Metrics and alerts
+          target: _blank
+    - name: Platform source
+      items:
+        - name: Kubara
+          logo: /assets/icons/kubara_icon.png
+          url: https://github.com/kubara-io/kubara
+          subtitle: Platform contract and catalog composer
+          target: _blank
+        - name: ConfigHub Catalog
+          logo: /assets/tools/secretsmanager.png
+          url: https://confighub.github.io/helm-expt/site/
+          subtitle: Reviewed component versions and deployment facts
+          target: _blank

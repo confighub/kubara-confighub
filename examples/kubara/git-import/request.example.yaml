@@ -1,0 +1,207 @@
+apiVersion: import.confighub.com/v1alpha1
+kind: KubaraGitRevisionImport
+metadata:
+  name: acme-kubara-platform
+spec:
+  source:
+    # Replace these three values before inspection. The commit must be the full
+    # immutable object ID from the clean checkout, never a branch or tag.
+    repository: https://github.com/acme/platform.git
+    commit: 0000000000000000000000000000000000000000
+    path: platform
+  layout:
+    # Every path is relative to spec.source.path.
+    source: source
+    config: source/config.yaml
+    components: generated/platform-components/helm
+    configs: generated/platform-configs
+    renders: effective-renders
+    artifactLock: component-artifacts.yaml
+    generationReceipt: generation-receipt.yaml
+    wiringGraph: wiring/graph.json
+  security:
+    credentialScan:
+      status: pass
+      # Run this exact scanner/version over the exact commit and scope. The
+      # inspector hashes the report and replaces the three binding fields.
+      scanner: gitleaks@8.24.3
+      reportSHA256: sha256:0000000000000000000000000000000000000000000000000000000000000000
+      sourceCommit: 0000000000000000000000000000000000000000
+      scopePath: platform
+      opaqueFilesReviewed: true
+  destination:
+    # Keep the intended slugs below. --inspect-destination replaces every
+    # example UUID/hash and the organization coordinate from narrow live reads.
+    organization: Acme Kubara
+    context: acme-kubara
+    organizationExternalID: 11111111-1111-4111-8111-111111111111
+    organizationID: 22222222-2222-4222-8222-222222222222
+    serverURL: https://hub.confighub.example
+    # Exact destination-specific origin used by Argo for ConfigHub Space
+    # releases. It is binding authority and is never inferred or hard-coded.
+    spaceReleaseOCIBase: oci://oci.hub.confighub.example:443/space
+    organizationPolicy: require-bootstrap-only-or-importer-owned-identical
+    spacePrefix: acme-kubara
+    deliveryMode: confighub-managed-argo
+    # An untagged, authenticated repository base. The importer derives one
+    # content-addressed ref per component/config payload and one platform index.
+    catalogOCIBase: oci://ghcr.io/acme/kubara-components
+    argobotBase:
+      space: argobot-base
+      spaceID: 50000000-0000-4000-8000-000000000000
+      unit: argobot
+      unitID: 51000000-0000-4000-8000-000000000000
+      componentVersion: v0.1.6
+      sourceRef: oci://ghcr.io/acme/argobot
+      sourceDigest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+      dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+      dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+  navigation:
+    guideURL: https://confighub.github.io/helm-expt/site/kubara.html
+    catalogURL: https://confighub.github.io/helm-expt/site/charts/
+  targets:
+    hx-app-dev:
+      space: acme-target-dev
+      spaceID: 30000000-0000-4000-8000-000000000001
+      target: target
+      targetID: 40000000-0000-4000-8000-000000000001
+      environment: Dev
+      region: local
+      delivery:
+        appsSpace: hx-app-dev-argo-apps
+        appsSpaceID: 60000000-0000-4000-8000-000000000001
+        root:
+          unit: root
+          unitID: 61000000-0000-4000-8000-000000000001
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobotApplication:
+          unit: argobot-hx-app-dev
+          unitID: 62000000-0000-4000-8000-000000000001
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobot:
+          space: argobot-hx-app-dev
+          spaceID: 63000000-0000-4000-8000-000000000001
+          unit: argobot
+          unitID: 64000000-0000-4000-8000-000000000001
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        reconciler:
+          # --inspect-destination replaces this block from the corresponding
+          # external KubaraArgoRuntimeObservation file.
+          componentVersion: v0.0.0
+          image: quay.io/argoproj/argocd:v0.0.0
+          evidenceRef: evidence://replace/hx-app-dev/argocd-runtime
+          evidenceSHA256: sha256:0000000000000000000000000000000000000000000000000000000000000000
+        workloadApplications: []
+    hx-app-staging:
+      space: acme-target-staging
+      spaceID: 30000000-0000-4000-8000-000000000002
+      target: target
+      targetID: 40000000-0000-4000-8000-000000000002
+      environment: Staging
+      region: local
+      delivery:
+        appsSpace: hx-app-staging-argo-apps
+        appsSpaceID: 60000000-0000-4000-8000-000000000002
+        root:
+          unit: root
+          unitID: 61000000-0000-4000-8000-000000000002
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobotApplication:
+          unit: argobot-hx-app-staging
+          unitID: 62000000-0000-4000-8000-000000000002
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobot:
+          space: argobot-hx-app-staging
+          spaceID: 63000000-0000-4000-8000-000000000002
+          unit: argobot
+          unitID: 64000000-0000-4000-8000-000000000002
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        reconciler:
+          componentVersion: v0.0.0
+          image: quay.io/argoproj/argocd:v0.0.0
+          evidenceRef: evidence://replace/hx-app-staging/argocd-runtime
+          evidenceSHA256: sha256:0000000000000000000000000000000000000000000000000000000000000000
+        workloadApplications: []
+    hx-app-prod-a:
+      space: acme-target-prod-a
+      spaceID: 30000000-0000-4000-8000-000000000003
+      target: target
+      targetID: 40000000-0000-4000-8000-000000000003
+      environment: Prod
+      region: us-east
+      delivery:
+        appsSpace: hx-app-prod-a-argo-apps
+        appsSpaceID: 60000000-0000-4000-8000-000000000003
+        root:
+          unit: root
+          unitID: 61000000-0000-4000-8000-000000000003
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobotApplication:
+          unit: argobot-hx-app-prod-a
+          unitID: 62000000-0000-4000-8000-000000000003
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobot:
+          space: argobot-hx-app-prod-a
+          spaceID: 63000000-0000-4000-8000-000000000003
+          unit: argobot
+          unitID: 64000000-0000-4000-8000-000000000003
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        reconciler:
+          componentVersion: v0.0.0
+          image: quay.io/argoproj/argocd:v0.0.0
+          evidenceRef: evidence://replace/hx-app-prod-a/argocd-runtime
+          evidenceSHA256: sha256:0000000000000000000000000000000000000000000000000000000000000000
+        workloadApplications: []
+    hx-app-prod-b:
+      space: acme-target-prod-b
+      spaceID: 30000000-0000-4000-8000-000000000004
+      target: target
+      targetID: 40000000-0000-4000-8000-000000000004
+      environment: Prod
+      region: us-west
+      delivery:
+        appsSpace: hx-app-prod-b-argo-apps
+        appsSpaceID: 60000000-0000-4000-8000-000000000004
+        root:
+          unit: root
+          unitID: 61000000-0000-4000-8000-000000000004
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobotApplication:
+          unit: argobot-hx-app-prod-b
+          unitID: 62000000-0000-4000-8000-000000000004
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        argobot:
+          space: argobot-hx-app-prod-b
+          spaceID: 63000000-0000-4000-8000-000000000004
+          unit: argobot
+          unitID: 64000000-0000-4000-8000-000000000004
+          dataHash: 0000000000000000000000000000000000000000000000000000000000000000
+          dataSHA256: 0000000000000000000000000000000000000000000000000000000000000000
+        reconciler:
+          componentVersion: v0.0.0
+          image: quay.io/argoproj/argocd:v0.0.0
+          evidenceRef: evidence://replace/hx-app-prod-b/argocd-runtime
+          evidenceSHA256: sha256:0000000000000000000000000000000000000000000000000000000000000000
+        workloadApplications: []
+  # List only pre-existing infrastructure outside importer-managed topology.
+  # --inspect-destination pins every named Space/Unit identity.
+  externalInfrastructure:
+    spaces: []
+
+# First import: omit spec.transition entirely. For a later Git revision, add:
+# transition:
+#   fromPlatformDigest: sha256:<prior-platform-digest>
+#   fromBindingDigest: sha256:<prior-binding-digest>
+#   previousApplyReceiptSHA256: sha256:<sha256-of-separately-preserved-prior-receipt>
+#   policy: additive-confighub-topology-importer-no-delete-argo-prune-disclosed

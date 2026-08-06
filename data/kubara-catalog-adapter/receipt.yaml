@@ -1,0 +1,160 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogAdapterReceipt"
+metadata:
+  name: "kubara-component-catalog-alignment"
+spec:
+  digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+  sourceExportParity:
+    -
+      sourceLine: "kubara-v0.12.0-built-in"
+      sourceTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      exportTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      sourceFileCount: 117
+      exportFileCount: 117
+      byteForByte: true
+      classes:
+        -
+          name: "Catalog.yaml"
+          sourceFileCount: 0
+          exportFileCount: 0
+          sourceTreeSha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          exportTreeSha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          byteForByte: true
+          upstreamPresence: "absent"
+        -
+          name: "services"
+          sourceFileCount: 7
+          exportFileCount: 7
+          sourceTreeSha256: "84902e5f8ae7fc516195256b7bc1d7296a59cab7e2cd0bf175986f041cd43462"
+          exportTreeSha256: "84902e5f8ae7fc516195256b7bc1d7296a59cab7e2cd0bf175986f041cd43462"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "platform-components"
+          sourceFileCount: 103
+          exportFileCount: 103
+          sourceTreeSha256: "79fdc4d3bc400cf8fa319cb00fdedd3de09c6cedca3fe5c69cd99b91be73a750"
+          exportTreeSha256: "79fdc4d3bc400cf8fa319cb00fdedd3de09c6cedca3fe5c69cd99b91be73a750"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "platform-configs"
+          sourceFileCount: 7
+          exportFileCount: 7
+          sourceTreeSha256: "8cabdfe1f1a6396945af3eb372bccb460e9eeaab99768eb1b0a3b1cfe7d8dbf6"
+          exportTreeSha256: "8cabdfe1f1a6396945af3eb372bccb460e9eeaab99768eb1b0a3b1cfe7d8dbf6"
+          byteForByte: true
+          upstreamPresence: "present"
+    -
+      sourceLine: "kubara-catalogs-1.1.0-release"
+      sourceTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      exportTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      sourceFileCount: 354
+      exportFileCount: 354
+      byteForByte: true
+      classes:
+        -
+          name: "Catalog.yaml"
+          sourceFileCount: 2
+          exportFileCount: 2
+          sourceTreeSha256: "e041cc0c8fc0032f0e8542cc05ae6405676324af47c84f5d282d1d471b18f488"
+          exportTreeSha256: "e041cc0c8fc0032f0e8542cc05ae6405676324af47c84f5d282d1d471b18f488"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "services"
+          sourceFileCount: 18
+          exportFileCount: 18
+          sourceTreeSha256: "52a037596738066d1743081a461b4193cf196e7913b5a82d9f06a7998acedc87"
+          exportTreeSha256: "52a037596738066d1743081a461b4193cf196e7913b5a82d9f06a7998acedc87"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "platform-components"
+          sourceFileCount: 289
+          exportFileCount: 289
+          sourceTreeSha256: "76221ce5467e5acbaa94ee588bb73277d7ef35dcc6886a7dcaeda398c83dec65"
+          exportTreeSha256: "76221ce5467e5acbaa94ee588bb73277d7ef35dcc6886a7dcaeda398c83dec65"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "platform-configs"
+          sourceFileCount: 45
+          exportFileCount: 45
+          sourceTreeSha256: "f62d9e93fe4145a462b3db5f61d79bbac40347b2a1942d720f8385b31b3acb5d"
+          exportTreeSha256: "f62d9e93fe4145a462b3db5f61d79bbac40347b2a1942d720f8385b31b3acb5d"
+          byteForByte: true
+          upstreamPresence: "present"
+    -
+      sourceLine: "kubara-catalogs-1.1.0-observed-head"
+      sourceTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      exportTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      sourceFileCount: 354
+      exportFileCount: 354
+      byteForByte: true
+      classes:
+        -
+          name: "Catalog.yaml"
+          sourceFileCount: 2
+          exportFileCount: 2
+          sourceTreeSha256: "e041cc0c8fc0032f0e8542cc05ae6405676324af47c84f5d282d1d471b18f488"
+          exportTreeSha256: "e041cc0c8fc0032f0e8542cc05ae6405676324af47c84f5d282d1d471b18f488"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "services"
+          sourceFileCount: 18
+          exportFileCount: 18
+          sourceTreeSha256: "52a037596738066d1743081a461b4193cf196e7913b5a82d9f06a7998acedc87"
+          exportTreeSha256: "52a037596738066d1743081a461b4193cf196e7913b5a82d9f06a7998acedc87"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "platform-components"
+          sourceFileCount: 289
+          exportFileCount: 289
+          sourceTreeSha256: "03e3a801132453bfa954335404091cc75e1070ff9128fed29fac9841f816a522"
+          exportTreeSha256: "03e3a801132453bfa954335404091cc75e1070ff9128fed29fac9841f816a522"
+          byteForByte: true
+          upstreamPresence: "present"
+        -
+          name: "platform-configs"
+          sourceFileCount: 45
+          exportFileCount: 45
+          sourceTreeSha256: "f62d9e93fe4145a462b3db5f61d79bbac40347b2a1942d720f8385b31b3acb5d"
+          exportTreeSha256: "f62d9e93fe4145a462b3db5f61d79bbac40347b2a1942d720f8385b31b3acb5d"
+          byteForByte: true
+          upstreamPresence: "present"
+  releaseVsObservedHead:
+    releaseSourceLine: "kubara-catalogs-1.1.0-release"
+    observedSourceLine: "kubara-catalogs-1.1.0-observed-head"
+    byteForByte: false
+    changedFileCount: 16
+    extraFileCount: 0
+    missingFileCount: 0
+    rule: "the observed head is not evidence for the released OCI bytes"
+  kubaraGenerateParity:
+    fullCurrentCatalogSourceAvailable: true
+    sourceExportIdentity: "proved-byte-for-byte"
+    executionStatus: "not-run-by-this-offline-adapter"
+    boundary: "full source identity makes exact-revision Kubara generation mechanically possible; rendered parity needs its own receipt"
+  currentCatalogVersionDeltasNotInConfigHubRoot:
+    []
+  invariants:
+    selectedPlatformRoleCount: 7
+    nonUserSelectableBootstrapConcernCount: 1
+    bytePreservedUnreviewedPassthroughServiceCount: 10
+    currentCatalogExportsAreFullBootstrapAndGeneralTrees: true
+    catalogManifestPreservation: "byte-for-byte-when-present-upstream"
+    serviceDefinitionPreservation: "byte-for-byte"
+    platformComponentPreservation: "byte-for-byte"
+    platformConfigTemplatePreservation: "byte-for-byte"
+    sourceMutation: false
+    liveWrites: false
+    aiRequired: false
+    rootCatalogPromotion: false
+  commands:
+    refreshPinnedSnapshots: "npm run kubara-catalog-snapshots:refresh"
+    generateOffline: "npm run kubara-catalog-adapter:generate"
+    verifyOffline: "npm run kubara-catalog-adapter:verify"

@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "kyverno-kyverno-3.8.2"
+spec:
+  chart:
+    repository: "kyverno"
+    name: "kyverno"
+    version: "3.8.2"
+  package:
+    path: "data/kubara-catalog-1.1-full-coverage/candidates/packages/kyverno/kyverno/3.8.2"
+    name: "kyverno-kyverno"
+    version: "3.8.2"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "0840b0559b8f05f18083621dafc675abca52c4fd13bc1bd56de9655e7d55501f"
+        bytes: 387
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "1596c72d8cde36995d7cd32ff3e953830da1763a59a25459c53ae4e4d425506d"
+        bytes: 5708782
+      -
+        path: "installer.yaml"
+        sha256: "8208bf12b721f5cd9662051990bc042a90b650f3f8bb5e362005cb656be90942"
+        bytes: 297
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-1.1-full-coverage/candidates/packages/kyverno/kyverno/3.8.2 -o <tmp>/kyverno-3.8.2.tgz"
+    sha256: "0019bb5d14d3f0c4e01dd1b9fe6ac4d69f7ff9eb4352e5181892cdb35e66eef8"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-1.1-full-coverage/candidates/packages/kyverno/kyverno/3.8.2 --base default --work-dir <tmp> --non-interactive --namespace kyverno"
+      helmReleaseObjectCount: 69
+      cubInstallObjectCountIncludingSupport: 70
+      semanticObjectMatches: "69/69"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||kyverno"

@@ -1,0 +1,7 @@
+0684e1c944c7800316f5dce31aaab4248949fc29ebaf85fad98ca9f10ac494ea  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/metrics-server.yaml
+1087500bfc35667bd192f16ca0350a8feac18013463e8836d32d6c77c6018ef5  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/traefik.yaml
+2c04287f57e1d1c7cb645a54e5eb86e8501b188b8de20e57125d9b19c7750a6a  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/argo-cd.yaml
+71d547af4a8eb72c802438a5ba95c1ef1bf0934420f92355f4ace61823507e87  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/homer-dashboard.yaml
+918451436e07273253b1b3b07cbc90e0ffa10b77ce97a029c750ca3d620208d2  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/external-secrets.yaml
+a037a1d9608c47fc95b1d8b864fefb3bc86c579dbcc1610b43da41b3c91c513a  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/cert-manager.yaml
+f46deb990f56f7353a695b472b8458316586d5b3ed6c44de681d11ec1b995803  data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/kube-prometheus-stack.yaml

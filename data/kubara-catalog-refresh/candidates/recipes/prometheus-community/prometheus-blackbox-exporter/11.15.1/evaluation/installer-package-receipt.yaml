@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1"
+spec:
+  chart:
+    repository: "prometheus-community"
+    name: "prometheus-blackbox-exporter"
+    version: "11.15.1"
+  package:
+    path: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+    name: "prometheus-community-prometheus-blackbox-exporter"
+    version: "11.15.1"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "a02b42bdeb0b8f9554924ecd135380eebedbc82847f167f7ffc65c8d2a0bd226"
+        bytes: 422
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"
+        bytes: 4039
+      -
+        path: "installer.yaml"
+        sha256: "5d3709624efb805a29e7a4f9d7534cd014dd7dab78a493e4039a3c7891ca2508"
+        bytes: 390
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1 -o <tmp>/prometheus-blackbox-exporter-11.15.1.tgz"
+    sha256: "5e27cf495c811261d5add40b01ce7b84ae07c0ec324a86c0c8aafcea88ad1f92"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1 --base default --work-dir <tmp> --non-interactive --namespace monitoring"
+      helmReleaseObjectCount: 4
+      cubInstallObjectCountIncludingSupport: 5
+      semanticObjectMatches: "4/4"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||monitoring"

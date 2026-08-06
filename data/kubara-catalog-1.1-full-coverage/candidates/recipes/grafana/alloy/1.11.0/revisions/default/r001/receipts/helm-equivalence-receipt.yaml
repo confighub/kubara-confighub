@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "alloy-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "d6e75fca48c764892e27664e0137148e30e34428763f411ef4eca669720e2ba6"
+    objectCount: 7
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 8
+    uploadedManifestFiles: 8
+    separatedSecretFiles: 0
+    semanticObjectMatches: "7/7"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||alloy"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-1.1-full-coverage:compare"

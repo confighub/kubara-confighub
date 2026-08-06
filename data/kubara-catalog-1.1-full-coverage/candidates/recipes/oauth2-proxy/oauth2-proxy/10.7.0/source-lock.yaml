@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "oauth2-proxy"
+  repositoryURL: "https://oauth2-proxy.github.io/manifests"
+  chart: "oauth2-proxy"
+  version: "10.7.0"
+  appVersion: "7.15.3"
+  packageSHA256: "47b44c66fdfc42677d307cf8891f3de29863414bf265f6bef2020c273ff7e839"
+  packageBytes: 70569
+  exactArtifact:
+    url: "https://github.com/oauth2-proxy/manifests/releases/download/oauth2-proxy-10.7.0/oauth2-proxy-10.7.0.tgz"
+    sha256: "47b44c66fdfc42677d307cf8891f3de29863414bf265f6bef2020c273ff7e839"
+    resolution: "artifact-addressed"
+  evidence:
+    exactArtifactRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

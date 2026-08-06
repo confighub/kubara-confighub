@@ -1,0 +1,133 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1"
+  chart: "prometheus-community/prometheus-blackbox-exporter"
+  version: "11.15.1"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "prometheus-community/prometheus-blackbox-exporter"
+    version: "11.15.1"
+    appVersion: "v0.28.0"
+    sourceLock: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/source-lock.yaml"
+    dependencyLock: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/dependency-lock.yaml"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    packageSHA256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+  recipe:
+    path: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/helm-plan.yaml"
+    chartDossier: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/chart-dossier.yaml"
+    controlPoints: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/control-points.yaml"
+    valueModel: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/helm-pain-report.yaml"
+    controlPointCategories:
+      - "capability-profile"
+      - "dependency-lock"
+      - "root-retention"
+      - "source-lock"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/catalog-status.yaml"
+    status: "proof-grade"
+    supportLevel: "machine-proof-only"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-prometheus-blackbox-exporter:11.15.1"
+    installer: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1/installer.yaml"
+    receipt: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "cbe762d1bb7ac8220d3532c03327f717b58712c3b9ab3bb72516bfd330793551"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1/bases/default"
+        default: true
+        description: "prometheus-blackbox-exporter chart defaults variant rendered from prometheus-community/prometheus-blackbox-exporter@11.15.1"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/variants/default/variant.yaml"
+      namespace: "monitoring"
+      releaseName: "prometheus-blackbox-exporter"
+      valuesProfile: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        {}
+      targetFactSummary: "none"
+      packageBase:
+        name: "default"
+        path: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1/bases/default"
+        default: true
+        description: "prometheus-blackbox-exporter chart defaults variant rendered from prometheus-community/prometheus-blackbox-exporter@11.15.1"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-prometheus-blackbox-exporter:11.15.1 --base default --work-dir <tmp> --non-interactive --namespace monitoring"
+        helmReleaseObjectCount: 4
+        cubInstallObjectCountIncludingSupport: 5
+        semanticObjectMatches: "4/4"
+        separatedSecretCount: 0
+        allowedCubOnlyObjects:
+          - "v1|Namespace||monitoring"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/variant-revision.yaml"
+          digest: "4c9809e50d57de87095f2d5c2fa1bba8feb90e2b92d30bef484a736cf6f60367"
+          renderedObjectSetSHA256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"
+          renderedObjects: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 4
+          helmObjectCount: 4
+          cubInstallObjectCountIncludingSupport: 5
+          semanticObjectMatches: "4/4"
+          separatedSecretFiles: 0
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "988144ef5b62615e820a8ada37fe9c0f9ee80bb853d5ec65c55a928faeba0c70"

@@ -1,0 +1,649 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "prometheus-community-kube-prometheus-stack-87.19.2"
+  chart: "prometheus-community/kube-prometheus-stack"
+  version: "87.19.2"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "prometheus-community/kube-prometheus-stack"
+    version: "87.19.2"
+    appVersion: "v0.92.1"
+    sourceLock: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/source-lock.yaml"
+    dependencyLock: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/dependency-lock.yaml"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    packageSHA256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+  recipe:
+    path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/helm-plan.yaml"
+    chartDossier: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/chart-dossier.yaml"
+    controlPoints: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/control-points.yaml"
+    valueModel: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/prometheus-community/kube-prometheus-stack/87.19.2/helm-pain-report.yaml"
+    controlPointCategories:
+      - "admission-webhook"
+      - "capability-profile"
+      - "cluster-rbac"
+      - "crd-policy"
+      - "dependency-lock"
+      - "generated-facts"
+      - "installer-support-object"
+      - "source-lock"
+      - "tpl"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/prometheus-community/kube-prometheus-stack/87.19.2/catalog-status.yaml"
+    status: "catalog-candidate"
+    supportLevel: "promotion-review-needed"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+      - "no-crds"
+      - "existing-secret"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/prometheus-community/kube-prometheus-stack/87.19.2"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-kube-prometheus-stack:87.19.2"
+    installer: "packages/prometheus-community/kube-prometheus-stack/87.19.2/installer.yaml"
+    receipt: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "7f2c47213f1df203c3b5996d28d15a90f38125c31cc9dcf21f49c0483fe57291"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/prometheus-community/kube-prometheus-stack/87.19.2/bases/default"
+        default: true
+        description: "kube-prometheus-stack default with Grafana password bound variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      -
+        name: "no-crds"
+        path: "packages/prometheus-community/kube-prometheus-stack/87.19.2/bases/no-crds"
+        default: false
+        description: "kube-prometheus-stack CRDs disabled variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      -
+        name: "existing-secret"
+        path: "packages/prometheus-community/kube-prometheus-stack/87.19.2/bases/existing-secret"
+        default: false
+        description: "kube-prometheus-stack Grafana credentials from an existing Secret variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/variants/default/variant.yaml"
+      namespace: "monitoring"
+      releaseName: "kube-prometheus-stack"
+      valuesProfile: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        requiredCRDs:
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "alertmanagerconfigs.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "alertmanagers.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "podmonitors.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "probes.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheusagents.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheuses.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheusrules.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "scrapeconfigs.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "servicemonitors.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "thanosrulers.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        requiredSecrets:
+          -
+            deliveryLanes:
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            keys:
+              - "ca"
+              - "cert"
+              - "key"
+            name: "kube-prometheus-stack-admission"
+            namespace: "monitoring"
+            purpose: "Prometheus Operator admission webhook TLS material created by the packaged chart-specific setup Job"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+      targetFactSummary: "required Secret monitoring/kube-prometheus-stack-admission keys ca,cert,key; required CRD alertmanagerconfigs.monitoring.coreos.com; required CRD alertmanagers.monitoring.coreos.com; required CRD podmonitors.monitoring.coreos.com; required CRD probes.monitoring.coreos.com; required CRD prometheusagents.monitoring.coreos.com; required CRD prometheuses.monitoring.coreos.com; required CRD prometheusrules.monitoring.coreos.com; required CRD scrapeconfigs.monitoring.coreos.com; required CRD servicemonitors.monitoring.coreos.com; required CRD thanosrulers.monitoring.coreos.com"
+      packageBase:
+        name: "default"
+        path: "packages/prometheus-community/kube-prometheus-stack/87.19.2/bases/default"
+        default: true
+        description: "kube-prometheus-stack default with Grafana password bound variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-kube-prometheus-stack:87.19.2 --base default --work-dir <tmp> --non-interactive --namespace monitoring"
+        helmReleaseObjectCount: 125
+        cubInstallObjectCountIncludingSupport: 126
+        semanticObjectMatches: "125/125"
+        separatedSecretCount: 2
+        allowedCubOnlyObjects:
+          - "v1|Namespace||monitoring"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/variant-revision.yaml"
+          digest: "78a99b1324a7c8360c446e68dc07aaf31edd9bcbc84fc3bac0b8fd87ca15fcc0"
+          renderedObjectSetSHA256: "f93812ce23b92c73c0bcc223d5c4efd125e80430b846dc41aa874eee09f67d99"
+          renderedObjects: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 125
+          helmObjectCount: 125
+          cubInstallObjectCountIncludingSupport: 126
+          semanticObjectMatches: "125/125"
+          separatedSecretFiles: 2
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "f93812ce23b92c73c0bcc223d5c4efd125e80430b846dc41aa874eee09f67d99"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "f93812ce23b92c73c0bcc223d5c4efd125e80430b846dc41aa874eee09f67d99"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "f93812ce23b92c73c0bcc223d5c4efd125e80430b846dc41aa874eee09f67d99"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "f93812ce23b92c73c0bcc223d5c4efd125e80430b846dc41aa874eee09f67d99"
+    -
+      name: "no-crds"
+      variant: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/variants/no-crds/variant.yaml"
+      namespace: "monitoring"
+      releaseName: "kube-prometheus-stack"
+      valuesProfile: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/effective-values-no-crds.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        requiredCRDs:
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "alertmanagerconfigs.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "alertmanagers.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "podmonitors.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "probes.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheusagents.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheuses.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheusrules.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "scrapeconfigs.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "servicemonitors.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "thanosrulers.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD managed outside this no-crds preset"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        requiredSecrets:
+          -
+            deliveryLanes:
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            keys:
+              - "ca"
+              - "cert"
+              - "key"
+            name: "kube-prometheus-stack-admission"
+            namespace: "monitoring"
+            purpose: "Prometheus Operator admission webhook TLS material created by the packaged chart-specific setup Job"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+      targetFactSummary: "required Secret monitoring/kube-prometheus-stack-admission keys ca,cert,key; required CRD alertmanagerconfigs.monitoring.coreos.com; required CRD alertmanagers.monitoring.coreos.com; required CRD podmonitors.monitoring.coreos.com; required CRD probes.monitoring.coreos.com; required CRD prometheusagents.monitoring.coreos.com; required CRD prometheuses.monitoring.coreos.com; required CRD prometheusrules.monitoring.coreos.com; required CRD scrapeconfigs.monitoring.coreos.com; required CRD servicemonitors.monitoring.coreos.com; required CRD thanosrulers.monitoring.coreos.com"
+      packageBase:
+        name: "no-crds"
+        path: "packages/prometheus-community/kube-prometheus-stack/87.19.2/bases/no-crds"
+        default: false
+        description: "kube-prometheus-stack CRDs disabled variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-kube-prometheus-stack:87.19.2 --base no-crds --work-dir <tmp> --non-interactive --namespace monitoring"
+        helmReleaseObjectCount: 115
+        cubInstallObjectCountIncludingSupport: 116
+        semanticObjectMatches: "115/115"
+        separatedSecretCount: 2
+        allowedCubOnlyObjects:
+          - "v1|Namespace||monitoring"
+      revisions:
+        -
+          name: "no-crds-r001"
+          revision: "r001"
+          variantRevision: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/variant-revision.yaml"
+          digest: "a3d22a92cbfb19d1849f6f248850f0a924392084a2ecbea42ef6b40d25507de4"
+          renderedObjectSetSHA256: "86d54113ec12fcea838d30e7e2ff6722de375bd0f6cc0e09ab8a14078c941446"
+          renderedObjects: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/rendered/object-inventory.yaml"
+          objectCount: 115
+          helmObjectCount: 115
+          cubInstallObjectCountIncludingSupport: 116
+          semanticObjectMatches: "115/115"
+          separatedSecretFiles: 2
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "86d54113ec12fcea838d30e7e2ff6722de375bd0f6cc0e09ab8a14078c941446"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "86d54113ec12fcea838d30e7e2ff6722de375bd0f6cc0e09ab8a14078c941446"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "86d54113ec12fcea838d30e7e2ff6722de375bd0f6cc0e09ab8a14078c941446"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/no-crds/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "86d54113ec12fcea838d30e7e2ff6722de375bd0f6cc0e09ab8a14078c941446"
+    -
+      name: "existing-secret"
+      variant: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/variants/existing-secret/variant.yaml"
+      namespace: "monitoring"
+      releaseName: "kube-prometheus-stack"
+      valuesProfile: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/effective-values-existing-secret.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        requiredCRDs:
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "alertmanagerconfigs.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "alertmanagers.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "podmonitors.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "probes.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheusagents.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheuses.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "prometheusrules.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "scrapeconfigs.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "servicemonitors.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+          -
+            applyMode: "server-side-force-conflicts"
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            name: "thanosrulers.monitoring.coreos.com"
+            purpose: "Prometheus Operator CRD included in this preset and applied before dependent objects"
+            sourceVariant: "default"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/default-crds.yaml"
+        requiredSecrets:
+          -
+            deliveryLanes:
+              - "regularHelm"
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            keys:
+              - "admin-user"
+              - "admin-password"
+            name: "grafana-admin-credentials"
+            namespace: "monitoring"
+            purpose: "Grafana admin credentials managed by the target secret backend"
+            suggestedSource: "ExternalSecret monitoring/grafana-admin-credentials or an equivalent target-owned Secret"
+          -
+            deliveryLanes:
+              - "cubInstallerApply"
+              - "configHubKubectlApply"
+              - "configHubOciArgo"
+            keys:
+              - "ca"
+              - "cert"
+              - "key"
+            name: "kube-prometheus-stack-admission"
+            namespace: "monitoring"
+            purpose: "Prometheus Operator admission webhook TLS material created by the packaged chart-specific setup Job"
+            suggestedSource: "package://prerequisites/kube-prometheus-stack-lifecycle/prepare.sh"
+      targetFactSummary: "required Secret monitoring/grafana-admin-credentials keys admin-user,admin-password; required Secret monitoring/kube-prometheus-stack-admission keys ca,cert,key; required CRD alertmanagerconfigs.monitoring.coreos.com; required CRD alertmanagers.monitoring.coreos.com; required CRD podmonitors.monitoring.coreos.com; required CRD probes.monitoring.coreos.com; required CRD prometheusagents.monitoring.coreos.com; required CRD prometheuses.monitoring.coreos.com; required CRD prometheusrules.monitoring.coreos.com; required CRD scrapeconfigs.monitoring.coreos.com; required CRD servicemonitors.monitoring.coreos.com; required CRD thanosrulers.monitoring.coreos.com"
+      packageBase:
+        name: "existing-secret"
+        path: "packages/prometheus-community/kube-prometheus-stack/87.19.2/bases/existing-secret"
+        default: false
+        description: "kube-prometheus-stack Grafana credentials from an existing Secret variant rendered from prometheus-community/kube-prometheus-stack@87.19.2"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-kube-prometheus-stack:87.19.2 --base existing-secret --work-dir <tmp> --non-interactive --namespace monitoring"
+        helmReleaseObjectCount: 124
+        cubInstallObjectCountIncludingSupport: 125
+        semanticObjectMatches: "124/124"
+        separatedSecretCount: 1
+        allowedCubOnlyObjects:
+          - "v1|Namespace||monitoring"
+      revisions:
+        -
+          name: "existing-secret-r001"
+          revision: "r001"
+          variantRevision: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/variant-revision.yaml"
+          digest: "f5b8a1c9fed02b0e922025f23c2f8eaceb1487e0780b83b52e08e5398f649a1e"
+          renderedObjectSetSHA256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"
+          renderedObjects: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/rendered/object-inventory.yaml"
+          objectCount: 124
+          helmObjectCount: 124
+          cubInstallObjectCountIncludingSupport: 125
+          semanticObjectMatches: "124/124"
+          separatedSecretFiles: 1
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/prometheus-community/kube-prometheus-stack/87.19.2/revisions/existing-secret/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "c0a62fce6407f18a6cbadb712a2b2570f51522f55bddc9ecaffcf30c5192ed2b"

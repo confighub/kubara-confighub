@@ -1,0 +1,39 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0"
+spec:
+  checkedValues:
+    -
+      path: "crds.enabled"
+      variant: "default"
+      disposition: "crds-excluded"
+      reason: "chart defaults do not render cert-manager CRDs"
+    -
+      path: "crds.enabled"
+      variant: "crds-enabled"
+      disposition: "crds-included"
+      reason: "renders the six cert-manager CRDs as part of the approved revision"
+    -
+      path: "installCRDs"
+      variant: "all"
+      disposition: "deprecated-crd-switch-not-used"
+      reason: "uses crds.enabled rather than the deprecated installCRDs switch"
+    -
+      path: "startupapicheck.enabled"
+      variant: "all"
+      disposition: "hook-excluded-by-render-policy"
+      reason: "startup API check is a Helm post-install hook and is excluded from the rendered revision by --no-hooks"
+    -
+      path: "extraObjects"
+      variant: "all"
+      disposition: "empty-extension-slot"
+      reason: "chart exposes a tpl-powered extension slot; offline candidate variants keep it empty"
+    -
+      path: "image.digest"
+      variant: "all"
+      disposition: "not-set"
+      reason: "default image references use chart appVersion tags, not digests"
+  unknownValues: "not-checked"
+  deadValues: "not-checked"
+  ignoredValues: "not-checked"

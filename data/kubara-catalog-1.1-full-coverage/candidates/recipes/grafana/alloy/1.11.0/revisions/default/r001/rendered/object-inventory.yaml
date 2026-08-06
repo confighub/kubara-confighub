@@ -1,0 +1,51 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "grafana-alloy-1.11.0-default-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "d6e75fca48c764892e27664e0137148e30e34428763f411ef4eca669720e2ba6"
+  objectCount: 7
+  objects:
+    -
+      apiVersion: "apiextensions.k8s.io/v1"
+      identity: "apiextensions.k8s.io/v1|CustomResourceDefinition||podlogs.monitoring.grafana.com"
+      kind: "CustomResourceDefinition"
+      name: "podlogs.monitoring.grafana.com"
+      namespace: ""
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|DaemonSet|alloy|alloy"
+      kind: "DaemonSet"
+      name: "alloy"
+      namespace: "alloy"
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||alloy"
+      kind: "ClusterRoleBinding"
+      name: "alloy"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||alloy"
+      kind: "ClusterRole"
+      name: "alloy"
+      namespace: ""
+    -
+      apiVersion: "v1"
+      identity: "v1|ConfigMap|alloy|alloy"
+      kind: "ConfigMap"
+      name: "alloy"
+      namespace: "alloy"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|alloy|alloy"
+      kind: "ServiceAccount"
+      name: "alloy"
+      namespace: "alloy"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|alloy|alloy"
+      kind: "Service"
+      name: "alloy"
+      namespace: "alloy"

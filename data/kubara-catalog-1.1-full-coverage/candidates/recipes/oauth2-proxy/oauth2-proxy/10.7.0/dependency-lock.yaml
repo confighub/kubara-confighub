@@ -1,0 +1,13 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  chart: "oauth2-proxy/oauth2-proxy"
+  version: "10.7.0"
+  dependencies:
+    -
+      name: "redis-ha"
+      repository: "https://dandydeveloper.github.io/charts"
+      version: "4.35.10"
+  chartLockDigest: "sha256:847c879db9c912fe3623ed305e15aaa6e3d3809d9810b9f730785f837e71a193"

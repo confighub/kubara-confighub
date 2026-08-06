@@ -1,0 +1,50 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      note: "chart has no subchart dependencies"
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+      note: "render is bound to the named Kubernetes capability profile even though this chart version does not branch on .Capabilities."
+    -
+      category: "crd-policy"
+      status: "variant-controlled"
+      variants:
+        default: 0
+        crds-enabled: 6
+      note: "CRDs are ordinary rendered objects only in the crds-enabled variant and still need lifecycle/upgrade policy."
+    -
+      category: "hook-policy"
+      status: "handled-for-render"
+      policy: "no-hooks"
+      note: "startup API check Job is a Helm post-install hook and is excluded from the render proof; lifecycle policy must handle it before production."
+    -
+      category: "admission-webhook"
+      status: "scan-and-observe"
+      objects:
+        - "admissionregistration.k8s.io/v1|MutatingWebhookConfiguration||cert-manager-webhook"
+        - "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||cert-manager-webhook"
+    -
+      category: "cluster-rbac"
+      status: "scan-and-review"
+      evidence: "scan receipts"
+    -
+      category: "tpl"
+      status: "controlled-by-empty-defaults"
+      note: "extraObjects uses tpl; offline candidate variants do not set that value."
+    -
+      category: "installer-support-object"
+      status: "handled"
+      object: "v1|Namespace||cert-manager"

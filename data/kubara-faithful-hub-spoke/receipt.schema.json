@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://confighub.github.io/helm-expt/schemas/kubara-faithful-hub-spoke-receipt.json",
+  "title": "Kubara faithful hub-and-spoke proof receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["apiVersion", "kind", "metadata", "spec", "status"],
+  "properties": {
+    "apiVersion": { "const": "helm-expt.confighub.com/v1alpha1" },
+    "kind": { "const": "KubaraFaithfulHubSpokeProofReceipt" },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "const": "kubara-v0-13-0-faithful-hub-spoke" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": [
+        "observedAt",
+        "execution",
+        "source",
+        "onboarding",
+        "configHub",
+        "secretRoute",
+        "argo",
+        "cleanup",
+        "limits"
+      ],
+      "properties": {
+        "observedAt": { "type": "string", "format": "date-time" },
+        "execution": { "const": "serial-live-lock" },
+        "source": {
+          "type": "object",
+          "required": ["kubara", "catalogs", "currentExample", "git", "contract"],
+          "properties": {
+            "kubara": {
+              "type": "object",
+              "required": ["version", "commit", "binarySha256", "binaryDigestCheck"],
+              "properties": {
+                "version": { "const": "v0.13.0" },
+                "commit": { "$ref": "#/$defs/sha1" },
+                "binarySha256": { "$ref": "#/$defs/sha256" },
+                "binaryDigestCheck": { "enum": ["pass", "version-only-cross-platform"] }
+              }
+            },
+            "catalogs": {
+              "type": "object",
+              "required": ["version", "commit", "snapshot"],
+              "properties": {
+                "version": { "const": "1.1.0" },
+                "commit": { "$ref": "#/$defs/sha1" },
+                "snapshot": { "type": "string", "minLength": 1 }
+              }
+            },
+            "currentExample": {
+              "type": "object",
+              "required": ["config", "configSha256", "generatedRoot", "generatedFileCount", "generatedSha256"],
+              "properties": {
+                "config": { "type": "string", "minLength": 1 },
+                "configSha256": { "$ref": "#/$defs/sha256" },
+                "generatedRoot": { "type": "string", "minLength": 1 },
+                "generatedFileCount": { "type": "integer", "minimum": 1 },
+                "generatedSha256": { "$ref": "#/$defs/sha256" }
+              }
+            },
+            "git": {
+              "type": "object",
+              "required": ["repository", "targetRevision", "commit", "currentExampleReachable", "generatedSha256", "generatedFileCount", "exactBoundaryFiles"],
+              "properties": {
+                "repository": { "type": "string", "format": "uri" },
+                "targetRevision": { "type": "string", "minLength": 1 },
+                "commit": { "$ref": "#/$defs/sha1" },
+                "currentExampleReachable": { "const": true },
+                "generatedSha256": { "$ref": "#/$defs/sha256" },
+                "generatedFileCount": { "type": "integer", "minimum": 1 },
+                "exactBoundaryFiles": {
+                  "type": "array",
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "uniqueItems": true,
+                  "items": {
+                    "enum": ["source/config.yaml", "source-lock.yaml", "component-artifacts.yaml"]
+                  }
+                }
+              }
+            },
+            "contract": { "$ref": "#/$defs/sourceContract" }
+          }
+        },
+        "onboarding": {
+          "type": "object",
+          "required": ["clusterAdd", "hub", "spoke"],
+          "properties": {
+            "clusterAdd": {
+              "type": "object",
+              "required": ["command", "result", "createdType", "persistedCatalogChoice", "sourceEntryRestoredBeforeGeneration"],
+              "properties": {
+                "command": { "type": "string", "minLength": 1 },
+                "result": { "const": "pass" },
+                "createdType": { "const": "spoke" },
+                "persistedCatalogChoice": { "const": true },
+                "sourceEntryRestoredBeforeGeneration": { "const": true }
+              }
+            },
+            "hub": { "$ref": "#/$defs/clusterIdentity" },
+            "spoke": { "$ref": "#/$defs/clusterIdentity" }
+          }
+        },
+        "configHub": {
+          "type": "object",
+          "required": ["planCheckAndApproval", "observedAttestation", "ordering", "githubStatus"],
+          "properties": {
+            "planCheckAndApproval": { "$ref": "#/$defs/configHubEvidence" },
+            "observedAttestation": { "$ref": "#/$defs/configHubEvidence" },
+            "ordering": {
+              "type": "object",
+              "required": ["planApprovedBeforeKindAndKubaraMutation", "observedAttestationApprovedAfterConvergence"],
+              "properties": {
+                "planApprovedBeforeKindAndKubaraMutation": { "const": true },
+                "observedAttestationApprovedAfterConvergence": { "const": true }
+              }
+            },
+            "githubStatus": {
+              "type": "object",
+              "required": ["enforced", "context", "claim", "detail"],
+              "properties": {
+                "enforced": { "const": false },
+                "context": { "type": "null" },
+                "claim": { "const": "not-proven" },
+                "detail": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "secretRoute": {
+          "type": "object",
+          "required": [
+            "backend",
+            "operator",
+            "clusterSecretStore",
+            "documentedRemotePath",
+            "remoteProperty",
+            "rewrittenServer",
+            "rewrittenKubeconfigSha256",
+            "apiServerCertificateIncludesRewrittenIP",
+            "hubNodeCanReachSpokeAPI",
+            "openBao",
+            "valueReadBackMatches",
+            "secretDataRecorded"
+          ],
+          "properties": {
+            "backend": { "type": "string", "minLength": 1 },
+            "operator": { "const": "External Secrets Operator" },
+            "clusterSecretStore": { "const": "hx-app-dev-dev" },
+            "documentedRemotePath": { "const": "hx-app-dev/dev/argocd/hx-app-staging-staging" },
+            "remoteProperty": { "const": "kubeconfig" },
+            "rewrittenServer": { "type": "string", "pattern": "^https://" },
+            "rewrittenKubeconfigSha256": { "$ref": "#/$defs/sha256" },
+            "apiServerCertificateIncludesRewrittenIP": { "const": true },
+            "hubNodeCanReachSpokeAPI": { "const": true },
+            "openBao": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["chart", "chartVersion", "chartUrl", "chartSha256", "namespace", "mode", "kubaraLocalPattern", "broadEvaluationOnlyPolicy", "rootTokenRecorded", "result"],
+              "properties": {
+                "chart": { "const": "openbao/openbao" },
+                "chartVersion": { "const": "0.28.3" },
+                "chartUrl": { "const": "https://github.com/openbao/openbao-helm/releases/download/openbao-0.28.3/openbao-0.28.3.tgz" },
+                "chartSha256": { "const": "8612ab52ca1383b61dbf54c0a40691aaeba2bb9f4e542134c9ad06fce15a907c" },
+                "namespace": { "const": "openbao" },
+                "mode": { "const": "dev" },
+                "kubaraLocalPattern": { "const": true },
+                "broadEvaluationOnlyPolicy": { "const": true },
+                "rootTokenRecorded": { "const": false },
+                "result": { "const": "pass" }
+              }
+            },
+            "valueReadBackMatches": { "const": true },
+            "secretDataRecorded": { "const": false }
+          }
+        },
+        "argo": {
+          "type": "object",
+          "required": ["registration", "sourceIntegrity", "application", "workload"],
+          "properties": {
+            "registration": {
+              "type": "object",
+              "required": ["result", "mechanism", "externalSecret", "clusterSecret", "registeredName", "registeredProject", "registeredServer", "secretConfigPresent", "clientCertificateAuthMaterialPresent", "secretDataRecorded"],
+              "properties": {
+                "result": { "const": "pass" },
+                "mechanism": { "type": "string", "minLength": 1 },
+                "externalSecret": { "type": "string", "minLength": 1 },
+                "clusterSecret": { "type": "string", "minLength": 1 },
+                "registeredName": { "const": "hx-app-staging" },
+                "registeredProject": { "const": "hx-app-dev-dev" },
+                "registeredServer": { "type": "string", "pattern": "^https://" },
+                "secretConfigPresent": { "const": true },
+                "clientCertificateAuthMaterialPresent": { "const": true },
+                "secretDataRecorded": { "const": false }
+              }
+            },
+            "sourceIntegrity": { "$ref": "#/$defs/sourceContract" },
+            "application": {
+              "type": "object",
+              "required": ["name", "destinationName", "sync", "health", "revisions", "component", "version"],
+              "properties": {
+                "name": { "const": "hx-app-staging-cert-manager" },
+                "destinationName": { "const": "hx-app-staging" },
+                "sync": { "const": "Synced" },
+                "health": { "const": "Healthy" },
+                "revisions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/sha1" } },
+                "component": { "const": "cert-manager" },
+                "version": { "const": "v1.21.0" }
+              }
+            },
+            "workload": {
+              "type": "object",
+              "required": ["namespace", "deployments", "ready"],
+              "properties": {
+                "namespace": { "const": "cert-manager" },
+                "deployments": { "type": "array", "minItems": 1 },
+                "ready": { "const": true }
+              }
+            }
+          }
+        },
+        "cleanup": {
+          "type": "object",
+          "required": ["hubCluster", "spokeCluster", "baselineRestored", "localFiles", "configHubAttestations"],
+          "properties": {
+            "hubCluster": { "const": "pass" },
+            "spokeCluster": { "const": "pass" },
+            "baselineRestored": { "const": true },
+            "localFiles": { "const": "pass" },
+            "configHubAttestations": { "const": "retained-as-proof" }
+          }
+        },
+        "limits": { "type": "array", "minItems": 5, "items": { "type": "string" } }
+      }
+    },
+    "status": {
+      "type": "object",
+      "required": ["result", "claim"],
+      "properties": {
+        "result": { "const": "pass" },
+        "claim": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "sha1": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "clusterIdentity": {
+      "type": "object",
+      "required": ["logicalName", "stage", "kindCluster"],
+      "properties": {
+        "logicalName": { "type": "string", "minLength": 1 },
+        "stage": { "type": "string", "minLength": 1 },
+        "kindCluster": { "type": "string", "pattern": "^hx-kubara-faithful-" }
+      }
+    },
+    "sourceContract": {
+      "type": "object",
+      "required": ["zeroRepoint", "gitRepository", "targetRevision", "platformComponentsPath", "platformConfigsPath", "allowedSourceRepos"],
+      "properties": {
+        "result": { "enum": ["pass"] },
+        "zeroRepoint": { "const": true },
+        "gitRepository": { "type": "string", "format": "uri" },
+        "targetRevision": { "type": "string", "minLength": 1 },
+        "platformComponentsPath": { "type": "string", "minLength": 1 },
+        "platformConfigsPath": { "type": "string", "minLength": 1 },
+        "allowedSourceRepos": { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uri" } }
+      }
+    },
+    "configHubEvidence": {
+      "type": "object",
+      "required": ["check", "unit", "approval"],
+      "properties": {
+        "check": {
+          "type": "object",
+          "required": ["result", "readBackMatches", "dataHashMatches"],
+          "properties": {
+            "result": { "const": "pass" },
+            "readBackMatches": { "const": true },
+            "dataHashMatches": { "const": true }
+          }
+        },
+        "unit": {
+          "type": "object",
+          "required": ["ref", "id", "headRevisionNum", "dataHash", "contentHash", "provider", "targetID", "action"],
+          "properties": {
+            "ref": { "type": "string", "minLength": 1 },
+            "id": { "type": "string", "format": "uuid" },
+            "headRevisionNum": { "type": "integer", "minimum": 1 },
+            "dataHash": { "$ref": "#/$defs/sha256" },
+            "contentHash": { "type": "integer" },
+            "provider": { "const": "None" },
+            "targetID": { "type": "null" },
+            "action": { "type": "string", "minLength": 1 }
+          }
+        },
+        "approval": {
+          "type": "object",
+          "required": ["revision", "recordedApprovals", "approverIdentityRecordedInReceipt", "action"],
+          "properties": {
+            "revision": { "type": "integer", "minimum": 1 },
+            "recordedApprovals": { "type": "integer", "minimum": 1 },
+            "approverIdentityRecordedInReceipt": { "const": false },
+            "action": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "metallb-metallb"
+  version: "0.16.1"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "metallb chart defaults variant rendered from metallb/metallb@0.16.1"

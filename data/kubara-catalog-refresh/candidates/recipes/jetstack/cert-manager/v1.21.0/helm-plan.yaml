@@ -1,0 +1,32 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "jetstack/cert-manager"
+    version: "v1.21.0"
+    variants:
+      - "default"
+      - "crds-enabled"
+    helmObjectsByVariant:
+      default: 40
+      crds-enabled: 46
+    cubInstallObjectsByVariant:
+      default: 41
+      crds-enabled: 47
+    helmMatchByVariant:
+      default: "40/40"
+      crds-enabled: "46/46"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"
+    - "revisions/crds-enabled/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/crds-enabled/r001/receipts/render-receipt.yaml"
+    - "revisions/crds-enabled/r001/receipts/scan-receipt.yaml"
+    - "revisions/crds-enabled/r001/receipts/install-gate.yaml"

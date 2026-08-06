@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartDossier"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.15.1"
+spec:
+  chart: "prometheus-community/kube-prometheus-stack"
+  version: "87.15.1"
+  maintainedNotes:
+    - "Default chart render is nondeterministic unless grafana.adminPassword is bound before render."
+    - "default variant binds grafana.adminPassword and renders 10 Prometheus Operator CRDs."
+    - "no-crds variant omits CRDs for clusters that manage CRDs separately and records those CRDs as target facts."
+    - "existing-secret mirrors Kubara's Grafana credential reference and does not render the Grafana admin Secret."
+    - "Chart declares CRD, kube-state-metrics, node-exporter, Grafana, and windows-exporter dependencies and records them in dependency-lock.yaml."
+    - "Config-only delivery stages the kube-prometheus-stack-admission TLS Secret as a target fact; regular Helm creates that material through hook lifecycle."
+    - "Admission webhook readiness must still be observed after apply because rendered objects plus staged Secret do not prove webhook health."
+    - "CRD manifests include YAML enum scalars such as bare equals signs; the proof parser handles these as scalar strings."
+    - "Rules, scrape configs, datasource config, and extraManifests are tpl/raw extension slots; offline candidate variants keep raw slots empty."
+  knownControlPoints:
+    - "capability-profile"
+    - "crd-lifecycle-policy"
+    - "generated-facts"
+    - "dependency-lock"
+    - "admission-webhook-observation"
+    - "cluster-rbac-scan"
+    - "tpl-extension-slot"

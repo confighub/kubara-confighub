@@ -1,0 +1,71 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  chart:
+    repository: "metrics-server"
+    name: "metrics-server"
+    version: "3.13.1"
+  package:
+    path: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+    name: "metrics-server-metrics-server"
+    version: "3.13.1"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "f4920dd1c8a946dcf14ead4ebb0853d0895b3eb9b654ba452e9ca164c1739b62"
+        bytes: 387
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+        bytes: 6923
+      -
+        path: "bases/external-tls-ca/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/external-tls-ca/upstream.yaml"
+        sha256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+        bytes: 7233
+      -
+        path: "collector/target-facts.sh"
+        sha256: "8c081a96ea3f624aa7f5fa08633cc41166eeb23cb3c437b223e7b985803229eb"
+        bytes: 2670
+      -
+        path: "installer.yaml"
+        sha256: "5f71198eb3fc744137f01bf6c3bd6096c01b674aaaf422e749ffb9b78696afb0"
+        bytes: 2177
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1 -o <tmp>/metrics-server-3.13.1.tgz"
+    sha256: "33033544cb781f32e4a7911e3a26fd6d6ccb9cabb276a485da8577b38e996f14"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1 --base default --work-dir <tmp> --non-interactive --namespace kube-system"
+      helmReleaseObjectCount: 9
+      cubInstallObjectCountIncludingSupport: 10
+      semanticObjectMatches: "9/9"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||kube-system"
+    -
+      variant: "external-tls-ca"
+      base: "external-tls-ca"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1 --base external-tls-ca --work-dir <tmp> --non-interactive --namespace kube-system"
+      helmReleaseObjectCount: 9
+      cubInstallObjectCountIncludingSupport: 10
+      semanticObjectMatches: "9/9"
+      separatedSecretCount: 0
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||kube-system"

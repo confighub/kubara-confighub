@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "KubaraFaithfulHubSpokeProofSummary"
+metadata:
+  name: "kubara-v0-13-0-faithful-hub-spoke"
+spec:
+  receipt: "runs/kubara-faithful-hub-spoke/receipt.yaml"
+  observedAt: "2026-08-05T14:37:39.550Z"
+  kubaraVersion: "v0.13.0"
+  catalogVersion: "1.1.0"
+  hub: "hx-app-dev"
+  spoke: "hx-app-staging"
+  component: "cert-manager"
+  componentVersion: "v1.21.0"
+  checks:
+    kubaraClusterAdd: "pass"
+    gitSourceUnchanged: "pass"
+    configHubPlanApproval: "pass"
+    openBaoExternalSecretRoute: "pass"
+    argoSpokeRegistration: "pass"
+    applicationSync: "Synced"
+    applicationHealth: "Healthy"
+    cleanup: "pass"
+  githubStatusEnforced: false
+status:
+  result: "pass"

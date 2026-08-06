@@ -1,0 +1,338 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "KubaraLiveQualificationSetReceipt"
+metadata:
+  name: "kubara-v0-12-0-exact-pins-all-bases"
+spec:
+  sourceCandidateSet: "data/kubara-catalog-refresh/candidates/candidate-set.yaml"
+  execution: "serial"
+  exactArtifactRequired: true
+  laneCount: 13
+  componentCount: 7
+  lanes:
+    -
+      id: "blackbox-default"
+      canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+      version: "11.15.1"
+      base: "default"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-prometheus-blackbox-exporter-11-15-1-default/receipt.yaml"
+      observedAt: "2026-08-04T11:03:08Z"
+      sourceArtifact:
+        bytes: 13353
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+        expectedSHA256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "metrics-default"
+      canonicalIdentity: "helm:metrics-server/metrics-server"
+      version: "3.13.1"
+      base: "default"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-metrics-server-3-13-1-default/receipt.yaml"
+      observedAt: "2026-08-04T11:07:27Z"
+      sourceArtifact:
+        bytes: 14144
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+        expectedSHA256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "metrics-external-tls-ca"
+      canonicalIdentity: "helm:metrics-server/metrics-server"
+      version: "3.13.1"
+      base: "external-tls-ca"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-metrics-server-3-13-1-external-tls-ca/receipt.yaml"
+      observedAt: "2026-08-04T11:41:03Z"
+      sourceArtifact:
+        bytes: 14144
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+        expectedSHA256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "cert-manager-default"
+      canonicalIdentity: "helm:jetstack/cert-manager"
+      version: "v1.21.0"
+      base: "default"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-cert-manager-v1-21-0-default/receipt.yaml"
+      observedAt: "2026-08-04T12:04:18Z"
+      sourceArtifact:
+        bytes: 153302
+        command: "curl --fail --location --retry 3 --output chart.tgz https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+        expectedSHA256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "cert-manager-crds-enabled"
+      canonicalIdentity: "helm:jetstack/cert-manager"
+      version: "v1.21.0"
+      base: "crds-enabled"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-cert-manager-v1-21-0-crds-enabled/receipt.yaml"
+      observedAt: "2026-08-04T12:10:01Z"
+      sourceArtifact:
+        bytes: 153302
+        command: "curl --fail --location --retry 3 --output chart.tgz https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+        expectedSHA256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "external-secrets-default"
+      canonicalIdentity: "helm:external-secrets/external-secrets"
+      version: "2.7.0"
+      base: "default"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-external-secrets-2-7-0-default/receipt.yaml"
+      observedAt: "2026-08-04T12:16:04Z"
+      sourceArtifact:
+        bytes: 195921
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz"
+        expectedSHA256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "external-secrets-no-crds"
+      canonicalIdentity: "helm:external-secrets/external-secrets"
+      version: "2.7.0"
+      base: "no-crds"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-external-secrets-2-7-0-no-crds/receipt.yaml"
+      observedAt: "2026-08-04T12:23:14Z"
+      sourceArtifact:
+        bytes: 195921
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz"
+        expectedSHA256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "argo-cd-no-crds"
+      canonicalIdentity: "helm:argo-cd/argo-cd"
+      version: "10.1.3"
+      base: "no-crds"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-argo-cd-10-1-3-no-crds/receipt.yaml"
+      observedAt: "2026-08-04T12:29:43Z"
+      sourceArtifact:
+        bytes: 227602
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz"
+        expectedSHA256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "argo-cd-default"
+      canonicalIdentity: "helm:argo-cd/argo-cd"
+      version: "10.1.3"
+      base: "default"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-argo-cd-10-1-3-default/receipt.yaml"
+      observedAt: "2026-08-04T12:52:03Z"
+      sourceArtifact:
+        bytes: 227602
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz"
+        expectedSHA256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "kps-default"
+      canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+      version: "87.15.1"
+      base: "default"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-kube-prometheus-stack-87-15-1-default/receipt.yaml"
+      observedAt: "2026-08-04T12:59:24Z"
+      sourceArtifact:
+        bytes: 889877
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+        expectedSHA256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "kps-no-crds"
+      canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+      version: "87.15.1"
+      base: "no-crds"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-kube-prometheus-stack-87-15-1-no-crds/receipt.yaml"
+      observedAt: "2026-08-04T13:11:46Z"
+      sourceArtifact:
+        bytes: 889877
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+        expectedSHA256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "kps-existing-secret"
+      canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+      version: "87.15.1"
+      base: "existing-secret"
+      targetProfile: "none"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-kube-prometheus-stack-87-15-1-existing-secret/receipt.yaml"
+      observedAt: "2026-08-04T13:21:55Z"
+      sourceArtifact:
+        bytes: 889877
+        command: "curl --fail --location --retry 3 --output chart.tgz https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+        expectedSHA256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+        materializedPath: "exact-chart-artifact/chart.tgz"
+        observedSHA256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+    -
+      id: "traefik-default"
+      canonicalIdentity: "helm:traefik/traefik"
+      version: "41.0.2"
+      base: "default"
+      targetProfile: "kind-loadbalancer"
+      result: "pass"
+      receipt: "runs/live-helm-confighub-compare/kubara-traefik-41-0-2-default/receipt.yaml"
+      observedAt: "2026-08-04T13:34:39Z"
+      sourceArtifact:
+        bytes: 244329
+        command: "helm pull oci://ghcr.io/traefik/helm/traefik --version 41.0.2 --destination exact-chart-artifact"
+        expectedSHA256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+        materializedPath: "exact-chart-artifact/traefik-41.0.2.tgz"
+        observedSHA256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+        resolution: "artifact-addressed"
+        result: "pass"
+        url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+      legs:
+        configHubKubectlApply: "pass"
+        configHubOciArgo: "pass"
+        regularHelm: "pass"
+      cleanup:
+        clusterLifecycle: "cleaned-up"
+        result: "pass"
+status:
+  result: "pass"

@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0"
+spec:
+  chart: "jetstack/cert-manager"
+  version: "v1.21.0"
+  dependencies:
+    []

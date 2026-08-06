@@ -1,0 +1,16 @@
+# Kind proof override: leave cub's first mapped NodePort reserved for argocd-server.
+traefik:
+  service:
+    spec:
+      type: NodePort
+  ports:
+    web:
+      nodePort: 30032
+    websecure:
+      nodePort: 30033
+  providers:
+    kubernetesIngress:
+      publishedService:
+        enabled: false
+      ingressEndpoint:
+        hostname: hx-app-prod-b.traefik.me

@@ -1,0 +1,7 @@
+bootstrapValues:
+  applicationSets:
+    test-cluster-local:
+      platformComponents:
+        path: examples/kubara/local-platform/generated/platform-components/helm
+      platformConfigs:
+        path: examples/kubara/local-platform/generated/platform-configs

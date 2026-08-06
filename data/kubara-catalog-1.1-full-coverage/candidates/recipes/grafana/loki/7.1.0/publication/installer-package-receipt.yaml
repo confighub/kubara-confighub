@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "grafana-loki-7.1.0"
+spec:
+  chart:
+    repository: "grafana"
+    name: "loki"
+    version: "7.1.0"
+  package:
+    path: "data/kubara-catalog-1.1-full-coverage/candidates/packages/grafana/loki/7.1.0"
+    name: "grafana-loki"
+    version: "7.1.0"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "96a40e080819815b9c2bcddf21cb492a8d7874397b786069204d1c9b614b6eb8"
+        bytes: 381
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "2e25c21e656867877b5211bfb1914d335806e76df455a78f72e7ec7f8bd8b9ff"
+        bytes: 32177
+      -
+        path: "installer.yaml"
+        sha256: "b71e64311e197d3b9180f2c9f855b2a737701ce18ce54c9db3a0245e85337cd1"
+        bytes: 298
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-1.1-full-coverage/candidates/packages/grafana/loki/7.1.0 -o <tmp>/loki-7.1.0.tgz"
+    sha256: "bc46d26a4002b46b9073b1e7f2a61d38a96ecae9aa8c23d5e936c2985bc58204"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-1.1-full-coverage/candidates/packages/grafana/loki/7.1.0 --base default --work-dir <tmp> --non-interactive --namespace loki"
+      helmReleaseObjectCount: 19
+      cubInstallObjectCountIncludingSupport: 20
+      semanticObjectMatches: "19/19"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||loki"

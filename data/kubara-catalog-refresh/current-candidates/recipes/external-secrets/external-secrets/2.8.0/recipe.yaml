@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "external-secrets-external-secrets"
+  version: "2.8.0"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/external-secrets/external-secrets/2.8.0"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/external-secrets/external-secrets/2.8.0"
+      - "--non-interactive"
+      - "--namespace"
+      - "external-secrets"
+  variants:
+    - "variants/default/variant.yaml"
+    - "variants/no-crds/variant.yaml"

@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "oauth2-proxy-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "1e6b5312d0e3ec8d8c0e306fb995604d377c89207409e35f2934f3526ac54abc"
+    objectCount: 5
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 6
+    uploadedManifestFiles: 6
+    separatedSecretFiles: 1
+    semanticObjectMatches: "5/5"
+  semanticNormalizations:
+    - "prune-null-fields"
+    - "oauth2-proxy-configmap-leading-blank-line-pruned-by-kustomize"
+  classifications:
+    -
+      identity: "v1|Namespace||oauth2-proxy"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-1.1-full-coverage:compare"

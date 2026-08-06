@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "prometheus-community/prometheus-blackbox-exporter"
+    version: "11.15.1"
+    variants:
+      - "default"
+    helmObjectsByVariant:
+      default: 4
+    cubInstallObjectsByVariant:
+      default: 5
+    helmMatchByVariant:
+      default: "4/4"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"

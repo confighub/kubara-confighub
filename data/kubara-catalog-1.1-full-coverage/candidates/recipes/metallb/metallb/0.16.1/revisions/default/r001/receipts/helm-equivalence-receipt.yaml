@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "metallb-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+    objectCount: 42
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 43
+    uploadedManifestFiles: 43
+    separatedSecretFiles: 2
+    semanticObjectMatches: "42/42"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||metallb-system"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-1.1-full-coverage:compare"

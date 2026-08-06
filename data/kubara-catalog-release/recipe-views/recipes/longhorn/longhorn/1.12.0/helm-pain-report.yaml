@@ -1,0 +1,87 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPainReport"
+metadata:
+  name: "longhorn-longhorn-1.12.0"
+spec:
+  chart:
+    name: "longhorn/longhorn"
+    version: "1.12.0"
+    source: "https://charts.longhorn.io"
+    digest: "869bb20701b154473606f1e8967b27f34f2448a2dfe6eb8970f1cae6957384f5"
+  supportedScopeStatus: "no-unhandled-pain-points-for-supported-scopes"
+  supportedScopes:
+    []
+  supportedVariants:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  notes:
+    - "This package is the exact longhorn@1.12.0 dependency selected by Kubara catalogs 1.1.0."
+    - "The retained root proves exact source bytes, deterministic rendering, and deterministic ConfigHub installer packaging."
+    - "It does not claim Kubara wrapper equivalence, live convergence, or production support."
+  painPoints:
+    -
+      id: "source-lock"
+      detectedPainPoint: "source-lock requires source-lock.yaml"
+      evidence:
+        - "source-lock.yaml"
+      configHubHome: "source-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "source-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "dependency-lock"
+      detectedPainPoint: "dependency-lock requires dependency-lock.yaml"
+      evidence:
+        - "dependency-lock.yaml"
+      configHubHome: "dependency-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "dependency-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "capability-profile"
+      detectedPainPoint: "capability-profile is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "capability-profile"
+      disposition: "handled-by-capability-profile"
+      linkedReceipt: "revisions/default/r001/receipts/render-receipt.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "crd-lifecycle"
+      detectedPainPoint: "crd-lifecycle is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "lifecycle-policy"
+      disposition: "handled-by-lifecycle-policy"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "review-required"
+    -
+      id: "catalog-coverage"
+      detectedPainPoint: "exact source and deterministic package are retained; live qualification and production support remain separate gates"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "recipe"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "packaged-with-controls"
+    -
+      id: "scan-gate"
+      detectedPainPoint: "Current scan gate is warn-production-blocked"
+      evidence:
+        - "helm-plan.yaml"
+        - "scan receipts"
+        - "install gates"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "warn-production-blocked"
+    -
+      id: "value-model-diagnostics"
+      detectedPainPoint: "Helm values can be unknown, dead, misspelled, shadowed, or ignored unless the values model records the analysis boundary."
+      evidence:
+        - "value-model.yaml"
+      configHubHome: "value-model"
+      disposition: "absorbed-into-value-model"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "unknown=not-exhaustively-checked-by-additive-coverage-proof; dead=not-exhaustively-checked-by-additive-coverage-proof; ignored=not-exhaustively-checked-by-additive-coverage-proof"
+  answerForSkepticalHelmUser: "longhorn/longhorn@1.12.0 maps its detected Helm pain to 7 ConfigHub control areas: source-lock, dependency-lock, capability-profile, lifecycle-policy, recipe, scan-gate, value-model. Supported scopes have explicit variants, receipts, scans/gates, and control-point dispositions; production readiness remains not-reviewed-for-production."

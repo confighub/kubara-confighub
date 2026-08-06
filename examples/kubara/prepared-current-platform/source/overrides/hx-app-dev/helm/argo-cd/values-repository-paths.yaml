@@ -1,0 +1,11 @@
+bootstrapValues:
+  projects:
+    hx-app-dev-dev:
+      sourceRepos:
+        - https://github.com/confighub/helm-expt.git
+  applicationSets:
+    hx-app-dev-dev:
+      platformComponents:
+        path: examples/kubara/current-platform/generated/platform-components/helm
+      platformConfigs:
+        path: examples/kubara/current-platform/generated/platform-configs

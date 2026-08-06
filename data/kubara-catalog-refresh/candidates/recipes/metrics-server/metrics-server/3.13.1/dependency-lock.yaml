@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  chart: "metrics-server/metrics-server"
+  version: "3.13.1"
+  dependencies:
+    []

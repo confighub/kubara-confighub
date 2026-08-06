@@ -1,0 +1,15 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartDossier"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1"
+spec:
+  chart: "prometheus-community/prometheus-blackbox-exporter"
+  version: "11.15.1"
+  maintainedNotes:
+    - "The exact Kubara-selected chart renders four objects with chart defaults."
+    - "This is an offline upstream-package candidate; Kubara wrapper compatibility and live qualification remain separate gates."
+  knownControlPoints:
+    - "source-lock"
+    - "dependency-lock"
+    - "capability-profile"
+    - "tpl-extension-slots"

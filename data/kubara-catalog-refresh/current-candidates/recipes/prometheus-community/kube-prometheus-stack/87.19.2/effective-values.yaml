@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.19.2-default"
+spec:
+  files:
+    -
+      path: "effective-values.yaml"
+      source: "inline-proof"
+      sha256: "dd22b3db01aeb3835e2f8989021e512fd14ff6a1783bf17efb8f9589d76dafac"
+  mergedValuesCaptured: false
+  values:
+    grafana:
+      adminPassword: "confighub-grafana-admin-password"

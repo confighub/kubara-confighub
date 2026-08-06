@@ -1,0 +1,24 @@
+apiVersion: helm-expt.confighub.com/v1alpha1
+kind: CatalogStatus
+metadata:
+  name: "argo-cd-argo-cd-10.2.1"
+spec:
+  chart: "argo-cd/argo-cd"
+  version: "10.2.1"
+  status: "catalog-candidate"
+  supportLevel: "promotion-review-needed"
+  supportedScopes:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  supportedVariants:
+    []
+  candidateVariants:
+    - "default"
+    - "no-crds"
+  deferredVariants: []
+  review:
+    lastReviewed: "2026-05-27"
+    humanReviewRequired: true
+    productReviewRequired: true
+  notes:
+    - "Machine proof exists; human product review must confirm the supported variants and production dispositions."

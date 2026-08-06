@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "prometheus-community-prometheus-blackbox-exporter-11.15.1-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "21b263756deb5ec9b307fd32a5323687afb5404bfd42607584e94f71be991176"
+  mergedValuesCaptured: false
+  values:
+    {}

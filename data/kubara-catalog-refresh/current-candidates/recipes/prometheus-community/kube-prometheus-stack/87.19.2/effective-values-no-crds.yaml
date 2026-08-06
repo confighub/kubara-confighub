@@ -1,0 +1,16 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.19.2-no-crds"
+spec:
+  files:
+    -
+      path: "effective-values-no-crds.yaml"
+      source: "inline-proof"
+      sha256: "4f88cc5798eb8b8809afa74993454998cd92dcb27a5264f7440f7174d775da0c"
+  mergedValuesCaptured: false
+  values:
+    crds:
+      enabled: false
+    grafana:
+      adminPassword: "confighub-grafana-admin-password"

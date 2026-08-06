@@ -1,0 +1,17 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartDossier"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  chart: "oauth2-proxy/oauth2-proxy"
+  version: "10.7.0"
+  maintainedNotes:
+    - "This package is the exact oauth2-proxy@10.7.0 dependency selected by Kubara catalogs 1.1.0."
+    - "The retained root proves exact source bytes, deterministic rendering, and deterministic ConfigHub installer packaging."
+    - "It does not claim Kubara wrapper equivalence, live convergence, or production support."
+  knownControlPoints:
+    - "source-lock"
+    - "dependency-lock"
+    - "capability-profile"
+    - "target-facts"
+    - "production-readiness-review"

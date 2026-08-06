@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "traefik-traefik-41.0.2"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "traefik"
+  repositoryURL: "oci://ghcr.io/traefik/helm"
+  chart: "traefik"
+  version: "41.0.2"
+  appVersion: "v3.7.6"
+  packageSHA256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+  packageBytes: 244329
+  exactArtifact:
+    url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+    sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+    resolution: "artifact-addressed"
+  evidence:
+    candidateRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

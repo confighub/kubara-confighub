@@ -1,0 +1,181 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "metallb-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "743f6ce209a0e83d5ed628ed507a02c74b97ccb48779cf65c261c743d20c5331"
+  findingCounts:
+    critical: 0
+    high: 0
+    medium: 27
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||metallb-frr-k8s-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||metallb-frr-k8s-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||metallb-frr-k8s-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||metallb-frr-k8s-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||metallb:controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||metallb:controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||metallb:controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||metallb:controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||metallb:speaker"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||metallb:speaker"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||metallb:speaker"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||metallb:speaker"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb-frr-k8s-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb-frr-k8s-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb-frr-k8s-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb-frr-k8s-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:speaker"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:speaker"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:speaker"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metallb:speaker"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||bfdprofiles.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||bfdprofiles.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||bgpadvertisements.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||bgpadvertisements.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||bgppeers.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||bgppeers.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||bgpsessionstates.frrk8s.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||bgpsessionstates.frrk8s.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||communities.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||communities.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||configurationstates.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||configurationstates.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||frrconfigurations.frrk8s.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||frrconfigurations.frrk8s.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||frrk8sconfigurations.frrk8s.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||frrk8sconfigurations.frrk8s.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||frrnodestates.frrk8s.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||frrnodestates.frrk8s.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||ipaddresspools.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||ipaddresspools.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||l2advertisements.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||l2advertisements.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||servicebgpstatuses.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||servicebgpstatuses.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||servicel2statuses.metallb.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||servicel2statuses.metallb.io"
+      message: "CRD ownership and upgrade behavior require production review"
+    -
+      id: "rendered-secret-ownership:v1|Secret|metallb-system|frr-k8s-webhook-server-cert"
+      rule: "rendered-secret-ownership"
+      severity: "medium"
+      object: "v1|Secret|metallb-system|frr-k8s-webhook-server-cert"
+      message: "Rendered Secret ownership and target-specific replacement require review"
+    -
+      id: "rendered-secret-ownership:v1|Secret|metallb-system|metallb-webhook-cert"
+      rule: "rendered-secret-ownership"
+      severity: "medium"
+      object: "v1|Secret|metallb-system|metallb-webhook-cert"
+      message: "Rendered Secret ownership and target-specific replacement require review"

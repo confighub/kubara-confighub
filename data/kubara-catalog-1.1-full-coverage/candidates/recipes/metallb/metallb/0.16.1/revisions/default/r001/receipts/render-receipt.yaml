@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "metallb-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "3a07736eee691ec7adc60475eecb08e0c26d0dc9085196c58ba42c82da6d0713"
+    dependencyLockSHA256: "23ddcd18f373a18865fa17b636f9223469cd230a52355ac85489b55d1231e192"
+    effectiveValuesSHA256: "6ea2e2ee03357589276eaaa189750a1bab5dee235e3d5fc5596afdf121e21829"
+  outputs:
+    renderedObjectSetSHA256: "430fb6a1ec84cd0b737106c4b87ac33d9734adb9fd337767a3161c90d7ae2d4e"
+    renderedObjectInventorySHA256: "a71740b874ee0217f32b13155414f299a9d05cc3e9131cc0f75319316bb823da"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 42
+    renderedSecretCount: 2
+    secretCountSeparatedByCubInstall: 2

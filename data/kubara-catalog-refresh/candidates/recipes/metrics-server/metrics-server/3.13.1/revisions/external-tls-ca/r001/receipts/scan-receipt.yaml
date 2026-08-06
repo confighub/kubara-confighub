@@ -1,0 +1,49 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "metrics-server-external-tls-ca-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "a760c42abd69a4a416bb6b6f284881c7ab1e821466df371784cdfe3b0fe9f420"
+  findingCounts:
+    critical: 0
+    high: 0
+    medium: 5
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "apiservice-requires-observation:apiregistration.k8s.io/v1|APIService||v1beta1.metrics.k8s.io"
+      rule: "apiservice-requires-observation"
+      severity: "medium"
+      object: "apiregistration.k8s.io/v1|APIService||v1beta1.metrics.k8s.io"
+      message: "APIService availability must be observed after apply"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||system:metrics-server"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||system:metrics-server"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||system:metrics-server-aggregated-reader"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||system:metrics-server-aggregated-reader"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||metrics-server:system:auth-delegator"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||metrics-server:system:auth-delegator"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||system:metrics-server"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||system:metrics-server"
+      message: "Cluster-scoped RBAC requires production review"

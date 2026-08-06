@@ -1,0 +1,1024 @@
+{
+  "apiVersion": "evidence.confighub.com/v1alpha1",
+  "kind": "KubaraPlatformMatrix",
+  "metadata": {
+    "name": "kubara-v0.12.0-adapted-confighub-fleet"
+  },
+  "spec": {
+    "evidence": {
+      "mode": "committed-receipt-join",
+      "recordedAt": {
+        "singlePlatform": "2026-08-03T22:14:20Z",
+        "appRollout": "2026-08-03T08:10:00Z"
+      },
+      "sources": {
+        "config": "examples/kubara/local-platform/source/config.yaml",
+        "alignment": "examples/kubara/local-platform/catalog-alignment.yaml",
+        "single": "runs/kubara-single-platform-proof/receipt.yaml",
+        "rollout": "runs/kubara-app-rollout-proof/receipt.yaml"
+      },
+      "liveReads": []
+    },
+    "scope": {
+      "kubaraVersion": "v0.12.0",
+      "deliveryModel": "adapted ConfigHub variant/OCI -> ConfigHub-owned Argo CD/argobot",
+      "faithfulKubaraGitDelivery": false,
+      "components": 7,
+      "clusters": 4,
+      "cells": 28
+    },
+    "vocabulary": {
+      "observed": "Workload and exact component sync evidence are both recorded for this cell.",
+      "watch": "The workload is observed, but controller sync is non-green or a material proof limit remains.",
+      "partial": "The workload is observed, but exact component sync and/or observed-version evidence is missing.",
+      "substituted": "The Kubara role is present through an explicitly recorded replacement, not its selected Kubara wrapper.",
+      "not-delivered": "The receipt explicitly limits this component to another cluster; this is not an unknown deployment claim."
+    },
+    "components": [
+      {
+        "name": "argo-cd",
+        "kubaraService": "argocd",
+        "selectedPackages": [
+          {
+            "identity": "helm:argo-cd/argo-cd",
+            "selectedVersion": "10.1.3",
+            "wrapperVersion": "1.2.0"
+          }
+        ],
+        "selectedVersion": "argo-cd/argo-cd@10.1.3",
+        "wrapperVersion": "1.2.0"
+      },
+      {
+        "name": "cert-manager",
+        "kubaraService": "cert-manager",
+        "selectedPackages": [
+          {
+            "identity": "helm:jetstack/cert-manager",
+            "selectedVersion": "v1.21.0",
+            "wrapperVersion": "0.5.0"
+          }
+        ],
+        "selectedVersion": "jetstack/cert-manager@v1.21.0",
+        "wrapperVersion": "0.5.0"
+      },
+      {
+        "name": "external-secrets",
+        "kubaraService": "external-secrets",
+        "selectedPackages": [
+          {
+            "identity": "helm:external-secrets/external-secrets",
+            "selectedVersion": "2.7.0",
+            "wrapperVersion": "0.13.0"
+          }
+        ],
+        "selectedVersion": "external-secrets/external-secrets@2.7.0",
+        "wrapperVersion": "0.13.0"
+      },
+      {
+        "name": "homer-dashboard",
+        "kubaraService": "homer-dashboard",
+        "selectedPackages": [
+          {
+            "identity": "kubara:homer-dashboard",
+            "selectedVersion": "0.1.0",
+            "wrapperVersion": "0.1.0"
+          }
+        ],
+        "selectedVersion": "kubara/homer-dashboard@0.1.0",
+        "wrapperVersion": "0.1.0"
+      },
+      {
+        "name": "kube-prometheus-stack",
+        "kubaraService": "kube-prometheus-stack",
+        "selectedPackages": [
+          {
+            "identity": "helm:prometheus-community/kube-prometheus-stack",
+            "selectedVersion": "87.15.1",
+            "wrapperVersion": "2.4.0"
+          },
+          {
+            "identity": "helm:prometheus-community/prometheus-blackbox-exporter",
+            "selectedVersion": "11.15.1",
+            "wrapperVersion": "2.4.0"
+          }
+        ],
+        "selectedVersion": "prometheus-community/kube-prometheus-stack@87.15.1 + prometheus-community/prometheus-blackbox-exporter@11.15.1",
+        "wrapperVersion": "2.4.0"
+      },
+      {
+        "name": "metrics-server",
+        "kubaraService": "metrics-server",
+        "selectedPackages": [
+          {
+            "identity": "helm:metrics-server/metrics-server",
+            "selectedVersion": "3.13.1",
+            "wrapperVersion": "0.1.0"
+          }
+        ],
+        "selectedVersion": "metrics-server/metrics-server@3.13.1",
+        "wrapperVersion": "0.1.0"
+      },
+      {
+        "name": "traefik",
+        "kubaraService": "traefik",
+        "selectedPackages": [
+          {
+            "identity": "helm:traefik/traefik",
+            "selectedVersion": "41.0.2",
+            "wrapperVersion": "2.1.0"
+          }
+        ],
+        "selectedVersion": "traefik/traefik@41.0.2",
+        "wrapperVersion": "2.1.0"
+      }
+    ],
+    "clusters": [
+      {
+        "name": "hx-app-dev",
+        "environment": "dev",
+        "receiptKey": "dev",
+        "region": "",
+        "argoAppsSpace": "hx-app-dev-argo-apps"
+      },
+      {
+        "name": "hx-app-staging",
+        "environment": "staging",
+        "receiptKey": "staging",
+        "region": "",
+        "argoAppsSpace": "hx-app-staging-argo-apps"
+      },
+      {
+        "name": "hx-app-prod-a",
+        "environment": "prod",
+        "receiptKey": "prod-a",
+        "region": "us-east",
+        "argoAppsSpace": "hx-app-prod-a-argo-apps"
+      },
+      {
+        "name": "hx-app-prod-b",
+        "environment": "prod",
+        "receiptKey": "prod-b",
+        "region": "us-west",
+        "argoAppsSpace": "hx-app-prod-b-argo-apps"
+      }
+    ],
+    "departures": [
+      {
+        "id": "adapted-delivery",
+        "components": [
+          "cert-manager",
+          "external-secrets",
+          "homer-dashboard",
+          "kube-prometheus-stack",
+          "metrics-server",
+          "traefik"
+        ],
+        "appliesTo": [
+          "hx-app-dev",
+          "hx-app-prod-a",
+          "hx-app-prod-b",
+          "hx-app-staging"
+        ],
+        "summary": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.",
+        "evidence": {
+          "source": "runs/kubara-app-rollout-proof/receipt.yaml",
+          "path": "spec.kubaraPlatform.source",
+          "sourceExcerpt": "Kubara-generated umbrella charts (examples/kubara/local-platform/generated), rendered and delivered per cluster via ConfigHub variant Spaces -> our Argo -> argobot"
+        }
+      },
+      {
+        "id": "argo-owner-substitution",
+        "components": [
+          "argo-cd"
+        ],
+        "appliesTo": [
+          "hx-app-dev",
+          "hx-app-prod-a",
+          "hx-app-prod-b",
+          "hx-app-staging"
+        ],
+        "summary": "ConfigHub-owned Argo CD plus argobot replaces Kubara's selected argo-cd wrapper.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.argoOwner",
+          "sourceExcerpt": "cub cluster up: ConfigHub-owned Argo CD + argobot on each cluster"
+        }
+      },
+      {
+        "id": "cert-manager-cr-ordering",
+        "components": [
+          "cert-manager"
+        ],
+        "appliesTo": [
+          "hx-app-dev",
+          "hx-app-prod-a",
+          "hx-app-prod-b",
+          "hx-app-staging"
+        ],
+        "summary": "ClusterIssuer and ServiceMonitor were split from the controller render for CRD-before-CR ordering.",
+        "evidence": {
+          "source": "runs/kubara-app-rollout-proof/receipt.yaml",
+          "path": "spec.kubaraPlatform.servicesDelivered[cert-manager].note",
+          "sourceExcerpt": "Kubara umbrella chart; ClusterIssuer + ServiceMonitor split out for CRD-before-CR ordering"
+        }
+      },
+      {
+        "id": "cert-manager-kind-issuer",
+        "components": [
+          "cert-manager"
+        ],
+        "appliesTo": [
+          "hx-app-dev",
+          "hx-app-prod-a",
+          "hx-app-prod-b",
+          "hx-app-staging"
+        ],
+        "summary": "The kind proof uses a self-signed issuer instead of Kubara's public Let's Encrypt ACME issuer.",
+        "evidence": {
+          "source": "runs/kubara-app-rollout-proof/receipt.yaml",
+          "path": "status.limits",
+          "sourceExcerpt": "Kubara's ClusterIssuer is Let's Encrypt ACME (http01), which needs a public-reachable ingress. A self-signed ClusterIssuer was used for TLS on kind instead."
+        }
+      },
+      {
+        "id": "external-secrets-dev-scope",
+        "components": [
+          "external-secrets"
+        ],
+        "appliesTo": [
+          "hx-app-dev"
+        ],
+        "summary": "External Secrets is evidenced on dev only in the committed platform receipt.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.platform.services[external-secrets]",
+          "sourceExcerpt": "Operator runs in default in this adapted layout. The kind-only fake provider holds demo data and is not a production secret backend."
+        }
+      },
+      {
+        "id": "external-secrets-fake-provider",
+        "components": [
+          "external-secrets"
+        ],
+        "appliesTo": [
+          "hx-app-dev"
+        ],
+        "summary": "The dev proof uses external-secrets' fake provider, not a production secret backend.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.findings[external-secrets-fake-provider-contract]",
+          "sourceExcerpt": "Kubara intentionally leaves clusterSecretStores empty. For kind, the prerequisite was adapted to external-secrets' built-in fake provider. In version 2.7.0 the provider requires a JSON string in value; the obsolete valueMap shape is rejected. dataFrom.extract decoded the JSON into the two Grafana Secret keys."
+        }
+      },
+      {
+        "id": "external-secrets-namespace-adaptation",
+        "components": [
+          "external-secrets"
+        ],
+        "appliesTo": [
+          "hx-app-dev"
+        ],
+        "summary": "A redundant Namespace/default object was removed after a shared-resource conflict.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.findings[external-secrets-shared-namespace]",
+          "sourceExcerpt": "The hand-off render put the operator in default and also emitted a redundant Namespace/default document. Argo reported a shared-resource tracking conflict with the existing Homer Application. Only that Namespace document was removed from the external-secrets base and promoted to dev; the namespace and all workloads remained in place, and the app became Synced/Healthy."
+        }
+      },
+      {
+        "id": "homer-namespace-adaptation",
+        "components": [
+          "homer-dashboard"
+        ],
+        "appliesTo": [
+          "hx-app-dev"
+        ],
+        "summary": "The live Units were assigned a namespace because the wrapper render omitted it.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.findings[render-omits-namespace]",
+          "sourceExcerpt": "The homer-dashboard render left namespace off its objects, so Argo CD could not place them. Namespace was set on the Units before delivery."
+        }
+      },
+      {
+        "id": "kps-crd-split-ssa",
+        "components": [
+          "kube-prometheus-stack"
+        ],
+        "appliesTo": [
+          "hx-app-dev"
+        ],
+        "summary": "Large monitoring CRDs were split and reconciled with server-side apply.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.findings[large-crd-annotation-limit]",
+          "sourceExcerpt": "kube-prometheus-stack CRDs exceed the 256 KB annotation limit that client-side apply uses. cub cluster up installs stock Argo CD, which defaults to client-side apply, so the first large chart hits this. The fix is ServerSideApply=true on the Argo Application, which large CRDs need. Replace=true was a temporary mid-flight fallback; it was removed after convergence. The final application has exactly ServerSideApply=true, is Synced/Healthy, and all 10 monitoring.coreos.com CRDs remain installed."
+        }
+      },
+      {
+        "id": "kps-version-departure",
+        "components": [
+          "kube-prometheus-stack"
+        ],
+        "appliesTo": [
+          "hx-app-dev"
+        ],
+        "summary": "The live proof used kube-prometheus-stack 87.19.0 because the selected 87.15.1 archive was unavailable from the repository index at run time.",
+        "evidence": {
+          "source": "runs/kubara-single-platform-proof/receipt.yaml",
+          "path": "spec.findings[pinned-version-pruned]",
+          "sourceExcerpt": "Kubara pinned kube-prometheus-stack 87.15.1. The prometheus-community repository had pruned it from its index, so the bundle would not build. Moved to the nearest surviving version in the same line, 87.19.0."
+        }
+      },
+      {
+        "id": "traefik-kind-loadbalancer",
+        "components": [
+          "traefik"
+        ],
+        "appliesTo": [
+          "hx-app-dev",
+          "hx-app-prod-a",
+          "hx-app-prod-b",
+          "hx-app-staging"
+        ],
+        "summary": "Traefik remains Progressing because its LoadBalancer has no MetalLB on kind, while its pod is serving.",
+        "evidence": {
+          "source": "runs/kubara-app-rollout-proof/receipt.yaml",
+          "path": "spec.kubaraPlatform.argoStatusNotes",
+          "sourceExcerpt": "traefik Argo apps report Synced/Progressing: the traefik Service is type LoadBalancer, which stays pending on kind without metallb. Pod is 1/1 and serving."
+        }
+      },
+      {
+        "id": "traefik-monitoring-strip",
+        "components": [
+          "traefik"
+        ],
+        "appliesTo": [
+          "hx-app-dev",
+          "hx-app-prod-a",
+          "hx-app-prod-b",
+          "hx-app-staging"
+        ],
+        "summary": "ServiceMonitor was stripped in the adapted render; the Prometheus API was declared to satisfy the wrapper's render guard.",
+        "evidence": {
+          "source": "runs/kubara-app-rollout-proof/receipt.yaml",
+          "path": "spec.kubaraPlatform.servicesDelivered[traefik].note",
+          "sourceExcerpt": "ServiceMonitor stripped; rendered with --api-versions monitoring.coreos.com/v1 to pass the chart's monitoring guard"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "argo-cd/argo-cd@10.1.3",
+        "observedVersion": "unknown",
+        "versionState": "substituted-observed-version-unknown",
+        "presence": "substituted",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "workloadState": "ConfigHub-owned Argo CD + argobot recorded; Argo workload version/readiness not separately recorded",
+        "proofStatus": "substituted",
+        "departureIds": [
+          "argo-owner-substitution"
+        ],
+        "departures": "ConfigHub-owned Argo CD plus argobot replaces Kubara's selected argo-cd wrapper.",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "argo-cd/argo-cd@10.1.3",
+        "observedVersion": "unknown",
+        "versionState": "substituted-observed-version-unknown",
+        "presence": "substituted",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "workloadState": "ConfigHub-owned Argo CD + argobot recorded; Argo workload version/readiness not separately recorded",
+        "proofStatus": "substituted",
+        "departureIds": [
+          "argo-owner-substitution"
+        ],
+        "departures": "ConfigHub-owned Argo CD plus argobot replaces Kubara's selected argo-cd wrapper.",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "argo-cd/argo-cd@10.1.3",
+        "observedVersion": "unknown",
+        "versionState": "substituted-observed-version-unknown",
+        "presence": "substituted",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "workloadState": "ConfigHub-owned Argo CD + argobot recorded; Argo workload version/readiness not separately recorded",
+        "proofStatus": "substituted",
+        "departureIds": [
+          "argo-owner-substitution"
+        ],
+        "departures": "ConfigHub-owned Argo CD plus argobot replaces Kubara's selected argo-cd wrapper.",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "argo-cd/argo-cd@10.1.3",
+        "observedVersion": "unknown",
+        "versionState": "substituted-observed-version-unknown",
+        "presence": "substituted",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "workloadState": "ConfigHub-owned Argo CD + argobot recorded; Argo workload version/readiness not separately recorded",
+        "proofStatus": "substituted",
+        "departureIds": [
+          "argo-owner-substitution"
+        ],
+        "departures": "ConfigHub-owned Argo CD plus argobot replaces Kubara's selected argo-cd wrapper.",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "cert-manager",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "jetstack/cert-manager@v1.21.0",
+        "observedVersion": "v1.21.0",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "OutOfSync/Healthy",
+        "workloadState": "3/3 Deployments Running on all four clusters",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "cert-manager-cr-ordering",
+          "cert-manager-kind-issuer"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; ClusterIssuer and ServiceMonitor were split from the controller render for CRD-before-CR ordering.; The kind proof uses a self-signed issuer instead of Kubara's public Let's Encrypt ACME issuer.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "cert-manager",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "jetstack/cert-manager@v1.21.0",
+        "observedVersion": "v1.21.0",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "OutOfSync/Healthy",
+        "workloadState": "3/3 Deployments Running on all four clusters",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "cert-manager-cr-ordering",
+          "cert-manager-kind-issuer"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; ClusterIssuer and ServiceMonitor were split from the controller render for CRD-before-CR ordering.; The kind proof uses a self-signed issuer instead of Kubara's public Let's Encrypt ACME issuer.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "cert-manager",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "jetstack/cert-manager@v1.21.0",
+        "observedVersion": "v1.21.0",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "OutOfSync/Healthy",
+        "workloadState": "3/3 Deployments Running on all four clusters",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "cert-manager-cr-ordering",
+          "cert-manager-kind-issuer"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; ClusterIssuer and ServiceMonitor were split from the controller render for CRD-before-CR ordering.; The kind proof uses a self-signed issuer instead of Kubara's public Let's Encrypt ACME issuer.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "cert-manager",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "jetstack/cert-manager@v1.21.0",
+        "observedVersion": "v1.21.0",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "OutOfSync/Healthy",
+        "workloadState": "3/3 Deployments Running on all four clusters",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "cert-manager-cr-ordering",
+          "cert-manager-kind-issuer"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; ClusterIssuer and ServiceMonitor were split from the controller render for CRD-before-CR ordering.; The kind proof uses a self-signed issuer instead of Kubara's public Let's Encrypt ACME issuer.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "external-secrets",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "external-secrets/external-secrets@2.7.0",
+        "observedVersion": "2.7.0",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "Synced/Healthy (3 split apps)",
+        "workloadState": "controller, webhook, and cert-controller 1/1 Running; 24 CRDs installed; ClusterSecretStore Ready=True (Valid); Grafana ExternalSecret Ready=True (SecretSynced)",
+        "proofStatus": "observed",
+        "departureIds": [
+          "adapted-delivery",
+          "external-secrets-dev-scope",
+          "external-secrets-fake-provider",
+          "external-secrets-namespace-adaptation"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; External Secrets is evidenced on dev only in the committed platform receipt.; The dev proof uses external-secrets' fake provider, not a production secret backend.; A redundant Namespace/default object was removed after a shared-resource conflict.",
+        "evidenceScope": "per-application dev evidence",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "external-secrets",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "external-secrets/external-secrets@2.7.0",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "external-secrets",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "external-secrets/external-secrets@2.7.0",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "external-secrets",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "external-secrets/external-secrets@2.7.0",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "homer-dashboard",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "kubara/homer-dashboard@0.1.0",
+        "observedVersion": "unknown",
+        "versionState": "unknown",
+        "presence": "present",
+        "syncState": "unknown",
+        "workloadState": "1/1 Running",
+        "proofStatus": "partial",
+        "departureIds": [
+          "adapted-delivery",
+          "homer-namespace-adaptation"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; The live Units were assigned a namespace because the wrapper render omitted it.",
+        "evidenceScope": "dev workload recorded; exact component Argo state not recorded",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "homer-dashboard",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "kubara/homer-dashboard@0.1.0",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "homer-dashboard",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "kubara/homer-dashboard@0.1.0",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "homer-dashboard",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "kubara/homer-dashboard@0.1.0",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "kube-prometheus-stack",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "prometheus-community/kube-prometheus-stack@87.15.1 + prometheus-community/prometheus-blackbox-exporter@11.15.1",
+        "observedVersion": "87.19.0 (kube-prometheus-stack); prometheus-blackbox-exporter unknown",
+        "versionState": "recorded-departure",
+        "presence": "present",
+        "syncState": "partial: CRD app hx-kps-crds-dev Synced/Healthy; main app sync unknown",
+        "workloadState": "operator, Prometheus, Alertmanager, node-exporter, kube-state-metrics, blackbox, and Grafana all Running. Grafana's admin Secret is now managed and owned by external-secrets.",
+        "proofStatus": "partial",
+        "departureIds": [
+          "adapted-delivery",
+          "kps-crd-split-ssa",
+          "kps-version-departure"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; Large monitoring CRDs were split and reconciled with server-side apply.; The live proof used kube-prometheus-stack 87.19.0 because the selected 87.15.1 archive was unavailable from the repository index at run time.",
+        "evidenceScope": "dev CRD app exact; main app not recorded",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "kube-prometheus-stack",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "prometheus-community/kube-prometheus-stack@87.15.1 + prometheus-community/prometheus-blackbox-exporter@11.15.1",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "kube-prometheus-stack",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "prometheus-community/kube-prometheus-stack@87.15.1 + prometheus-community/prometheus-blackbox-exporter@11.15.1",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "kube-prometheus-stack",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "prometheus-community/kube-prometheus-stack@87.15.1 + prometheus-community/prometheus-blackbox-exporter@11.15.1",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "metrics-server",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "metrics-server/metrics-server@3.13.1",
+        "observedVersion": "unknown",
+        "versionState": "unknown",
+        "presence": "present",
+        "syncState": "unknown",
+        "workloadState": "1/1 Running",
+        "proofStatus": "partial",
+        "departureIds": [
+          "adapted-delivery"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.",
+        "evidenceScope": "dev workload recorded; exact component Argo state not recorded",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "metrics-server",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "metrics-server/metrics-server@3.13.1",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "metrics-server",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "metrics-server/metrics-server@3.13.1",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "metrics-server",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "metrics-server/metrics-server@3.13.1",
+        "observedVersion": "not-observed",
+        "versionState": "not-delivered",
+        "presence": "not-delivered",
+        "syncState": "not-applicable",
+        "workloadState": "not-delivered-in-receipt-scope",
+        "proofStatus": "not-delivered",
+        "departureIds": [],
+        "departures": "none; component is outside this cluster's recorded proof scope",
+        "evidenceScope": "explicit receipt scope limit",
+        "evidence": [
+          "runs/kubara-single-platform-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "traefik",
+        "cluster": "hx-app-dev",
+        "environment": "dev",
+        "region": "",
+        "selectedVersion": "traefik/traefik@41.0.2",
+        "observedVersion": "41.0.2",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "Synced/Progressing",
+        "workloadState": "1/1 Deployment Running on all four clusters, IngressClass=traefik",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "traefik-kind-loadbalancer",
+          "traefik-monitoring-strip"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; Traefik remains Progressing because its LoadBalancer has no MetalLB on kind, while its pod is serving.; ServiceMonitor was stripped in the adapted render; the Prometheus API was declared to satisfy the wrapper's render guard.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "traefik",
+        "cluster": "hx-app-staging",
+        "environment": "staging",
+        "region": "",
+        "selectedVersion": "traefik/traefik@41.0.2",
+        "observedVersion": "41.0.2",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "Synced/Progressing",
+        "workloadState": "1/1 Deployment Running on all four clusters, IngressClass=traefik",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "traefik-kind-loadbalancer",
+          "traefik-monitoring-strip"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; Traefik remains Progressing because its LoadBalancer has no MetalLB on kind, while its pod is serving.; ServiceMonitor was stripped in the adapted render; the Prometheus API was declared to satisfy the wrapper's render guard.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "traefik",
+        "cluster": "hx-app-prod-a",
+        "environment": "prod",
+        "region": "us-east",
+        "selectedVersion": "traefik/traefik@41.0.2",
+        "observedVersion": "41.0.2",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "Synced/Progressing",
+        "workloadState": "1/1 Deployment Running on all four clusters, IngressClass=traefik",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "traefik-kind-loadbalancer",
+          "traefik-monitoring-strip"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; Traefik remains Progressing because its LoadBalancer has no MetalLB on kind, while its pod is serving.; ServiceMonitor was stripped in the adapted render; the Prometheus API was declared to satisfy the wrapper's render guard.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      },
+      {
+        "component": "traefik",
+        "cluster": "hx-app-prod-b",
+        "environment": "prod",
+        "region": "us-west",
+        "selectedVersion": "traefik/traefik@41.0.2",
+        "observedVersion": "41.0.2",
+        "versionState": "matches-selection",
+        "presence": "present",
+        "syncState": "Synced/Progressing",
+        "workloadState": "1/1 Deployment Running on all four clusters, IngressClass=traefik",
+        "proofStatus": "watch",
+        "departureIds": [
+          "adapted-delivery",
+          "traefik-kind-loadbalancer",
+          "traefik-monitoring-strip"
+        ],
+        "departures": "ConfigHub variant/OCI delivery replaces the native Kubara Git/ApplicationSet delivery path in this proof.; Traefik remains Progressing because its LoadBalancer has no MetalLB on kind, while its pod is serving.; ServiceMonitor was stripped in the adapted render; the Prometheus API was declared to satisfy the wrapper's render guard.",
+        "evidenceScope": "fleet-summary; not individually enumerated per cluster",
+        "evidence": [
+          "runs/kubara-app-rollout-proof/receipt.yaml"
+        ]
+      }
+    ],
+    "unknowns": [
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-dev",
+        "observedVersion": "unknown",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted"
+      },
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-staging",
+        "observedVersion": "unknown",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted"
+      },
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-prod-a",
+        "observedVersion": "unknown",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted"
+      },
+      {
+        "component": "argo-cd",
+        "cluster": "hx-app-prod-b",
+        "observedVersion": "unknown",
+        "syncState": "Synced/Healthy (argobot delivery app)",
+        "evidenceScope": "per-cluster argobot summary; Kubara argo-cd is substituted"
+      },
+      {
+        "component": "homer-dashboard",
+        "cluster": "hx-app-dev",
+        "observedVersion": "unknown",
+        "syncState": "unknown",
+        "evidenceScope": "dev workload recorded; exact component Argo state not recorded"
+      },
+      {
+        "component": "kube-prometheus-stack",
+        "cluster": "hx-app-dev",
+        "observedVersion": "87.19.0 (kube-prometheus-stack); prometheus-blackbox-exporter unknown",
+        "syncState": "partial: CRD app hx-kps-crds-dev Synced/Healthy; main app sync unknown",
+        "evidenceScope": "dev CRD app exact; main app not recorded"
+      },
+      {
+        "component": "metrics-server",
+        "cluster": "hx-app-dev",
+        "observedVersion": "unknown",
+        "syncState": "unknown",
+        "evidenceScope": "dev workload recorded; exact component Argo state not recorded"
+      }
+    ],
+    "summary": {
+      "substituted": 4,
+      "watch": 8,
+      "observed": 1,
+      "not-delivered": 12,
+      "partial": 3,
+      "explicitUnknownCells": 7
+    },
+    "claimBoundary": [
+      "This matrix joins historical committed receipts and does not query current ConfigHub, Argo CD, or Kubernetes state.",
+      "The four-cluster proof uses ConfigHub-owned Argo CD and adapted per-cluster delivery; it is not the faithful Kubara Git/ApplicationSet lane.",
+      "A selected package version is not reported as observed unless the receipt records the running version.",
+      "Fleet-summary Argo states are repeated per cell with evidenceScope=fleet-summary; they are not represented as individually queried cluster states."
+    ]
+  }
+}

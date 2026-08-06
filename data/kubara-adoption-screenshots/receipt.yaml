@@ -1,0 +1,173 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraConfigHubAdoptionScreenshotReceipt"
+metadata:
+  name: "kubara-config-hub-six-step-adoption"
+spec:
+  contract:
+    path: "data/kubara-adoption-screenshots/contract.yaml"
+    sha256: "cc568171b829cfe4ad8e24897b83ea9fface8fdd8a9b2f0d3e198465fe063d02"
+  source:
+    repository: "https://github.com/confighub/helm-expt.git"
+    commit: "5d69eb0447eed52a5e1b7f20617d98a742d65f3c"
+    repositoryTree: "6c94c83d608a7a72a1b5f1e421b12dae079efab5"
+    selectedPath: "examples/kubara/prepared-current-platform"
+    selectedPathTree: "1787312abce3bfcc3037c3fb0d2b910a15d44f9f"
+  organization:
+    name: "Kubara"
+    externalID: "58b23b85-9699-4384-bd57-80ef695a1d58"
+    internalID: "12c33fa8-00b1-4011-ad3e-19d56458b29c"
+    serverURL: "https://hub.confighub.com"
+  evidence:
+    -
+      id: "generationReceipt"
+      path: "examples/kubara/current-platform/generation-receipt.yaml"
+      sha256: "b1dc565427ca72d39370981cbfd00c2e18b4100f938b87774d9f79e90f45aafe"
+    -
+      id: "catalogParityReceipt"
+      path: "examples/kubara/current-platform/catalog-parity-receipt.yaml"
+      sha256: "1ccc392eff09f7b338828b299613cdf31209eddeb2a939d530ebf3ac1e294a46"
+    -
+      id: "preparedHandoffReceipt"
+      path: "examples/kubara/prepared-current-platform/preparation-receipt.yaml"
+      sha256: "bb948948ab73acce5f25df22025bc050d9cd90de32a687a5f75b192095ce2731"
+    -
+      id: "importerImplementation"
+      path: "scripts/import-kubara-git-revision.mjs"
+      sha256: "925726043ad9a4c6165cb6a6a1dcdc9aadf71c4482acc7fa447449d23875dbd7"
+    -
+      id: "appReleaseRunnerImplementation"
+      path: "scripts/run-kubara-app-release.mjs"
+      sha256: "57917d7ee7303365101581a21d19ff980e2283eee7c316604023e98a6c6f5c73"
+    -
+      id: "releaseAcceptanceContract"
+      path: "data/kubara-release-acceptance/contract.yaml"
+      sha256: "41f9a9de306d5f4463d478b3e89e74271ac63143b137161881b788d3473ad835"
+    -
+      id: "faithfulReceipt"
+      path: "runs/kubara-faithful-hub-spoke/receipt.yaml"
+      sha256: "76c2ed7d7c36f65eea1deae08d843d944f15e5d5e9c5e2b9c2097fa3a2d9ef61"
+    -
+      id: "miniIdpReceipt"
+      path: "runs/kubara-mini-idp-reconcile/receipt.yaml"
+      sha256: "8b26167c50773baad5f144c2d64625de4129d2d82edf5b33c7801dd9056e8238"
+    -
+      id: "orphanReceipt"
+      path: "runs/kubara-mini-idp-reconcile/orphan-audit.yaml"
+      sha256: "c588c4882ed5de66d4dde68cf0f09f94ee9b976bca740e14cec4c6796bebdb23"
+    -
+      id: "matrix"
+      path: "data/kubara-platform-matrix/matrix.json"
+      sha256: "d03cd48285f2844c4eae3b550f05f3e0e64a8f0c945b7cdc512aceed426520e6"
+    -
+      id: "wiring"
+      path: "data/kubara-wiring/graph.json"
+      sha256: "fdc8637d5dfc0f139a2b43d9fadcdba0fdc873847225c5a597a5c1ef287609a7"
+  images:
+    -
+      step: 1
+      id: "native-config"
+      path: "docs/images/kubara-adoption/01-native-kubara-config.png"
+      sha256: "f27e17b4032bfbe29624ac603057da35e44909ddb3f496c32452f15c050bef92"
+      capturedAt: "2026-08-06T10:39:31.317Z"
+      visibleIdentities:
+        - "the public confighub/helm-expt repository and its Git identities"
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      evidenceBindings:
+        - "generationReceipt"
+      sensitiveHandling:
+        mode: "absent"
+        detail: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "A real GitHub review frame of examples/kubara/current-platform/source/config.yaml at commit 5d69eb0447eed52a5e1b7f20617d98a742d65f3c: the ordered official bootstrap and general catalog references, the one-hub declaration with three spoke declarations, the expanded cert-manager service selection, and the adjacent source/overrides tree that holds the corresponding values-kind.yaml override for cert-manager on hx-app-dev."
+      claimBoundary: "The frame illustrates the reviewed native input only; it does not claim generation, delivery, or cluster state. It never replaces the machine checkpoint or evidence receipt."
+    -
+      step: 2
+      id: "generation-parity"
+      path: "docs/images/kubara-adoption/02-kubara-generation-parity.png"
+      sha256: "343b68804c56e0730d598b0b6383cb987b0b09b110b70edf4b81c73cfdf6889a"
+      capturedAt: "2026-08-06T09:51:33.835Z"
+      visibleIdentities:
+        - "the public confighub/helm-expt repository and its Git identities"
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      evidenceBindings:
+        - "generationReceipt"
+        - "catalogParityReceipt"
+      sensitiveHandling:
+        mode: "absent"
+        detail: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "One real terminal frame: the complete verifier final line (verified Kubara v0.13.0 current platform offline: 2 catalog lanes, 4 clusters, 7 exact artifacts, 13 deterministic renders) with the adjacent generated tree listing platform-components, platform-configs, and the four cluster directories."
+      claimBoundary: "The frame illustrates the offline generation and parity checkpoint; it does not claim live delivery. It never replaces the machine checkpoint or evidence receipt."
+    -
+      step: 3
+      id: "exact-git-revision"
+      path: "docs/images/kubara-adoption/03-exact-git-revision.png"
+      sha256: "eac99e2559da0b0c939600adb837fb8c4cbb5876c2ebed70b171b3ea9ddeabe6"
+      capturedAt: "2026-08-06T10:00:05.036Z"
+      visibleIdentities:
+        - "the public confighub/helm-expt repository and its Git identities"
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      evidenceBindings:
+        - "preparedHandoffReceipt"
+      sensitiveHandling:
+        mode: "absent"
+        detail: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The public verified GitHub commit 5d69eb0447eed52a5e1b7f20617d98a742d65f3c (shown with GitHub's short form 5d69eb0, Verified badge, and 3/3 passing checks) whose change touches the source, generated, and prepared paths together, with the preparation receipt and checksum inventory visible in the commit file tree."
+      claimBoundary: "GitHub renders the abbreviated commit identifier; the exact 40-character commit is recorded here and in the source binding. The frame does not claim registry publication or cluster state."
+    -
+      step: 4
+      id: "oci-packages-index"
+      path: "docs/images/kubara-adoption/04-oci-packages-index.png"
+      sha256: "8fd419455c35408987b06371d66d36a2891ab2e41ad246224009ea03098d2833"
+      capturedAt: "2026-08-06T10:00:44.144Z"
+      visibleIdentities:
+        - "the public confighub/helm-expt repository and its Git identities"
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      evidenceBindings:
+        - "preparedHandoffReceipt"
+        - "importerImplementation"
+        - "releaseAcceptanceContract"
+      sensitiveHandling:
+        mode: "absent"
+        detail: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "One real terminal frame from the importer self-test run at working revision f458615e0febd6041df4a9f13fb135437b0cf609, whose examples/kubara source and prepared trees are byte-identical to the bound source commit 5d69eb0447eed52a5e1b7f20617d98a742d65f3c. The complete passing final line reports the exact Git compile, 22 component/config OCI packages plus the digest index, pulled-payload verification, pinned delivery topology, the zero-action second run, and the adversarial refusals — all against deterministic fake Git, OCI, and ConfigHub test surfaces."
+      claimBoundary: "This frame proves the importer contract and isolated package/index behavior only; it does not claim a live registry publication, ConfigHub materialization, or cluster health."
+    -
+      step: 5
+      id: "selected-org-topology"
+      path: "docs/images/kubara-adoption/05-selected-org-topology.png"
+      sha256: "ac59b27b423cb78d271cba922eeedc942cf8dd624af8db418057a6c6616a6dce"
+      capturedAt: "2026-08-06T10:28:52.055Z"
+      visibleIdentities:
+        - "the public confighub/helm-expt repository and its Git identities"
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      evidenceBindings:
+        - "faithfulReceipt"
+        - "miniIdpReceipt"
+        - "orphanReceipt"
+      sensitiveHandling:
+        mode: "absent"
+        detail: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The selected ConfigHub organization's Spaces view sorted by name: the faithful hx-argo definition Spaces, the adapted per-cluster argo-apps and argobot Spaces, the per-component base and per-cluster variant Spaces, the application Spaces, and hx-platform, with unit, worker, target, and trigger counts."
+      claimBoundary: "The frame proves visible topology, not workload convergence by itself; convergence is proved by the bound mini-IDP and orphan receipts."
+    -
+      step: 6
+      id: "app-governance-live"
+      path: "docs/images/kubara-adoption/06-app-governance-live.png"
+      sha256: "249555d8154d0549fed5a2541f05c0a542a84ed90a12943c0e592a89ffc3dc0f"
+      capturedAt: "2026-08-06T10:35:26.345Z"
+      visibleIdentities:
+        - "the public confighub/helm-expt repository and its Git identities"
+        - "the ConfigHub organization Kubara and its owner account name and avatar as rendered by the GUI"
+      evidenceBindings:
+        - "miniIdpReceipt"
+        - "orphanReceipt"
+        - "matrix"
+        - "wiring"
+      sensitiveHandling:
+        mode: "absent"
+        detail: "no credentials, tokens, secret values, or private endpoints are rendered; visible identifiers are the public repository, the demo organization, and its owner account identity"
+      caption: "The hx-web-deployment Unit in hx-web-prod-a: twelve revisions with retained release-1 through release-7 Tags, promotion UpgradeUnit entries, the RestoreRevision one-target rollback of production A, apply-gate markers, and the current head revision carrying the Head and Applied markers as the exact live release."
+      claimBoundary: "The frame illustrates the current governance and live-result claim and remains bound to the mini-IDP, orphan, matrix, and wiring evidence; it is not itself the acceptance proof."
+status:
+  result: "pass"
+  sourceCurrent: true
+  frameCount: 6

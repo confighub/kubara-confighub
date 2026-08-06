@@ -1,0 +1,265 @@
+apiVersion: catalog.confighub.com/v1alpha1
+kind: KubaraCatalogAlignment
+metadata:
+  name: kubara-local-platform-v0-12-0
+spec:
+  authority:
+    platformSelection:
+      - effective-kubara-catalog-set
+      - examples/kubara/local-platform/source/config.yaml
+      - documented-values-overrides
+    configHubCatalogRole: component-first
+    exactVersionPolicy: fail-if-missing
+  retention:
+    mode: additive-only
+    preserve:
+      - older-recipes
+      - older-packages
+      - candidates
+      - receipts
+      - fixtures
+      - public-paths
+  exactCandidateSet:
+    status: offline-candidate-pass
+    path: data/kubara-catalog-refresh/candidates/candidate-set.yaml
+    candidateCount: 7
+    rootRetention: retained
+    liveQualification: passed-13-of-13
+  kubaraCatalogAdapter:
+    status: verified
+    requiredInputs:
+      - exact-reviewed-upstream-package
+      - kubara-ServiceDefinition
+      - kubara-wrapper-templates-defaults-and-additions
+    requiredOutputs:
+      - Catalog.yaml
+      - services/ServiceDefinition
+      - platform-components
+      - platform-configs
+  components:
+    - canonicalIdentity: helm:argo-cd/argo-cd
+      kubara:
+        service: argocd
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/argo-cd
+        wrapperVersion: 1.2.0
+        selectedVersion: 10.1.3
+        repository: https://argoproj.github.io/argo-helm
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz
+          sha256: bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b
+      configHubCatalog:
+        recipeRoot: recipes/argo-cd/argo-cd
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/argo-cd/argo-cd/10.1.3
+          package: data/kubara-catalog-refresh/candidates/packages/argo-cd/argo-cd/10.1.3
+        retainedVersions:
+          - 9.5.15
+          - 9.5.17
+          - 10.1.3
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/argocd.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+    - canonicalIdentity: helm:jetstack/cert-manager
+      kubara:
+        service: cert-manager
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/cert-manager
+        wrapperVersion: 0.5.0
+        selectedVersion: v1.21.0
+        repository: https://charts.jetstack.io
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz
+          sha256: 9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97
+      configHubCatalog:
+        recipeRoot: recipes/jetstack/cert-manager
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/jetstack/cert-manager/v1.21.0
+          package: data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0
+        retainedVersions:
+          - v1.20.2
+          - v1.21.0
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/cert-manager.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+    - canonicalIdentity: helm:external-secrets/external-secrets
+      kubara:
+        service: external-secrets
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/external-secrets
+        wrapperVersion: 0.13.0
+        selectedVersion: 2.7.0
+        repository: https://charts.external-secrets.io/
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz
+          sha256: a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60
+      configHubCatalog:
+        recipeRoot: recipes/external-secrets/external-secrets
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/external-secrets/external-secrets/2.7.0
+          package: data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0
+        retainedVersions:
+          - 2.5.0
+          - 2.7.0
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/external-secrets.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+    - canonicalIdentity: kubara:homer-dashboard
+      kubara:
+        service: homer-dashboard
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/homer-dashboard
+        wrapperVersion: 0.1.0
+        selectedVersion: 0.1.0
+        source: first-party-kubara
+      configHubCatalog:
+        recipeRoot: recipes/kubara/homer-dashboard
+        componentEntryStatus: missing
+        upstreamPackageMatch: not-applicable
+        retainedVersions: []
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/homer-dashboard.yaml
+        adapterStatus: verified
+        parityStatus: deterministic-render-verified
+    - canonicalIdentity: helm:prometheus-community/kube-prometheus-stack
+      kubara:
+        service: kube-prometheus-stack
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/kube-prometheus-stack
+        wrapperVersion: 2.4.0
+        selectedVersion: 87.15.1
+        repository: https://prometheus-community.github.io/helm-charts
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz
+          sha256: 4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b
+      adaptedLiveDeparture:
+        version: 87.19.0
+        reason: exact-version-resolution-failed-during-original-single-platform-proof
+        laterExactQualification: passed-13-of-13-suite
+      configHubCatalog:
+        recipeRoot: recipes/prometheus-community/kube-prometheus-stack
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.15.1
+          package: data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.15.1
+        retainedVersions:
+          - 85.3.3
+          - 86.1.0
+          - 87.15.1
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/kube-prometheus-stack.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+    - canonicalIdentity: helm:prometheus-community/prometheus-blackbox-exporter
+      kubara:
+        service: kube-prometheus-stack
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/kube-prometheus-stack
+        wrapperVersion: 2.4.0
+        selectedVersion: 11.15.1
+        repository: https://prometheus-community.github.io/helm-charts
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz
+          sha256: 4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e
+      configHubCatalog:
+        recipeRoot: recipes/prometheus-community/prometheus-blackbox-exporter
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1
+          package: data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1
+        retainedVersions:
+          - 11.10.0
+          - 11.15.1
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/kube-prometheus-stack.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+    - canonicalIdentity: helm:metrics-server/metrics-server
+      kubara:
+        service: metrics-server
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/metrics-server
+        wrapperVersion: 0.1.0
+        selectedVersion: 3.13.1
+        repository: https://kubernetes-sigs.github.io/metrics-server
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz
+          sha256: 084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13
+      configHubCatalog:
+        recipeRoot: recipes/metrics-server/metrics-server
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1
+          package: data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1
+        retainedVersions:
+          - 3.13.0
+          - 3.13.1
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/metrics-server.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+    - canonicalIdentity: helm:traefik/traefik
+      kubara:
+        service: traefik
+        wrapperPath: examples/kubara/local-platform/generated/platform-components/helm/traefik
+        wrapperVersion: 2.1.0
+        selectedVersion: 41.0.2
+        repository: oci://ghcr.io/traefik/helm
+        artifact:
+          verifiedAt: "2026-08-04T08:41:11Z"
+          url: oci://ghcr.io/traefik/helm/traefik:41.0.2
+          manifestDigest: sha256:b64212403e056c14dbcac5bfd0030f89f0e08fccae370dd7cd96592ee745848e
+          chartLayerDigest: sha256:a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a
+      configHubCatalog:
+        recipeRoot: recipes/traefik/traefik
+        componentEntryStatus: retained
+        upstreamPackageMatch: retained
+        exactCandidate:
+          status: offline-candidate-pass
+          recipe: data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2
+          package: data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2
+        retainedVersions:
+          - 40.2.0
+          - 41.0.2
+        kubaraCompatibility:
+          serviceDefinition: byte-preserved
+          wrapperAdditions: byte-preserved
+          adapterProfile: data/kubara-compatibility-profiles/services/traefik.yaml
+        adapterStatus: verified
+        parityStatus: passed-13-of-13
+  buildDependencies:
+    - canonicalIdentity: kubara:template-library
+      path: examples/kubara/local-platform/generated/platform-components/helm/template-library
+      version: 0.2.0
+      disposition: source-lock-with-wrapper

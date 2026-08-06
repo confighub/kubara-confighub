@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartDossier"
+metadata:
+  name: "external-secrets-external-secrets-2.8.0"
+spec:
+  chart: "external-secrets/external-secrets"
+  version: "2.8.0"
+  maintainedNotes:
+    - "Default chart renders 23 external-secrets CRDs because installCRDs defaults to true."
+    - "no-crds variant omits CRDs for clusters that manage CRDs separately and records those CRDs as target facts."
+    - "Chart declares a bitwarden-sdk-server dependency that remains disabled in offline candidate variants but is recorded in dependency-lock.yaml."
+    - "Validating webhook readiness must be observed after apply because rendered objects alone do not prove webhook health."
+    - "The rendered webhook Secret is separated by installer and must be staged before ConfigHub/GitOps sync; cert-controller populates certificate material after apply."
+    - "A stricter cub-scout live witness on kind Kubernetes 1.30 found that the rendered ExternalSecret CRD contains spec.versions[0].selectableFields that the live API omitted after apply; workloads converged, but this blocks strict rendered-object/live parity for that target profile."
+    - "extraObjects is a tpl-powered extension slot; offline candidate variants keep it empty."
+  knownControlPoints:
+    - "capability-profile"
+    - "capability-profile-live-pruning"
+    - "crd-lifecycle-policy"
+    - "dependency-lock"
+    - "admission-webhook-observation"
+    - "webhook-secret-observation"
+    - "cluster-rbac-scan"
+    - "tpl-extension-slot"

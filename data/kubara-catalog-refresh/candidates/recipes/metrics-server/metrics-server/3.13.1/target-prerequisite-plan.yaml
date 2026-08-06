@@ -1,0 +1,47 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "TargetPrerequisitePlan"
+metadata:
+  name: "metrics-server-metrics-server-3-13-1"
+  chart: "metrics-server/metrics-server"
+  version: "3.13.1"
+spec:
+  summary: "The external-tls-ca base is render-equivalent, but it is only target-ready when the serving certificate Secret and APIService CA bundle are created from the same trust material and the aggregated metrics API is observed after apply."
+  bases:
+    default:
+      status: "self-contained-for-local-proof"
+      note: "The default base keeps insecureSkipTLSVerify=true and lets metrics-server generate its serving certificate at runtime. This is the simple local proof path, not the strict external CA path."
+    externalTlsCa:
+      status: "target-prerequisite-modeled-live-parity-pass"
+      currentProofLimit: "The maintained canonical proof keeps the placeholder apiService.caBundle value so Helm equivalence stays stable. The installer package exposes apiServiceCaBundle as an input and rewrites the APIService at setup time. The live parity harness generates a matching CA and serving Secret for both legs, stages the Secret, passes the CA value before render, and observes the APIService."
+      requiredForStrictLiveParity:
+        - "Generate a CA and serving certificate with SANs for metrics-server.kube-system and metrics-server.kube-system.svc."
+        - "Render both regular Helm and cub installer with apiService.caBundle set from that CA."
+        - "Stage kube-system/metrics-server-tls from the matching serving certificate and key before apply."
+        - "Observe Deployment availability, APIService Available=True, and the metrics.k8s.io API after apply."
+      requiredBeforeRender:
+        -
+          kind: "Value"
+          path: "apiService.caBundle"
+          purpose: "CA bundle embedded into the rendered APIService; must be generated with the serving certificate target fact, not left as the placeholder value"
+      requiredBeforeApply:
+        -
+          kind: "Secret"
+          namespace: "kube-system"
+          name: "metrics-server-tls"
+          keys:
+            - "tls.crt"
+            - "tls.key"
+          purpose: "metrics-server serving certificate and private key"
+      coupling: "apiService.caBundle must validate the certificate chain presented by kube-system/metrics-server-tls."
+      mustObserve:
+        - "Deployment kube-system/metrics-server is available"
+        - "APIService v1beta1.metrics.k8s.io has Available=True"
+        - "kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes returns metrics or a target-approved empty result"
+      requiredReceipts:
+        - "target-fact-receipt"
+        - "secret-preflight-receipt"
+        - "apiservice-observation-receipt"
+  notProvenBy:
+    - "render parity alone"
+    - "a Secret with the expected name but unrelated certificate material"
+    - "a rendered caBundle without live APIService availability"

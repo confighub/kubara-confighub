@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy-10.7.0"
+spec:
+  checkedValues:
+    -
+      path: "<chart defaults>"
+      variant: "default"
+      disposition: "default-render-captured"
+      reason: "the exact Kubara-selected chart default render is captured"
+  unknownValues: "not-exhaustively-checked-by-additive-coverage-proof"
+  deadValues: "not-exhaustively-checked-by-additive-coverage-proof"
+  ignoredValues: "not-exhaustively-checked-by-additive-coverage-proof"

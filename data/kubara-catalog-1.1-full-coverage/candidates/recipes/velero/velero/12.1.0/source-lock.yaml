@@ -1,0 +1,19 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "SourceLock"
+metadata:
+  name: "velero-velero-12.1.0"
+spec:
+  sourceType: "HelmChart"
+  repositoryName: "velero"
+  repositoryURL: "https://vmware-tanzu.github.io/helm-charts"
+  chart: "velero"
+  version: "12.1.0"
+  appVersion: "1.18.1"
+  packageSHA256: "cd23589ad1b2d25cdd3220f6866b3f6f4c5683c4c09494e76a14700b33f81f83"
+  packageBytes: 42489
+  exactArtifact:
+    url: "https://github.com/vmware-tanzu/helm-charts/releases/download/velero-12.1.0/velero-12.1.0.tgz"
+    sha256: "cd23589ad1b2d25cdd3220f6866b3f6f4c5683c4c09494e76a14700b33f81f83"
+    resolution: "artifact-addressed"
+  evidence:
+    exactArtifactRenderReceipt: "revisions/default/r001/receipts/render-receipt.yaml"

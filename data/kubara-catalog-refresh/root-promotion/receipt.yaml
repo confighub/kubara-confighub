@@ -1,0 +1,226 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogRootPromotionReceipt"
+metadata:
+  name: "kubara-v0-12-0-exact-pins-root-promotion"
+spec:
+  sourceAlignment: "examples/kubara/local-platform/catalog-alignment.yaml"
+  sourceCandidateSet: "data/kubara-catalog-refresh/candidates/candidate-set.yaml"
+  sourceCandidateEntriesSHA256: "5a3ab22c1cfe50e3b7149d4133930f66b59a2019b3a782cf517fc4d893b2b039"
+  liveQualificationReceipt: "runs/kubara-live-qualification/receipt.yaml"
+  liveQualificationReceiptSHA256: "b3d31befe058320443249ab707c8e460cee70112dbaf46589a7b72dbd12e6e9e"
+  retentionMode: "additive-only-non-overwrite"
+  immutableBaseline:
+    versionCount: 110
+    recipesTreeSHA256: "405bb7847cff4a4c9c691aafbaf69a1baff160c5e8a8f5d927569c8dd2286424"
+    packagesTreeSHA256: "68c82bb177743dc610172bacd035475160515cccb47aea68910d32d222bd6e1c"
+  additionWave: "historical-7"
+  additionCount: 7
+  rootVersionCountAfterWave: 117
+  ociPublication: "not-performed"
+  components:
+    -
+      canonicalIdentity: "helm:argo-cd/argo-cd"
+      version: "10.1.3"
+      exactArtifact:
+        url: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.1.3/argo-cd-10.1.3.tgz"
+        sha256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/argo-cd/argo-cd/10.1.3"
+        recipeTreeSHA256: "83bcb1e0da8ea756cd4156204cb66f696f3be686e8fda287303f22df571f8eaf"
+        package: "data/kubara-catalog-refresh/candidates/packages/argo-cd/argo-cd/10.1.3"
+        packageTreeSHA256: "b51741fe52083cfbe23e7eb0d0376382f68e77e539cfebad7b90c98f025abdeb"
+      retainedRoot:
+        recipe: "recipes/argo-cd/argo-cd/10.1.3"
+        recipeCoreTreeSHA256: "e9bedc922a26f21d2628e134bc362d9dde732595d79f09b8405ab2baeba1b310"
+        package: "packages/argo-cd/argo-cd/10.1.3"
+        packageTreeSHA256: "fdbe4eb451b0a9fa81653bf1adff3132e560d35dfc922b74d66f931d9374a22f"
+      historicalRoots:
+        -
+          version: "9.5.15"
+          recipe: "recipes/argo-cd/argo-cd/9.5.15"
+          recipeCoreTreeSHA256: "be9c7b4a92493a75b74f8fbb0e9f2cff7e3f964217136d1bb7278f04abadab31"
+          package: "packages/argo-cd/argo-cd/9.5.15"
+          packageTreeSHA256: "efd8d942bdf26b6abbcbe2efa83d731a9036e21463e0335697dfc43194175f13"
+        -
+          version: "9.5.17"
+          recipe: "recipes/argo-cd/argo-cd/9.5.17"
+          recipeCoreTreeSHA256: "25b9dc56eb9a68e31ff1d116fdf95dfc230cbbbae99699601a188ff92f35a1d8"
+          package: "packages/argo-cd/argo-cd/9.5.17"
+          packageTreeSHA256: "0458220746985197b9881b9738938b47dfd2da37429a0ff9fd7553276dd039b0"
+      liveQualificationLanes:
+        - "argo-cd-no-crds"
+        - "argo-cd-default"
+    -
+      canonicalIdentity: "helm:jetstack/cert-manager"
+      version: "v1.21.0"
+      exactArtifact:
+        url: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+        sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/jetstack/cert-manager/v1.21.0"
+        recipeTreeSHA256: "81fff1b37331a95b665932620c72f37a7229a253a3b465260bf8a841fdea866f"
+        package: "data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0"
+        packageTreeSHA256: "781c1ea913e4ebd1dd71e12602f80652d212c7fd3dc09664210362aed16c4b70"
+      retainedRoot:
+        recipe: "recipes/jetstack/cert-manager/v1.21.0"
+        recipeCoreTreeSHA256: "865b512378a23d889239048133af9cb8b5035821b2861d07b423ff52bfd81ae2"
+        package: "packages/jetstack/cert-manager/v1.21.0"
+        packageTreeSHA256: "5ebc7b1860fc2eb216e85979f25b40aa5187708806876d21e87595ed98a9e668"
+      historicalRoots:
+        -
+          version: "v1.20.2"
+          recipe: "recipes/jetstack/cert-manager/v1.20.2"
+          recipeCoreTreeSHA256: "30e65a5119fa6e20b45ea76b90b614bfc4e43734649b8706e36f306fe3b3cc36"
+          package: "packages/jetstack/cert-manager/v1.20.2"
+          packageTreeSHA256: "b960914232c30afa857774b749e6bc224aa0c8ed7ff0a247856c53406fca6e39"
+      liveQualificationLanes:
+        - "cert-manager-default"
+        - "cert-manager-crds-enabled"
+    -
+      canonicalIdentity: "helm:external-secrets/external-secrets"
+      version: "2.7.0"
+      exactArtifact:
+        url: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.7.0/external-secrets-2.7.0.tgz"
+        sha256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/external-secrets/external-secrets/2.7.0"
+        recipeTreeSHA256: "705528dbe7e151a3c69fdd1ab885210bffdde4a4785d65238f3e4eed2779eba5"
+        package: "data/kubara-catalog-refresh/candidates/packages/external-secrets/external-secrets/2.7.0"
+        packageTreeSHA256: "5de0697fdb384874193b09401f89727592463d4eb1bf14da4fcccc4f113af598"
+      retainedRoot:
+        recipe: "recipes/external-secrets/external-secrets/2.7.0"
+        recipeCoreTreeSHA256: "e873fe390dea76c113b74cf096296d70b729f6fb6f6a4cbcd4f7ef71204ee492"
+        package: "packages/external-secrets/external-secrets/2.7.0"
+        packageTreeSHA256: "0b404e58608ac27734f7ec42037251fe8f94d1bfd0aa37862b59588d23752a6f"
+      historicalRoots:
+        -
+          version: "2.5.0"
+          recipe: "recipes/external-secrets/external-secrets/2.5.0"
+          recipeCoreTreeSHA256: "707736681e6f8ee9609fcea4448744905b907fe790b4ecade51acb85d53b3bb2"
+          package: "packages/external-secrets/external-secrets/2.5.0"
+          packageTreeSHA256: "2a43bc18ca871c80d7b0a1d431dc8d6e3c9ac0a38d56bf1d4b52cfd22e9ebee0"
+      liveQualificationLanes:
+        - "external-secrets-default"
+        - "external-secrets-no-crds"
+    -
+      canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+      version: "87.15.1"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.15.1/kube-prometheus-stack-87.15.1.tgz"
+        sha256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.15.1"
+        recipeTreeSHA256: "59e433a4ae6866724cbd547e4e7f391e5217ed9795177db3ae0d653714beda48"
+        package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.15.1"
+        packageTreeSHA256: "1b2950a6386e4d23397963a9bd663357be9afa91dae17b0c798ecf88366cb251"
+      retainedRoot:
+        recipe: "recipes/prometheus-community/kube-prometheus-stack/87.15.1"
+        recipeCoreTreeSHA256: "92fce42a559723b6a85461e63769a3bfabd4638720e83ccf13eb2c3c32bb5478"
+        package: "packages/prometheus-community/kube-prometheus-stack/87.15.1"
+        packageTreeSHA256: "a0c4502941d30df49709a9025098881f9141d25042532a9239ae2e3e979caf6f"
+        lifecycleExtras: "config-catalog/package-extras/prometheus-community/kube-prometheus-stack/87.15.1"
+        lifecycleExtrasTreeSHA256: "0fe92cc49a4e0885ddc78ef99388bd30b73a2d1f8aa4e77c525ca885ab016a96"
+      historicalRoots:
+        -
+          version: "85.3.3"
+          recipe: "recipes/prometheus-community/kube-prometheus-stack/85.3.3"
+          recipeCoreTreeSHA256: "0e88b9bee9afbd55340289929471c3d96783b1f57787da4a9d1c08ceefb40ee6"
+          package: "packages/prometheus-community/kube-prometheus-stack/85.3.3"
+          packageTreeSHA256: "7f502d57cf466a685488d1b9f577a54e3a4d0b5ae50a5800b258d7592dfc9151"
+          lifecycleExtras: "config-catalog/package-extras/prometheus-community/kube-prometheus-stack/85.3.3"
+          lifecycleExtrasTreeSHA256: "4bac2d76a8ee8dad3f28bf7be5305d75498abc8674f0aaa9d2a487c897da3909"
+        -
+          version: "86.1.0"
+          recipe: "recipes/prometheus-community/kube-prometheus-stack/86.1.0"
+          recipeCoreTreeSHA256: "b208b9fc32a614095a11ee17188565e428622eb53c95084f86c05b157e2213e1"
+          package: "packages/prometheus-community/kube-prometheus-stack/86.1.0"
+          packageTreeSHA256: "385a0f01ea4f99ad92b4c7dc796be008f0d2ec37b434327d0d232881c327ed77"
+          lifecycleExtras: "config-catalog/package-extras/prometheus-community/kube-prometheus-stack/86.1.0"
+          lifecycleExtrasTreeSHA256: "b8217494f16cef8f9f3a4b93d15380642eebc411fc996d53594d03e52d776f2e"
+      liveQualificationLanes:
+        - "kps-default"
+        - "kps-no-crds"
+        - "kps-existing-secret"
+    -
+      canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+      version: "11.15.1"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+        sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+        recipeTreeSHA256: "12fd1f73b6cc5a71d3cab295b91ca7d4346b50ec1c872d690e5dbe85f2f2f7dd"
+        package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+        packageTreeSHA256: "ec865a73d46d520d8c7672f209417de370188dec1a32550140aeed7b7bd642d2"
+      retainedRoot:
+        recipe: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+        recipeCoreTreeSHA256: "3641e923093868396179480f46a8b24abe0222740baa4a609eeb525bc330d884"
+        package: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+        packageTreeSHA256: "0d3f33d7ae4967b8943750aafa39b1b6f7691a3600a7c209ebb6a8a18bebb4e8"
+      historicalRoots:
+        -
+          version: "11.10.0"
+          recipe: "recipes/prometheus-community/prometheus-blackbox-exporter/11.10.0"
+          recipeCoreTreeSHA256: "32d348d71f307d0b272f111fd12fac86012c8a701e10bd767703ed50e9555cb3"
+          package: "packages/prometheus-community/prometheus-blackbox-exporter/11.10.0"
+          packageTreeSHA256: "36ee529e5bb1370b91f70312b7513f14ac88474353daaa8e3b10cea8eadecb11"
+      liveQualificationLanes:
+        - "blackbox-default"
+    -
+      canonicalIdentity: "helm:metrics-server/metrics-server"
+      version: "3.13.1"
+      exactArtifact:
+        url: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+        sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1"
+        recipeTreeSHA256: "08e3a2ac909d5365e4986535c8752ba03f2e82247a5f87865f0cb023ee5c4234"
+        package: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+        packageTreeSHA256: "fe0d2adedd9dc5e99e5acf4733c1f4435e163df278ca53d264a44efd1ce2e08a"
+      retainedRoot:
+        recipe: "recipes/metrics-server/metrics-server/3.13.1"
+        recipeCoreTreeSHA256: "82a38ca70d09a501073dfab46a9e7c362fa0ae86f41ead74460c87c916ad3c9b"
+        package: "packages/metrics-server/metrics-server/3.13.1"
+        packageTreeSHA256: "ca39ec4ca4d1cd87f4fd5a5993f3c2c1006f5ed8918cdb4ccf468990ebc3ef22"
+      historicalRoots:
+        -
+          version: "3.13.0"
+          recipe: "recipes/metrics-server/metrics-server/3.13.0"
+          recipeCoreTreeSHA256: "7dee57d2f40f18df9bbf1dfed3a8a6b33f88f67166e438ac03ae532a314d637c"
+          package: "packages/metrics-server/metrics-server/3.13.0"
+          packageTreeSHA256: "ce109d2589322aaca3c34529562d988366834cb759100c5cd6098e830ee6157b"
+      liveQualificationLanes:
+        - "metrics-default"
+        - "metrics-external-tls-ca"
+    -
+      canonicalIdentity: "helm:traefik/traefik"
+      version: "41.0.2"
+      exactArtifact:
+        url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+        sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      immutableCandidate:
+        recipe: "data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2"
+        recipeTreeSHA256: "07248547dfee17e68ec14dea1e76b5960fb7b6ec859f9ff717fc39e3ba99e47a"
+        package: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+        packageTreeSHA256: "b09caea51351f8529bc3101798e9583891bc8bffca03e48b79fcfb0a9301826d"
+      retainedRoot:
+        recipe: "recipes/traefik/traefik/41.0.2"
+        recipeCoreTreeSHA256: "c376b1779a1620a947cc13b2c2f57786063990fd44db0c9371ae5c7bbd0c8b7b"
+        package: "packages/traefik/traefik/41.0.2"
+        packageTreeSHA256: "ec37fe5139b20128c35583d9eb8dc47a346ffb7b738711f290eb6cf8235e0c48"
+      historicalRoots:
+        -
+          version: "40.2.0"
+          recipe: "recipes/traefik/traefik/40.2.0"
+          recipeCoreTreeSHA256: "f3e939f4a87f7685ba00f646f0200a411f05fec5a124406d860e5eac359eb938"
+          package: "packages/traefik/traefik/40.2.0"
+          packageTreeSHA256: "747c244cf8ade5703d2655fcc81aa15bb6c20657eb00056755cd1dd16d38ce9a"
+      liveQualificationLanes:
+        - "traefik-default"
+status:
+  result: "pass"
+  componentCount: 7
+  laneCount: 13
+  immutableBaselinePreserved: true
+  historicalRootsPreserved: true
+  candidatesPreserved: true

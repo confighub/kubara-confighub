@@ -1,0 +1,307 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraEffectiveRenderReceipt"
+metadata:
+  name: "historical-v0.12.0-v0.12.0"
+spec:
+  profile:
+    id: "historical-v0.12.0"
+    role: "secondary-historical"
+  source:
+    kubaraVersion: "v0.12.0"
+    kubaraCommit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+    catalogVersion: "built-in"
+    fixture: "examples/kubara/local-platform"
+    sourceLock: "examples/kubara/local-platform/source-lock.yaml"
+    artifactIndex: "examples/kubara/local-platform/catalog-alignment.yaml"
+    config: "examples/kubara/local-platform/source/config.yaml"
+    sourceChecksums: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/source-checksums.txt"
+    sourceChecksumsSha256: "e61aaee93d88aafc7b8696d89ed1ee9230fde3b567c1e10f5cadfa088cc459c5"
+  renderProfile:
+    kubeVersion: "1.34.0"
+    helmVersion: "v4.1.4"
+    includeCrds: true
+    includeHooks: true
+    skipTests: true
+    apiVersions:
+      - "cert-manager.io/v1"
+      - "external-secrets.io/v1"
+      - "monitoring.coreos.com/v1"
+  clusters:
+    -
+      name: "test-cluster"
+      stage: "local"
+      type: "hub"
+      argoSelfManaged: "enabled"
+  instances:
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "argo-cd"
+      kubaraService: "argocd"
+      releaseName: "argocd"
+      namespace: "argocd"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/argo-cd/values.generated.yaml"
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/argo-cd/values-helm-expt-paths.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/argo-cd.yaml"
+      sha256: "2c04287f57e1d1c7cb645a54e5eb86e8501b188b8de20e57125d9b19c7750a6a"
+      objectCount: 78
+      kinds:
+        ApplicationSet: 17
+        AppProject: 2
+        ClusterExternalSecret: 1
+        ClusterRole: 5
+        ClusterRoleBinding: 2
+        ConfigMap: 7
+        CustomResourceDefinition: 3
+        Deployment: 5
+        Ingress: 1
+        Job: 1
+        Namespace: 1
+        NetworkPolicy: 5
+        Role: 6
+        RoleBinding: 6
+        Secret: 2
+        Service: 6
+        ServiceAccount: 6
+        ServiceMonitor: 1
+        StatefulSet: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "argo-cd-10.1.3.tgz"
+          sha256: "bce4f091cc4e9e5e878ec75bd845f2db988784f95bc3ac4094d4c72136041e1b"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "cert-manager"
+      kubaraService: "cert-manager"
+      releaseName: "cert-manager"
+      namespace: "cert-manager"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/cert-manager/values.generated.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/cert-manager.yaml"
+      sha256: "a037a1d9608c47fc95b1d8b864fefb3bc86c579dbcc1610b43da41b3c91c513a"
+      objectCount: 54
+      kinds:
+        ClusterIssuer: 1
+        ClusterRole: 13
+        ClusterRoleBinding: 10
+        CustomResourceDefinition: 6
+        Deployment: 3
+        Job: 1
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        PrometheusRule: 1
+        Role: 4
+        RoleBinding: 4
+        Service: 3
+        ServiceAccount: 4
+        ServiceMonitor: 1
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "cert-manager-v1.21.0.tgz"
+          sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "external-secrets"
+      kubaraService: "external-secrets"
+      releaseName: "external-secrets"
+      namespace: "external-secrets"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/external-secrets/values.generated.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/external-secrets.yaml"
+      sha256: "918451436e07273253b1b3b07cbc90e0ffa10b77ce97a029c750ca3d620208d2"
+      objectCount: 44
+      kinds:
+        ClusterRole: 5
+        ClusterRoleBinding: 2
+        CustomResourceDefinition: 24
+        Deployment: 3
+        Namespace: 1
+        Role: 1
+        RoleBinding: 1
+        Secret: 1
+        Service: 1
+        ServiceAccount: 3
+        ValidatingWebhookConfiguration: 2
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "external-secrets-2.7.0.tgz"
+          sha256: "a2ce165cc59b74c88451c9e21eb72c329b392506c53763df19061e62ec29ac60"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "homer-dashboard"
+      kubaraService: "homer-dashboard"
+      releaseName: "homer-dashboard"
+      namespace: "homer-dashboard"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/homer-dashboard/values.generated.yaml"
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/homer-dashboard/values-homer-links.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/homer-dashboard.yaml"
+      sha256: "71d547af4a8eb72c802438a5ba95c1ef1bf0934420f92355f4ace61823507e87"
+      objectCount: 8
+      kinds:
+        ConfigMap: 4
+        Deployment: 1
+        Namespace: 1
+        Service: 1
+        ServiceMonitor: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "kube-prometheus-stack"
+      kubaraService: "kube-prometheus-stack"
+      releaseName: "kube-prometheus-stack"
+      namespace: "kube-prometheus-stack"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/kube-prometheus-stack/values.generated.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/kube-prometheus-stack.yaml"
+      sha256: "f46deb990f56f7353a695b472b8458316586d5b3ed6c44de681d11ec1b995803"
+      objectCount: 116
+      kinds:
+        Alertmanager: 1
+        Certificate: 2
+        ClusterRole: 4
+        ClusterRoleBinding: 4
+        ConfigMap: 29
+        CustomResourceDefinition: 10
+        DaemonSet: 1
+        Deployment: 4
+        ExternalSecret: 1
+        Issuer: 2
+        MutatingWebhookConfiguration: 1
+        Namespace: 1
+        Prometheus: 1
+        PrometheusRule: 30
+        Secret: 1
+        Service: 8
+        ServiceAccount: 7
+        ServiceMonitor: 8
+        ValidatingWebhookConfiguration: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "kube-prometheus-stack-87.15.1.tgz"
+          sha256: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "prometheus-blackbox-exporter-11.15.1.tgz"
+          sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "metrics-server"
+      kubaraService: "metrics-server"
+      releaseName: "metrics-server"
+      namespace: "metrics-server"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/metrics-server/values.generated.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/metrics-server.yaml"
+      sha256: "0684e1c944c7800316f5dce31aaab4248949fc29ebaf85fad98ca9f10ac494ea"
+      objectCount: 10
+      kinds:
+        APIService: 1
+        ClusterRole: 2
+        ClusterRoleBinding: 2
+        Deployment: 1
+        Namespace: 1
+        RoleBinding: 1
+        Service: 1
+        ServiceAccount: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "metrics-server-3.13.1.tgz"
+          sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+    -
+      cluster: "test-cluster"
+      stage: "local"
+      clusterType: "hub"
+      component: "traefik"
+      kubaraService: "traefik"
+      releaseName: "traefik"
+      namespace: "traefik"
+      values:
+        - "examples/kubara/local-platform/generated/platform-configs/test-cluster/helm/traefik/values.generated.yaml"
+      output: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/test-cluster/traefik.yaml"
+      sha256: "1087500bfc35667bd192f16ca0350a8feac18013463e8836d32d6c77c6018ef5"
+      objectCount: 33
+      kinds:
+        ClusterRole: 1
+        ClusterRoleBinding: 1
+        CustomResourceDefinition: 25
+        Deployment: 1
+        IngressClass: 1
+        Namespace: 1
+        Service: 1
+        ServiceAccount: 1
+        ServiceMonitor: 1
+      deterministicDoubleRender: true
+      dependencyPackages:
+        -
+          file: "template-library-0.2.0.tgz"
+          reviewedArtifact: false
+          source: "local-file-dependency; source tree covered by source-checksums.txt"
+        -
+          file: "traefik-41.0.2.tgz"
+          sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+          reviewedArtifact: true
+          source: "reviewed-upstream-archive"
+  renderChecksums: "data/kubara-effective-renders/historical-v0.12.0/test-cluster/render-checksums.txt"
+  renderChecksumsSha256: "f06a1a9c361c193f5a04705f12e94463ad10696eb239489b2279435492b9fb56"
+  claimBoundary:
+    - "These are offline Helm renders of committed Kubara-generated wrappers and per-cluster values."
+    - "API versions are declared explicitly so cross-component custom resources appear in each cluster's aggregate desired-state corpus."
+    - "A rendered object is desired-state evidence, not proof that a controller created it or that a live cluster reconciled it."
+status:
+  result: "offline-render-pass"
+  liveReconciliation: "not-observed-by-this-receipt"

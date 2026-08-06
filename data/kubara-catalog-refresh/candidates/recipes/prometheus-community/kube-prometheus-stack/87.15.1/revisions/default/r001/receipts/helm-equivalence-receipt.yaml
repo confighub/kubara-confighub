@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "kube-prometheus-stack-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "97b4a93ca243b74fc8f39ac939701c5247eb24cd01d5eb5bfe86b81972759c09"
+    objectCount: 125
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 126
+    uploadedManifestFiles: 126
+    separatedSecretFiles: 2
+    semanticObjectMatches: "125/125"
+  semanticNormalizations:
+    - "prune-null-fields"
+    - "prune-empty-metadata-maps"
+  classifications:
+    -
+      identity: "v1|Namespace||monitoring"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-candidates:verify"

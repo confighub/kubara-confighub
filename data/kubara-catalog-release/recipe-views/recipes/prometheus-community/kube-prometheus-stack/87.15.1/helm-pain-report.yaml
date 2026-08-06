@@ -1,0 +1,129 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPainReport"
+metadata:
+  name: "prometheus-community-kube-prometheus-stack-87.15.1"
+spec:
+  chart:
+    name: "prometheus-community/kube-prometheus-stack"
+    version: "87.15.1"
+    source: "https://prometheus-community.github.io/helm-charts"
+    digest: "4334ab0443245c748d73be7d84ce447bb7f3715c63e08fecf05eca66eb9f567b"
+  supportedScopeStatus: "no-unhandled-pain-points-for-supported-scopes"
+  supportedScopes:
+    []
+  supportedVariants:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  notes:
+    - "Default chart render is nondeterministic unless grafana.adminPassword is bound before render."
+    - "default variant binds grafana.adminPassword and renders 10 Prometheus Operator CRDs."
+    - "no-crds variant omits CRDs for clusters that manage CRDs separately and records those CRDs as target facts."
+    - "existing-secret mirrors Kubara's Grafana credential reference and does not render the Grafana admin Secret."
+    - "Chart declares CRD, kube-state-metrics, node-exporter, Grafana, and windows-exporter dependencies and records them in dependency-lock.yaml."
+    - "Config-only delivery stages the kube-prometheus-stack-admission TLS Secret as a target fact; regular Helm creates that material through hook lifecycle."
+    - "Admission webhook readiness must still be observed after apply because rendered objects plus staged Secret do not prove webhook health."
+    - "CRD manifests include YAML enum scalars such as bare equals signs; the proof parser handles these as scalar strings."
+    - "Rules, scrape configs, datasource config, and extraManifests are tpl/raw extension slots; promoted variants keep raw slots empty."
+  painPoints:
+    -
+      id: "source-lock"
+      detectedPainPoint: "source-lock requires source-lock.yaml"
+      evidence:
+        - "source-lock.yaml"
+      configHubHome: "source-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "source-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "dependency-lock"
+      detectedPainPoint: "chart declares CRD, kube-state-metrics, node-exporter, Grafana, and windows-exporter dependencies; promoted variants lock their metadata."
+      evidence:
+        - "dependency-lock.yaml"
+      configHubHome: "dependency-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "dependency-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "capability-profile"
+      detectedPainPoint: "OpenShift and ServiceMonitor branches are bound to the named Kubernetes capability profile."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "capability-profile"
+      disposition: "handled-by-capability-profile"
+      linkedReceipt: "revisions/default/r001/receipts/render-receipt.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "crd-policy"
+      detectedPainPoint: "CRDs are ordinary rendered objects in the default variant; no-crds records those same CRDs as target prerequisites."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "recipe"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "variant-controlled-and-target-fact"
+    -
+      id: "admission-webhook"
+      detectedPainPoint: "Config-only delivery must stage the kube-prometheus-stack-admission Secret because Helm normally creates the TLS material through hook lifecycle."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "lifecycle-policy"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "target-fact-and-observe"
+    -
+      id: "generated-facts"
+      detectedPainPoint: "Default and no-crds bind the password for deterministic proof; existing-secret keeps credential material in the target secret backend."
+      evidence:
+        - "grafana.adminPassword or grafana.admin.existingSecret"
+      configHubHome: "generated-fact"
+      disposition: "handled-by-generated-facts"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "variant-controlled"
+    -
+      id: "cluster-rbac"
+      detectedPainPoint: "cluster-rbac requires scan receipts"
+      evidence:
+        - "scan receipts"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/scan-receipt.yaml"
+      supportedVariantStatus: "scan-and-review"
+    -
+      id: "tpl"
+      detectedPainPoint: "Prometheus/Grafana rules, scrape configs, datasource config, and extraManifests can use templating; promoted variants keep raw slots empty."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "extension-slot"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "controlled-by-empty-defaults"
+    -
+      id: "installer-support-object"
+      detectedPainPoint: "installer-support-object affects v1|Namespace||monitoring"
+      evidence:
+        - "v1|Namespace||monitoring"
+      configHubHome: "recipe"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "scan-gate"
+      detectedPainPoint: "Current scan gate is warn-production-blocked"
+      evidence:
+        - "helm-plan.yaml"
+        - "scan receipts"
+        - "install gates"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "warn-production-blocked"
+    -
+      id: "value-model-diagnostics"
+      detectedPainPoint: "Helm values can be unknown, dead, misspelled, shadowed, or ignored unless the values model records the analysis boundary."
+      evidence:
+        - "value-model.yaml"
+      configHubHome: "value-model"
+      disposition: "absorbed-into-value-model"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "unknown=not-checked; dead=not-checked; ignored=not-checked"
+  answerForSkepticalHelmUser: "prometheus-community/kube-prometheus-stack@87.15.1 maps its detected Helm pain to 9 ConfigHub control areas: source-lock, dependency-lock, capability-profile, recipe, lifecycle-policy, generated-fact, scan-gate, extension-slot, value-model. Supported scopes have explicit variants, receipts, scans/gates, and control-point dispositions; production readiness remains not-reviewed-for-production."

@@ -1,0 +1,149 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogCandidateSet"
+metadata:
+  name: "kubara-v0-13-0-catalogs-v1-1-0-exact-pins"
+spec:
+  source:
+    kubaraVersion: "v0.13.0"
+    catalogVersion: "1.1.0"
+    artifactSet: "examples/kubara/current-platform/component-artifacts.yaml"
+    sourceLock: "examples/kubara/current-platform/source-lock.yaml"
+  retentionMode: "additive-only"
+  qualification: "offline-only"
+  exactPublicArtifactCount: 7
+  additiveVersionCount: 3
+  candidates:
+    -
+      canonicalIdentity: "helm:argo-cd/argo-cd"
+      service: "argo-cd"
+      version: "10.2.1"
+      status: "offline-current-candidate-pass"
+      storageLane: "current-addition"
+      exactArtifact:
+        url: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.2.1/argo-cd-10.2.1.tgz"
+        sha256: "27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885"
+      recipe: "data/kubara-catalog-refresh/current-candidates/recipes/argo-cd/argo-cd/10.2.1"
+      package: "data/kubara-catalog-refresh/current-candidates/packages/argo-cd/argo-cd/10.2.1"
+      variants:
+        -
+          name: "default"
+          objectCount: 55
+        -
+          name: "no-crds"
+          objectCount: 52
+      sourceLockSHA256: "9caa127507f306b010b4173fe921fb530fb28c950d604a3ac94733ecaf2ec32c"
+    -
+      canonicalIdentity: "helm:jetstack/cert-manager"
+      service: "cert-manager"
+      version: "v1.21.0"
+      status: "reused-identical-offline-candidate-pass"
+      storageLane: "reused-identical-v0.12-candidate"
+      exactArtifact:
+        url: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+        sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/jetstack/cert-manager/v1.21.0"
+      package: "data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0"
+      variants:
+        -
+          name: "default"
+          objectCount: 40
+        -
+          name: "crds-enabled"
+          objectCount: 46
+      sourceLockSHA256: "18cbc1643830bc39cc302e4d46a0ac3d85d2c687f997b203e6058e28f4417a47"
+    -
+      canonicalIdentity: "helm:external-secrets/external-secrets"
+      service: "external-secrets"
+      version: "2.8.0"
+      status: "offline-current-candidate-pass"
+      storageLane: "current-addition"
+      exactArtifact:
+        url: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.8.0/external-secrets-2.8.0.tgz"
+        sha256: "251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd"
+      recipe: "data/kubara-catalog-refresh/current-candidates/recipes/external-secrets/external-secrets/2.8.0"
+      package: "data/kubara-catalog-refresh/current-candidates/packages/external-secrets/external-secrets/2.8.0"
+      variants:
+        -
+          name: "default"
+          objectCount: 44
+        -
+          name: "no-crds"
+          objectCount: 19
+      sourceLockSHA256: "1f793c04ef6824650b3e4b8066099b111cf3052cb2d823a0f7feee1cacbe83a2"
+    -
+      canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+      service: "kube-prometheus-stack"
+      version: "87.19.2"
+      status: "offline-current-candidate-pass"
+      storageLane: "current-addition"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.19.2/kube-prometheus-stack-87.19.2.tgz"
+        sha256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+      recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+      package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+      variants:
+        -
+          name: "default"
+          objectCount: 125
+        -
+          name: "no-crds"
+          objectCount: 115
+        -
+          name: "existing-secret"
+          objectCount: 124
+      sourceLockSHA256: "275b32f293fff2ceb6c0a71107f94fba21f7bf5f5d6da608440f5c82be39a1ba"
+    -
+      canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+      service: "kube-prometheus-stack"
+      version: "11.15.1"
+      status: "reused-identical-offline-candidate-pass"
+      storageLane: "reused-identical-v0.12-candidate"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+        sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+      package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+      variants:
+        -
+          name: "default"
+          objectCount: 4
+      sourceLockSHA256: "7986a85d37a68f8e48f8acf9b6bd98872c494eda49c6955a82e5dc90a7cd0814"
+    -
+      canonicalIdentity: "helm:metrics-server/metrics-server"
+      service: "metrics-server"
+      version: "3.13.1"
+      status: "reused-identical-offline-candidate-pass"
+      storageLane: "reused-identical-v0.12-candidate"
+      exactArtifact:
+        url: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+        sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/metrics-server/metrics-server/3.13.1"
+      package: "data/kubara-catalog-refresh/candidates/packages/metrics-server/metrics-server/3.13.1"
+      variants:
+        -
+          name: "default"
+          objectCount: 9
+        -
+          name: "external-tls-ca"
+          objectCount: 9
+      sourceLockSHA256: "b349a59ba35363e1007d1b4e1ff5cc21a21305b5b771bf4e56981d58a6fe16ad"
+    -
+      canonicalIdentity: "helm:traefik/traefik"
+      service: "traefik"
+      version: "41.0.2"
+      status: "reused-identical-offline-candidate-pass"
+      storageLane: "reused-identical-v0.12-candidate"
+      exactArtifact:
+        url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+        sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+      recipe: "data/kubara-catalog-refresh/candidates/recipes/traefik/traefik/41.0.2"
+      package: "data/kubara-catalog-refresh/candidates/packages/traefik/traefik/41.0.2"
+      variants:
+        -
+          name: "default"
+          objectCount: 31
+      sourceLockSHA256: "0c569de2069c5e7ab716a56fdd1fadb30ac35462c51c6a1a9edffe422986860a"
+  limits:
+    - "candidate status does not imply retained root Catalog status"
+    - "three changed versions require serial live qualification before additive root promotion"
+    - "four byte-identical versions reuse their immutable v0.12 candidate trees rather than copying them"

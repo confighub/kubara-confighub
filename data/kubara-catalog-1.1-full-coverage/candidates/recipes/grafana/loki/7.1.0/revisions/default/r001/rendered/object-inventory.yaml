@@ -1,0 +1,123 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderedObjectInventory"
+metadata:
+  name: "grafana-loki-7.1.0-default-r001"
+spec:
+  source: "rendered/release-objects.yaml"
+  sourceSHA256: "2e25c21e656867877b5211bfb1914d335806e76df455a78f72e7ec7f8bd8b9ff"
+  objectCount: 19
+  objects:
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|DaemonSet|loki|loki-canary"
+      kind: "DaemonSet"
+      name: "loki-canary"
+      namespace: "loki"
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|Deployment|loki|loki-gateway"
+      kind: "Deployment"
+      name: "loki-gateway"
+      namespace: "loki"
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|StatefulSet|loki|loki"
+      kind: "StatefulSet"
+      name: "loki"
+      namespace: "loki"
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|StatefulSet|loki|loki-chunks-cache"
+      kind: "StatefulSet"
+      name: "loki-chunks-cache"
+      namespace: "loki"
+    -
+      apiVersion: "apps/v1"
+      identity: "apps/v1|StatefulSet|loki|loki-results-cache"
+      kind: "StatefulSet"
+      name: "loki-results-cache"
+      namespace: "loki"
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||loki-clusterrolebinding"
+      kind: "ClusterRoleBinding"
+      name: "loki-clusterrolebinding"
+      namespace: ""
+    -
+      apiVersion: "rbac.authorization.k8s.io/v1"
+      identity: "rbac.authorization.k8s.io/v1|ClusterRole||loki-clusterrole"
+      kind: "ClusterRole"
+      name: "loki-clusterrole"
+      namespace: ""
+    -
+      apiVersion: "v1"
+      identity: "v1|ConfigMap|loki|loki"
+      kind: "ConfigMap"
+      name: "loki"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|ConfigMap|loki|loki-gateway"
+      kind: "ConfigMap"
+      name: "loki-gateway"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|ConfigMap|loki|loki-runtime"
+      kind: "ConfigMap"
+      name: "loki-runtime"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|loki|loki"
+      kind: "ServiceAccount"
+      name: "loki"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|ServiceAccount|loki|loki-canary"
+      kind: "ServiceAccount"
+      name: "loki-canary"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki"
+      kind: "Service"
+      name: "loki"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki-canary"
+      kind: "Service"
+      name: "loki-canary"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki-chunks-cache"
+      kind: "Service"
+      name: "loki-chunks-cache"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki-gateway"
+      kind: "Service"
+      name: "loki-gateway"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki-headless"
+      kind: "Service"
+      name: "loki-headless"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki-memberlist"
+      kind: "Service"
+      name: "loki-memberlist"
+      namespace: "loki"
+    -
+      apiVersion: "v1"
+      identity: "v1|Service|loki|loki-results-cache"
+      kind: "Service"
+      name: "loki-results-cache"
+      namespace: "loki"

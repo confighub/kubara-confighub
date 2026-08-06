@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmEquivalenceReceipt"
+metadata:
+  name: "external-secrets-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  regularHelm:
+    renderedSHA256: "33f0d74470d5f0a3affc7589a1929d5dc6cd1a30b557ccfb624545820a0a0d11"
+    objectCount: 43
+  cubInstall:
+    objectCountIncludingSecretsAndSupportObjects: 44
+    uploadedManifestFiles: 44
+    separatedSecretFiles: 1
+    semanticObjectMatches: "43/43"
+  semanticNormalizations:
+    - "prune-null-fields"
+  classifications:
+    -
+      identity: "v1|Namespace||external-secrets"
+      classification: "installer-support-object"
+      disposition: "allowed"
+  result: "pass"
+  evidenceCommand: "npm run kubara-catalog-candidates:verify"

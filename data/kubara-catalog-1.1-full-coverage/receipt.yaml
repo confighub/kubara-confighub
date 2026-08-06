@@ -1,0 +1,351 @@
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogFullCoverageReceipt"
+metadata:
+  name: "kubara-catalogs-1-1-0-full-component-coverage"
+spec:
+  sourceSnapshot: "data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-release/source"
+  sourceInventory: "data/kubara-catalog-1.1-full-coverage/wrapper-dependency-inventory.yaml"
+  exactArtifactRegistry: "data/kubara-catalog-1.1-full-coverage/exact-artifact-registry.yaml"
+  preflightReceipt: "data/kubara-catalog-1.1-full-coverage/preflight-receipt.yaml"
+  retentionMode: "additive-only-no-overwrite"
+  baseline:
+    componentCount: 100
+    versionCount: 120
+    recipesTreeSHA256: "b2f020f851838d1c4052ead583768e82710f03b03466fa882720180910007266"
+    packagesTreeSHA256: "1101a9a6f546e620a992779bd2a76c2562ff66f88991deaf0c7c7112e0cef89d"
+  finalCatalog:
+    componentCount: 103
+    versionCount: 130
+    addedComponentCount: 3
+    addedVersionCount: 10
+  selections:
+    -
+      canonicalIdentity: "argo-cd/argo-cd"
+      version: "10.2.1"
+      wrapperOccurrences: 1
+      catalogState: "retained-exact"
+      exactArtifact:
+        url: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.2.1/argo-cd-10.2.1.tgz"
+        sha256: "27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885"
+    -
+      canonicalIdentity: "jetstack/cert-manager"
+      version: "v1.21.0"
+      wrapperOccurrences: 2
+      catalogState: "retained-exact"
+      exactArtifact:
+        url: "https://charts.jetstack.io/charts/cert-manager-v1.21.0.tgz"
+        sha256: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+    -
+      canonicalIdentity: "external-secrets/external-secrets"
+      version: "2.8.0"
+      wrapperOccurrences: 2
+      catalogState: "retained-exact"
+      exactArtifact:
+        url: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.8.0/external-secrets-2.8.0.tgz"
+        sha256: "251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd"
+    -
+      canonicalIdentity: "prometheus-community/kube-prometheus-stack"
+      version: "87.19.2"
+      wrapperOccurrences: 2
+      catalogState: "retained-exact"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.19.2/kube-prometheus-stack-87.19.2.tgz"
+        sha256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+    -
+      canonicalIdentity: "grafana/loki"
+      version: "7.1.0"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/grafana/helm-charts/releases/download/helm-loki-7.1.0/loki-7.1.0.tgz"
+        sha256: "34361cca2bbb6fa975fd1aeec4f9d5e2b91e2c99af7dd6f9c14ef7fe646493d1"
+    -
+      canonicalIdentity: "grafana/alloy"
+      version: "1.11.0"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/grafana/helm-charts/releases/download/alloy-1.11.0/alloy-1.11.0.tgz"
+        sha256: "11d253b62e47beeacd89eb4283fc056962ecbf143984863c1998be13da0772dd"
+    -
+      canonicalIdentity: "prometheus-community/prometheus-blackbox-exporter"
+      version: "11.15.1"
+      wrapperOccurrences: 1
+      catalogState: "retained-exact"
+      exactArtifact:
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+        sha256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+    -
+      canonicalIdentity: "stakater/reloader"
+      version: "2.2.14"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://stakater.github.io/stakater-charts/reloader-2.2.14.tgz"
+        sha256: "a21154a5b32df7c4d78c575e957ffa2af5afdfdf608415d3eb0a0da1d045dcec"
+    -
+      canonicalIdentity: "metrics-server/metrics-server"
+      version: "3.13.1"
+      wrapperOccurrences: 1
+      catalogState: "retained-exact"
+      exactArtifact:
+        url: "https://github.com/kubernetes-sigs/metrics-server/releases/download/metrics-server-helm-chart-3.13.1/metrics-server-3.13.1.tgz"
+        sha256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+    -
+      canonicalIdentity: "oauth2-proxy/oauth2-proxy"
+      version: "10.7.0"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/oauth2-proxy/manifests/releases/download/oauth2-proxy-10.7.0/oauth2-proxy-10.7.0.tgz"
+        sha256: "47b44c66fdfc42677d307cf8891f3de29863414bf265f6bef2020c273ff7e839"
+    -
+      canonicalIdentity: "kyverno/kyverno-policies"
+      version: "3.8.2"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://kyverno.github.io/kyverno/kyverno-policies-3.8.2.tgz"
+        sha256: "a9e9377c7f068842274b9fce133832a4579c81429cb099a5956bb33bd66a0ccc"
+    -
+      canonicalIdentity: "external-dns/external-dns"
+      version: "1.21.1"
+      wrapperOccurrences: 1
+      catalogState: "supplemental-lock"
+      exactArtifact:
+        url: "https://github.com/kubernetes-sigs/external-dns/releases/download/external-dns-helm-chart-1.21.1/external-dns-1.21.1.tgz"
+        sha256: "5dd033a4b872bf641860695705ee460031d0bc695f114bf8926fee6736814e19"
+    -
+      canonicalIdentity: "velero/velero"
+      version: "12.1.0"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/vmware-tanzu/helm-charts/releases/download/velero-12.1.0/velero-12.1.0.tgz"
+        sha256: "cd23589ad1b2d25cdd3220f6866b3f6f4c5683c4c09494e76a14700b33f81f83"
+    -
+      canonicalIdentity: "policy-reporter/policy-reporter"
+      version: "3.9.1"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/kyverno/policy-reporter/releases/download/policy-reporter-3.9.1/policy-reporter-3.9.1.tgz"
+        sha256: "a7d00d9b79435bc40fb3049302e8e08da156f718713403042666bb699c569fb1"
+    -
+      canonicalIdentity: "longhorn/longhorn"
+      version: "1.12.0"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/longhorn/charts/releases/download/longhorn-1.12.0/longhorn-1.12.0.tgz"
+        sha256: "869bb20701b154473606f1e8967b27f34f2448a2dfe6eb8970f1cae6957384f5"
+    -
+      canonicalIdentity: "metallb/metallb"
+      version: "0.16.1"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://github.com/metallb/metallb/releases/download/metallb-chart-0.16.1/metallb-0.16.1.tgz"
+        sha256: "fb06bb584fcb7856f15733b2a6a2aff5b61b5c350687e341c163ae24a5938adc"
+    -
+      canonicalIdentity: "kyverno/kyverno"
+      version: "3.8.2"
+      wrapperOccurrences: 1
+      catalogState: "additive-root"
+      exactArtifact:
+        url: "https://kyverno.github.io/kyverno/kyverno-3.8.2.tgz"
+        sha256: "f4fc787cf1d6781eefb9e9b45837edcddcfae984c872888289914e97207cc5de"
+    -
+      canonicalIdentity: "traefik/traefik"
+      version: "41.0.2"
+      wrapperOccurrences: 1
+      catalogState: "supplemental-lock"
+      exactArtifact:
+        url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+        sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+        manifestDigest: "sha256:b64212403e056c14dbcac5bfd0030f89f0e08fccae370dd7cd96592ee745848e"
+  additions:
+    -
+      canonicalIdentity: "grafana/loki"
+      version: "7.1.0"
+      recipePath: "recipes/grafana/loki/7.1.0"
+      recipeTreeSHA256: "16760cb44965321b0821e702f83b1e7de2e431088b92149c636e2ba5433ced9e"
+      packagePath: "packages/grafana/loki/7.1.0"
+      packageTreeSHA256: "b35d19dbb02eaaa01c5e73bd7371aa7f512d7285f99074e7945621b27a9b681b"
+      publication:
+        canonicalIdentity: "grafana/loki"
+        version: "7.1.0"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/grafana-loki:7.1.0"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:83711c1b4b1dffabf4ee7f63a37853a59021f887062b1f78bddadb6b722fda1c"
+        layerDigest: "sha256:bc46d26a4002b46b9073b1e7f2a61d38a96ecae9aa8c23d5e936c2985bc58204"
+        receipt: "runs/installer-oci/grafana-loki/7.1.0/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "grafana/alloy"
+      version: "1.11.0"
+      recipePath: "recipes/grafana/alloy/1.11.0"
+      recipeTreeSHA256: "f6a4b61b53150348b3d15fec2311828e1b97f6c941137b1dfbc9e347b4e71ab7"
+      packagePath: "packages/grafana/alloy/1.11.0"
+      packageTreeSHA256: "176b56fcd0cca6d795b0d442d3bc1fc437915d082f6ff6d46b07a95a68298737"
+      publication:
+        canonicalIdentity: "grafana/alloy"
+        version: "1.11.0"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/grafana-alloy:1.11.0"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:29de0719bc9bc52e2ad47616af1542ef4e9d1b79734ce33c224555a518efe305"
+        layerDigest: "sha256:1c852abf30f2d7c4e801f923f8feab4c620e51603c4a00a57f3fb3a99dd0112b"
+        receipt: "runs/installer-oci/grafana-alloy/1.11.0/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "stakater/reloader"
+      version: "2.2.14"
+      recipePath: "recipes/stakater/reloader/2.2.14"
+      recipeTreeSHA256: "89020c31e0e3952f848c294f23b6f203f6f9a4c124cd50644751b57ac68ae09b"
+      packagePath: "packages/stakater/reloader/2.2.14"
+      packageTreeSHA256: "ac3a8750acf639657eaee5beef4182245f75c645259176fd3e47f617354db085"
+      publication:
+        canonicalIdentity: "stakater/reloader"
+        version: "2.2.14"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/stakater-reloader:2.2.14"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:e901ac5638834018bcee0433c2a4f8aa832bd84c8b8a958e116f6c268e672269"
+        layerDigest: "sha256:eeca278bc7280f67c3c24362539959616f5089e478b4233cc4f582fca2041c65"
+        receipt: "runs/installer-oci/stakater-reloader/2.2.14/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "oauth2-proxy/oauth2-proxy"
+      version: "10.7.0"
+      recipePath: "recipes/oauth2-proxy/oauth2-proxy/10.7.0"
+      recipeTreeSHA256: "9bbd47bbebbd46a6d0fa98d96fe9faae13780bba25bc2227aa7000f084b0ca5b"
+      packagePath: "packages/oauth2-proxy/oauth2-proxy/10.7.0"
+      packageTreeSHA256: "bdf05005a71b60616aa278805a03cd5f3e8596f106e5c649e17d8cc1f0bbb5c5"
+      publication:
+        canonicalIdentity: "oauth2-proxy/oauth2-proxy"
+        version: "10.7.0"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/oauth2-proxy-oauth2-proxy:10.7.0"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:52ca76c189956363cc5e23fc29bd527d160c659236bcfd6fe5a4a1716f66eab9"
+        layerDigest: "sha256:e2ea12142ed6580180b3a968201b00c8eb6f6ee086caf3b40e69b44971f6fe65"
+        receipt: "runs/installer-oci/oauth2-proxy-oauth2-proxy/10.7.0/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "kyverno/kyverno-policies"
+      version: "3.8.2"
+      recipePath: "recipes/kyverno/kyverno-policies/3.8.2"
+      recipeTreeSHA256: "787e3a26c9c321cc99f908a850115056a108584862581a0ee1ad2432c6e09b4c"
+      packagePath: "packages/kyverno/kyverno-policies/3.8.2"
+      packageTreeSHA256: "020950a834253a334e7a17b28a72852db8f4707dd6be166babf5ee577c7f3a64"
+      publication:
+        canonicalIdentity: "kyverno/kyverno-policies"
+        version: "3.8.2"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kyverno-kyverno-policies:3.8.2"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:204b16876ea9d7f9a487d3ad884f9b0c5f41e0e9a01d8b8c37c7bb6693575460"
+        layerDigest: "sha256:e7d016fe4f673dc4887602f3408e0f7ecae189da78d71d48673fcca781487a0e"
+        receipt: "runs/installer-oci/kyverno-kyverno-policies/3.8.2/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "velero/velero"
+      version: "12.1.0"
+      recipePath: "recipes/velero/velero/12.1.0"
+      recipeTreeSHA256: "ef604e94fd793dab7c53bebcf2a7ff3f7be58473fa45a152cdab1439794570a7"
+      packagePath: "packages/velero/velero/12.1.0"
+      packageTreeSHA256: "fd185db66ac0baf067b959c7e8c507f1d37c20d5b1093d3617cfdb77005910fe"
+      publication:
+        canonicalIdentity: "velero/velero"
+        version: "12.1.0"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/velero-velero:12.1.0"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:2a9fdd03dec5b0a44e7d39ee2b208844da73ddf95d94a08e383ce9b935d373e6"
+        layerDigest: "sha256:94798a27f0af0ef9032a333a71f711e5198f23becc78aa7b3baa082c5858d307"
+        receipt: "runs/installer-oci/velero-velero/12.1.0/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "policy-reporter/policy-reporter"
+      version: "3.9.1"
+      recipePath: "recipes/policy-reporter/policy-reporter/3.9.1"
+      recipeTreeSHA256: "14cb96ba75881141f0c32f0fb9ee84c80747c3e5e63d892748d6d8fdc3ed8981"
+      packagePath: "packages/policy-reporter/policy-reporter/3.9.1"
+      packageTreeSHA256: "67de5c1efe4a29ecf275940ea7e39227931b636c9b5b60129ffc3c31fa7311b2"
+      publication:
+        canonicalIdentity: "policy-reporter/policy-reporter"
+        version: "3.9.1"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/policy-reporter-policy-reporter:3.9.1"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:163983ccb94d0ad000007e5f50185210412833bcf9888b8f6bad51c1411bfc05"
+        layerDigest: "sha256:40621dbdce4489cad2f52e624efe72e5020a574017df3b53b626f667880fd5a6"
+        receipt: "runs/installer-oci/policy-reporter-policy-reporter/3.9.1/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "longhorn/longhorn"
+      version: "1.12.0"
+      recipePath: "recipes/longhorn/longhorn/1.12.0"
+      recipeTreeSHA256: "81e87c9973f4592ea66affd4b4d3ccd4ead9722e0c540adf93d73397a993a10c"
+      packagePath: "packages/longhorn/longhorn/1.12.0"
+      packageTreeSHA256: "04c5218eaee62193c92bf71aeb58d6a452238d808d6f24f974da626d5f52a53a"
+      publication:
+        canonicalIdentity: "longhorn/longhorn"
+        version: "1.12.0"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/longhorn-longhorn:1.12.0"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:c39d4513809ca0a533d871bd93424e8f44c50e020de639e6758dc643ceb2c912"
+        layerDigest: "sha256:06a73e1d849b99b26da8c25ed683ffd3d6ce290b2a2feca1123d9c5ae7083a69"
+        receipt: "runs/installer-oci/longhorn-longhorn/1.12.0/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "metallb/metallb"
+      version: "0.16.1"
+      recipePath: "recipes/metallb/metallb/0.16.1"
+      recipeTreeSHA256: "080ab4c7848cd8ac6f749569fb9675f9a0c8904ef93a1b1fd43622c98b6de3c4"
+      packagePath: "packages/metallb/metallb/0.16.1"
+      packageTreeSHA256: "0a26e41e69e0f3b597bf398b9d599833f2a95bfb66aa60a691c8e3e8d290f66e"
+      publication:
+        canonicalIdentity: "metallb/metallb"
+        version: "0.16.1"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metallb-metallb:0.16.1"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:9889faee92425826615cec041c02335349bb843268cbef1114312dc8b15e252d"
+        layerDigest: "sha256:a8dda85492c18543c1f541be8a6e803a270f89bc7d9001c87bbabe4bdd6b7070"
+        receipt: "runs/installer-oci/metallb-metallb/0.16.1/installer-package-publication-receipt.yaml"
+    -
+      canonicalIdentity: "kyverno/kyverno"
+      version: "3.8.2"
+      recipePath: "recipes/kyverno/kyverno/3.8.2"
+      recipeTreeSHA256: "2888e92db1359f81ab3fdde4a557535e51d9c5857c40525f27b6b87aa6119989"
+      packagePath: "packages/kyverno/kyverno/3.8.2"
+      packageTreeSHA256: "49227f4de9cbf54a1fc26558ac9f07dc43401fb35b9ea5221f95013300c99cc3"
+      publication:
+        canonicalIdentity: "kyverno/kyverno"
+        version: "3.8.2"
+        ref: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/kyverno-kyverno:3.8.2"
+        status: "published"
+        action: "pushed-new"
+        manifestDigest: "sha256:53b06a8062c1b7e92cebb21ec9d518332ddd9e237e48aa991b3bbfde9f798db3"
+        layerDigest: "sha256:0019bb5d14d3f0c4e01dd1b9fe6ac4d69f7ff9eb4352e5181892cdb35e66eef8"
+        receipt: "runs/installer-oci/kyverno-kyverno/3.8.2/installer-package-publication-receipt.yaml"
+  supplements:
+    -
+      canonicalIdentity: "external-dns/external-dns"
+      version: "1.21.1"
+      exactArtifact:
+        url: "https://github.com/kubernetes-sigs/external-dns/releases/download/external-dns-helm-chart-1.21.1/external-dns-1.21.1.tgz"
+        sha256: "5dd033a4b872bf641860695705ee460031d0bc695f114bf8926fee6736814e19"
+      existingRootMutation: "none"
+    -
+      canonicalIdentity: "traefik/traefik"
+      version: "41.0.2"
+      exactArtifact:
+        url: "oci://ghcr.io/traefik/helm/traefik:41.0.2"
+        sha256: "a84ec5eae9f5507c8f0632d58a7eb10c9b7fd2a277b77740ee7460c55ecde49a"
+        manifestDigest: "sha256:b64212403e056c14dbcac5bfd0030f89f0e08fccae370dd7cd96592ee745848e"
+      existingRootMutation: "none"
+status:
+  result: "pass"
+  oldRootsByteIdentical: true
+  wrapperDependencyOccurrences: 21
+  exactSelectionCount: 18
+  publishedPackageCount: 10
+  finalComponentCount: 103
+  finalVersionCount: 130

@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy"
+  version: "10.7.0"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "oauth2-proxy chart defaults variant rendered from oauth2-proxy/oauth2-proxy@10.7.0"

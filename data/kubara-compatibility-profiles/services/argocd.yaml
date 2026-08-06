@@ -1,0 +1,265 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCompatibilityProfile"
+metadata:
+  name: "argocd"
+spec:
+  kubaraServiceKey: "argocd"
+  aliases:
+    - "argocd"
+    - "argo-cd"
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      provenance:
+        repository: "https://github.com/kubara-io/kubara.git"
+        commit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+        repositoryTree: "92cb8480e662d53906418c8c1e0b6f7bbd545f40"
+        releaseTags:
+          []
+        distributionStatus: "embedded-in-kubara-v0.12.0"
+      sourceCatalog:
+        name: "built-in"
+        version: "embedded-in-v0.12.0"
+        manifest:
+          status: "absent-in-upstream-built-in-layout"
+      serviceDefinition:
+        path: "services/argo-cd.yaml"
+        sha256: "87cf8a5db90ddd84c833f6d48315dd5aae45b6b8530d270070fb8a4cb50b719f"
+        bytes: 218
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "argocd"
+        category: "application-management"
+        chartPath: "argo-cd"
+        defaultStatus: "disabled"
+        clusterTypes:
+          - "hub"
+      wrapper:
+        path: "platform-components/helm/argo-cd"
+        chartYaml:
+          path: "platform-components/helm/argo-cd/Chart.yaml"
+          sha256: "fac6e93e8ca9ff8d3ceaaac93ab86a1ff6b02d5d8931d467c0fd44843502a52d"
+          bytes: 353
+        name: "argocd"
+        version: "1.2.0"
+        tree:
+          fileCount: 16
+          bytes: 10350
+          treeSha256: "5cd9ee56f023790e928f7af10b20cd119b083d0911e59a49147ff67aaecd6c99"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "platform-configs/helm/argo-cd/values.generated.yaml.tplt"
+        sha256: "0a9fc553bb7e36ab73c96635bc55876bcaa0064919948f6ec95546b62911e2ca"
+        bytes: 7433
+      serviceSliceTree:
+        fileCount: 18
+        bytes: 18001
+        treeSha256: "01b2fc0c9b3e3832cc0f3b137ff71e19e7122eb8d649e88220067452c84fd2c0"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:argo-cd/argo-cd"
+          chartDependency:
+            name: "argo-cd"
+            version: "10.1.3"
+            repository: "https://argoproj.github.io/argo-helm"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/argo-cd/argo-cd/10.1.3"
+              package: "packages/argo-cd/argo-cd/10.1.3"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/argo-cd/argo-cd/10.1.3"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/argo-cd/argo-cd/10.1.3"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/argo-cd/argo-cd/10.1.3"
+                package: "data/kubara-catalog-refresh/candidates/packages/argo-cd/argo-cd/10.1.3"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+        repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+        releaseTags:
+          - "bootstrap-1.1.0"
+          - "general-1.1.0"
+        distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+      sourceCatalog:
+        name: "bootstrap"
+        version: "1.1.0"
+        manifest:
+          path: "bootstrap/Catalog.yaml"
+          sha256: "b65380475c27bdb74fec0a5812cd1ec315e1ce762d688be87bb563b7bbf8f184"
+          bytes: 190
+      serviceDefinition:
+        path: "bootstrap/services/argo-cd.yaml"
+        sha256: "095fe6fe038658ff3857a64b8d22625313c859072e7014677ff3e152fcc56f13"
+        bytes: 214
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "argo-cd"
+        category: "application-management"
+        chartPath: "argo-cd"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+      wrapper:
+        path: "bootstrap/platform-components/helm/argo-cd"
+        chartYaml:
+          path: "bootstrap/platform-components/helm/argo-cd/Chart.yaml"
+          sha256: "f02c07d0ced9f3cd599e87d47e78af693fad4152f633402fee170b86bf6aec29"
+          bytes: 353
+        name: "argocd"
+        version: "1.3.0"
+        tree:
+          fileCount: 18
+          bytes: 13419
+          treeSha256: "9e26e0331db4d4d7861dcb523474009b56c26fcf282fbe0289a279c14fcb5c26"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "bootstrap/platform-configs/helm/argo-cd/values.generated.yaml.tplt"
+        sha256: "d95ab66d30d9c35e36417136091a557bc384cabae3e88e93bb8496c7dab487b5"
+        bytes: 7689
+      serviceSliceTree:
+        fileCount: 20
+        bytes: 21322
+        treeSha256: "70d574f604eb15be63f8f4809bcc3b91e8746af5322192637a5129518c22f6c7"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:argo-cd/argo-cd"
+          chartDependency:
+            name: "argo-cd"
+            version: "10.2.1"
+            repository: "https://argoproj.github.io/argo-helm"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/argo-cd/argo-cd/10.2.1"
+              package: "packages/argo-cd/argo-cd/10.2.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/argo-cd/argo-cd/10.2.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/argo-cd/argo-cd/10.2.1"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/argo-cd/argo-cd/10.2.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/argo-cd/argo-cd/10.2.1"
+                recipeExists: false
+                packageExists: false
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+        repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+        releaseTags:
+          []
+        distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+      sourceCatalog:
+        name: "bootstrap"
+        version: "1.1.0"
+        manifest:
+          path: "bootstrap/Catalog.yaml"
+          sha256: "b65380475c27bdb74fec0a5812cd1ec315e1ce762d688be87bb563b7bbf8f184"
+          bytes: 190
+      serviceDefinition:
+        path: "bootstrap/services/argo-cd.yaml"
+        sha256: "095fe6fe038658ff3857a64b8d22625313c859072e7014677ff3e152fcc56f13"
+        bytes: 214
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "argo-cd"
+        category: "application-management"
+        chartPath: "argo-cd"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+      wrapper:
+        path: "bootstrap/platform-components/helm/argo-cd"
+        chartYaml:
+          path: "bootstrap/platform-components/helm/argo-cd/Chart.yaml"
+          sha256: "f02c07d0ced9f3cd599e87d47e78af693fad4152f633402fee170b86bf6aec29"
+          bytes: 353
+        name: "argocd"
+        version: "1.3.0"
+        tree:
+          fileCount: 18
+          bytes: 13579
+          treeSha256: "cc1553fc3b05707e8bbb444a76e62f8ffd7fa346c1f61f3cc038632135a5cea9"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "bootstrap/platform-configs/helm/argo-cd/values.generated.yaml.tplt"
+        sha256: "d95ab66d30d9c35e36417136091a557bc384cabae3e88e93bb8496c7dab487b5"
+        bytes: 7689
+      serviceSliceTree:
+        fileCount: 20
+        bytes: 21482
+        treeSha256: "44142d5cc7f199ca9a698b177bd3f5a91756014535ce69e4f7681480bdf7eb00"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:argo-cd/argo-cd"
+          chartDependency:
+            name: "argo-cd"
+            version: "10.2.1"
+            repository: "https://argoproj.github.io/argo-helm"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/argo-cd/argo-cd/10.2.1"
+              package: "packages/argo-cd/argo-cd/10.2.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/argo-cd/argo-cd/10.2.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/argo-cd/argo-cd/10.2.1"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/argo-cd/argo-cd/10.2.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/argo-cd/argo-cd/10.2.1"
+                recipeExists: false
+                packageExists: false
+      firstPartyComponent: null
+  contract:
+    serviceDefinition: "retained-byte-for-byte"
+    wrapper: "retained-byte-for-byte"
+    configTemplate: "retained-byte-for-byte"
+    platformSpecialization: "remains-a-separate-config-step"
+    aiRequired: false

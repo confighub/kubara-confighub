@@ -1,0 +1,12 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "longhorn-longhorn"
+  version: "1.12.0"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "longhorn chart defaults variant rendered from longhorn/longhorn@1.12.0"

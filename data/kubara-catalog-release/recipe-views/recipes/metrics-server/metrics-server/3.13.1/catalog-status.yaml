@@ -1,0 +1,24 @@
+apiVersion: helm-expt.confighub.com/v1alpha1
+kind: CatalogStatus
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  chart: "metrics-server/metrics-server"
+  version: "3.13.1"
+  status: "catalog-candidate"
+  supportLevel: "promotion-review-needed"
+  supportedScopes:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  supportedVariants:
+    []
+  candidateVariants:
+    - "default"
+    - "external-tls-ca"
+  deferredVariants: []
+  review:
+    lastReviewed: "2026-05-27"
+    humanReviewRequired: true
+    productReviewRequired: true
+  notes:
+    - "Machine proof exists; human product review must confirm the supported variants and production dispositions."

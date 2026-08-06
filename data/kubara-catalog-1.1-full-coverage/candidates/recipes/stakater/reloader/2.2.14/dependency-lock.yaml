@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "stakater-reloader-2.2.14"
+spec:
+  chart: "stakater/reloader"
+  version: "2.2.14"
+  dependencies:
+    []

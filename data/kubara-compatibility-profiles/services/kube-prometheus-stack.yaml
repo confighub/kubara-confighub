@@ -1,0 +1,345 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCompatibilityProfile"
+metadata:
+  name: "kube-prometheus-stack"
+spec:
+  kubaraServiceKey: "kube-prometheus-stack"
+  aliases:
+    - "kube-prometheus-stack"
+  sourceLines:
+    -
+      id: "kubara-v0.12.0-built-in"
+      provenance:
+        repository: "https://github.com/kubara-io/kubara.git"
+        commit: "ad039dd3e038c8580592b3b9134c2165a426344d"
+        repositoryTree: "92cb8480e662d53906418c8c1e0b6f7bbd545f40"
+        releaseTags:
+          []
+        distributionStatus: "embedded-in-kubara-v0.12.0"
+      sourceCatalog:
+        name: "built-in"
+        version: "embedded-in-v0.12.0"
+        manifest:
+          status: "absent-in-upstream-built-in-layout"
+      serviceDefinition:
+        path: "services/kube-prometheus-stack.yaml"
+        sha256: "19a33c00a219b00466d9f08b4242860e68f4046fe76ed9cb25d616709337c651"
+        bytes: 249
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "kube-prometheus-stack"
+        category: "observability"
+        chartPath: "kube-prometheus-stack"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "platform-components/helm/kube-prometheus-stack"
+        chartYaml:
+          path: "platform-components/helm/kube-prometheus-stack/Chart.yaml"
+          sha256: "35555f52d38e8464a14c9477fde7f2a9079e04bb8dbdabed40037832ba2d5a4d"
+          bytes: 484
+        name: "kube-prometheus-stack"
+        version: "2.4.0"
+        tree:
+          fileCount: 8
+          bytes: 12752
+          treeSha256: "3054a2d85b1964d12a2a476e88dc124c927f50df0db06e539404ddb3400e00ad"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "platform-configs/helm/kube-prometheus-stack/values.generated.yaml.tplt"
+        sha256: "9a50d8b0d78916d54a998bbc439af5a80bee86220a7250c96d63d6431bf00ff4"
+        bytes: 9592
+      serviceSliceTree:
+        fileCount: 10
+        bytes: 22593
+        treeSha256: "b661544a573422570713d6c9150609b4b38d73fe9e90c80afedeceae86fbb136"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "31b72b264f1d0ae58cb79d5b4c11b26baf48c02b3651baa81ebf2d0f361c1f14"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+          chartDependency:
+            name: "kube-prometheus-stack"
+            version: "87.15.1"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/kube-prometheus-stack/87.15.1"
+              package: "packages/prometheus-community/kube-prometheus-stack/87.15.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/kube-prometheus-stack/87.15.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.15.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.15.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.15.1"
+                recipeExists: true
+                packageExists: true
+        -
+          canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+          chartDependency:
+            name: "prometheus-blackbox-exporter"
+            version: "11.15.1"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+              package: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-release"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+        repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+        releaseTags:
+          - "bootstrap-1.1.0"
+          - "general-1.1.0"
+        distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+      sourceCatalog:
+        name: "general"
+        version: "1.1.0"
+        manifest:
+          path: "general/Catalog.yaml"
+          sha256: "0ace12c931982d63f4ebeb8b39b1e8f7d8ef5864d7e28736bf2e5668df7d8bdf"
+          bytes: 188
+      serviceDefinition:
+        path: "general/services/kube-prometheus-stack.yaml"
+        sha256: "416ff6ca30f5042f50fd8d5c10122889f1bb0845fedbd2ee4781f74684f3cecc"
+        bytes: 240
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "kube-prometheus-stack"
+        category: "observability"
+        chartPath: "kube-prometheus-stack"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "general/platform-components/helm/kube-prometheus-stack"
+        chartYaml:
+          path: "general/platform-components/helm/kube-prometheus-stack/Chart.yaml"
+          sha256: "05e6786761e94e91403e69f47a3a0210d44bd330fb6b2dbe90ddbef32707409e"
+          bytes: 484
+        name: "kube-prometheus-stack"
+        version: "2.5.0"
+        tree:
+          fileCount: 8
+          bytes: 12769
+          treeSha256: "b165f0c64ea66bc941878c4f05ea864f2173368a3778d1b0e155d302c68e06bc"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "general/platform-configs/helm/kube-prometheus-stack/values.generated.yaml.tplt"
+        sha256: "9a50d8b0d78916d54a998bbc439af5a80bee86220a7250c96d63d6431bf00ff4"
+        bytes: 9592
+      serviceSliceTree:
+        fileCount: 10
+        bytes: 22601
+        treeSha256: "db10cc964abb9b0dcb46d3020e900f789482dde19b85adf2d7dfa84fd16bb641"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+          chartDependency:
+            name: "kube-prometheus-stack"
+            version: "87.19.2"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+              package: "packages/prometheus-community/kube-prometheus-stack/87.19.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: false
+                packageExists: false
+        -
+          canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+          chartDependency:
+            name: "prometheus-blackbox-exporter"
+            version: "11.15.1"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+              package: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+    -
+      id: "kubara-catalogs-1.1.0-observed-head"
+      provenance:
+        repository: "https://github.com/kubara-io/catalogs.git"
+        commit: "79d566dd82013ecf11beb8d1fec4ede7be069c20"
+        repositoryTree: "a4e0dc903011577b26640b7e3fd61f5358e43cd4"
+        releaseTags:
+          []
+        distributionStatus: "observed-post-tag-source-not-byte-equivalent-to-released-oci"
+      sourceCatalog:
+        name: "general"
+        version: "1.1.0"
+        manifest:
+          path: "general/Catalog.yaml"
+          sha256: "0ace12c931982d63f4ebeb8b39b1e8f7d8ef5864d7e28736bf2e5668df7d8bdf"
+          bytes: 188
+      serviceDefinition:
+        path: "general/services/kube-prometheus-stack.yaml"
+        sha256: "416ff6ca30f5042f50fd8d5c10122889f1bb0845fedbd2ee4781f74684f3cecc"
+        bytes: 240
+        apiVersion: "kubara.io/v1alpha1"
+        kind: "ServiceDefinition"
+        name: "kube-prometheus-stack"
+        category: "observability"
+        chartPath: "kube-prometheus-stack"
+        defaultStatus: "enabled"
+        clusterTypes:
+          - "hub"
+          - "spoke"
+      wrapper:
+        path: "general/platform-components/helm/kube-prometheus-stack"
+        chartYaml:
+          path: "general/platform-components/helm/kube-prometheus-stack/Chart.yaml"
+          sha256: "05e6786761e94e91403e69f47a3a0210d44bd330fb6b2dbe90ddbef32707409e"
+          bytes: 484
+        name: "kube-prometheus-stack"
+        version: "2.5.0"
+        tree:
+          fileCount: 8
+          bytes: 12768
+          treeSha256: "bac8a801d2a670b4c805242008163f8d78e5986902eb9e73f77cd485c96723c2"
+          digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      configTemplate:
+        path: "general/platform-configs/helm/kube-prometheus-stack/values.generated.yaml.tplt"
+        sha256: "9a50d8b0d78916d54a998bbc439af5a80bee86220a7250c96d63d6431bf00ff4"
+        bytes: 9592
+      serviceSliceTree:
+        fileCount: 10
+        bytes: 22600
+        treeSha256: "3097cbdaf627fb3e00032fda46f094a2c1c6a0ab0d02fb91720d8ade8bd321ae"
+        digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+      snapshotSelectionTreeSha256: "a0595a03d4088c1b543400064cb8ff6f48fe3edbec688521496e54936863d4b8"
+      templateLibraryDependency:
+        name: "template-library"
+        version: "0.2.0"
+        repository: "file://../template-library"
+      upstreamComponents:
+        -
+          canonicalIdentity: "helm:prometheus-community/kube-prometheus-stack"
+          chartDependency:
+            name: "kube-prometheus-stack"
+            version: "87.19.2"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+              package: "packages/prometheus-community/kube-prometheus-stack/87.19.2"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: true
+                packageExists: true
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/kube-prometheus-stack/87.19.2"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/kube-prometheus-stack/87.19.2"
+                recipeExists: false
+                packageExists: false
+        -
+          canonicalIdentity: "helm:prometheus-community/prometheus-blackbox-exporter"
+          chartDependency:
+            name: "prometheus-blackbox-exporter"
+            version: "11.15.1"
+            repository: "https://prometheus-community.github.io/helm-charts"
+          configHub:
+            disposition: "available-in-root-catalog"
+            root:
+              recipe: "recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+              package: "packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+              recipeExists: true
+              packageExists: true
+            candidates:
+              -
+                lane: "kubara-current-catalog-candidates"
+                recipe: "data/kubara-catalog-refresh/current-candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                package: "data/kubara-catalog-refresh/current-candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                recipeExists: false
+                packageExists: false
+              -
+                lane: "kubara-v0.12.0-candidates"
+                recipe: "data/kubara-catalog-refresh/candidates/recipes/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                package: "data/kubara-catalog-refresh/candidates/packages/prometheus-community/prometheus-blackbox-exporter/11.15.1"
+                recipeExists: true
+                packageExists: true
+      firstPartyComponent: null
+  contract:
+    serviceDefinition: "retained-byte-for-byte"
+    wrapper: "retained-byte-for-byte"
+    configTemplate: "retained-byte-for-byte"
+    platformSpecialization: "remains-a-separate-config-step"
+    aiRequired: false

@@ -1,0 +1,71 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallerPackageReceipt"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0"
+spec:
+  chart:
+    repository: "jetstack"
+    name: "cert-manager"
+    version: "v1.21.0"
+  package:
+    path: "data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0"
+    name: "jetstack-cert-manager"
+    version: "v1.21.0"
+    sourceFiles:
+      -
+        path: "README.md"
+        sha256: "cd64a283b4a91e35107ec51a65cb1ac3a86470db00d04803974d92cac2bfa814"
+        bytes: 378
+      -
+        path: "bases/crds-enabled/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/crds-enabled/upstream.yaml"
+        sha256: "ce9f3596a16fd6af0ef68f3c292349bd4174cff361bdc2e1318901396d8f6967"
+        bytes: 1037629
+      -
+        path: "bases/default/kustomization.yaml"
+        sha256: "44d52637f259f73730afd3a41d7350391387456ab7c418f201eec1ef73720153"
+        bytes: 99
+      -
+        path: "bases/default/upstream.yaml"
+        sha256: "9e9b6442f769b8a02974ae801946207452f7f4990e873e007e4d32ec88d9cc09"
+        bytes: 40631
+      -
+        path: "collector/target-facts.sh"
+        sha256: "19b484c12c1102f9ef0e1617ed05eb1d8cad6b5b4699b6a7683ae3911500e248"
+        bytes: 4360
+      -
+        path: "installer.yaml"
+        sha256: "5131ca651def25d8d5650610e8aba1a39184ff921784fc566af3c2b6ab93a8d5"
+        bytes: 1870
+  deterministicBundle:
+    command: "cub installer package data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0 -o <tmp>/cert-manager-v1.21.0.tgz"
+    sha256: "1a43f5210e77061129156f0bda8c1815c31d7129b29c31c8b17d689f30278305"
+    byteIdenticalAcrossTwoLocalBundles: true
+  setupChecks:
+    -
+      variant: "default"
+      base: "default"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0 --base default --work-dir <tmp> --non-interactive --namespace cert-manager"
+      helmReleaseObjectCount: 40
+      cubInstallObjectCountIncludingSupport: 41
+      semanticObjectMatches: "40/40"
+      separatedSecretCount: 0
+      targetFactMode: "collector-facts"
+      targetFactsBound: true
+      allowedCubOnlyObjects:
+        - "v1|Namespace||cert-manager"
+    -
+      variant: "crds-enabled"
+      base: "crds-enabled"
+      command: "cub installer setup --pull data/kubara-catalog-refresh/candidates/packages/jetstack/cert-manager/v1.21.0 --base crds-enabled --work-dir <tmp> --non-interactive --namespace cert-manager"
+      helmReleaseObjectCount: 46
+      cubInstallObjectCountIncludingSupport: 47
+      semanticObjectMatches: "46/46"
+      separatedSecretCount: 0
+      targetFactMode: "not-required"
+      targetFactsBound: false
+      allowedCubOnlyObjects:
+        - "v1|Namespace||cert-manager"

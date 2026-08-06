@@ -1,0 +1,45 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "argo-cd-argo-cd"
+  version: "10.1.3"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "argo-cd default variant rendered from argo-cd/argo-cd@10.1.3"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "Secret argocd/argocd-redis key auth"
+          namespace: "argocd"
+          suggestedSource: "kubectl -n argocd create secret generic argocd-redis --from-literal=auth=<value>"
+    -
+      name: "no-crds"
+      path: "bases/no-crds"
+      description: "argo-cd CRDs disabled variant rendered from argo-cd/argo-cd@10.1.3"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "CRD applications.argoproj.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD applicationsets.argoproj.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "CRD appprojects.argoproj.io"
+          suggestedSource: "kubectl apply -f <crd-manifest.yaml>"
+        -
+          kind: "ClusterFeature"
+          name: "Secret argocd/argocd-redis key auth"
+          namespace: "argocd"
+          suggestedSource: "kubectl -n argocd create secret generic argocd-redis --from-literal=auth=<value>"
+  collector:
+    command: "/bin/sh"
+    args:
+      - "collector/target-facts.sh"
+    description: "Records target-fact bindings and can live-check cluster-visible Secret and CRD requirements."

@@ -1,0 +1,25 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "RenderReceipt"
+metadata:
+  name: "external-secrets-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderer:
+    name: "helm"
+    version: "v4.1.4+g05fa379"
+    kubeVersion: "1.30.0"
+    flags:
+      - "--include-crds"
+      - "--skip-tests"
+      - "--no-hooks"
+  inputs:
+    sourceLockSHA256: "1f793c04ef6824650b3e4b8066099b111cf3052cb2d823a0f7feee1cacbe83a2"
+    dependencyLockSHA256: "17d96c6831b1aa4b9c49aa44fca5b144b24928f2b6169871695482814874b7c2"
+    effectiveValuesSHA256: "9331d54a09b3d2da4a646242915346c45bfa054c0b0ed2058eb105657ad6c202"
+  outputs:
+    renderedObjectSetSHA256: "bb3555fb22fc50b3cebf8a96068d20a887fcf58fc52cb3785704928cdaf40be3"
+    renderedObjectInventorySHA256: "bc07e5812cb5deb022cb937341dafbe221ae0d1a8b8f936db85df2769e5786cd"
+    deterministicAcrossTwoLocalRenders: true
+    objectCount: 44
+    renderedSecretCount: 1
+    secretCountSeparatedByCubInstall: 1

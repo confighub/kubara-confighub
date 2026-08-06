@@ -1,0 +1,52 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ControlPoints"
+metadata:
+  name: "kube-prometheus-stack-kube-prometheus-stack-87.19.2"
+spec:
+  points:
+    -
+      category: "source-lock"
+      status: "handled"
+      evidence: "source-lock.yaml"
+    -
+      category: "dependency-lock"
+      status: "handled"
+      evidence: "dependency-lock.yaml"
+      note: "chart declares CRD, kube-state-metrics, node-exporter, Grafana, and windows-exporter dependencies; offline candidate variants lock their metadata."
+    -
+      category: "capability-profile"
+      status: "handled"
+      kubeVersion: "1.30.0"
+      note: "OpenShift and ServiceMonitor branches are bound to the named Kubernetes capability profile."
+    -
+      category: "crd-policy"
+      status: "variant-controlled-and-target-fact"
+      variants:
+        default: 10
+        no-crds: 0
+        existing-secret: 10
+      note: "CRDs are ordinary rendered objects in the default variant; no-crds records those same CRDs as target prerequisites."
+    -
+      category: "admission-webhook"
+      status: "target-fact-and-observe"
+      objects:
+        - "admissionregistration.k8s.io/v1|MutatingWebhookConfiguration||kube-prometheus-stack-admission"
+        - "admissionregistration.k8s.io/v1|ValidatingWebhookConfiguration||kube-prometheus-stack-admission"
+      note: "Config-only delivery must stage the kube-prometheus-stack-admission Secret because Helm normally creates the TLS material through hook lifecycle."
+    -
+      category: "generated-facts"
+      status: "variant-controlled"
+      evidence: "grafana.adminPassword or grafana.admin.existingSecret"
+      note: "Default and no-crds bind the password for deterministic proof; existing-secret keeps credential material in the target secret backend."
+    -
+      category: "cluster-rbac"
+      status: "scan-and-review"
+      evidence: "scan receipts"
+    -
+      category: "tpl"
+      status: "controlled-by-empty-defaults"
+      note: "Prometheus/Grafana rules, scrape configs, datasource config, and extraManifests can use templating; offline candidate variants keep raw slots empty."
+    -
+      category: "installer-support-object"
+      status: "handled"
+      object: "v1|Namespace||monitoring"

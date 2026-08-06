@@ -1,0 +1,14 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Variant"
+metadata:
+  name: "crds-enabled"
+spec:
+  recipe: "../../recipe.yaml"
+  namespace: "cert-manager"
+  releaseName: "cert-manager"
+  valuesProfile: "../../effective-values-crds-enabled.yaml"
+  capabilityProfile:
+    kubeVersion: "1.30.0"
+    apiVersions:
+      []
+  hookPolicy: "no-hooks"

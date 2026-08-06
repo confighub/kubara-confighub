@@ -1,0 +1,63 @@
+---
+apiVersion: "catalog.confighub.com/v1alpha1"
+kind: "KubaraCatalogSnapshot"
+metadata:
+  name: "kubara-catalogs-1.1.0-release"
+spec:
+  source:
+    repository: "https://github.com/kubara-io/catalogs.git"
+    commit: "b451260636bba764ccdb0561d9f8f5ce414e2ee5"
+    repositoryTree: "9c722d1ba28053d4b802d3c74a14fea5a343b765"
+    sourceSubtree: "."
+    releaseTags:
+      - "bootstrap-1.1.0"
+      - "general-1.1.0"
+    defaultOciReferences:
+      - "oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0"
+      - "oci://ghcr.io/kubara-io/catalogs/general:1.1.0"
+    distributionStatus: "released-oci-source-at-bootstrap-and-general-1.1.0-tags"
+    catalogSubtrees:
+      -
+        name: "bootstrap"
+        path: "bootstrap"
+        gitTree: "055d6d4204113290911d0dfab1697976b3c9ac21"
+        version: "1.1.0"
+        catalogManifest: "bootstrap/Catalog.yaml"
+      -
+        name: "general"
+        path: "general"
+        gitTree: "99cc97f9f54d1094dba87dce39e53c4d6f344fff"
+        version: "1.1.0"
+        catalogManifest: "general/Catalog.yaml"
+  snapshot:
+    scope: "full-bootstrap-and-general-catalogs"
+    profiledServices:
+      - "argocd"
+      - "cert-manager"
+      - "external-secrets"
+      - "homer-dashboard"
+      - "kube-prometheus-stack"
+      - "metrics-server"
+      - "traefik"
+    bootstrapConcerns:
+      -
+        key: "bootstrap-crds"
+        status: "included"
+    selectedPaths:
+      - "bootstrap"
+      - "general"
+    fileCount: 354
+    bytes: 6394558
+    treeSha256: "25470fa8da444c2eafd078e1d9daab6734afbc6fafb66d0a6a7a4f6c162a62fa"
+    digestAlgorithm: "sha256 of sorted '<file-sha256>  <posix-relative-path>\\n' records"
+    checksums: "data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-release/checksums.txt"
+  license:
+    path: "data/kubara-catalog-snapshots/kubara-catalogs-1.1.0-release/UPSTREAM_LICENSE"
+    sha256: "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    identifier: "Apache-2.0"
+  boundaries:
+    fullUpstreamRepositorySnapshot: false
+    fullCatalogSubtrees: true
+    historicalBuiltInBoundary: null
+    sourceFilesModified: false
+    networkRequiredForOfflineVerify: false

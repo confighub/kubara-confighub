@@ -1,0 +1,17 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartDossier"
+metadata:
+  name: "velero-velero-12.1.0"
+spec:
+  chart: "velero/velero"
+  version: "12.1.0"
+  maintainedNotes:
+    - "This package is the exact velero@12.1.0 dependency selected by Kubara catalogs 1.1.0."
+    - "The retained root proves exact source bytes, deterministic rendering, and deterministic ConfigHub installer packaging."
+    - "It does not claim Kubara wrapper equivalence, live convergence, or production support."
+  knownControlPoints:
+    - "source-lock"
+    - "dependency-lock"
+    - "capability-profile"
+    - "target-facts"
+    - "production-readiness-review"

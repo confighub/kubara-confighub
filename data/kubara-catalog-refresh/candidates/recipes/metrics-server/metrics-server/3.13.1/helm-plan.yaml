@@ -1,0 +1,32 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  readiness:
+    status: "offline-candidate"
+    chart: "metrics-server/metrics-server"
+    version: "3.13.1"
+    variants:
+      - "default"
+      - "external-tls-ca"
+    helmObjectsByVariant:
+      default: 9
+      external-tls-ca: 9
+    cubInstallObjectsByVariant:
+      default: 10
+      external-tls-ca: 10
+    helmMatchByVariant:
+      default: "9/9"
+      external-tls-ca: "9/9"
+    scanGate: "offline-only-live-qualification-required"
+    nextAction: "complete Kubara compatibility and serial live qualification before root Catalog promotion"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"
+    - "revisions/external-tls-ca/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/external-tls-ca/r001/receipts/render-receipt.yaml"
+    - "revisions/external-tls-ca/r001/receipts/scan-receipt.yaml"
+    - "revisions/external-tls-ca/r001/receipts/install-gate.yaml"

@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "InstallGate"
+metadata:
+  name: "external-secrets-no-crds-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "75ce0bfaa1c4ed14044edbd406eaa256987967a395676e2902a280e9abfa3304"
+  decision: "blocked"
+  allowedScopes:
+    - "offline-local-evaluation"
+  blockedScopes:
+    - "live-cluster"
+    - "root-catalog-promotion"
+    - "production"
+  reasons:
+    - "Helm equivalence passed for no-crds"
+    - "CRD install/upgrade behavior needs explicit lifecycle policy before production"
+    - "Admission webhook availability needs a fresh observation receipt after apply"
+    - "Webhook Secret and cert-controller behavior need observation after apply"
+    - "Cluster-scoped RBAC needs production review"
+    - "omits external-secrets CRDs while preserving webhook, cert-controller, and RBAC objects; target clusters must already provide the External Secrets CRDs and the separated webhook Secret must be staged before sync"
+    - "live qualification has not run"
+    - "Kubara ServiceDefinition, wrapper, defaults, and additions compatibility is incomplete"

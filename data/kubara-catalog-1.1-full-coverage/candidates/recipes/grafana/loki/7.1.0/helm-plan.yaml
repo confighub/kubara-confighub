@@ -1,0 +1,24 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPlan"
+metadata:
+  name: "grafana-loki-7.1.0"
+spec:
+  readiness:
+    status: "packaged-with-controls"
+    chart: "grafana/loki"
+    version: "7.1.0"
+    variants:
+      - "default"
+    helmObjectsByVariant:
+      default: 19
+    cubInstallObjectsByVariant:
+      default: 20
+    helmMatchByVariant:
+      default: "19/19"
+    scanGate: "warn-production-blocked"
+    nextAction: "select a reviewed configuration and complete target-specific live qualification before production"
+  receipts:
+    - "revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+    - "revisions/default/r001/receipts/render-receipt.yaml"
+    - "revisions/default/r001/receipts/scan-receipt.yaml"
+    - "revisions/default/r001/receipts/install-gate.yaml"

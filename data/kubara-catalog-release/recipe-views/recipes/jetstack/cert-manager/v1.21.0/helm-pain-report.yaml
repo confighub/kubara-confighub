@@ -1,0 +1,125 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "HelmPainReport"
+metadata:
+  name: "jetstack-cert-manager-v1.21.0"
+spec:
+  chart:
+    name: "jetstack/cert-manager"
+    version: "v1.21.0"
+    source: "https://charts.jetstack.io"
+    digest: "9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97"
+  supportedScopeStatus: "no-unhandled-pain-points-for-supported-scopes"
+  supportedScopes:
+    []
+  supportedVariants:
+    []
+  productionReadiness: "not-reviewed-for-production"
+  notes:
+    - "Default chart does not render CRDs because crds.enabled defaults to false."
+    - "crds-enabled variant renders six cert-manager CRDs as ordinary rendered objects."
+    - "startup API check is a Helm post-install hook and is excluded from the rendered revision by --no-hooks."
+    - "Mutating and validating webhook readiness must be observed after apply because rendered objects alone do not prove webhook health."
+    - "extraObjects is a tpl-powered extension slot; promoted variants keep it empty."
+  painPoints:
+    -
+      id: "source-lock"
+      detectedPainPoint: "source-lock requires source-lock.yaml"
+      evidence:
+        - "source-lock.yaml"
+      configHubHome: "source-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "source-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "dependency-lock"
+      detectedPainPoint: "chart has no subchart dependencies"
+      evidence:
+        - "dependency-lock.yaml"
+      configHubHome: "dependency-lock"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "dependency-lock.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "capability-profile"
+      detectedPainPoint: "render is bound to the named Kubernetes capability profile even though this chart version does not branch on .Capabilities."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "capability-profile"
+      disposition: "handled-by-capability-profile"
+      linkedReceipt: "revisions/default/r001/receipts/render-receipt.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "crd-policy"
+      detectedPainPoint: "CRDs are ordinary rendered objects only in the crds-enabled variant and still need lifecycle/upgrade policy."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "recipe"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "variant-controlled"
+    -
+      id: "hook-policy"
+      detectedPainPoint: "startup API check Job is a Helm post-install hook and is excluded from the render proof; lifecycle policy must handle it before production."
+      evidence:
+        - "no-hooks"
+      configHubHome: "lifecycle-policy"
+      disposition: "handled-by-lifecycle-policy"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "handled-for-render"
+    -
+      id: "admission-webhook"
+      detectedPainPoint: "admission-webhook is detected in this chart and mapped to a ConfigHub control point"
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "lifecycle-policy"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "scan-and-observe"
+    -
+      id: "cluster-rbac"
+      detectedPainPoint: "cluster-rbac requires scan receipts"
+      evidence:
+        - "scan receipts"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/scan-receipt.yaml"
+      supportedVariantStatus: "scan-and-review"
+    -
+      id: "tpl"
+      detectedPainPoint: "extraObjects uses tpl; promoted variants do not set that value."
+      evidence:
+        - "control-points.yaml"
+      configHubHome: "extension-slot"
+      disposition: "needs-operator-decision"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "controlled-by-empty-defaults"
+    -
+      id: "installer-support-object"
+      detectedPainPoint: "installer-support-object affects v1|Namespace||cert-manager"
+      evidence:
+        - "v1|Namespace||cert-manager"
+      configHubHome: "recipe"
+      disposition: "absorbed-into-recipe"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "handled"
+    -
+      id: "scan-gate"
+      detectedPainPoint: "Current scan gate is warn-production-blocked"
+      evidence:
+        - "helm-plan.yaml"
+        - "scan receipts"
+        - "install gates"
+      configHubHome: "scan-gate"
+      disposition: "handled-by-scan-or-gate"
+      linkedReceipt: "revisions/default/r001/receipts/install-gate.yaml"
+      supportedVariantStatus: "warn-production-blocked"
+    -
+      id: "value-model-diagnostics"
+      detectedPainPoint: "Helm values can be unknown, dead, misspelled, shadowed, or ignored unless the values model records the analysis boundary."
+      evidence:
+        - "value-model.yaml"
+      configHubHome: "value-model"
+      disposition: "absorbed-into-value-model"
+      linkedReceipt: "value-model.yaml"
+      supportedVariantStatus: "unknown=not-checked; dead=not-checked; ignored=not-checked"
+  answerForSkepticalHelmUser: "jetstack/cert-manager@v1.21.0 maps its detected Helm pain to 8 ConfigHub control areas: source-lock, dependency-lock, capability-profile, recipe, lifecycle-policy, scan-gate, extension-slot, value-model. Supported scopes have explicit variants, receipts, scans/gates, and control-point dispositions; production readiness remains not-reviewed-for-production."

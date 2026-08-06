@@ -1,0 +1,700 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "KubaraPreparedGitHandoffReceipt"
+metadata:
+  name: "kubara-current-four-cluster"
+spec:
+  contractVersion: "v1alpha1"
+  cleanOutputLayout:
+    source: "source"
+    config: "source/config.yaml"
+    components: "generated/platform-components/helm"
+    configs: "generated/platform-configs"
+    renders: "effective-renders"
+    artifactLock: "component-artifacts.yaml"
+    generationReceipt: "generation-receipt.yaml"
+    wiringGraph: "wiring/graph.json"
+  clusterCount: 4
+  renderCount: 13
+  payloads:
+    -
+      path: "component-artifacts.yaml"
+      sha256: "3e80fb1bbd04845f0f8820282ac1a5a74625cb8fe39d0db9ab1647fcca6d0a10"
+      size: 2911
+    -
+      path: "effective-renders/hx-app-dev/argo-cd/release-objects.yaml"
+      sha256: "3881930e58f377be7074eda757a17e304825a3104183f477cfadb4cb87c57bb8"
+      size: 1955957
+    -
+      path: "effective-renders/hx-app-dev/cert-manager/release-objects.yaml"
+      sha256: "d42bd87d5d10982edf3d3c308769c3fba802df70bfca68e10600a76114e95ee7"
+      size: 1046374
+    -
+      path: "effective-renders/hx-app-dev/external-secrets/release-objects.yaml"
+      sha256: "b90bd5215ed87a67cd9b2754f04865a20e40b805fe1349e93de25770b0a69292"
+      size: 1978102
+    -
+      path: "effective-renders/hx-app-dev/homer-dashboard/release-objects.yaml"
+      sha256: "0810f86226a13a70f24a345af9560536f773f054fb75a7cbaf2202ab64858d2d"
+      size: 356650
+    -
+      path: "effective-renders/hx-app-dev/kube-prometheus-stack/release-objects.yaml"
+      sha256: "452a3733b9b3c3d92a079a524f1a325c1c594bf1bcd732d05866e21fd81e3655"
+      size: 5109331
+    -
+      path: "effective-renders/hx-app-dev/metrics-server/release-objects.yaml"
+      sha256: "da82e05435f85b1856a3e24d95c99363cfb16f8759499a25e69ba5cc260ae855"
+      size: 7453
+    -
+      path: "effective-renders/hx-app-dev/traefik/release-objects.yaml"
+      sha256: "0c39aaa4266218d7c9cd5c29f8fd303b832d53345176fbd7bd2a94a14909ca7c"
+      size: 433424
+    -
+      path: "effective-renders/hx-app-prod-a/cert-manager/release-objects.yaml"
+      sha256: "27f69adde8d447b0294205f65d9d19685c987a4b2ad573271e3edbb239f0a75a"
+      size: 1043910
+    -
+      path: "effective-renders/hx-app-prod-a/traefik/release-objects.yaml"
+      sha256: "f3f494ffb978b154e083493974f39221f32ce5ec047f3e4caaced3d3310e3d81"
+      size: 432900
+    -
+      path: "effective-renders/hx-app-prod-b/cert-manager/release-objects.yaml"
+      sha256: "ddab0a44c5efc491c6132223fff6b88ecd2da5abdd77e73af1887f7593aef70a"
+      size: 1043910
+    -
+      path: "effective-renders/hx-app-prod-b/traefik/release-objects.yaml"
+      sha256: "9d5ce0593524ae3e9b2aaf99ec8fddf4a8c57332b9a07bff91f24456a034a4a1"
+      size: 432900
+    -
+      path: "effective-renders/hx-app-staging/cert-manager/release-objects.yaml"
+      sha256: "d7cc5ad406be55803cc8c8f267631812051d82dd649863a89f87c2db0ed0690d"
+      size: 1043914
+    -
+      path: "effective-renders/hx-app-staging/traefik/release-objects.yaml"
+      sha256: "3ebec65bab14e1f48da29496d979c7463741f2e6f2697e46752a582d6d77633c"
+      size: 432905
+    -
+      path: "generated/platform-components/helm/argo-cd/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/argo-cd/CHANGELOG.md"
+      sha256: "e63ddb149ab4444d5d1e1c67b8930cae8e850569d427a9078a4c664048013d3e"
+      size: 3463
+    -
+      path: "generated/platform-components/helm/argo-cd/Chart.yaml"
+      sha256: "f02c07d0ced9f3cd599e87d47e78af693fad4152f633402fee170b86bf6aec29"
+      size: 353
+    -
+      path: "generated/platform-components/helm/argo-cd/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/argo-cd/script/restart-dex.tmpl"
+      sha256: "d9d3833ec79b8f678d1708ad37a341f677ed32b37b4b495e4c681e6078178cf2"
+      size: 1118
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/applications.yaml"
+      sha256: "0690c0f393b0e7d8ca3182adbed511d671557b5b77a00eefbccd20ab65401684"
+      size: 162
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/appsets.yaml"
+      sha256: "ca92019250467e988c301f30e87799e6b6dbc93fb86ad8bbeba4c52e385331c4"
+      size: 174
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/cluster.yaml"
+      sha256: "a560ff9368b4be2c2f0de0d601e798b11221ca05fbcb19e1c4dd73fce18df165"
+      size: 141
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/default_project.yaml"
+      sha256: "0bcca71306842e1e6a07ab5026b56caff9b04127847de2eea73f08648708c652"
+      size: 70
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/external-secrets.yaml"
+      sha256: "6023826ff560d29bbe31bf3eed7016e60ec3d8bc6b36646d0ac0fa3441d12efa"
+      size: 62
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/extSecrets.dockerPull.tpl"
+      sha256: "106a1499215cec0abc9fb9a0b3fd4b7ce20d0ff8f4ecd325830d2a1e98c517c1"
+      size: 163
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/inCluster.secret.yaml"
+      sha256: "ae1880d2927e10656c693f4955619cf5de57214b48eb44ba4bee299e1e081326"
+      size: 587
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/namespace.yaml"
+      sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+      size: 49
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/post-deploy-restart-job.yaml"
+      sha256: "cf4ae984ecbb7decaa9f5bebd2d35e407ade9024b9c26372448c438a76fd0fec"
+      size: 1676
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/projects.yaml"
+      sha256: "9966974a203004a828f5aeeed776fa90a4dba1b17a60c6402523d7523c80f855"
+      size: 133
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/repository.yaml"
+      sha256: "8755159aefb0167b1ef62e4299ba38dc8010f4f3052c0ccca264347b6e8aa817"
+      size: 151
+    -
+      path: "generated/platform-components/helm/argo-cd/templates/secret-store.yaml"
+      sha256: "9758b0d976bb0e9ac993aa7f749d35a2b6c8c31b33d7bbdb53cf28495d671d38"
+      size: 64
+    -
+      path: "generated/platform-components/helm/argo-cd/values.yaml"
+      sha256: "c025c84d8a7a85bdc65f7bb1f258384f98ab824f2ee061b34de7f5419ad1b231"
+      size: 4638
+    -
+      path: "generated/platform-components/helm/bootstrap-crds/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/bootstrap-crds/CHANGELOG.md"
+      sha256: "5d50266878e5cc78cc293eefd946d5070e240f34c627d115583665a85e558759"
+      size: 432
+    -
+      path: "generated/platform-components/helm/bootstrap-crds/Chart.yaml"
+      sha256: "c491cd3880fa78e2129c4350c123096d5c685871328e48ab112f16035af29a9b"
+      size: 621
+    -
+      path: "generated/platform-components/helm/cert-manager/.gitignore"
+      sha256: "4ee42c9dd151a1eef2c234a9f6a3c16d3804a71296bc7b8f283b56b935d29a58"
+      size: 25
+    -
+      path: "generated/platform-components/helm/cert-manager/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/cert-manager/CHANGELOG.md"
+      sha256: "318fec87437ffbc4e2bd4612a983bff418c24b544ed15a140f2bb6eb51c1270d"
+      size: 1742
+    -
+      path: "generated/platform-components/helm/cert-manager/Chart.yaml"
+      sha256: "4e4834a8a34828a5a59aac65d2d39d318c04dfb007e95cb3f02294fcfc32e719"
+      size: 306
+    -
+      path: "generated/platform-components/helm/cert-manager/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/cert-manager/templates/clusterissuer.yaml"
+      sha256: "fcdcfebbf059a38d445699ffaaf0dc354d34295ecfaad5532ddba2500f714063"
+      size: 650
+    -
+      path: "generated/platform-components/helm/cert-manager/templates/namespace.yaml"
+      sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+      size: 49
+    -
+      path: "generated/platform-components/helm/cert-manager/templates/prometheusRule.yaml"
+      sha256: "70b631573f8f7395c780bea584dc74fa99130b30d0ab73bba482fe86edebb59a"
+      size: 1948
+    -
+      path: "generated/platform-components/helm/cert-manager/values.yaml"
+      sha256: "f9c6ae28730f2b521c22b67ba290c962e1f2ec2efc1274c6393504a5466b29f9"
+      size: 905
+    -
+      path: "generated/platform-components/helm/external-secrets/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/external-secrets/CHANGELOG.md"
+      sha256: "c4813fe865a1c03ec88b62d67a0fabf344591b593cc591546234ddaa95fe2ae9"
+      size: 2403
+    -
+      path: "generated/platform-components/helm/external-secrets/Chart.yaml"
+      sha256: "eae77f87c1b7f402d740d6fe4e8fd92cc2958e95d5fb1fcc9eb567c005e9e3a7"
+      size: 408
+    -
+      path: "generated/platform-components/helm/external-secrets/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/external-secrets/templates/certificate.yaml"
+      sha256: "b464f30627f19f3d265c598249162c4d96e030d763401245fa2b5b89fdfd6a6f"
+      size: 571
+    -
+      path: "generated/platform-components/helm/external-secrets/templates/clusterSecretStore.yaml"
+      sha256: "88fc9a6739611a6790ba0758540dea0a9b1485668042e6018c9b8f4a0778bac3"
+      size: 71
+    -
+      path: "generated/platform-components/helm/external-secrets/templates/issuer.yaml"
+      sha256: "e0327760a48a886baf92e6a61293787e4ed67ac94ffe7cb4d2fca42ffe0a4e0b"
+      size: 288
+    -
+      path: "generated/platform-components/helm/external-secrets/templates/namespace.yaml"
+      sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+      size: 49
+    -
+      path: "generated/platform-components/helm/external-secrets/values.yaml"
+      sha256: "8a5bac2d3765495a695e9fb7f335fd839767f7e830d798b7b323f77fe3639843"
+      size: 466
+    -
+      path: "generated/platform-components/helm/homer-dashboard/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/icons/favicon.ico"
+      sha256: "8f562d42f87c3efec96e6ba5973a54f2d0c2821e30a79ada61bdd4c6e400906c"
+      size: 15086
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/icons/kubara_icon.png"
+      sha256: "21699b4c348abc90db792b6038561518f078e0d85f3a5f58f3dd18938c1924b5"
+      size: 99715
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/alertmanager.png"
+      sha256: "bc218d1dc6e3671bd8b419baf7a34ce71b266a89d45603b8d5b8d69ff23f691f"
+      size: 22396
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/argocd.png"
+      sha256: "3a1bbf2c87326622a56eca68a6b050fd323975c45a8489fdf681fc085b5a34bf"
+      size: 9900
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/grafana.png"
+      sha256: "5bb3c15d464299b6db6d9a9b7f7f7ab948ee0952f805c0e96430d25f1e11fc06"
+      size: 6267
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/kyverno.png"
+      sha256: "7fea83ba8ceb08697820e8e79c9954044d9d51b5aa3b25c5a41e71574af8306b"
+      size: 15000
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/longhorn.png"
+      sha256: "58a499067d17bd12398003697577d3d40591d58a8f3710d5e5bf015e718ac7a3"
+      size: 18594
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/nginx.png"
+      sha256: "d93320e063d73ca06bb2d743b05326772e9f3121d0e45631ce28af7b312918c8"
+      size: 6891
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/openbao.png"
+      sha256: "5f224b4338ad8be60727b4a9af6262e875a4c53d815f9e28cd6e982f653ce617"
+      size: 9392
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/prometheus.png"
+      sha256: "805f392051052534afa93ada2583f92c6ab3b0d1709444991bf1c56c405405fe"
+      size: 7652
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/secretsmanager.png"
+      sha256: "e767c434eebe8e925c9c89f6a5dde30647fab21d76570fcaca75f4aa549cfa5b"
+      size: 17035
+    -
+      path: "generated/platform-components/helm/homer-dashboard/assets/tools/traefik.png"
+      sha256: "a0d89ddabe27fe3b62ee770cfc2f9ad25aee3a2c49fd3a73eeba125e4b316eaa"
+      size: 32801
+    -
+      path: "generated/platform-components/helm/homer-dashboard/CHANGELOG.md"
+      sha256: "c736c7069b460f2be1766d0feb62b78278c95aeda740ca7dab54a1f097240f53"
+      size: 695
+    -
+      path: "generated/platform-components/helm/homer-dashboard/Chart.yaml"
+      sha256: "fadd817515d7951a94c5bb025de8448395a7ef0aadc5673fba671ae0e69ad20b"
+      size: 206
+    -
+      path: "generated/platform-components/helm/homer-dashboard/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/configmaps/assets-icons-configmap.yaml"
+      sha256: "00fef8a1307acfd515afd104108a7942e6d38ebb970fdf0504c56bc49fa22488"
+      size: 255
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/configmaps/assets-tools-configmap.yaml"
+      sha256: "37cd46de96ad9c50348f42d90ffd9f606b8cbd2661729d9efe710c7752454a35"
+      size: 255
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/configmaps/dashboard-configmap.yaml"
+      sha256: "51ba5a5a8576fba8f42fc1de4b974e68ef15e902de12ebbb03d3de8134e5e8f7"
+      size: 196
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/configmaps/lighttpdconfig-configmap.yaml"
+      sha256: "3e83ac48292fd372f2e12becde3813fe5450dc7b285304c8a5cbf85cd259fa6c"
+      size: 714
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/deployment.yaml"
+      sha256: "763a47eb66986af88e794a4a7a69a6396448a1a2fac407aeeac43e8c8060eb41"
+      size: 3868
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/ingress.yaml"
+      sha256: "29c3966dbe4a640d4ba8cd12bb7dbd1c1efc54e9f09f64a15a200b72e6a60874"
+      size: 767
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/monitoring/servicemonitor.yaml"
+      sha256: "ed9aecbc1317377617ca0f08eade9f7ab3b6b99bba520a493a9838b0d7ba73f7"
+      size: 790
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/namespace.yaml"
+      sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+      size: 49
+    -
+      path: "generated/platform-components/helm/homer-dashboard/templates/service.yaml"
+      sha256: "40cc633d8988fc7d5675e86c4b284f6391cfc309a72ec5c5915e39d47a9eb231"
+      size: 333
+    -
+      path: "generated/platform-components/helm/homer-dashboard/values.yaml"
+      sha256: "df008f54959d003496f6b55dad6204c54d15fc00d68940a80f9b59e592abf14c"
+      size: 595
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/CHANGELOG.md"
+      sha256: "0729b7599fc864d5bb1ef13660c3ca39187054c509bb9cd3f925467254a311ed"
+      size: 6123
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/Chart.yaml"
+      sha256: "05e6786761e94e91403e69f47a3a0210d44bd330fb6b2dbe90ddbef32707409e"
+      size: 484
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/templates/external-secrets.yaml"
+      sha256: "6023826ff560d29bbe31bf3eed7016e60ec3d8bc6b36646d0ac0fa3441d12efa"
+      size: 62
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/templates/namespace.yaml"
+      sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+      size: 49
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/templates/secret-store.yaml"
+      sha256: "9758b0d976bb0e9ac993aa7f749d35a2b6c8c31b33d7bbdb53cf28495d671d38"
+      size: 64
+    -
+      path: "generated/platform-components/helm/kube-prometheus-stack/values.yaml"
+      sha256: "f1c89488d599b7b9b5646e50021729e9c4de89bf615ce0fa4eda75b06e3835cd"
+      size: 5572
+    -
+      path: "generated/platform-components/helm/metrics-server/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/metrics-server/CHANGELOG.md"
+      sha256: "49fbd423f0302c7fba9397a1fe97de8035b95e2ee596ce5687aa64a9d97693e6"
+      size: 801
+    -
+      path: "generated/platform-components/helm/metrics-server/Chart.yaml"
+      sha256: "c069858516c6a4e83a6198ac7d73526b2375a14cff8b146f86ae77b0d8f5f752"
+      size: 333
+    -
+      path: "generated/platform-components/helm/metrics-server/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/metrics-server/templates/namespace.yaml"
+      sha256: "61346018d7a43e55a88c92fccbc64c3ec8fd7a8fec36438df38c9d770c6c356f"
+      size: 50
+    -
+      path: "generated/platform-components/helm/metrics-server/values.yaml"
+      sha256: "b74ae9ea2d2fda2fd1c20fb5b638bbb3de30b65830f0f3257912d42aaa62779b"
+      size: 296
+    -
+      path: "generated/platform-components/helm/template-library/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/template-library/CHANGELOG.md"
+      sha256: "0fae11104371f93fb72d772bd2922a4c679c9b05c480889d172e390bab90a515"
+      size: 1018
+    -
+      path: "generated/platform-components/helm/template-library/Chart.yaml"
+      sha256: "80a0bf19d06ea052d9ccf8cf0b2552afd1b934be79fca7ac90f978cdc7701060"
+      size: 150
+    -
+      path: "generated/platform-components/helm/template-library/README.md"
+      sha256: "e1eb86f5c01f6ad32299efdab8864a59cf20c13da4c337a0fce7074c4c79dd91"
+      size: 2335
+    -
+      path: "generated/platform-components/helm/template-library/templates/_functions.tpl"
+      sha256: "12eddf31e066cb9415b944189fa479d2c90f6069ca78db03bc7931239cd5eb30"
+      size: 2386
+    -
+      path: "generated/platform-components/helm/template-library/templates/_k8s.namespace.tpl"
+      sha256: "5a155ae52799a6b3d3b6f7ca59bc4f8519e6dcc874bc752a04c98f069916fe5e"
+      size: 342
+    -
+      path: "generated/platform-components/helm/template-library/templates/_util.yaml"
+      sha256: "828a9df8aea5fcb469aa3cd1b52c00211a8e467725056a67843f8c4b144e8c99"
+      size: 499
+    -
+      path: "generated/platform-components/helm/template-library/templates/argocd/_argo.app.tpl"
+      sha256: "15c169e9da6e6f492037a227654278710189f5e457edd927fca83ae48edf4b93"
+      size: 2505
+    -
+      path: "generated/platform-components/helm/template-library/templates/argocd/_argo.appset.tpl"
+      sha256: "7b8635a7b7672738d7cd1d069eabec0c15e0b6492a6aa2581197358377648258"
+      size: 2925
+    -
+      path: "generated/platform-components/helm/template-library/templates/argocd/_argo.project.tpl"
+      sha256: "c6044ac184527abb6fa8a57025d342242acc41c89efbaa1dffc0d5c15e472170"
+      size: 1953
+    -
+      path: "generated/platform-components/helm/template-library/templates/cert-manager/_certManager.certificate.tpl"
+      sha256: "37e2a386bc73dbd9b914f156cc58465a6868c7c281e91c4b3d491444bcdfdb26"
+      size: 369
+    -
+      path: "generated/platform-components/helm/template-library/templates/cert-manager/_certManager.certificateRequest.tpl"
+      sha256: "fee1f490abec32b569c8091571fcb6991a3b7e58cce480800efb7ce0693d7749"
+      size: 397
+    -
+      path: "generated/platform-components/helm/template-library/templates/cert-manager/_certManager.clusterIssuer.tpl"
+      sha256: "0d0a32b48d87f404a45b485e8b8d9adf5051ef6875993565d29ebf907a7c340b"
+      size: 377
+    -
+      path: "generated/platform-components/helm/template-library/templates/cert-manager/_certManager.issuer.tpl"
+      sha256: "fde14ec776d4d2c261c5f370d81c0f2884520008187e7f119576f9f2f7ba6415"
+      size: 349
+    -
+      path: "generated/platform-components/helm/template-library/templates/external-secrets/_externalSecret.es.argo.cluster.tpl"
+      sha256: "333276367089854ef4b2c9769c981c418fc1ae187ac2e7895e778468e6bf31ec"
+      size: 2852
+    -
+      path: "generated/platform-components/helm/template-library/templates/external-secrets/_externalSecret.es.argo.repo.tpl"
+      sha256: "55f97d1cbc48cb8614aca9a660acde39d46c5bae368a71d65c01f7b01d2f0cbb"
+      size: 1465
+    -
+      path: "generated/platform-components/helm/template-library/templates/external-secrets/_externalSecrets.ces.dockerPullSecret.tpl"
+      sha256: "270cb4ce288f52123e0be82a0c37e1db93da26ba27226215f2bc3d98d6045cd6"
+      size: 1272
+    -
+      path: "generated/platform-components/helm/template-library/templates/external-secrets/_externalSecrets.clusterSecretStore.tpl"
+      sha256: "e44d2467d7224cf126049d5b8757160398ffedb8cdad29e22bc49247583a2cc8"
+      size: 386
+    -
+      path: "generated/platform-components/helm/template-library/templates/external-secrets/_externalSecrets.es.generic.tpl"
+      sha256: "ddfbd4bc67d82bbe2785074ba5552b285cbe1aa0273ea3d5853075d3cd8e8ed2"
+      size: 2025
+    -
+      path: "generated/platform-components/helm/template-library/templates/external-secrets/_externalSecrets.secretStore.tpl"
+      sha256: "56df71e6c2ea6da44c78773b2e192aced5361fe870b36c281dbfc74ce439c5ee"
+      size: 414
+    -
+      path: "generated/platform-components/helm/template-library/templates/kyverno/_kyverno.clusterPolicy.tpl"
+      sha256: "bf6c1cca43f7366f382b962e53f7b3d7184f93048e267bdde73666b816d2efec"
+      size: 360
+    -
+      path: "generated/platform-components/helm/template-library/templates/kyverno/_kyverno.policy.tpl"
+      sha256: "67eb4b04d593bb96579942596e923859686959c9667876d94b13071bd468d449"
+      size: 332
+    -
+      path: "generated/platform-components/helm/traefik/.helmignore"
+      sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+      size: 349
+    -
+      path: "generated/platform-components/helm/traefik/CHANGELOG.md"
+      sha256: "040482f0275cfd8270ace4a1758c4696fd3b7d512555727c6785f93c088d8bbb"
+      size: 1400
+    -
+      path: "generated/platform-components/helm/traefik/Chart.yaml"
+      sha256: "6185750b3a8673725c628836dfbe7d63c69717ece4c2536b5f59c0e82fcfc286"
+      size: 273
+    -
+      path: "generated/platform-components/helm/traefik/ci/ci-values.yaml"
+      sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+      size: 66
+    -
+      path: "generated/platform-components/helm/traefik/templates/namespace.yaml"
+      sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+      size: 49
+    -
+      path: "generated/platform-components/helm/traefik/values-ci.yaml"
+      sha256: "36026e30e5463558d1f1b28f81c859793c5f7cec320e56261bdbc17f251122eb"
+      size: 8
+    -
+      path: "generated/platform-components/helm/traefik/values.yaml"
+      sha256: "90b9d43ab3209637f5212e2a8509aede8bc16f696f2a5a8338af32619939a4d1"
+      size: 108
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/argo-cd/values-repository-paths.yaml"
+      sha256: "098ac6f8ea0c377c1140b387b2acf0e82eeb3e1d2c736f1df349d1430e8794f3"
+      size: 365
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/argo-cd/values.generated.yaml"
+      sha256: "723c3ec2a0a9a1236335972e485b4eff39086f9a221ca64f3e8acd3b5e9c2050"
+      size: 6632
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/cert-manager/values.generated.yaml"
+      sha256: "46efd6d7a83bbe40e56972fe34f6b473d2f4832593542c2b59125b447b73e219"
+      size: 641
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/external-secrets/values.generated.yaml"
+      sha256: "acbdb2cf5d38c0581cddd494cb1706877a737965c2f7bfb4e8ba943e1c86e680"
+      size: 655
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/homer-dashboard/values-project-links.yaml"
+      sha256: "9539796ad6952e0999448bb4c89b1cb7aeb982f5511d63498abdb00a170d8e7f"
+      size: 1023
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/homer-dashboard/values.generated.yaml"
+      sha256: "016a45b7e7a434a75c070e9ef8bd413606da9baeebd066cd02b4ed5801d6eba4"
+      size: 3995
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/kube-prometheus-stack/values.generated.yaml"
+      sha256: "727548f32d58baa6763b4a4372f34ea2eadf3d6e5d166480778b75cc92ef647a"
+      size: 6245
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/metrics-server/values-kind.yaml"
+      sha256: "ce8c2f62991eac0097f1d0bcb566f302ebc5cc06a034ac7afbc35c19d6d3b3c2"
+      size: 53
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/metrics-server/values.generated.yaml"
+      sha256: "100963627f4c0d01b9867d97788fd5aa55f5e5ff9bc5737da18cd15159ebb3b7"
+      size: 441
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/traefik/values-kind.yaml"
+      sha256: "f388358fd18f9f089e1a14323a996d80fdf57a638af66d49f8cd2ad825daca1e"
+      size: 359
+    -
+      path: "generated/platform-configs/hx-app-dev/helm/traefik/values.generated.yaml"
+      sha256: "4b1e48cfd767522ac8dd3859db083479f0e8b57954db6f24667ab3b924d105cc"
+      size: 583
+    -
+      path: "generated/platform-configs/hx-app-prod-a/helm/argo-cd/values.generated.yaml"
+      sha256: "9adc247da8c0b310549caa7af2851d5368b07da2de7579742482d5243f6a6ac2"
+      size: 212
+    -
+      path: "generated/platform-configs/hx-app-prod-a/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "generated/platform-configs/hx-app-prod-a/helm/cert-manager/values.generated.yaml"
+      sha256: "264300cb0e0e62337c8e803d074431b2b65fdb7b1f98d3578ae8c8570e45fc75"
+      size: 629
+    -
+      path: "generated/platform-configs/hx-app-prod-a/helm/traefik/values-kind.yaml"
+      sha256: "f97dbe7bfb19933af70bbc4a2a3d1e7834c684f283222ed56641f2152852a5d1"
+      size: 362
+    -
+      path: "generated/platform-configs/hx-app-prod-a/helm/traefik/values.generated.yaml"
+      sha256: "742779027860092aa8766a4060e32b20df83b5b774eabd63f99689336e621349"
+      size: 569
+    -
+      path: "generated/platform-configs/hx-app-prod-b/helm/argo-cd/values.generated.yaml"
+      sha256: "9adc247da8c0b310549caa7af2851d5368b07da2de7579742482d5243f6a6ac2"
+      size: 212
+    -
+      path: "generated/platform-configs/hx-app-prod-b/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "generated/platform-configs/hx-app-prod-b/helm/cert-manager/values.generated.yaml"
+      sha256: "f69a8d94d739e24512c2b97a64a6b58a0a63eaf50b68c82c03d10320916c37bd"
+      size: 629
+    -
+      path: "generated/platform-configs/hx-app-prod-b/helm/traefik/values-kind.yaml"
+      sha256: "ac839be62678128e7de1f8e3f3fab8bd1e3e15e42a1d33f2d74e89abcfdcb400"
+      size: 362
+    -
+      path: "generated/platform-configs/hx-app-prod-b/helm/traefik/values.generated.yaml"
+      sha256: "6ae8708d237a16756761cf6d50acd49db2dd7076132350f0f97470a047392238"
+      size: 569
+    -
+      path: "generated/platform-configs/hx-app-staging/helm/argo-cd/values.generated.yaml"
+      sha256: "9adc247da8c0b310549caa7af2851d5368b07da2de7579742482d5243f6a6ac2"
+      size: 212
+    -
+      path: "generated/platform-configs/hx-app-staging/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "generated/platform-configs/hx-app-staging/helm/cert-manager/values.generated.yaml"
+      sha256: "0f0f63ba1c33ee60bd95063d9d0b5958467099a2a6abb39063280f4c447ffbd1"
+      size: 637
+    -
+      path: "generated/platform-configs/hx-app-staging/helm/traefik/values-kind.yaml"
+      sha256: "2adc8f267183bf85a53bee677f14cef96decb10e908c5081a8833db00ebb66bb"
+      size: 363
+    -
+      path: "generated/platform-configs/hx-app-staging/helm/traefik/values.generated.yaml"
+      sha256: "454018ef772a98233a0e61653016fc89406d47ccf58a8368e4bcadc23c1c98b7"
+      size: 577
+    -
+      path: "generation-receipt.yaml"
+      sha256: "59cbc9102f3ad84beb5a6fd72a5d348dea1e2dbbbb57eff0bd1dfebf1c9deba9"
+      size: 53029
+    -
+      path: "preparation-request.yaml"
+      sha256: "64b6a4b1beb5b82e5671b1ae0b19fe68bcbcc29dd0b627167a6a3e43f598a15d"
+      size: 2380
+    -
+      path: "source-lock.yaml"
+      sha256: "2e5c0495235e8d0b66d08845cd34b6ec54a9807ad39f5ab77519541d065fd61b"
+      size: 1476
+    -
+      path: "source/config.yaml"
+      sha256: "7260fe438066413c1bc44b5f674e4441e3ae9873146e860d4188ef518abc1211"
+      size: 5862
+    -
+      path: "source/overrides/hx-app-dev/helm/argo-cd/values-repository-paths.yaml"
+      sha256: "098ac6f8ea0c377c1140b387b2acf0e82eeb3e1d2c736f1df349d1430e8794f3"
+      size: 365
+    -
+      path: "source/overrides/hx-app-dev/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "source/overrides/hx-app-dev/helm/homer-dashboard/values-project-links.yaml"
+      sha256: "9539796ad6952e0999448bb4c89b1cb7aeb982f5511d63498abdb00a170d8e7f"
+      size: 1023
+    -
+      path: "source/overrides/hx-app-dev/helm/metrics-server/values-kind.yaml"
+      sha256: "ce8c2f62991eac0097f1d0bcb566f302ebc5cc06a034ac7afbc35c19d6d3b3c2"
+      size: 53
+    -
+      path: "source/overrides/hx-app-dev/helm/traefik/values-kind.yaml"
+      sha256: "f388358fd18f9f089e1a14323a996d80fdf57a638af66d49f8cd2ad825daca1e"
+      size: 359
+    -
+      path: "source/overrides/hx-app-prod-a/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "source/overrides/hx-app-prod-a/helm/traefik/values-kind.yaml"
+      sha256: "f97dbe7bfb19933af70bbc4a2a3d1e7834c684f283222ed56641f2152852a5d1"
+      size: 362
+    -
+      path: "source/overrides/hx-app-prod-b/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "source/overrides/hx-app-prod-b/helm/traefik/values-kind.yaml"
+      sha256: "ac839be62678128e7de1f8e3f3fab8bd1e3e15e42a1d33f2d74e89abcfdcb400"
+      size: 362
+    -
+      path: "source/overrides/hx-app-staging/helm/cert-manager/values-kind.yaml"
+      sha256: "e87248ac287ea23f9cb841d41df675e6299e9e53db4725c0dfddc125ecc511e8"
+      size: 273
+    -
+      path: "source/overrides/hx-app-staging/helm/traefik/values-kind.yaml"
+      sha256: "2adc8f267183bf85a53bee677f14cef96decb10e908c5081a8833db00ebb66bb"
+      size: 363
+    -
+      path: "wiring/graph.json"
+      sha256: "d2ed15056dcd6079f7f48eccc0d4c5af60d68d799dda2fc1a60fb6cea82e3f51"
+      size: 1506550
+  payloadTreeSHA256: "dd14aef0be339632cd64e8d2a9a69da4f190e95f109395f5593db082674c760e"
+  notSelected:
+    - ".env"
+    - "apps"
+    - "target-facts"
+    - "Git commit/external-scan/destination facts"
+  refusedIfDetected:
+    - "credential-shaped material detected by the built-in structural scan"
+    - "absolute workstation paths"
+    - "symlinks"
+    - "pre-vendored chart content"
+  nextSteps:
+    - "commit and push the complete prepared output"
+    - "scan that exact commit and scope"
+    - "inspect the ConfigHub destination"
+    - "compile, verify, package, and apply twice"
+status:
+  result: "pass"
+  deterministic: true
+  pathNeutral: true
+  finalGitCommitBound: false
+  externalCredentialScanRequired: true

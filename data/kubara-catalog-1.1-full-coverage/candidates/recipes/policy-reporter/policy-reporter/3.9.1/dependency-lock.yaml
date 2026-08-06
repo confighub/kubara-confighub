@@ -1,0 +1,9 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "DependencyLock"
+metadata:
+  name: "policy-reporter-policy-reporter-3.9.1"
+spec:
+  chart: "policy-reporter/policy-reporter"
+  version: "3.9.1"
+  dependencies:
+    []

@@ -1,0 +1,39 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+spec:
+  checkedValues:
+    -
+      path: "tls.type"
+      variant: "default"
+      disposition: "chart-default-runtime-cert"
+      reason: "default chart uses metrics-server runtime-generated serving certificate, so Helm generated cert helpers are inactive"
+    -
+      path: "args"
+      variant: "external-tls-ca"
+      disposition: "kind-proof-target-fit"
+      reason: "keeps the strict APIService CA proof compatible with vanilla kind kubelet certificates; production targets should set their own kubelet TLS posture"
+    -
+      path: "tls.type"
+      variant: "external-tls-ca"
+      disposition: "target-secret-reference"
+      reason: "uses externally managed TLS Secret instead of Helm-generated certificate material"
+    -
+      path: "tls.existingSecret.name"
+      variant: "external-tls-ca"
+      disposition: "target-secret-reference"
+      reason: "records Secret name without storing secret material"
+    -
+      path: "tls.existingSecret.lookup"
+      variant: "external-tls-ca"
+      disposition: "disabled-lookup"
+      reason: "prevents cluster-sourced lookup from changing the rendered revision"
+    -
+      path: "apiService.caBundle"
+      variant: "external-tls-ca"
+      disposition: "explicit-ca-input"
+      reason: "binds APIService trust input into the rendered variant revision"
+  unknownValues: "not-checked"
+  deadValues: "not-checked"
+  ignoredValues: "not-checked"

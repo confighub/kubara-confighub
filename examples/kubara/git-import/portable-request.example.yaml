@@ -1,0 +1,29 @@
+apiVersion: import.confighub.com/v1alpha1
+kind: KubaraPortableGitRevision
+metadata:
+  name: acme-kubara-platform
+spec:
+  source:
+    repository: https://github.com/acme/platform.git
+    commit: "0000000000000000000000000000000000000000"
+    path: platform
+  layout:
+    source: source
+    config: source/config.yaml
+    components: generated/platform-components/helm
+    configs: generated/platform-configs
+    renders: effective-renders
+    artifactLock: component-artifacts.yaml
+    generationReceipt: generation-receipt.yaml
+    wiringGraph: wiring/graph.json
+  security:
+    credentialScan:
+      status: pass
+      scanner: gitleaks@8.24.3
+      reportSHA256: sha256:0000000000000000000000000000000000000000000000000000000000000000
+      sourceCommit: "0000000000000000000000000000000000000000"
+      scopePath: platform
+      opaqueFilesReviewed: true
+  publication:
+    # This is a package repository, not a ConfigHub Organization binding.
+    catalogOCIBase: oci://ghcr.io/acme/kubara-components

@@ -1,0 +1,151 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ScanReceipt"
+metadata:
+  name: "argo-cd-default-r001"
+spec:
+  variantRevision: "../variant-revision.yaml"
+  renderedObjectSetSHA256: "a2ba05a7684443115b1516e1b01a03ebe845cdfcf956722539ae0d3f5bff8780"
+  result: "warn"
+  scanner:
+    name: "helm-expt-local-rendered-object-scan"
+    version: "0.1.0"
+  policyBundleDigest: "66ce596103503d1d7de128e7be1e4701fee22d7ca00a814f33690ba05ef86fbb"
+  findingCounts:
+    critical: 0
+    high: 1
+    medium: 21
+    low: 0
+    info: 0
+  findings:
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-application-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-application-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-application-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-application-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-notifications-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-notifications-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-notifications-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-notifications-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-server"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-server"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-server"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRole||argo-cd-argocd-server"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-application-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-application-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-application-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-application-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-notifications-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-notifications-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-notifications-controller"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-notifications-controller"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-server"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-server"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "cluster-rbac-review:rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-server"
+      rule: "cluster-rbac-review"
+      severity: "medium"
+      object: "rbac.authorization.k8s.io/v1|ClusterRoleBinding||argo-cd-argocd-server"
+      message: "Cluster-scoped RBAC requires production review"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||applications.argoproj.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||applications.argoproj.io"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||applicationsets.argoproj.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||applicationsets.argoproj.io"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "crd-upgrade-policy:apiextensions.k8s.io/v1|CustomResourceDefinition||appprojects.argoproj.io"
+      rule: "crd-upgrade-policy"
+      severity: "medium"
+      object: "apiextensions.k8s.io/v1|CustomResourceDefinition||appprojects.argoproj.io"
+      message: "CRD readiness, ordering, schema validation, and upgrade compatibility require explicit policy"
+    -
+      id: "dependency-lock-review:redis-ha"
+      rule: "dependency-lock-review"
+      severity: "medium"
+      object: "dependency|redis-ha|4.34.11"
+      message: "Disabled redis-ha dependency is locked and should remain disabled unless selected by a variant"
+    -
+      id: "extension-slot-review:extraObjects"
+      rule: "extension-slot-review"
+      severity: "medium"
+      object: "values|extraObjects"
+      message: "extraObjects is a tpl-powered extension slot and must be scanned when populated"
+    -
+      id: "generated-secret-ownership:v1|Secret|argocd|argocd-notifications-secret"
+      rule: "generated-secret-ownership"
+      severity: "medium"
+      object: "v1|Secret|argocd|argocd-notifications-secret"
+      message: "Argo CD Secret content and ownership must be explicit before production promotion"
+    -
+      id: "generated-secret-ownership:v1|Secret|argocd|argocd-secret"
+      rule: "generated-secret-ownership"
+      severity: "medium"
+      object: "v1|Secret|argocd|argocd-secret"
+      message: "Argo CD Secret content and ownership must be explicit before production promotion"
+    -
+      id: "helm-hook-lifecycle-policy:source"
+      rule: "helm-hook-lifecycle-policy"
+      severity: "medium"
+      object: "source|helm-hooks"
+      message: "Chart source contains Helm hooks; rendered proof excludes hooks and production needs lifecycle policy"
+    -
+      id: "stateful-workload-review:apps/v1|StatefulSet|argocd|argo-cd-argocd-application-controller"
+      rule: "stateful-workload-review"
+      severity: "medium"
+      object: "apps/v1|StatefulSet|argocd|argo-cd-argocd-application-controller"
+      message: "Stateful workload requires storage, upgrade, and rollback policy"
+    -
+      id: "workload-service-account-exists:apps/v1|Deployment|argocd|argo-cd-argocd-redis"
+      rule: "workload-service-account-exists"
+      severity: "high"
+      object: "apps/v1|Deployment|argocd|argo-cd-argocd-redis"
+      message: "workload references missing ServiceAccount argocd/default"

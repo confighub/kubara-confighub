@@ -1,0 +1,23 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "Recipe"
+metadata:
+  name: "oauth2-proxy-oauth2-proxy"
+  version: "10.7.0"
+spec:
+  chartRef:
+    sourceLock: "source-lock.yaml"
+    dependencyLock: "dependency-lock.yaml"
+  importMode: "render-and-vendor"
+  currentExecutableFixture:
+    installerPackage: "../../../../packages/oauth2-proxy/oauth2-proxy/10.7.0"
+    setupCommand:
+      - "cub"
+      - "installer"
+      - "setup"
+      - "--pull"
+      - "../../../../packages/oauth2-proxy/oauth2-proxy/10.7.0"
+      - "--non-interactive"
+      - "--namespace"
+      - "oauth2-proxy"
+  variants:
+    - "variants/default/variant.yaml"

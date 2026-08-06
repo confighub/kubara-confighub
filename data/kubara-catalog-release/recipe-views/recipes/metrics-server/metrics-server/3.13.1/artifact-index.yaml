@@ -1,0 +1,223 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ChartArtifactIndex"
+metadata:
+  name: "metrics-server-metrics-server-3.13.1"
+  chart: "metrics-server/metrics-server"
+  version: "3.13.1"
+  generatedBy: "scripts/generate-chart-catalogs.mjs"
+spec:
+  doctrine: "1 Helm chart version -> 1 core recipe -> N variants -> M variant revisions -> package bases -> receipts"
+  chart:
+    ref: "metrics-server/metrics-server"
+    version: "3.13.1"
+    appVersion: "0.8.1"
+    sourceLock: "recipes/metrics-server/metrics-server/3.13.1/source-lock.yaml"
+    dependencyLock: "recipes/metrics-server/metrics-server/3.13.1/dependency-lock.yaml"
+    repository: "https://kubernetes-sigs.github.io/metrics-server/"
+    packageSHA256: "084e6edb680cf4e2acc30bd496568c53fdf663cbacf6e17876b25785c35b7a13"
+  recipe:
+    path: "recipes/metrics-server/metrics-server/3.13.1/recipe.yaml"
+    importMode: "render-and-vendor"
+    helmPlan: "recipes/metrics-server/metrics-server/3.13.1/helm-plan.yaml"
+    chartDossier: "recipes/metrics-server/metrics-server/3.13.1/chart-dossier.yaml"
+    controlPoints: "recipes/metrics-server/metrics-server/3.13.1/control-points.yaml"
+    valueModel: "recipes/metrics-server/metrics-server/3.13.1/value-model.yaml"
+    weirdnessAndMitigations: ""
+    helmPainReport: "data/kubara-catalog-release/recipe-views/recipes/metrics-server/metrics-server/3.13.1/helm-pain-report.yaml"
+    controlPointCategories:
+      - "apiservice"
+      - "capability-profile"
+      - "cluster-rbac"
+      - "dependency-lock"
+      - "generated-facts"
+      - "hook-policy"
+      - "installer-support-object"
+      - "lookup"
+      - "source-lock"
+      - "target-facts"
+  catalogStatus:
+    path: "data/kubara-catalog-release/recipe-views/recipes/metrics-server/metrics-server/3.13.1/catalog-status.yaml"
+    status: "catalog-candidate"
+    supportLevel: "promotion-review-needed"
+    supportedScopes:
+      []
+    productionReadiness: "not-reviewed-for-production"
+    supportedVariants:
+      []
+    candidateVariants:
+      - "default"
+      - "external-tls-ca"
+    deferredVariants:
+      []
+  proofSummary:
+    adoptionBucket: ""
+    userStatus: ""
+    strongestEvidence: ""
+    proofLanes:
+      renderParity: ""
+      inConfigHub: ""
+      localLive: ""
+      gitopsLive: ""
+      liveParity: ""
+    featureSummary: ""
+    hardGap: ""
+    nextAction: ""
+  installerPackage:
+    path: "packages/metrics-server/metrics-server/3.13.1"
+    ociRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metrics-server-metrics-server:3.13.1"
+    installer: "packages/metrics-server/metrics-server/3.13.1/installer.yaml"
+    receipt: "recipes/metrics-server/metrics-server/3.13.1/publication/installer-package-receipt.yaml"
+    deterministicBundleSHA256: "dd108bf532abd76b79693826321835e7c79cb7982b7ec4b9c1fd709446f6b43a"
+    deterministicAcrossTwoLocalBundles: true
+    bases:
+      -
+        name: "default"
+        path: "packages/metrics-server/metrics-server/3.13.1/bases/default"
+        default: true
+        description: "metrics-server default variant rendered from metrics-server/metrics-server@3.13.1"
+      -
+        name: "external-tls-ca"
+        path: "packages/metrics-server/metrics-server/3.13.1/bases/external-tls-ca"
+        default: false
+        description: "metrics-server external TLS with explicit CA variant rendered from metrics-server/metrics-server@3.13.1"
+  variants:
+    -
+      name: "default"
+      variant: "recipes/metrics-server/metrics-server/3.13.1/variants/default/variant.yaml"
+      namespace: "kube-system"
+      releaseName: "metrics-server"
+      valuesProfile: "recipes/metrics-server/metrics-server/3.13.1/effective-values.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        {}
+      targetFactSummary: "none"
+      packageBase:
+        name: "default"
+        path: "packages/metrics-server/metrics-server/3.13.1/bases/default"
+        default: true
+        description: "metrics-server default variant rendered from metrics-server/metrics-server@3.13.1"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metrics-server-metrics-server:3.13.1 --base default --work-dir <tmp> --non-interactive --namespace kube-system"
+        helmReleaseObjectCount: 9
+        cubInstallObjectCountIncludingSupport: 10
+        semanticObjectMatches: "9/9"
+        separatedSecretCount: 0
+        allowedCubOnlyObjects:
+          - "v1|Namespace||kube-system"
+      revisions:
+        -
+          name: "default-r001"
+          revision: "r001"
+          variantRevision: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/variant-revision.yaml"
+          digest: "ad5ef093f5d0d0579de82d628033c4f9b7c03c37eee7e29d4817f4d100a527c5"
+          renderedObjectSetSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+          renderedObjects: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/rendered/object-inventory.yaml"
+          objectCount: 9
+          helmObjectCount: 9
+          cubInstallObjectCountIncludingSupport: 10
+          semanticObjectMatches: "9/9"
+          separatedSecretFiles: 0
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/default/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "ba425a0f2a88f25a0052c54d3cbfe143f399f5ee13e53e1d926d84f82066e93d"
+    -
+      name: "external-tls-ca"
+      variant: "recipes/metrics-server/metrics-server/3.13.1/variants/external-tls-ca/variant.yaml"
+      namespace: "kube-system"
+      releaseName: "metrics-server"
+      valuesProfile: "recipes/metrics-server/metrics-server/3.13.1/effective-values-external-tls-ca.yaml"
+      capabilityProfile:
+        apiVersions:
+          []
+        kubeVersion: "1.30.0"
+      hookPolicy: "no-hooks"
+      targetFacts:
+        requiredSecrets:
+          -
+            keys:
+              - "tls.crt"
+              - "tls.key"
+            name: "metrics-server-tls"
+            namespace: "kube-system"
+            purpose: "metrics-server serving certificate"
+        requiredValues:
+          -
+            installerInput: "apiServiceCaBundle"
+            installerInputFormat: "base64-pem"
+            path: "apiService.caBundle"
+            purpose: "APIService CA bundle that validates kube-system/metrics-server-tls"
+            regularHelmFormat: "pem"
+            source: "metrics-server-tls-ca"
+            stage: "pre-render"
+      targetFactSummary: "required Secret kube-system/metrics-server-tls keys tls.crt,tls.key; required Value apiService.caBundle (pre-render)"
+      packageBase:
+        name: "external-tls-ca"
+        path: "packages/metrics-server/metrics-server/3.13.1/bases/external-tls-ca"
+        default: false
+        description: "metrics-server external TLS with explicit CA variant rendered from metrics-server/metrics-server@3.13.1"
+      setupCheck:
+        command: "cub installer setup --pull oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/metrics-server-metrics-server:3.13.1 --base external-tls-ca --work-dir <tmp> --non-interactive --namespace kube-system"
+        helmReleaseObjectCount: 9
+        cubInstallObjectCountIncludingSupport: 10
+        semanticObjectMatches: "9/9"
+        separatedSecretCount: 0
+        allowedCubOnlyObjects:
+          - "v1|Namespace||kube-system"
+      revisions:
+        -
+          name: "external-tls-ca-r001"
+          revision: "r001"
+          variantRevision: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/variant-revision.yaml"
+          digest: "cc3f8af059e9dc6738892daabfd1520260bba0188b2b726994a77b32146345a9"
+          renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+          renderedObjects: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/rendered/release-objects.yaml"
+          objectInventory: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/rendered/object-inventory.yaml"
+          objectCount: 9
+          helmObjectCount: 9
+          cubInstallObjectCountIncludingSupport: 10
+          semanticObjectMatches: "9/9"
+          separatedSecretFiles: 0
+          receipts:
+            render:
+              kind: "RenderReceipt"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/receipts/render-receipt.yaml"
+              result: "recorded"
+              renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+            helmEquivalence:
+              kind: "HelmEquivalenceReceipt"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/receipts/helm-equivalence-receipt.yaml"
+              result: "pass"
+              renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+            scan:
+              kind: "ScanReceipt"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/receipts/scan-receipt.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"
+            installGate:
+              kind: "InstallGate"
+              path: "recipes/metrics-server/metrics-server/3.13.1/revisions/external-tls-ca/r001/receipts/install-gate.yaml"
+              result: "warn"
+              renderedObjectSetSHA256: "212865947af7715d777769dc65712ce8713c725c8ab9e805f8db55d2e345f537"

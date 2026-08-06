@@ -1,0 +1,44 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "ValueModel"
+metadata:
+  name: "argo-cd-argo-cd-10.2.1"
+spec:
+  checkedValues:
+    -
+      path: "crds.install"
+      variant: "default"
+      disposition: "crds-included"
+      reason: "chart defaults render the three Argo CD CRDs"
+    -
+      path: "crds.install"
+      variant: "no-crds"
+      disposition: "crds-excluded"
+      reason: "omits CRDs from the rendered revision for clusters that manage CRDs separately"
+    -
+      path: "crds.*"
+      variant: "all"
+      disposition: "crd-selection-controls"
+      reason: "controls Argo CD CRD rendering and lifecycle policy"
+    -
+      path: "extraObjects"
+      variant: "all"
+      disposition: "empty-extension-slot"
+      reason: "chart exposes a tpl-powered extension slot; offline candidate variants keep it empty"
+    -
+      path: "redis-ha.enabled"
+      variant: "all"
+      disposition: "disabled-dependency"
+      reason: "chart declares and locks the redis-ha dependency, but offline candidate variants keep it disabled"
+    -
+      path: "redisSecretInit.enabled"
+      variant: "all"
+      disposition: "secret-initializer-enabled"
+      reason: "Argo CD renders argocd-secret and a Redis secret initializer path that must be treated as generated/operational state"
+    -
+      path: "configs.*"
+      variant: "all"
+      disposition: "config-extension-surface"
+      reason: "Argo CD configuration, repositories, credentials, and notifications are managed as explicit variant/config inputs"
+  unknownValues: "not-checked"
+  deadValues: "not-checked"
+  ignoredValues: "not-checked"

@@ -1,0 +1,55 @@
+apiVersion: "installer.confighub.com/v1alpha1"
+kind: "Package"
+metadata:
+  name: "metrics-server-metrics-server"
+  version: "3.13.1"
+spec:
+  bases:
+    -
+      name: "default"
+      path: "bases/default"
+      default: true
+      description: "metrics-server default variant rendered from metrics-server/metrics-server@3.13.1"
+    -
+      name: "external-tls-ca"
+      path: "bases/external-tls-ca"
+      description: "metrics-server external TLS with explicit CA variant rendered from metrics-server/metrics-server@3.13.1"
+      externalRequires:
+        -
+          kind: "ClusterFeature"
+          name: "Secret kube-system/metrics-server-tls keys tls.crt,tls.key"
+          namespace: "kube-system"
+          suggestedSource: "kubectl -n kube-system create secret generic metrics-server-tls --from-literal=tls.crt=<value> --from-literal=tls.key=<value>"
+  inputs:
+    -
+      name: "apiServiceCaBundle"
+      type: "string"
+      default: "Y29uZmlnaHViLW1ldHJpY3Mtc2VydmVyLWNh"
+      prompt: "Base64-encoded CA bundle for the Metrics Server APIService"
+      description: "Used by the external-tls-ca base. Must match the CA that issued kube-system/metrics-server-tls."
+  collector:
+    command: "/bin/sh"
+    args:
+      - "collector/target-facts.sh"
+    description: "Records target-fact bindings and can live-check cluster-visible Secret and CRD requirements."
+  transformers:
+    -
+      description: "Set the namespace on every namespaced resource."
+      invocations:
+        -
+          name: "set-namespace"
+          args:
+            - "{{ .Namespace }}"
+      toolchain: "Kubernetes/YAML"
+      whereResource: ""
+    -
+      description: "Bind the Metrics Server APIService caBundle from the installer input."
+      invocations:
+        -
+          name: "set-string-path"
+          args:
+            - "apiregistration.k8s.io/v1/APIService"
+            - "spec.caBundle"
+            - "{{ .Inputs.apiServiceCaBundle }}"
+      toolchain: "Kubernetes/YAML"
+      whereResource: "{{ if eq .Selection.Base \"external-tls-ca\" }}ConfigHub.ResourceType = 'apiregistration.k8s.io/v1/APIService'{{ else }}ConfigHub.ResourceType = 'helm-expt.invalid/v1/Never'{{ end }}"

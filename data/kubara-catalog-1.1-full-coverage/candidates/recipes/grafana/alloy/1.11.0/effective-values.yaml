@@ -1,0 +1,10 @@
+apiVersion: "helm-expt.confighub.com/v1alpha1"
+kind: "EffectiveValues"
+metadata:
+  name: "grafana-alloy-1.11.0-default"
+spec:
+  profile: "chart-defaults"
+  defaultValuesSHA256: "ef15cc9705e54b64304ab7d186596957f9eac3a11f975701401584481d3eff90"
+  mergedValuesCaptured: false
+  values:
+    {}
