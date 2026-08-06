@@ -2,7 +2,7 @@
 
 This repository shows how a [Kubara](https://github.com/kubara-io)-generated platform runs through [ConfigHub](https://confighub.com): the native config stays the input, every generated file is imported at an exact Git revision, and delivery becomes governed releases with receipts you can verify.
 
-Kubara keeps what it is good at. It selects components from its catalogs, wires a hub and spokes, and generates the platform files. ConfigHub adds what teams ask for next: component identity with retained versions, approvals before production, exact-digest releases, one-target rollback, drift repair, a fleet matrix, and queryable wiring. Argo CD remains the cluster reconciler on every target.
+Kubara keeps what it is good at ([this introduction](https://itnext.io/what-is-kubara-a-gitops-first-approach-to-reusable-kubernetes-platforms-3f91a060b39c) explains what Kubara is). It selects components from its catalogs, wires a hub and spokes, and generates the platform files. ConfigHub adds what teams ask for next: component identity with retained versions, approvals before production, exact-digest releases, one-target rollback, drift repair, a fleet matrix, and queryable wiring. Argo CD remains the cluster reconciler on every target.
 
 ## Why we did this
 
