@@ -57,7 +57,7 @@ Show:
 - links to the Catalog, matrix, wiring evidence, and both delivery lanes; and
 - the exact receipt status behind the tour.
 
-Buyer message: **this is the same Kubara platform, with its source and evidence
+Key takeaway: **this is the same Kubara platform, with its source and evidence
 made navigable.**
 
 Screenshot checkpoint: platform contract header, source identity, and
@@ -84,7 +84,7 @@ digest, Argo revision, sync/health, and workload readiness are proved
 separately in the platform matrix. A deliberately pinned instance can be
 Synced and Healthy while still showing that newer definition revisions exist.
 
-Buyer message: **Kubara still chooses and wires a platform package; ConfigHub
+Key takeaway: **Kubara still chooses and wires a platform package; ConfigHub
 makes each reusable component and every retained version independently
 governable.**
 
@@ -110,7 +110,7 @@ Show:
   `ARGO_SYNC_MODE=kubernetes`, `ARGO_NAMESPACE=argocd`, and
   `ARGO_REFRESH_TYPE=hard`.
 
-Buyer message: **ConfigHub adds a simpler operating lane without declaring the
+Key takeaway: **ConfigHub adds a simpler operating lane without declaring the
 Kubara topology wrong or removing the faithful option. Argo remains local, but
 a mutable `latest` pointer cannot bypass ConfigHub governance.**
 
@@ -140,7 +140,7 @@ Show:
   revalidation, no active operation, and Kubernetes UID/resourceVersion
   compare-and-set.
 
-Buyer message: **the platform definition and the application release are
+Key takeaway: **the platform definition and the application release are
 separate, but their target placement and history are visible together; the
 approved digest, not mutable `latest`, is what Argo reconciles.**
 
@@ -163,7 +163,7 @@ Show relationships such as:
 
 Then link to the complete generated wiring evidence for engineering review.
 
-Buyer message: **relationships that were implicit in folders and generated
+Key takeaway: **relationships that were implicit in folders and generated
 YAML can become queryable platform facts.**
 
 Screenshot checkpoint: a small, legible set of native Links with both ends
@@ -191,7 +191,7 @@ A disabled selection is `NotApplicable`. A desired cell without an accepted
 source-current observation is `Unknown`; the matrix must never turn desired
 state into inferred runtime health.
 
-Buyer message: **Kubara's platform matrix becomes current data, and the demo
+Key takeaway: **Kubara's platform matrix becomes current data, and the demo
 organization's governed inventory is proved clean rather than merely looking
 tidy. The receipt does not claim a complete inventory of every Kubernetes
 resource type.**
