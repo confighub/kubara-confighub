@@ -4,6 +4,21 @@ This repository shows how a [Kubara](https://github.com/kubara-io)-generated pla
 
 Kubara keeps what it is good at. It selects components from its catalogs, wires a hub and spokes, and generates the platform files. ConfigHub adds what teams ask for next: component identity with retained versions, approvals before production, exact-digest releases, one-target rollback, drift repair, a fleet matrix, and queryable wiring. Argo CD remains the cluster reconciler on every target.
 
+## Why we did this
+
+Teams who adopt Kubara like what it generates and then meet the same operational questions every platform meets. Which exact version of each component runs on which cluster? Who approved this before it reached production? Can we roll one production cluster back without touching its twin? Did anything drift, and is anything left behind that nobody owns? Folder trees and mutable tags answer none of these well.
+
+Running the Kubara platform through ConfigHub answers them without changing what Kubara produces:
+
+- Every component and application shows its exact observed version on every cluster, in one 36-cell matrix.
+- Production changes pass an approval gate bound to the exact revision, not to whatever the tag points at today.
+- Releases are immutable digests; promotion moves the reviewed revision, and rollback restores one target while its peer keeps the newer release.
+- Drift gets detected and repaired as an attributed action, and a scoped audit proves zero unowned residue.
+- The wiring between apps and platform services becomes queryable data instead of folder convention.
+- The cost of reconciliation is measured and disclosed, not asserted.
+
+The detailed case — what stays Kubara, what becomes better, and how to verify each claim — is in [the Kubara with ConfigHub overview](docs/demo/kubara/index.md).
+
 ## See the result first
 
 One application, four clusters, every placement healthy at its exact retained release. Production B stays on the older release because production A was rolled back one target at a time:
