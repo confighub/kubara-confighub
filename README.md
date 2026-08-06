@@ -41,6 +41,10 @@ These details are cut from one receipt-bound frame, [the full matrix page](docs/
 
 ## How applications work
 
+Here is the second example application, Cubbychat, as ConfigHub sees it: one base definition fanning out to all four clusters, every placement Healthy and Synced at the same retained release, with upstream-newer signals kept visible instead of hidden:
+
+![The cubbychat application deployed from one base to all four clusters](docs/images/kubara/details/cubbychat-four-clusters.png)
+
 Your application code does not move into ConfigHub; its delivery does. The reviewed application source lives in a base Space (`hx-web-base` keeps one Unit per Kubernetes resource; `hx-cubbychat-base` keeps one Unit for the whole app), and a variant Space per cluster binds that source to the cluster's target. Upgrade links connect each variant back to its base, and NeedsProvides links declare what the app needs from the platform — its Ingress needs the traefik ingress class, its Certificate needs cert-manager — so the wiring that was implicit in folders becomes queryable facts:
 
 ![The hx-cubbychat development Unit's native links to traefik and cert-manager](docs/images/kubara/05-native-links.png)
