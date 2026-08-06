@@ -43,6 +43,10 @@ npm run kubara-wiring:verify
 
 A screenshot never replaces a machine checkpoint. Missing or stale evidence stays visible instead of becoming a marketing claim.
 
+## Boundary with helm-expt
+
+The Helm chart and config catalog stayed in [confighub/helm-expt](https://github.com/confighub/helm-expt); this repository carries only the Kubara work. Deep links inside the generated catalog evidence views under `data/kubara-catalog-release/recipe-views/` still point at catalog paths in that repository, and the vendored Kubara catalog snapshots keep their upstream-relative links byte-identical by contract. Every reader-facing page in `docs/` and `examples/` resolves inside this repository.
+
 ## Provenance
 
 This project moved here from [confighub/helm-expt](https://github.com/confighub/helm-expt) at commit `6b4bc9d6b`, where its full development history remains public. Relative paths were preserved, so every receipt's path-and-digest binding verifies unchanged. The release-acceptance gates that referenced the helm-expt generated site are included but not yet re-targeted to this repository's pages.
