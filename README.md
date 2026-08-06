@@ -63,9 +63,11 @@ Every step has a deterministic self-test that runs against fake Git, OCI, and Co
 npm run kubara-adoption:self-test
 ```
 
-## Evidence discipline
+## Why you can trust these pages
 
-Every screenshot, matrix cell, and measured number in these pages binds to a committed receipt by SHA-256. Receipts live in [runs/](runs/) and [data/](data/), and the offline verifiers prove them:
+Demo pages for config tools are easy to fake: a screenshot of a healthy dashboard proves nothing about the system that produced it. Adopting a delivery platform on that kind of evidence is how teams end up surprised in production.
+
+These pages work differently. Every screenshot, matrix cell, and measured number binds to a committed receipt by SHA-256, the receipts record the exact Git commit and organization they came from, and you can check the whole chain yourself in seconds, offline:
 
 ```sh
 npm run kubara-mini-idp:receipt-verify
@@ -75,12 +77,14 @@ npm run kubara-platform-matrix:verify
 npm run kubara-wiring:verify
 ```
 
-A screenshot never replaces a machine checkpoint. Missing or stale evidence stays visible instead of becoming a marketing claim.
+When evidence is missing or stale, the pages say so instead of showing you a green badge. A screenshot never replaces a machine checkpoint.
 
-## Boundary with helm-expt
+## Where your Helm charts come from
 
-The Helm chart and config catalog stayed in [confighub/helm-expt](https://github.com/confighub/helm-expt); this repository carries only the Kubara work. Deep links inside the generated catalog evidence views under `data/kubara-catalog-release/recipe-views/` still point at catalog paths in that repository, and the vendored Kubara catalog snapshots keep their upstream-relative links byte-identical by contract. Every reader-facing page in `docs/` and `examples/` resolves inside this repository.
+If you build your own platform, your charts keep coming from Kubara's own catalogs, exactly as they do today. Your `config.yaml` names them (`oci://ghcr.io/kubara-io/catalogs/bootstrap`, `oci://ghcr.io/kubara-io/catalogs/general`), Kubara resolves components from them, and ConfigHub imports what Kubara generated. Nothing in this repository substitutes chart sources or sits between you and the Kubara catalogs.
 
-## Provenance
+Separately, our test lab [confighub/helm-expt](https://github.com/confighub/helm-expt) maintains its own Helm chart catalog that we used to cross-check Kubara's rendered output byte for byte. That catalog stayed in helm-expt. A few deep generated evidence views under `data/kubara-catalog-release/recipe-views/` still link into it; no tutorial step depends on them.
 
-This project moved here from [confighub/helm-expt](https://github.com/confighub/helm-expt) at commit `6b4bc9d6b`, where its full development history remains public. Relative paths were preserved, so every receipt's path-and-digest binding verifies unchanged. The release-acceptance gates that referenced the helm-expt generated site are included but not yet re-targeted to this repository's pages.
+## History
+
+This project moved here from [confighub/helm-expt](https://github.com/confighub/helm-expt) at commit `6b4bc9d6b`, where its full development history remains public. Paths were preserved, so every receipt verifies unchanged.
