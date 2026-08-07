@@ -1,0 +1,134 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "CertifiedBundleReceipt"
+metadata:
+  name: "kubara-current-platform-kube-prometheus-stack"
+spec:
+  producer:
+    name: "kubara"
+    repository: "https://github.com/confighub/kubara-confighub"
+  source:
+    kind: "kubara-component"
+    charts:
+      -
+        repository: "helm:prometheus-community/kube-prometheus-stack"
+        name: "kube-prometheus-stack"
+        version: "87.19.2"
+        packageSHA256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+        exactArtifactUrl: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.19.2/kube-prometheus-stack-87.19.2.tgz"
+      -
+        repository: "helm:prometheus-community/prometheus-blackbox-exporter"
+        name: "prometheus-blackbox-exporter"
+        version: "11.15.1"
+        packageSHA256: "4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e"
+        exactArtifactUrl: "https://github.com/prometheus-community/helm-charts/releases/download/prometheus-blackbox-exporter-11.15.1/prometheus-blackbox-exporter-11.15.1.tgz"
+    evidence:
+      - "examples/kubara/current-platform/component-artifacts.yaml"
+      - "examples/kubara/current-platform/generation-receipt.yaml"
+  bundle:
+    contentsKind: "component-definition"
+    files:
+      -
+        path: ".helmignore"
+        sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+        bytes: 349
+      -
+        path: "CHANGELOG.md"
+        sha256: "0729b7599fc864d5bb1ef13660c3ca39187054c509bb9cd3f925467254a311ed"
+        bytes: 6123
+      -
+        path: "Chart.yaml"
+        sha256: "05e6786761e94e91403e69f47a3a0210d44bd330fb6b2dbe90ddbef32707409e"
+        bytes: 484
+      -
+        path: "ci/ci-values.yaml"
+        sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+        bytes: 66
+      -
+        path: "templates/external-secrets.yaml"
+        sha256: "6023826ff560d29bbe31bf3eed7016e60ec3d8bc6b36646d0ac0fa3441d12efa"
+        bytes: 62
+      -
+        path: "templates/namespace.yaml"
+        sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+        bytes: 49
+      -
+        path: "templates/secret-store.yaml"
+        sha256: "9758b0d976bb0e9ac993aa7f749d35a2b6c8c31b33d7bbdb53cf28495d671d38"
+        bytes: 64
+      -
+        path: "values.yaml"
+        sha256: "f1c89488d599b7b9b5646e50021729e9c4de89bf615ce0fa4eda75b06e3835cd"
+        bytes: 5572
+    compositionIndexRef: "examples/kubara/current-platform/component-artifacts.yaml"
+  ingest:
+    granularity: "per-file"
+    spacePattern: "{{.Labels.Component}}-{{.Labels.Variant}}"
+    externalSourceAnnotation: "confighub.com/external-source"
+  dispositions:
+    -
+      class: "helm-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "resource-policy-keep"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "lookup"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "webhook-ca"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "capabilities-api-versions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "generated-secrets"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "crd-ordering"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "immutable-fields"
+      finding: "not-evaluated"
+      detail: "a cross-version property; no second version is compared in this receipt"
+      disposition: "versioned replacement route when an upgrade pair is audited"
+    -
+      class: "namespace-creation"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "subchart-conditions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "test-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+  verdict:
+    lane: "do-not-flatten"
+    status: "certified"
+    decidedBy: "the flattening-safety audit in confighub/helm-expt at recipes/prometheus-community/kube-prometheus-stack/87.19.2/publication/flattening-safety-verdict.yaml (exact version match: helm:prometheus-community/kube-prometheus-stack 87.19.2)"
+    openQuestions:
+      - "the component also wraps prometheus-blackbox-exporter 11.15.1, which has no flattening-safety verdict yet"
+    notes: "The lane is the wrapped chart's, scoped to the audited base named in the cited verdict; the wrapper's own values were not rendered here."
+  provenance:
+    emittedBy: "scripts/generate-certified-bundle-receipts.mjs"
+    generatedFrom:
+      - "examples/kubara/current-platform/generated/platform-components/helm/kube-prometheus-stack"
+      - "examples/kubara/current-platform/component-artifacts.yaml"

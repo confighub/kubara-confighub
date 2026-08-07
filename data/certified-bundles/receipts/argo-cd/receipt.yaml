@@ -1,0 +1,168 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "CertifiedBundleReceipt"
+metadata:
+  name: "kubara-current-platform-argo-cd"
+spec:
+  producer:
+    name: "kubara"
+    repository: "https://github.com/confighub/kubara-confighub"
+  source:
+    kind: "kubara-component"
+    charts:
+      -
+        repository: "helm:argo-cd/argo-cd"
+        name: "argo-cd"
+        version: "10.2.1"
+        packageSHA256: "27e930e366d22c999002008ad5ec7961bda00410a84287210d0fffbee8150885"
+        exactArtifactUrl: "https://github.com/argoproj/argo-helm/releases/download/argo-cd-10.2.1/argo-cd-10.2.1.tgz"
+    evidence:
+      - "examples/kubara/current-platform/component-artifacts.yaml"
+      - "examples/kubara/current-platform/generation-receipt.yaml"
+  bundle:
+    contentsKind: "component-definition"
+    files:
+      -
+        path: ".helmignore"
+        sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+        bytes: 349
+      -
+        path: "CHANGELOG.md"
+        sha256: "e63ddb149ab4444d5d1e1c67b8930cae8e850569d427a9078a4c664048013d3e"
+        bytes: 3463
+      -
+        path: "Chart.yaml"
+        sha256: "f02c07d0ced9f3cd599e87d47e78af693fad4152f633402fee170b86bf6aec29"
+        bytes: 353
+      -
+        path: "ci/ci-values.yaml"
+        sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+        bytes: 66
+      -
+        path: "script/restart-dex.tmpl"
+        sha256: "d9d3833ec79b8f678d1708ad37a341f677ed32b37b4b495e4c681e6078178cf2"
+        bytes: 1118
+      -
+        path: "templates/applications.yaml"
+        sha256: "0690c0f393b0e7d8ca3182adbed511d671557b5b77a00eefbccd20ab65401684"
+        bytes: 162
+      -
+        path: "templates/appsets.yaml"
+        sha256: "ca92019250467e988c301f30e87799e6b6dbc93fb86ad8bbeba4c52e385331c4"
+        bytes: 174
+      -
+        path: "templates/cluster.yaml"
+        sha256: "a560ff9368b4be2c2f0de0d601e798b11221ca05fbcb19e1c4dd73fce18df165"
+        bytes: 141
+      -
+        path: "templates/default_project.yaml"
+        sha256: "0bcca71306842e1e6a07ab5026b56caff9b04127847de2eea73f08648708c652"
+        bytes: 70
+      -
+        path: "templates/extSecrets.dockerPull.tpl"
+        sha256: "106a1499215cec0abc9fb9a0b3fd4b7ce20d0ff8f4ecd325830d2a1e98c517c1"
+        bytes: 163
+      -
+        path: "templates/external-secrets.yaml"
+        sha256: "6023826ff560d29bbe31bf3eed7016e60ec3d8bc6b36646d0ac0fa3441d12efa"
+        bytes: 62
+      -
+        path: "templates/inCluster.secret.yaml"
+        sha256: "ae1880d2927e10656c693f4955619cf5de57214b48eb44ba4bee299e1e081326"
+        bytes: 587
+      -
+        path: "templates/namespace.yaml"
+        sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+        bytes: 49
+      -
+        path: "templates/post-deploy-restart-job.yaml"
+        sha256: "cf4ae984ecbb7decaa9f5bebd2d35e407ade9024b9c26372448c438a76fd0fec"
+        bytes: 1676
+      -
+        path: "templates/projects.yaml"
+        sha256: "9966974a203004a828f5aeeed776fa90a4dba1b17a60c6402523d7523c80f855"
+        bytes: 133
+      -
+        path: "templates/repository.yaml"
+        sha256: "8755159aefb0167b1ef62e4299ba38dc8010f4f3052c0ccca264347b6e8aa817"
+        bytes: 151
+      -
+        path: "templates/secret-store.yaml"
+        sha256: "9758b0d976bb0e9ac993aa7f749d35a2b6c8c31b33d7bbdb53cf28495d671d38"
+        bytes: 64
+      -
+        path: "values.yaml"
+        sha256: "c025c84d8a7a85bdc65f7bb1f258384f98ab824f2ee061b34de7f5419ad1b231"
+        bytes: 4638
+    compositionIndexRef: "examples/kubara/current-platform/component-artifacts.yaml"
+  ingest:
+    granularity: "per-file"
+    spacePattern: "{{.Labels.Component}}-{{.Labels.Variant}}"
+    externalSourceAnnotation: "confighub.com/external-source"
+  dispositions:
+    -
+      class: "helm-hooks"
+      finding: "present"
+      detail: "1 component file(s) carry helm.sh/hook"
+      disposition: "lifecycle route executed by the delivery runtime"
+      evidence: "templates/post-deploy-restart-job.yaml"
+    -
+      class: "resource-policy-keep"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "lookup"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "webhook-ca"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "capabilities-api-versions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "generated-secrets"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "crd-ordering"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "immutable-fields"
+      finding: "not-evaluated"
+      detail: "a cross-version property; no second version is compared in this receipt"
+      disposition: "versioned replacement route when an upgrade pair is audited"
+    -
+      class: "namespace-creation"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "subchart-conditions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "test-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+  verdict:
+    lane: "do-not-flatten"
+    status: "provisional"
+    decidedBy: "argo-cd 10.2.1 has no flattening-safety verdict yet; the chart family carries hooks and generated values, so the conservative lane holds until the audit decides"
+    openQuestions:
+      - "argo-cd 10.2.1 needs its flattening-safety verdict"
+  provenance:
+    emittedBy: "scripts/generate-certified-bundle-receipts.mjs"
+    generatedFrom:
+      - "examples/kubara/current-platform/generated/platform-components/helm/argo-cd"
+      - "examples/kubara/current-platform/component-artifacts.yaml"

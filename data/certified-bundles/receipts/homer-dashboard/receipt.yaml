@@ -1,0 +1,192 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "CertifiedBundleReceipt"
+metadata:
+  name: "kubara-current-platform-homer-dashboard"
+spec:
+  producer:
+    name: "kubara"
+    repository: "https://github.com/confighub/kubara-confighub"
+  source:
+    kind: "kubara-component"
+    evidence:
+      - "examples/kubara/current-platform/component-artifacts.yaml"
+      - "examples/kubara/current-platform/generation-receipt.yaml"
+  bundle:
+    contentsKind: "component-definition"
+    files:
+      -
+        path: ".helmignore"
+        sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+        bytes: 349
+      -
+        path: "CHANGELOG.md"
+        sha256: "c736c7069b460f2be1766d0feb62b78278c95aeda740ca7dab54a1f097240f53"
+        bytes: 695
+      -
+        path: "Chart.yaml"
+        sha256: "fadd817515d7951a94c5bb025de8448395a7ef0aadc5673fba671ae0e69ad20b"
+        bytes: 206
+      -
+        path: "assets/icons/favicon.ico"
+        sha256: "8f562d42f87c3efec96e6ba5973a54f2d0c2821e30a79ada61bdd4c6e400906c"
+        bytes: 15086
+      -
+        path: "assets/icons/kubara_icon.png"
+        sha256: "21699b4c348abc90db792b6038561518f078e0d85f3a5f58f3dd18938c1924b5"
+        bytes: 99715
+      -
+        path: "assets/tools/alertmanager.png"
+        sha256: "bc218d1dc6e3671bd8b419baf7a34ce71b266a89d45603b8d5b8d69ff23f691f"
+        bytes: 22396
+      -
+        path: "assets/tools/argocd.png"
+        sha256: "3a1bbf2c87326622a56eca68a6b050fd323975c45a8489fdf681fc085b5a34bf"
+        bytes: 9900
+      -
+        path: "assets/tools/grafana.png"
+        sha256: "5bb3c15d464299b6db6d9a9b7f7f7ab948ee0952f805c0e96430d25f1e11fc06"
+        bytes: 6267
+      -
+        path: "assets/tools/kyverno.png"
+        sha256: "7fea83ba8ceb08697820e8e79c9954044d9d51b5aa3b25c5a41e71574af8306b"
+        bytes: 15000
+      -
+        path: "assets/tools/longhorn.png"
+        sha256: "58a499067d17bd12398003697577d3d40591d58a8f3710d5e5bf015e718ac7a3"
+        bytes: 18594
+      -
+        path: "assets/tools/nginx.png"
+        sha256: "d93320e063d73ca06bb2d743b05326772e9f3121d0e45631ce28af7b312918c8"
+        bytes: 6891
+      -
+        path: "assets/tools/openbao.png"
+        sha256: "5f224b4338ad8be60727b4a9af6262e875a4c53d815f9e28cd6e982f653ce617"
+        bytes: 9392
+      -
+        path: "assets/tools/prometheus.png"
+        sha256: "805f392051052534afa93ada2583f92c6ab3b0d1709444991bf1c56c405405fe"
+        bytes: 7652
+      -
+        path: "assets/tools/secretsmanager.png"
+        sha256: "e767c434eebe8e925c9c89f6a5dde30647fab21d76570fcaca75f4aa549cfa5b"
+        bytes: 17035
+      -
+        path: "assets/tools/traefik.png"
+        sha256: "a0d89ddabe27fe3b62ee770cfc2f9ad25aee3a2c49fd3a73eeba125e4b316eaa"
+        bytes: 32801
+      -
+        path: "ci/ci-values.yaml"
+        sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+        bytes: 66
+      -
+        path: "templates/configmaps/assets-icons-configmap.yaml"
+        sha256: "00fef8a1307acfd515afd104108a7942e6d38ebb970fdf0504c56bc49fa22488"
+        bytes: 255
+      -
+        path: "templates/configmaps/assets-tools-configmap.yaml"
+        sha256: "37cd46de96ad9c50348f42d90ffd9f606b8cbd2661729d9efe710c7752454a35"
+        bytes: 255
+      -
+        path: "templates/configmaps/dashboard-configmap.yaml"
+        sha256: "51ba5a5a8576fba8f42fc1de4b974e68ef15e902de12ebbb03d3de8134e5e8f7"
+        bytes: 196
+      -
+        path: "templates/configmaps/lighttpdconfig-configmap.yaml"
+        sha256: "3e83ac48292fd372f2e12becde3813fe5450dc7b285304c8a5cbf85cd259fa6c"
+        bytes: 714
+      -
+        path: "templates/deployment.yaml"
+        sha256: "763a47eb66986af88e794a4a7a69a6396448a1a2fac407aeeac43e8c8060eb41"
+        bytes: 3868
+      -
+        path: "templates/ingress.yaml"
+        sha256: "29c3966dbe4a640d4ba8cd12bb7dbd1c1efc54e9f09f64a15a200b72e6a60874"
+        bytes: 767
+      -
+        path: "templates/monitoring/servicemonitor.yaml"
+        sha256: "ed9aecbc1317377617ca0f08eade9f7ab3b6b99bba520a493a9838b0d7ba73f7"
+        bytes: 790
+      -
+        path: "templates/namespace.yaml"
+        sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+        bytes: 49
+      -
+        path: "templates/service.yaml"
+        sha256: "40cc633d8988fc7d5675e86c4b284f6391cfc309a72ec5c5915e39d47a9eb231"
+        bytes: 333
+      -
+        path: "values.yaml"
+        sha256: "df008f54959d003496f6b55dad6204c54d15fc00d68940a80f9b59e592abf14c"
+        bytes: 595
+    compositionIndexRef: "examples/kubara/current-platform/component-artifacts.yaml"
+  ingest:
+    granularity: "per-file"
+    spacePattern: "{{.Labels.Component}}-{{.Labels.Variant}}"
+    externalSourceAnnotation: "confighub.com/external-source"
+  dispositions:
+    -
+      class: "helm-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "resource-policy-keep"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "lookup"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "webhook-ca"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "capabilities-api-versions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "generated-secrets"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "crd-ordering"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "immutable-fields"
+      finding: "not-evaluated"
+      detail: "a cross-version property; no second version is compared in this receipt"
+      disposition: "versioned replacement route when an upgrade pair is audited"
+    -
+      class: "namespace-creation"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "subchart-conditions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "test-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+  verdict:
+    lane: "safe-to-flatten"
+    status: "provisional"
+    decidedBy: "a first-party chart with no audited upstream; the static scan below finds no construct render time discards"
+    openQuestions:
+      - "first-party charts get verdicts when the audit lane covers them"
+  provenance:
+    emittedBy: "scripts/generate-certified-bundle-receipts.mjs"
+    generatedFrom:
+      - "examples/kubara/current-platform/generated/platform-components/helm/homer-dashboard"
+      - "examples/kubara/current-platform/component-artifacts.yaml"

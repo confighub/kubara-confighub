@@ -27,3 +27,5 @@ jobs:
         run: npm run kubara-wiring:verify
       - name: Faithful hub-spoke proof
         run: npm run kubara-faithful-hub-spoke:verify
+      - name: Certified bundle receipts
+        run: npm run certified-bundles:verify

@@ -142,7 +142,10 @@ npm run kubara-mini-idp:performance:receipt-verify
 npm run kubara-mini-idp:orphan-audit:receipt-verify
 npm run kubara-platform-matrix:verify
 npm run kubara-wiring:verify
+npm run certified-bundles:verify
 ```
+
+Every platform component also carries a certified bundle receipt under `data/certified-bundles/`: a per-file fingerprint of the component definition, the digest index it belongs to, and a flattening-safety lane. Where a wrapped chart version exactly matches an audited verdict in [confighub/helm-expt](https://github.com/confighub/helm-expt), the lane is certified by citation; everywhere else the receipt says plainly that it is provisional and why. The receipt spec's canonical home is that repository; the schema here is a byte-faithful copy so these receipts verify standalone.
 
 When evidence is missing or stale, the pages say so themselves instead of showing a green badge. A screenshot never replaces a machine checkpoint.
 

@@ -9,6 +9,8 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "certified-bundles": "node scripts/generate-certified-bundle-receipts.mjs --generate",
+    "certified-bundles:verify": "node scripts/generate-certified-bundle-receipts.mjs --verify",
     "kubara-example:generate": "node scripts/generate-kubara-example.mjs --generate",
     "kubara-example:verify": "node scripts/generate-kubara-example.mjs --verify",
     "kubara-example:live-record": "node scripts/generate-kubara-example.mjs --live-record",
