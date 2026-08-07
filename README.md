@@ -79,10 +79,11 @@ The command sequence, end to end:
 
 ```bash
 # 1. Rehearse everything against built-in fake surfaces. Node.js only,
-#    nothing external touched, about a minute.
+#    nothing external touched. About two minutes.
 npm run kubara-adoption:self-test
 
 # 2. Check the committed evidence chain you are about to rely on.
+#    A few seconds each.
 npm run kubara-mini-idp:receipt-verify
 npm run kubara-platform-matrix:verify
 
@@ -92,16 +93,20 @@ cp examples/kubara/git-import/portable-request.example.yaml my-request.yaml
 
 # 4. Compile your exact revision into per-component OCI packages plus the
 #    digest-bound platform index. Offline; the output is inspectable files.
+#    A few minutes for a full platform.
 node scripts/import-kubara-git-revision.mjs --request my-request.yaml
 
 # 5. First live contact. Log into YOUR organization, then compile the
-#    resumable import contract. The compiler executes nothing; organization
+#    resumable import contract. The compile itself takes seconds. The compiler executes nothing; organization
 #    and cluster bootstrap remain explicit steps in the journal it emits.
 cub auth login
 node scripts/compile-kubara-selected-org-workflow.mjs --request my-workflow.yaml
 
 # 6. Execute the journal's ordered commands. Interruptions are safe: the
 #    journal is prefix-resumable, and a rerun replays only what is proven.
+#    Budget tens of minutes end to end: cluster bootstrap runs a few minutes
+#    per cluster, and Argo convergence dominates the rest. Our reference
+#    no-op reconciliation measures about 77 seconds once converged.
 ```
 
 Each step matches a tutorial chapter below; steps 1 to 4 are fully offline, step 5 is your first live contact, and step 6 hands off applications:
