@@ -75,7 +75,36 @@ This rehearses the whole journey on your machine: reading the Kubara config, com
 
 When you are ready to build for real, you need [Kubara](https://github.com/kubara-io) if you want to generate your own platform rather than reuse the committed example, the [cub CLI](https://docs.confighub.com) logged into your own ConfigHub organization, and clusters (kind works; the reference fleet is kind). Your platform code lives wherever your Git lives: fork this repository, or start a fresh one and copy [examples/kubara/git-import/](examples/kubara/git-import/) as your request templates.
 
-Then work through the six steps in order. Steps 1 to 4 are fully offline; step 5 is your first live contact, and step 6 hands off applications:
+The command sequence, end to end:
+
+```bash
+# 1. Rehearse everything against built-in fake surfaces. Node.js only,
+#    nothing external touched, about a minute.
+npm run kubara-adoption:self-test
+
+# 2. Check the committed evidence chain you are about to rely on.
+npm run kubara-mini-idp:receipt-verify
+npm run kubara-platform-matrix:verify
+
+# 3. Point the tooling at your platform: copy the request templates and
+#    fill in your Git repository and revision.
+cp examples/kubara/git-import/portable-request.example.yaml my-request.yaml
+
+# 4. Compile your exact revision into per-component OCI packages plus the
+#    digest-bound platform index. Offline; the output is inspectable files.
+node scripts/import-kubara-git-revision.mjs --request my-request.yaml
+
+# 5. First live contact. Log into YOUR organization, then compile the
+#    resumable import contract. The compiler executes nothing; organization
+#    and cluster bootstrap remain explicit steps in the journal it emits.
+cub auth login
+node scripts/compile-kubara-selected-org-workflow.mjs --request my-workflow.yaml
+
+# 6. Execute the journal's ordered commands. Interruptions are safe: the
+#    journal is prefix-resumable, and a rerun replays only what is proven.
+```
+
+Each step matches a tutorial chapter below; steps 1 to 4 are fully offline, step 5 is your first live contact, and step 6 hands off applications:
 
 1. [Choose the platform in native Kubara config](docs/demo/kubara/adoption-1-choose.md)
 2. [Run Kubara and verify the generated platform](docs/demo/kubara/adoption-2-generate.md)
