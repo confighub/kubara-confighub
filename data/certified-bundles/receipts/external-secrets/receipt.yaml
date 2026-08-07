@@ -1,0 +1,130 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "CertifiedBundleReceipt"
+metadata:
+  name: "kubara-current-platform-external-secrets"
+spec:
+  producer:
+    name: "kubara"
+    repository: "https://github.com/confighub/kubara-confighub"
+  source:
+    kind: "kubara-component"
+    charts:
+      -
+        repository: "helm:external-secrets/external-secrets"
+        name: "external-secrets"
+        version: "2.8.0"
+        packageSHA256: "251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd"
+        exactArtifactUrl: "https://github.com/external-secrets/external-secrets/releases/download/helm-chart-2.8.0/external-secrets-2.8.0.tgz"
+    evidence:
+      - "examples/kubara/current-platform/component-artifacts.yaml"
+      - "examples/kubara/current-platform/generation-receipt.yaml"
+  bundle:
+    contentsKind: "component-definition"
+    files:
+      -
+        path: ".helmignore"
+        sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+        bytes: 349
+      -
+        path: "CHANGELOG.md"
+        sha256: "c4813fe865a1c03ec88b62d67a0fabf344591b593cc591546234ddaa95fe2ae9"
+        bytes: 2403
+      -
+        path: "Chart.yaml"
+        sha256: "eae77f87c1b7f402d740d6fe4e8fd92cc2958e95d5fb1fcc9eb567c005e9e3a7"
+        bytes: 408
+      -
+        path: "ci/ci-values.yaml"
+        sha256: "2a72dae44d107aebeb2565cd80fbfa9a52f739137b083ce482d197cb9f0a1de6"
+        bytes: 66
+      -
+        path: "templates/certificate.yaml"
+        sha256: "b464f30627f19f3d265c598249162c4d96e030d763401245fa2b5b89fdfd6a6f"
+        bytes: 571
+      -
+        path: "templates/clusterSecretStore.yaml"
+        sha256: "88fc9a6739611a6790ba0758540dea0a9b1485668042e6018c9b8f4a0778bac3"
+        bytes: 71
+      -
+        path: "templates/issuer.yaml"
+        sha256: "e0327760a48a886baf92e6a61293787e4ed67ac94ffe7cb4d2fca42ffe0a4e0b"
+        bytes: 288
+      -
+        path: "templates/namespace.yaml"
+        sha256: "153f8cf568b1b3761eea48599d5edd84b894f5af3695d98353335a8a043f7c2f"
+        bytes: 49
+      -
+        path: "values.yaml"
+        sha256: "8a5bac2d3765495a695e9fb7f335fd839767f7e830d798b7b323f77fe3639843"
+        bytes: 466
+    compositionIndexRef: "examples/kubara/current-platform/component-artifacts.yaml"
+  ingest:
+    granularity: "per-file"
+    spacePattern: "{{.Labels.Component}}-{{.Labels.Variant}}"
+    externalSourceAnnotation: "confighub.com/external-source"
+  dispositions:
+    -
+      class: "helm-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "resource-policy-keep"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "lookup"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "webhook-ca"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "capabilities-api-versions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "generated-secrets"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "crd-ordering"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "immutable-fields"
+      finding: "not-evaluated"
+      detail: "a cross-version property; no second version is compared in this receipt"
+      disposition: "versioned replacement route when an upgrade pair is audited"
+    -
+      class: "namespace-creation"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "subchart-conditions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "test-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+  verdict:
+    lane: "flatten-with-routes"
+    status: "certified"
+    decidedBy: "the flattening-safety audit in confighub/helm-expt at recipes/external-secrets/external-secrets/2.8.0/publication/flattening-safety-verdict.yaml (exact version match: helm:external-secrets/external-secrets 2.8.0)"
+    notes: "The lane is the wrapped chart's, scoped to the audited base named in the cited verdict; the wrapper's own values were not rendered here."
+  provenance:
+    emittedBy: "scripts/generate-certified-bundle-receipts.mjs"
+    generatedFrom:
+      - "examples/kubara/current-platform/generated/platform-components/helm/external-secrets"
+      - "examples/kubara/current-platform/component-artifacts.yaml"

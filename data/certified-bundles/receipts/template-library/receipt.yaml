@@ -1,0 +1,177 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "CertifiedBundleReceipt"
+metadata:
+  name: "kubara-current-platform-template-library"
+spec:
+  producer:
+    name: "kubara"
+    repository: "https://github.com/confighub/kubara-confighub"
+  source:
+    kind: "kubara-component"
+    evidence:
+      - "examples/kubara/current-platform/component-artifacts.yaml"
+      - "examples/kubara/current-platform/generation-receipt.yaml"
+  bundle:
+    contentsKind: "component-definition"
+    files:
+      -
+        path: ".helmignore"
+        sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+        bytes: 349
+      -
+        path: "CHANGELOG.md"
+        sha256: "0fae11104371f93fb72d772bd2922a4c679c9b05c480889d172e390bab90a515"
+        bytes: 1018
+      -
+        path: "Chart.yaml"
+        sha256: "80a0bf19d06ea052d9ccf8cf0b2552afd1b934be79fca7ac90f978cdc7701060"
+        bytes: 150
+      -
+        path: "README.md"
+        sha256: "e1eb86f5c01f6ad32299efdab8864a59cf20c13da4c337a0fce7074c4c79dd91"
+        bytes: 2335
+      -
+        path: "templates/_functions.tpl"
+        sha256: "12eddf31e066cb9415b944189fa479d2c90f6069ca78db03bc7931239cd5eb30"
+        bytes: 2386
+      -
+        path: "templates/_k8s.namespace.tpl"
+        sha256: "5a155ae52799a6b3d3b6f7ca59bc4f8519e6dcc874bc752a04c98f069916fe5e"
+        bytes: 342
+      -
+        path: "templates/_util.yaml"
+        sha256: "828a9df8aea5fcb469aa3cd1b52c00211a8e467725056a67843f8c4b144e8c99"
+        bytes: 499
+      -
+        path: "templates/argocd/_argo.app.tpl"
+        sha256: "15c169e9da6e6f492037a227654278710189f5e457edd927fca83ae48edf4b93"
+        bytes: 2505
+      -
+        path: "templates/argocd/_argo.appset.tpl"
+        sha256: "7b8635a7b7672738d7cd1d069eabec0c15e0b6492a6aa2581197358377648258"
+        bytes: 2925
+      -
+        path: "templates/argocd/_argo.project.tpl"
+        sha256: "c6044ac184527abb6fa8a57025d342242acc41c89efbaa1dffc0d5c15e472170"
+        bytes: 1953
+      -
+        path: "templates/cert-manager/_certManager.certificate.tpl"
+        sha256: "37e2a386bc73dbd9b914f156cc58465a6868c7c281e91c4b3d491444bcdfdb26"
+        bytes: 369
+      -
+        path: "templates/cert-manager/_certManager.certificateRequest.tpl"
+        sha256: "fee1f490abec32b569c8091571fcb6991a3b7e58cce480800efb7ce0693d7749"
+        bytes: 397
+      -
+        path: "templates/cert-manager/_certManager.clusterIssuer.tpl"
+        sha256: "0d0a32b48d87f404a45b485e8b8d9adf5051ef6875993565d29ebf907a7c340b"
+        bytes: 377
+      -
+        path: "templates/cert-manager/_certManager.issuer.tpl"
+        sha256: "fde14ec776d4d2c261c5f370d81c0f2884520008187e7f119576f9f2f7ba6415"
+        bytes: 349
+      -
+        path: "templates/external-secrets/_externalSecret.es.argo.cluster.tpl"
+        sha256: "333276367089854ef4b2c9769c981c418fc1ae187ac2e7895e778468e6bf31ec"
+        bytes: 2852
+      -
+        path: "templates/external-secrets/_externalSecret.es.argo.repo.tpl"
+        sha256: "55f97d1cbc48cb8614aca9a660acde39d46c5bae368a71d65c01f7b01d2f0cbb"
+        bytes: 1465
+      -
+        path: "templates/external-secrets/_externalSecrets.ces.dockerPullSecret.tpl"
+        sha256: "270cb4ce288f52123e0be82a0c37e1db93da26ba27226215f2bc3d98d6045cd6"
+        bytes: 1272
+      -
+        path: "templates/external-secrets/_externalSecrets.clusterSecretStore.tpl"
+        sha256: "e44d2467d7224cf126049d5b8757160398ffedb8cdad29e22bc49247583a2cc8"
+        bytes: 386
+      -
+        path: "templates/external-secrets/_externalSecrets.es.generic.tpl"
+        sha256: "ddfbd4bc67d82bbe2785074ba5552b285cbe1aa0273ea3d5853075d3cd8e8ed2"
+        bytes: 2025
+      -
+        path: "templates/external-secrets/_externalSecrets.secretStore.tpl"
+        sha256: "56df71e6c2ea6da44c78773b2e192aced5361fe870b36c281dbfc74ce439c5ee"
+        bytes: 414
+      -
+        path: "templates/kyverno/_kyverno.clusterPolicy.tpl"
+        sha256: "bf6c1cca43f7366f382b962e53f7b3d7184f93048e267bdde73666b816d2efec"
+        bytes: 360
+      -
+        path: "templates/kyverno/_kyverno.policy.tpl"
+        sha256: "67eb4b04d593bb96579942596e923859686959c9667876d94b13071bd468d449"
+        bytes: 332
+    compositionIndexRef: "examples/kubara/current-platform/component-artifacts.yaml"
+  ingest:
+    granularity: "per-file"
+    spacePattern: "{{.Labels.Component}}-{{.Labels.Variant}}"
+    externalSourceAnnotation: "confighub.com/external-source"
+  dispositions:
+    -
+      class: "helm-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "resource-policy-keep"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "lookup"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "webhook-ca"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "capabilities-api-versions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "generated-secrets"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "crd-ordering"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "immutable-fields"
+      finding: "not-evaluated"
+      detail: "a cross-version property; no second version is compared in this receipt"
+      disposition: "versioned replacement route when an upgrade pair is audited"
+    -
+      class: "namespace-creation"
+      finding: "present"
+      detail: "1 Namespace object(s) ship in the component files"
+      disposition: "namespace ships as its own Unit"
+      evidence: "templates/_k8s.namespace.tpl"
+    -
+      class: "subchart-conditions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "test-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+  verdict:
+    lane: "safe-to-flatten"
+    status: "provisional"
+    decidedBy: "a non-deployable helper library (deployable: false in the artifact index); nothing renders to a cluster from this component"
+    openQuestions:
+      - "first-party charts get verdicts when the audit lane covers them"
+  provenance:
+    emittedBy: "scripts/generate-certified-bundle-receipts.mjs"
+    generatedFrom:
+      - "examples/kubara/current-platform/generated/platform-components/helm/template-library"
+      - "examples/kubara/current-platform/component-artifacts.yaml"

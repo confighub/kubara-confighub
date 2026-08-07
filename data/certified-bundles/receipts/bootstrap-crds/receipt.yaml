@@ -1,0 +1,99 @@
+apiVersion: "evidence.confighub.com/v1alpha1"
+kind: "CertifiedBundleReceipt"
+metadata:
+  name: "kubara-current-platform-bootstrap-crds"
+spec:
+  producer:
+    name: "kubara"
+    repository: "https://github.com/confighub/kubara-confighub"
+  source:
+    kind: "kubara-component"
+    evidence:
+      - "examples/kubara/current-platform/component-artifacts.yaml"
+      - "examples/kubara/current-platform/generation-receipt.yaml"
+  bundle:
+    contentsKind: "component-definition"
+    files:
+      -
+        path: ".helmignore"
+        sha256: "bb987e6a8ef45a99255d1d632812482d5f0f3255ea841520b4d90342df5fe2b3"
+        bytes: 349
+      -
+        path: "CHANGELOG.md"
+        sha256: "5d50266878e5cc78cc293eefd946d5070e240f34c627d115583665a85e558759"
+        bytes: 432
+      -
+        path: "Chart.yaml"
+        sha256: "c491cd3880fa78e2129c4350c123096d5c685871328e48ab112f16035af29a9b"
+        bytes: 621
+    compositionIndexRef: "examples/kubara/current-platform/component-artifacts.yaml"
+  ingest:
+    granularity: "per-file"
+    spacePattern: "{{.Labels.Component}}-{{.Labels.Variant}}"
+    externalSourceAnnotation: "confighub.com/external-source"
+  dispositions:
+    -
+      class: "helm-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "resource-policy-keep"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "lookup"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "webhook-ca"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "capabilities-api-versions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "generated-secrets"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "crd-ordering"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "immutable-fields"
+      finding: "not-evaluated"
+      detail: "a cross-version property; no second version is compared in this receipt"
+      disposition: "versioned replacement route when an upgrade pair is audited"
+    -
+      class: "namespace-creation"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+    -
+      class: "subchart-conditions"
+      finding: "not-evaluated"
+      detail: "template-time construct, out of scope for the committed component definition files; the wrapped chart's own template behavior is decided by that chart's flattening-safety verdict, cited in this receipt's verdict"
+      disposition: "decided by the wrapped chart's verdict"
+    -
+      class: "test-hooks"
+      finding: "absent"
+      detail: "absent from the committed component definition files"
+      disposition: "none required"
+  verdict:
+    lane: "flatten-with-routes"
+    status: "certified"
+    decidedBy: "the cert-manager v1.21.0, kube-prometheus-stack 87.19.2, and external-secrets 2.8.0 verdicts in confighub/helm-expt, whose CRD-ordering dispositions this component implements"
+    notes: "This component is Kubara's implementation of the CRD ordering route: it delivers the CRD subsets of three audited charts ahead of their controllers, which is exactly the companion artifact those verdicts require."
+  provenance:
+    emittedBy: "scripts/generate-certified-bundle-receipts.mjs"
+    generatedFrom:
+      - "examples/kubara/current-platform/generated/platform-components/helm/bootstrap-crds"
+      - "examples/kubara/current-platform/component-artifacts.yaml"

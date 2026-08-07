@@ -1,0 +1,10 @@
+component,charts,contents_kind,file_count,lane,status,receipt
+argo-cd,argo-cd 10.2.1,component-definition,18,do-not-flatten,provisional,data/certified-bundles/receipts/argo-cd/receipt.yaml
+bootstrap-crds,first-party,component-definition,3,flatten-with-routes,certified,data/certified-bundles/receipts/bootstrap-crds/receipt.yaml
+cert-manager,cert-manager v1.21.0,component-definition,9,flatten-with-routes,certified,data/certified-bundles/receipts/cert-manager/receipt.yaml
+external-secrets,external-secrets 2.8.0,component-definition,9,flatten-with-routes,certified,data/certified-bundles/receipts/external-secrets/receipt.yaml
+homer-dashboard,first-party,component-definition,26,safe-to-flatten,provisional,data/certified-bundles/receipts/homer-dashboard/receipt.yaml
+kube-prometheus-stack,kube-prometheus-stack 87.19.2; prometheus-blackbox-exporter 11.15.1,component-definition,8,do-not-flatten,certified,data/certified-bundles/receipts/kube-prometheus-stack/receipt.yaml
+metrics-server,metrics-server 3.13.1,component-definition,6,safe-to-flatten,certified,data/certified-bundles/receipts/metrics-server/receipt.yaml
+template-library,first-party,component-definition,22,safe-to-flatten,provisional,data/certified-bundles/receipts/template-library/receipt.yaml
+traefik,traefik 41.0.2,component-definition,7,flatten-with-routes,certified,data/certified-bundles/receipts/traefik/receipt.yaml
