@@ -10,7 +10,7 @@ Teams who adopt Kubara like what it generates and then meet the same operational
 
 Running the Kubara platform through ConfigHub answers them without changing what Kubara produces:
 
-- Every component and application shows its exact observed version on every cluster, in one 36-cell matrix.
+- One 36-cell matrix shows every component and application on every cluster, and keeps four facts apart that a status page usually collapses into a single green tick: what should be placed there, which release was actually delivered, what the reconciler says it synced, and what Kubernetes reports as ready.
 - Production changes pass an approval gate bound to the exact revision, not to whatever the tag points at today.
 - Releases are immutable digests; promotion moves the reviewed revision, and rollback restores one target while its peer keeps the newer release.
 - Drift gets detected and repaired as an attributed action, and a scoped audit proves zero unowned residue.
