@@ -10,7 +10,7 @@ Teams who adopt Kubara like what it generates and then meet the same operational
 
 Running the Kubara platform through ConfigHub answers them without changing what Kubara produces:
 
-- Every component and application shows its exact observed version on every cluster, in one 36-cell matrix.
+- One 36-cell matrix shows every component and application on every cluster, and keeps four facts apart that a status page usually collapses into a single green tick: what should be placed there, which release was actually delivered, what the reconciler says it synced, and what Kubernetes reports as ready.
 - Production changes pass an approval gate bound to the exact revision, not to whatever the tag points at today.
 - Releases are immutable digests; promotion moves the reviewed revision, and rollback restores one target while its peer keeps the newer release.
 - Drift gets detected and repaired as an attributed action, and a scoped audit proves zero unowned residue.
@@ -27,17 +27,21 @@ One application, four clusters, every placement healthy at its exact retained re
 
 The fleet matrix keeps desired placement separate from observed release, sync, health, and readiness. Here is its development column, every component observed, Synced, and Healthy at its exact version or digest:
 
-![The development column of the fleet matrix](docs/images/kubara/details/06a-matrix-dev-column.png)
+![The development column of the fleet matrix](docs/images/kubara/matrix/matrix-dev.png)
+
+A column where everything is green does not show that those four fields are kept apart. Production A does. Four components are `disabled` there, and the row says so four times over — no sync to report, no health to report, nothing observed — instead of collapsing to one grey tick:
+
+![The production A column, where four components are disabled and four are observed](docs/images/kubara/matrix/matrix-prod-a.png)
 
 Beneath the matrix, the live overlay receipt and the scoped residue audit tie the page to committed evidence — all 36 cells validated, zero audited residue, the audit's own SHA-256 in the page:
 
-![The live overlay receipt and scoped residue audit identity](docs/images/kubara/details/06b-live-audit.png)
+![The live overlay receipt and scoped residue audit identity](docs/images/kubara/matrix/receipts.png)
 
 Values overrides stay declared Kubara inputs, listed per cluster and component, never silently reclassified as live departures:
 
-![Declared values overrides per cluster and component](docs/images/kubara/details/06c-declared-overrides.png)
+![Declared values overrides per cluster and component](docs/images/kubara/matrix/declared-values-overrides.png)
 
-These details are cut from one receipt-bound frame, [the full matrix page](docs/images/kubara/06-fleet-matrix-clean-inventory.png). The [GUI tour](docs/demo/kubara/gui-tour.md) walks all six frames with their key takeaways.
+The whole page is captured a section at a time in [docs/images/kubara/matrix](docs/images/kubara/matrix), one frame per cluster column, because four columns of this density in a single frame are not readable. The [GUI tour](docs/demo/kubara/gui-tour.md) walks the six original frames with their key takeaways.
 
 ## How applications work
 
