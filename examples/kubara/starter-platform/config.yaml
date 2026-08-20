@@ -1,0 +1,61 @@
+version: "v1alpha4"
+bootstrapCatalog: "oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0"
+clusters:
+  -
+    name: "workshop-dev"
+    stage: "dev"
+    type: "hub"
+    dnsName: "workshop-dev.traefik.me"
+    ssoOrg: "none"
+    ssoTeam: "none"
+    ingressClassName: "traefik"
+    argocd:
+      selfManaged: "enabled"
+      repo:
+        https:
+          configs:
+            url: "https://github.com/example/platform.git"
+            targetRevision: "main"
+          components:
+            url: "https://github.com/example/platform.git"
+            targetRevision: "main"
+    catalogs:
+      - "oci://ghcr.io/kubara-io/catalogs/general:1.1.0"
+    services:
+      cert-manager:
+        status: "enabled"
+        config:
+          clusterIssuer:
+            email: "platform@example.com"
+            name: "letsencrypt-staging"
+            server: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      external-dns:
+        status: "disabled"
+      external-secrets:
+        status: "disabled"
+      homer-dashboard:
+        status: "disabled"
+      kube-prometheus-stack:
+        status: "disabled"
+      kyverno:
+        status: "disabled"
+      kyverno-policies:
+        status: "disabled"
+      kyverno-policy-reporter:
+        status: "disabled"
+      loki:
+        status: "disabled"
+      longhorn:
+        status: "disabled"
+      metallb:
+        status: "disabled"
+      metrics-server:
+        status: "enabled"
+      oauth2-proxy:
+        status: "disabled"
+      reloader:
+        status: "disabled"
+      traefik:
+        status: "enabled"
+      velero:
+        status: "disabled"
