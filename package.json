@@ -9,6 +9,10 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "kubara-platform:start": "node scripts/create-kubara-platform.mjs",
+    "kubara-platform:example:generate": "node scripts/create-kubara-platform.mjs --generate-example",
+    "kubara-platform:example:verify": "node scripts/create-kubara-platform.mjs --verify-example",
+    "kubara-platform:self-test": "node scripts/create-kubara-platform.mjs --self-test",
     "certified-bundles": "node scripts/generate-certified-bundle-receipts.mjs --generate",
     "certified-bundles:verify": "node scripts/generate-certified-bundle-receipts.mjs --verify",
     "kubara-example:generate": "node scripts/generate-kubara-example.mjs --generate",

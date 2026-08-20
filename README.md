@@ -19,6 +19,32 @@ Running the Kubara platform through ConfigHub answers them without changing what
 
 The detailed case — what stays Kubara, what becomes better, and how to verify each claim — is in [the Kubara with ConfigHub overview](docs/demo/kubara/index.md).
 
+## Start a small platform
+
+Create one native Kubara development platform before opening the full four-cluster
+example:
+
+```sh
+npm run kubara-platform:start -- \
+  --name my-platform \
+  --repository https://github.com/acme/platform.git \
+  --output ../my-platform
+```
+
+The command writes Kubara's ordinary `config.yaml`, a safe `.env.example`, a short
+README, and a companion `source-and-intent.yaml`. The companion record pins the
+Kubara catalogs and exact component versions, links them to Config Workshop Catalog
+evidence, and names the hooks, CRDs, Secrets, setup work, and target facts that must
+be reviewed after generation. It does not claim that the platform has already been
+generated or deployed.
+
+The committed [starter platform](examples/kubara/starter-platform/) uses cert-manager,
+Metrics Server, and Traefik. Verify it with:
+
+```sh
+npm run kubara-platform:example:verify
+```
+
 ## See the result first
 
 One application, four clusters, every placement healthy at its exact retained release. Production B stays on the older release because production A was rolled back one target at a time:
