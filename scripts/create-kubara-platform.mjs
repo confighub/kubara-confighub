@@ -55,15 +55,25 @@ const SERVICE_COMPONENTS = {
 const CONFIG_WORKSHOP = "https://confighub.github.io/helm-expt/site";
 const CATALOG_OCI = "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt";
 const exampleRoot = join(repoRoot, "examples", "kubara", "starter-platform");
+const inferenceExampleRoot = join(repoRoot, "examples", "kubara", "inference-platform");
 
 const first = process.argv[2] ?? "";
-if (first === "--generate-example") {
+if (first === "--list-services") {
+  console.log(ALL_SERVICES.join("\n"));
+} else if (first === "--generate-example") {
   generate(exampleRoot, exampleOptions(), true);
   verifyExample();
   console.log(`generated ${relative(repoRoot, exampleRoot)}`);
 } else if (first === "--verify-example") {
   verifyExample();
   console.log("verified deterministic Kubara starter platform");
+} else if (first === "--generate-inference-example") {
+  generate(inferenceExampleRoot, inferenceExampleOptions(), true);
+  verifyInferenceExample();
+  console.log(`generated ${relative(repoRoot, inferenceExampleRoot)}`);
+} else if (first === "--verify-inference-example") {
+  verifyInferenceExample();
+  console.log("verified deterministic Kubara inference platform starter");
 } else if (first === "--self-test") {
   selfTest();
   console.log("Kubara platform starter self-test: pass");
@@ -83,7 +93,26 @@ function exampleOptions() {
     dnsSuffix: "traefik.me",
     email: "platform@example.com",
     services: DEFAULT_SERVICES,
+    runtimeImages: [],
     output: exampleRoot,
+    force: true,
+  };
+}
+
+function inferenceExampleOptions() {
+  return {
+    name: "inference-platform",
+    cluster: "inference-dev",
+    repository: "https://github.com/confighub/kubara-confighub.git",
+    dnsSuffix: "traefik.me",
+    email: "platform@example.com",
+    services: ["cert-manager", "metrics-server", "traefik", "kube-prometheus-stack"],
+    runtimeImages: [
+      parseRuntimeImage(
+        "vllm=vllm/vllm-openai-cpu:v0.27.1-arm64@sha256:e6745d7ba6610f637c6f22fc06cd730342e50245b6c46767235600483adfbbde",
+      ),
+    ],
+    output: inferenceExampleRoot,
     force: true,
   };
 }
@@ -96,6 +125,7 @@ function parseOptions(args) {
     dnsSuffix: "traefik.me",
     email: "platform@example.com",
     services: DEFAULT_SERVICES,
+    runtimeImages: [],
     output: "",
     force: false,
   };
@@ -103,6 +133,13 @@ function parseOptions(args) {
     const argument = args[index];
     if (argument === "--force") {
       options.force = true;
+      continue;
+    }
+    if (argument === "--runtime-image") {
+      const value = args[index + 1];
+      if (!value || value.startsWith("--")) usage("--runtime-image needs a name=image@sha256:digest value");
+      options.runtimeImages.push(parseRuntimeImage(value));
+      index += 1;
       continue;
     }
     const key = {
@@ -138,6 +175,25 @@ function validateOptions(options) {
   if (!/^[^@\s]+@[^@\s]+$/.test(options.email)) throw new Error("--email is invalid");
   const unknown = options.services.filter((service) => !ALL_SERVICES.includes(service));
   if (unknown.length > 0) throw new Error(`unknown Kubara service(s): ${unknown.join(", ")}`);
+  const imageNames = options.runtimeImages.map((item) => item.name);
+  if (new Set(imageNames).size !== imageNames.length) throw new Error("runtime image names must be unique");
+}
+
+function parseRuntimeImage(value) {
+  const separator = value.indexOf("=");
+  if (separator < 1 || separator === value.length - 1) {
+    throw new Error("--runtime-image must use name=image@sha256:digest");
+  }
+  const name = value.slice(0, separator);
+  const image = value.slice(separator + 1);
+  if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(name)) {
+    throw new Error("runtime image names must use lowercase letters, numbers, and hyphens");
+  }
+  const digest = image.match(/@sha256:([a-f0-9]{64})$/)?.[1];
+  if (!digest || /\s/.test(image)) {
+    throw new Error(`runtime image ${name} must be pinned with @sha256:<64 lowercase hex characters>`);
+  }
+  return { name, image, digest: `sha256:${digest}` };
 }
 
 function generate(outputRoot, options, force) {
@@ -156,6 +212,9 @@ function generate(outputRoot, options, force) {
   const configSha256 = sha256(readFileSync(join(outputRoot, "config.yaml")));
   const intent = buildIntent(options, sourceLock, artifacts, configSha256);
   writeYaml(join(outputRoot, "source-and-intent.yaml"), intent);
+  if (options.runtimeImages.length > 0) {
+    writeYaml(join(outputRoot, "runtime-images.yaml"), buildRuntimeImages(options));
+  }
   write(join(outputRoot, "README.md"), starterReadme(options));
   writeChecksums(outputRoot);
 }
@@ -258,6 +317,7 @@ function buildIntent(options, sourceLock, artifacts, configSha256) {
         platform: options.name,
         cluster: { name: options.cluster, stage: "dev", type: "hub" },
         enabledServices: options.services,
+        customRuntimeImages: options.runtimeImages,
         repository: options.repository,
       },
       components,
@@ -274,6 +334,7 @@ function buildIntent(options, sourceLock, artifacts, configSha256) {
         status: "not-generated",
         command: "kubara --work-dir . --config-file config.yaml --env-file .env generate --helm",
         expected: ["platform-components/", "platform-configs/"],
+        companionInputs: options.runtimeImages.length > 0 ? ["runtime-images.yaml"] : [],
       },
       next: {
         inspect: `${CONFIG_WORKSHOP}/ask.html`,
@@ -284,6 +345,19 @@ function buildIntent(options, sourceLock, artifacts, configSha256) {
     status: {
       phase: "ready-to-generate",
       claim: "The Kubara input and exact component versions are recorded. No generated or live result is claimed yet.",
+    },
+  };
+}
+
+function buildRuntimeImages(options) {
+  return {
+    apiVersion: "workshop.confighub.com/v1alpha1",
+    kind: "KubaraPlatformRuntimeImages",
+    metadata: { name: options.name },
+    spec: {
+      images: options.runtimeImages,
+      use: "Reference these exact images from application configuration kept beside the generated platform.",
+      boundary: "Kubara does not deploy these image records. An image is not a complete application.",
     },
   };
 }
@@ -320,6 +394,8 @@ so a future catalog default cannot add a component without a visible diff.
 Open \`source-and-intent.yaml\` next. It records the Kubara and catalog versions,
 the exact Helm components selected by Kubara, and the Config Workshop pages for
 their configurations and evidence. Kubara does not read this companion file.
+
+${options.runtimeImages.length > 0 ? `Open \`runtime-images.yaml\` too. It records ${options.runtimeImages.length} digest-pinned runtime image${options.runtimeImages.length === 1 ? "" : "s"} for application configuration you add beside the platform. Kubara does not deploy this file, and the starter does not pretend an image is a complete application.` : "No custom runtime image is recorded in this starter. Add one or more `--runtime-image name=image@sha256:digest` options when an application image must travel with the platform choice."}
 
 ## 2. Generate the platform
 
@@ -389,6 +465,28 @@ function verifyExample() {
   }
 }
 
+function verifyInferenceExample() {
+  if (!existsSync(inferenceExampleRoot)) {
+    throw new Error("inference platform example is missing; run --generate-inference-example");
+  }
+  const temporaryRoot = mkdtempSync(join(tmpdir(), "kubara-inference-platform-starter-"));
+  try {
+    const expectedRoot = join(temporaryRoot, "expected");
+    generate(expectedRoot, inferenceExampleOptions(), true);
+    compareTrees(expectedRoot, inferenceExampleRoot);
+    const intent = readYaml(join(inferenceExampleRoot, "source-and-intent.yaml"));
+    const images = readYaml(join(inferenceExampleRoot, "runtime-images.yaml"));
+    if (intent.spec?.intent?.enabledServices?.length !== 4) {
+      throw new Error("inference starter component selection changed");
+    }
+    if (images.spec?.images?.[0]?.name !== "vllm") {
+      throw new Error("inference starter runtime image changed");
+    }
+  } finally {
+    rmSync(temporaryRoot, { recursive: true, force: true });
+  }
+}
+
 function selfTest() {
   const temporaryRoot = mkdtempSync(join(tmpdir(), "kubara-platform-starter-test-"));
   try {
@@ -397,6 +495,20 @@ function selfTest() {
     generate(firstRoot, exampleOptions(), true);
     generate(secondRoot, exampleOptions(), true);
     compareTrees(firstRoot, secondRoot);
+    const imageOptions = {
+      ...exampleOptions(),
+      runtimeImages: [parseRuntimeImage(`inference=example.com/inference@sha256:${"a".repeat(64)}`)],
+    };
+    const imageRoot = join(temporaryRoot, "with-image");
+    generate(imageRoot, imageOptions, true);
+    const imageIntent = readYaml(join(imageRoot, "source-and-intent.yaml"));
+    const imageRecord = readYaml(join(imageRoot, "runtime-images.yaml"));
+    if (imageIntent.spec?.intent?.customRuntimeImages?.length !== 1) {
+      throw new Error("starter did not retain the custom runtime image");
+    }
+    if (imageRecord.spec?.images?.[0]?.digest !== `sha256:${"a".repeat(64)}`) {
+      throw new Error("runtime image record did not retain the digest");
+    }
     let refusedUnknown = false;
     try {
       validateOptions({ ...exampleOptions(), services: ["made-up-service"] });
@@ -404,6 +516,13 @@ function selfTest() {
       refusedUnknown = true;
     }
     if (!refusedUnknown) throw new Error("unknown services were not refused");
+    let refusedTagOnlyImage = false;
+    try {
+      parseRuntimeImage("inference=example.com/inference:latest");
+    } catch {
+      refusedTagOnlyImage = true;
+    }
+    if (!refusedTagOnlyImage) throw new Error("tag-only runtime image was not refused");
   } finally {
     rmSync(temporaryRoot, { recursive: true, force: true });
   }
@@ -442,7 +561,7 @@ function slug(value) {
 function usage(message) {
   if (message) console.error(message);
   console.error(
-    "Usage: node scripts/create-kubara-platform.mjs --name <name> --repository <https-url> --output <dir> [--cluster <name>] [--services a,b,c] [--dns-suffix <domain>] [--email <address>] [--force]",
+    "Usage: node scripts/create-kubara-platform.mjs --list-services | --name <name> --repository <https-url> --output <dir> [--cluster <name>] [--services a,b,c] [--runtime-image name=image@sha256:digest] [--dns-suffix <domain>] [--email <address>] [--force]",
   );
   process.exit(2);
 }

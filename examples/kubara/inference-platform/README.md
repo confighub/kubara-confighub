@@ -1,4 +1,4 @@
-# workshop-platform
+# inference-platform
 
 This folder is a small starting point for one Kubara development platform.
 Kubara still chooses and generates the platform. Config Workshop records the
@@ -6,15 +6,15 @@ exact component versions and links each one to its checked Catalog material.
 
 ## 1. Review the platform choice
 
-Open `config.yaml`. It defines one hub cluster, workshop-dev, and enables
-cert-manager, metrics-server, traefik. Every other built-in service is disabled explicitly,
+Open `config.yaml`. It defines one hub cluster, inference-dev, and enables
+cert-manager, metrics-server, traefik, kube-prometheus-stack. Every other built-in service is disabled explicitly,
 so a future catalog default cannot add a component without a visible diff.
 
 Open `source-and-intent.yaml` next. It records the Kubara and catalog versions,
 the exact Helm components selected by Kubara, and the Config Workshop pages for
 their configurations and evidence. Kubara does not read this companion file.
 
-No custom runtime image is recorded in this starter. Add one or more `--runtime-image name=image@sha256:digest` options when an application image must travel with the platform choice.
+Open `runtime-images.yaml` too. It records 1 digest-pinned runtime image for application configuration you add beside the platform. Kubara does not deploy this file, and the starter does not pretend an image is a complete application.
 
 ## 2. Generate the platform
 
