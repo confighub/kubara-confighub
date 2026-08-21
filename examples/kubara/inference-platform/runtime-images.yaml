@@ -1,0 +1,12 @@
+apiVersion: "workshop.confighub.com/v1alpha1"
+kind: "KubaraPlatformRuntimeImages"
+metadata:
+  name: "inference-platform"
+spec:
+  images:
+    -
+      name: "vllm"
+      image: "vllm/vllm-openai-cpu:v0.27.1-arm64@sha256:e6745d7ba6610f637c6f22fc06cd730342e50245b6c46767235600483adfbbde"
+      digest: "sha256:e6745d7ba6610f637c6f22fc06cd730342e50245b6c46767235600483adfbbde"
+  use: "Reference these exact images from application configuration kept beside the generated platform."
+  boundary: "Kubara does not deploy these image records. An image is not a complete application."

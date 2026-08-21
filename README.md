@@ -28,6 +28,7 @@ example:
 npm run kubara-platform:start -- \
   --name my-platform \
   --repository https://github.com/acme/platform.git \
+  --services cert-manager,metrics-server,traefik \
   --output ../my-platform
 ```
 
@@ -37,6 +38,42 @@ Kubara catalogs and exact component versions, links them to Config Workshop Cata
 evidence, and names the hooks, CRDs, Secrets, setup work, and target facts that must
 be reviewed after generation. It does not claim that the platform has already been
 generated or deployed.
+
+List every Kubara service that the starter can select:
+
+```sh
+npm run kubara-platform:start -- --list-services
+```
+
+Use `--services` to choose the platform components. Components with a matching
+Config Workshop entry carry a link to the tested chart version and its exact
+package. Services without that evidence remain visible as unchecked.
+
+You may also record an application or model-server image beside the platform. The
+image must be pinned by digest:
+
+```sh
+npm run kubara-platform:start -- \
+  --name my-platform \
+  --repository https://github.com/acme/platform.git \
+  --services cert-manager,metrics-server,traefik,kube-prometheus-stack \
+  --runtime-image inference=registry.example.com/inference@sha256:<64-hex-digest> \
+  --output ../my-platform
+```
+
+This writes `runtime-images.yaml` and records the same reference in
+`source-and-intent.yaml`. Kubara does not deploy that file. Add the image to your
+application configuration beside the generated platform, then review that complete
+application before deployment.
+
+The committed [inference platform starter](examples/kubara/inference-platform/)
+shows that exact output with cert-manager, Metrics Server, Traefik,
+kube-prometheus-stack, and the digest-pinned vLLM CPU image used by the Config
+Workshop runtime proof. Verify it with:
+
+```sh
+npm run kubara-platform:inference-example:verify
+```
 
 The committed [starter platform](examples/kubara/starter-platform/) uses cert-manager,
 Metrics Server, and Traefik. Verify it with:

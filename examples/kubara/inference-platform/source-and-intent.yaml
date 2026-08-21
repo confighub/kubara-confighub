@@ -1,7 +1,7 @@
 apiVersion: "workshop.confighub.com/v1alpha1"
 kind: "KubaraPlatformSourceAndIntent"
 metadata:
-  name: "workshop-platform"
+  name: "inference-platform"
 spec:
   source:
     type: "kubara"
@@ -9,7 +9,7 @@ spec:
     version: "v0.13.0"
     commit: "096ed84d116e5316852537046cc61d15a1e1c304"
     config: "config.yaml"
-    configSha256: "sha256:5f5245f65eb43548c33b49cc5e87ae31ca4f2d83e2d98c86ee5a4de3862a7fd7"
+    configSha256: "sha256:692f7b89c3dbca64d72a75445b1f6f32bf535f6ecdd6d34318e66abf12bde600"
   catalogs:
     version: "1.1.0"
     repository: "https://github.com/kubara-io/catalogs.git"
@@ -17,18 +17,22 @@ spec:
     bootstrap: "oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0"
     general: "oci://ghcr.io/kubara-io/catalogs/general:1.1.0"
   intent:
-    platform: "workshop-platform"
+    platform: "inference-platform"
     cluster:
-      name: "workshop-dev"
+      name: "inference-dev"
       stage: "dev"
       type: "hub"
     enabledServices:
       - "cert-manager"
       - "metrics-server"
       - "traefik"
+      - "kube-prometheus-stack"
     customRuntimeImages:
-      []
-    repository: "https://github.com/example/platform.git"
+      -
+        name: "vllm"
+        image: "vllm/vllm-openai-cpu:v0.27.1-arm64@sha256:e6745d7ba6610f637c6f22fc06cd730342e50245b6c46767235600483adfbbde"
+        digest: "sha256:e6745d7ba6610f637c6f22fc06cd730342e50245b6c46767235600483adfbbde"
+    repository: "https://github.com/confighub/kubara-confighub.git"
   components:
     -
       service: "argocd"
@@ -87,6 +91,20 @@ spec:
         baseVariantRecords: "https://confighub.github.io/helm-expt/site/base-variant-records.json"
         packageOciRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/traefik-traefik:41.0.2"
         role: "Reference package for the component. Kubara remains the platform composer."
+    -
+      service: "kube-prometheus-stack"
+      source: "helm"
+      canonicalIdentity: "prometheus-community/kube-prometheus-stack"
+      version: "87.19.2"
+      exactArtifact:
+        sha256: "b846cc368aaafd122148c8eec9b361d3893c6068d6301ec20d41c8023dcd8c88"
+        url: "https://github.com/prometheus-community/helm-charts/releases/download/kube-prometheus-stack-87.19.2/kube-prometheus-stack-87.19.2.tgz"
+      catalogMatch:
+        status: "retained-exact"
+        chartPage: "https://confighub.github.io/helm-expt/site/charts/prometheus-community-kube-prometheus-stack-87-19-2.html"
+        baseVariantRecords: "https://confighub.github.io/helm-expt/site/base-variant-records.json"
+        packageOciRef: "oci://europe-west1-docker.pkg.dev/nth-fort-499605-q5/helm-expt/prometheus-community-kube-prometheus-stack:87.19.2"
+        role: "Reference package for the component. Kubara remains the platform composer."
   lifecycleReview:
     status: "required-after-generation"
     check:
@@ -101,7 +119,7 @@ spec:
       - "platform-components/"
       - "platform-configs/"
     companionInputs:
-      []
+      - "runtime-images.yaml"
   next:
     inspect: "https://confighub.github.io/helm-expt/site/ask.html"
     promote: "https://confighub.github.io/helm-expt/site/promote.html"
