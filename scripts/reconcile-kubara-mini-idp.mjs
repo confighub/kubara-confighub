@@ -279,13 +279,16 @@ const READ_ONLY_CUB_COMMAND_PAIRS = new Set([
   "unit/data", "unit/diff", "unit/get", "unit/list",
   "version/",
 ]);
-const UNIT_READ_SELECT = "Labels,Annotations,TargetID,UpstreamUnitID,DeleteGates,DestroyGates,ToolchainType,ProviderType,Data,DataHash,ContentHash,HeadRevisionNum,LastAppliedRevisionNum,ApprovedBy,ApplyGates";
+// Data is not a selectable Unit field any more -- naming it is a 400 -- and DataHash is
+// the only hash. The body is read from the Unit's data endpoint and attached as
+// ConfigData, which is why ConfigData rather than Data is a decision field below.
+const UNIT_READ_SELECT = "Labels,Annotations,TargetID,UpstreamUnitID,DeleteGates,DestroyGates,ToolchainType,ProviderType,DataHash,HeadRevisionNum,LastReleasedRevisionNum,ApprovedBy,ApplyGates";
 const LINK_READ_SELECT = "FromUnitID,ToUnitID,ToSpaceID,UpdateType,AutoUpdate,Labels,Annotations,UpstreamLastMergedRevisionNum,DownstreamLastMergedRevisionNum";
 const SPACE_READ_SELECT = "OrganizationID,Labels,Annotations,ReleaseTargetID,TriggerFilterID,TriggerIDs,WhereTrigger,DeleteGates";
 const RELEASE_READ_SELECT = "TagID,Digest,ManifestDigest,ReleaseNum,UnitCount,CreatedAt";
 const TARGET_READ_SELECT = "SpaceID,ProviderType,ToolchainType,Annotations";
 const SPACE_DECISION_FIELDS = Object.freeze(["OrganizationID", "SpaceID", "Slug", "Labels", "Annotations", "ReleaseTargetID", "TriggerFilterID", "TriggerIDs", "WhereTrigger", "DeleteGates"]);
-const UNIT_DECISION_FIELDS = Object.freeze(["SpaceID", "UnitID", "Slug", "Labels", "Annotations", "TargetID", "UpstreamUnitID", "DeleteGates", "DestroyGates", "ToolchainType", "ProviderType", "Data", "DataHash", "ContentHash", "HeadRevisionNum", "LastAppliedRevisionNum", "ApprovedBy", "ApplyGates"]);
+const UNIT_DECISION_FIELDS = Object.freeze(["SpaceID", "UnitID", "Slug", "Labels", "Annotations", "TargetID", "UpstreamUnitID", "DeleteGates", "DestroyGates", "ToolchainType", "ProviderType", "ConfigData", "DataHash", "HeadRevisionNum", "LastReleasedRevisionNum", "ApprovedBy", "ApplyGates"]);
 const RELEASE_DECISION_FIELDS = Object.freeze(["SpaceID", "ReleaseID", "TagID", "Digest", "ManifestDigest", "ReleaseNum", "UnitCount", "CreatedAt"]);
 const LINK_DECISION_FIELDS = Object.freeze(["SpaceID", "LinkID", "Slug", "FromUnitID", "ToUnitID", "ToSpaceID", "UpdateType", "AutoUpdate", "UpstreamLastMergedRevisionNum", "DownstreamLastMergedRevisionNum", "Labels", "Annotations"]);
 const TARGET_DECISION_FIELDS = Object.freeze(["SpaceID", "TargetID", "Slug", "ProviderType", "ToolchainType", "Annotations"]);
@@ -3242,41 +3245,46 @@ function selfTestApplyReadSnapshotLifecycle() {
       Slug: "unit-a",
       UnitID: "unit-id-a",
       SpaceID: "space-id-a",
-      Data: Buffer.from(unitPayloads[0], "utf8").toString("base64"),
+      ConfigData: unitPayloads[0],
       DataHash: sha256(unitPayloads[0]),
     },
     {
       Slug: "unit-b",
       UnitID: "unit-id-b",
       SpaceID: "space-id-b",
-      Data: Buffer.from(unitPayloads[1], "utf8").toString("base64"),
+      ConfigData: unitPayloads[1],
       DataHash: sha256(unitPayloads[1]),
     },
   ];
   const largeUnitText = `apiVersion: v1\nkind: ConfigMap\ndata:\n  payload: ${"x".repeat(512 * 1024)}\n`;
   const largeCanonicalUnit = {
-    Data: Buffer.from(largeUnitText, "utf8").toString("base64"),
+    ConfigData: largeUnitText,
     DataHash: sha256(largeUnitText),
   };
   check(
     decodeBulkUnitData(largeCanonicalUnit, "performance self-test/large unit") === largeUnitText,
-    "performance self-test: large canonical bulk Unit Data did not round-trip",
+    "performance self-test: large canonical bulk Unit configuration did not round-trip",
   );
   expectBulkUnitDataFailure(
-    { ...units[0], Data: "not-base64!" },
-    "non-canonical base64 Data",
-    "malformed base64",
+    { ...units[0], ConfigData: undefined },
+    "omitted its configuration",
+    "missing configuration",
   );
   expectBulkUnitDataFailure(
     { ...units[0], DataHash: "0".repeat(64) },
-    "DataHash does not match decoded Data",
-    "decoded-data hash mismatch",
+    "Unit data does not match its DataHash",
+    "data hash mismatch",
   );
   const invalidUtf8 = Buffer.from([0xff]);
-  expectBulkUnitDataFailure(
-    { ...units[0], Data: invalidUtf8.toString("base64"), DataHash: sha256(invalidUtf8) },
-    "decoded Data is not valid UTF-8",
-    "invalid UTF-8",
+  let invalidUtf8Message = "";
+  try {
+    decodeUnitConfigBytes(invalidUtf8, sha256(invalidUtf8), "performance self-test/invalid UTF-8");
+  } catch (error) {
+    invalidUtf8Message = error.message;
+  }
+  check(
+    invalidUtf8Message.includes("Unit data is not valid UTF-8"),
+    "performance self-test: invalid UTF-8 was not rejected",
   );
   const links = [{ Slug: "link-a", LinkID: "link-id-a", SpaceID: "space-id-a" }];
   const releases = [{ Slug: "release-a", ReleaseID: "release-id-a", SpaceID: "space-id-a", ReleaseNum: 1, UnitCount: 1 }];
@@ -3378,7 +3386,7 @@ function selfTestApplyReadSnapshotLifecycle() {
       check(readSpaces().size === 2, "performance self-test: cached Space inventory drifted");
       check(readUnitRows("space-a").length === 1, "performance self-test: cached Unit inventory drifted");
       check(readUnit("space-b", "unit-b")?.UnitID === "unit-id-b", "performance self-test: cached Unit lookup drifted");
-      check(readUnitData("space-a", "unit-a") === "kind: ConfigMap\n", "performance self-test: bulk Unit Data drifted");
+      check(readUnitData("space-a", "unit-a") === "kind: ConfigMap\n", "performance self-test: bulk Unit configuration drifted");
       check(readTarget("space-a")?.TargetID === "target-id-a", "performance self-test: cached target drifted");
       check(readLinks("space-a").length === 1, "performance self-test: cached Link inventory drifted");
       check(latestRelease("space-a")?.ReleaseNum === 1, "performance self-test: cached release drifted");
@@ -3719,7 +3727,7 @@ function applyReadInvalidationScopes(args) {
     return [["link", space], ["unit", space]];
   }
   if (resource === "release") {
-    // Publishing advances LastAppliedRevisionNum on the released Units.
+    // Publishing advances LastReleasedRevisionNum on the released Units.
     return [["release", space], ["unit", space]];
   }
   return [];
@@ -4259,10 +4267,12 @@ function fetchSpaces() {
 }
 
 function fetchUnitRows(space) {
-  return unwrapRows(cubJson([
+  const rows = unwrapRows(cubJson([
     "unit", "list", "--space", space,
     "--select", `SpaceID,${UNIT_READ_SELECT}`,
   ]), "Unit");
+  for (const unit of rows) attachUnitConfigData(space, unit);
+  return rows;
 }
 
 function fetchUnit(space, slug) {
@@ -4272,7 +4282,41 @@ function fetchUnit(space, slug) {
     "-o", "json",
   ]);
   if (!result.ok) return null;
-  return unwrapEntity(JSON.parse(result.output), "Unit");
+  const unit = unwrapEntity(JSON.parse(result.output), "Unit");
+  attachUnitConfigData(space, unit);
+  return unit;
+}
+
+// The configuration is not a Unit field any more, so a listed row carries metadata
+// only. Read the body from the Unit's own data endpoint and attach it as ConfigData,
+// keeping every later decision served from the same immutable snapshot. The bytes go
+// to a file rather than stdout because stdout normalizes the trailing newline and
+// DataHash covers the stored bytes exactly.
+function fetchUnitConfigBytes(space, slug) {
+  const directory = mkdtempSync(join(tmpdir(), "kubara-unit-data-"));
+  const path = join(directory, "data");
+  try {
+    cub(["unit", "data", slug, "--space", space, "--output-file", path, "--quiet"]);
+    return readFileSync(path);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+function attachUnitConfigData(space, unit) {
+  const ref = `${space}/${unit.Slug}`;
+  unit.ConfigData = decodeUnitConfigBytes(fetchUnitConfigBytes(space, unit.Slug), unit.DataHash, ref);
+  return unit;
+}
+
+function decodeUnitConfigBytes(bytes, dataHash, ref) {
+  check(/^[a-f0-9]{64}$/.test(dataHash ?? ""), `${ref}: Unit metadata has an invalid DataHash`);
+  check(sha256(bytes) === dataHash, `${ref}: Unit data does not match its DataHash`);
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    check(false, `${ref}: Unit data is not valid UTF-8`);
+  }
 }
 
 function readUnitData(space, slug) {
@@ -4282,19 +4326,8 @@ function readUnitData(space, slug) {
 }
 
 function decodeBulkUnitData(unit, ref) {
-  check(typeof unit?.Data === "string", `${ref}: bulk Unit metadata omitted Data; refusing an unproved body comparison`);
-  check(/^[a-f0-9]{64}$/.test(unit.DataHash ?? ""), `${ref}: bulk Unit metadata has an invalid DataHash`);
-  const decoded = Buffer.from(unit.Data, "base64");
-  check(
-    unit.Data.length % 4 === 0 && decoded.toString("base64") === unit.Data,
-    `${ref}: bulk Unit metadata contains non-canonical base64 Data`,
-  );
-  check(sha256(decoded) === unit.DataHash, `${ref}: bulk Unit DataHash does not match decoded Data`);
-  try {
-    return new TextDecoder("utf-8", { fatal: true }).decode(decoded);
-  } catch {
-    check(false, `${ref}: bulk Unit decoded Data is not valid UTF-8`);
-  }
+  check(typeof unit?.ConfigData === "string", `${ref}: bulk Unit row omitted its configuration; refusing an unproved body comparison`);
+  return decodeUnitConfigBytes(Buffer.from(unit.ConfigData, "utf8"), unit.DataHash, ref);
 }
 
 function expectBulkUnitDataFailure(unit, expectedMessage, label) {
@@ -4820,9 +4853,10 @@ function captureOrganizationReadSnapshot(spaces) {
     for (const unit of rows) {
       const ref = `${space}/${unit.Slug}`;
       check(!unitsByRef.has(ref), `${ref}: organization snapshot returned duplicate Unit slugs`);
-      // Bulk Data is part of every authoritative snapshot. Decode and hash it
-      // at ingress so malformed, truncated, or mismatched bodies can never be
+      // The body is part of every authoritative snapshot. Read, hash, and decode
+      // it at ingress so malformed, truncated, or mismatched bodies can never be
       // cached as trusted evidence merely because a later path did not read it.
+      attachUnitConfigData(space, unit);
       decodeBulkUnitData(unit, ref);
       unitsByRef.set(ref, unit);
     }
@@ -4848,7 +4882,7 @@ function captureOrganizationReadSnapshot(spaces) {
   }
   const canonicalRows = {
     space: snapshotRows([...spaces.values()], ["OrganizationID", "SpaceID", "Slug", "Labels", "Annotations", "ReleaseTargetID", "TriggerFilterID", "TriggerIDs", "WhereTrigger", "DeleteGates"]),
-    unit: snapshotRows(units, ["SpaceID", "UnitID", "Slug", "Labels", "Annotations", "TargetID", "UpstreamUnitID", "DeleteGates", "DestroyGates", "ToolchainType", "ProviderType", "Data", "DataHash", "ContentHash", "HeadRevisionNum", "LastAppliedRevisionNum", "ApprovedBy", "ApplyGates"]),
+    unit: snapshotRows(units, UNIT_DECISION_FIELDS),
     release: snapshotRows(releases, ["SpaceID", "ReleaseID", "TagID", "Digest", "ManifestDigest", "ReleaseNum", "UnitCount", "CreatedAt"]),
     link: snapshotRows(links, ["SpaceID", "LinkID", "Slug", "FromUnitID", "ToUnitID", "ToSpaceID", "UpdateType", "AutoUpdate", "UpstreamLastMergedRevisionNum", "DownstreamLastMergedRevisionNum", "Labels", "Annotations"]),
     target: snapshotRows(targets, ["SpaceID", "TargetID", "Slug", "ProviderType", "ToolchainType", "Annotations"]),
@@ -7830,9 +7864,9 @@ function scenarioCheckpointFromAuthoritativeSnapshot(spaces) {
         ref: `${space}/${unit.Slug}`,
         id: unit.UnitID,
         headRevisionNum: unit.HeadRevisionNum,
-        ...(unit.LastAppliedRevisionNum === undefined || unit.LastAppliedRevisionNum === null
+        ...(unit.LastReleasedRevisionNum === undefined || unit.LastReleasedRevisionNum === null
           ? {}
-          : { lastAppliedRevisionNum: unit.LastAppliedRevisionNum }),
+          : { lastAppliedRevisionNum: unit.LastReleasedRevisionNum }),
         dataHash: unit.DataHash,
         targetID: unit.TargetID ?? null,
         upstreamUnitID: unit.UpstreamUnitID ?? null,
@@ -10682,7 +10716,7 @@ function assertReleaseStreamStillCurrent(
   for (const unit of units) {
     decodeBulkUnitData(unit, `${space}/${unit.Slug}`);
     check(
-      Number(unit.HeadRevisionNum) === Number(unit.LastAppliedRevisionNum),
+      Number(unit.HeadRevisionNum) === Number(unit.LastReleasedRevisionNum),
       `${space}/${unit.Slug}: Unit head changed after release selection and before Argo compare-and-set`,
     );
   }
@@ -10704,7 +10738,7 @@ function spaceHasUnreleasedHeads(space) {
   const units = readUnitRows(space);
   check(units.length > 0, `${space}: cannot determine release currency without Units`);
   return units.some(
-    (unit) => Number(unit.HeadRevisionNum ?? 0) !== Number(unit.LastAppliedRevisionNum ?? 0),
+    (unit) => Number(unit.HeadRevisionNum ?? 0) !== Number(unit.LastReleasedRevisionNum ?? 0),
   );
 }
 
@@ -10995,7 +11029,7 @@ function releaseBoundarySnapshot(space) {
       slug: unit.Slug,
       id: unit.UnitID,
       headRevisionNum: unit.HeadRevisionNum,
-      lastAppliedRevisionNum: unit.LastAppliedRevisionNum,
+      lastAppliedRevisionNum: unit.LastReleasedRevisionNum,
       dataHash: unit.DataHash,
       targetID: unit.TargetID ?? null,
       upstreamUnitID: unit.UpstreamUnitID ?? null,

@@ -270,7 +270,7 @@ function executeStep({ step, targetName, target, request, state, live }) {
     let actions = 0;
     if (!releaseMatches(latest, target.source)) {
       const unit = live.getUnit(target.source.space, target.source.unit);
-      check(Number(unit.HeadRevisionNum) !== Number(unit.LastAppliedRevisionNum), `${targetName}: latest release differs from the request but the exact source head is already published; refusing stale authority`);
+      check(Number(unit.HeadRevisionNum) !== Number(unit.LastReleasedRevisionNum), `${targetName}: latest release differs from the request but the exact source head is already published; refusing stale authority`);
       live.publish(target.source.space);
       actions = 1;
       const afterPublish = observeExactSource(live, targetName, target);
@@ -310,15 +310,15 @@ function executeStep({ step, targetName, target, request, state, live }) {
     const delivery = live.getUnit(target.delivery.appsSpace, target.delivery.unit);
     check(delivery?.TargetID === target.delivery.targetID, `${targetName}: delivery Unit disappeared before apps-root publication`);
     const units = live.listUnits(target.delivery.appsSpace);
-    const unrelatedPending = units.filter((row) => row.Slug !== target.delivery.unit && Number(row.HeadRevisionNum) !== Number(row.LastAppliedRevisionNum));
+    const unrelatedPending = units.filter((row) => row.Slug !== target.delivery.unit && Number(row.HeadRevisionNum) !== Number(row.LastReleasedRevisionNum));
     check(unrelatedPending.length === 0, `${targetName}: refusing to publish unrelated pending apps-root Units: ${unrelatedPending.map((row) => row.Slug).join(", ")}`);
     let actions = 0;
-    if (Number(delivery.HeadRevisionNum) !== Number(delivery.LastAppliedRevisionNum)) {
+    if (Number(delivery.HeadRevisionNum) !== Number(delivery.LastReleasedRevisionNum)) {
       live.publish(target.delivery.appsSpace);
       actions = 1;
     }
     const after = live.getUnit(target.delivery.appsSpace, target.delivery.unit);
-    check(Number(after.HeadRevisionNum) === Number(after.LastAppliedRevisionNum), `${targetName}: delivery Unit head remains unpublished`);
+    check(Number(after.HeadRevisionNum) === Number(after.LastReleasedRevisionNum), `${targetName}: delivery Unit head remains unpublished`);
     const rootRelease = latestRelease(live.listPublishedReleases(target.delivery.appsSpace));
     check(exactDigest(rootRelease?.ManifestDigest) && exactDigest(rootRelease?.Digest), `${targetName}: apps-root publication lacks exact release digests`);
     return complete(releaseObservation(rootRelease), actions);
@@ -392,9 +392,9 @@ function auditAll({ request, state, live }) {
     check(targetEntity?.TargetID === target.delivery.targetID && targetEntity.ProviderType === "OCI" && targetEntity.ToolchainType === "Any", `${targetName}: delivery Target identity/provider/toolchain drifted during immediate audit`);
     const delivery = live.getUnit(target.delivery.appsSpace, target.delivery.unit);
     const documentText = readRegular(join(state.outputRoot, "delivery-applications", `${targetName}.yaml`), `${targetName} delivery Application`);
-    check(delivery?.DataHash === sha256(documentText) && delivery.TargetID === target.delivery.targetID && delivery.ToolchainType === "Kubernetes/YAML" && !delivery.ProviderType && Number(delivery.HeadRevisionNum) === Number(delivery.LastAppliedRevisionNum), `${targetName}: delivery Unit differs, has the wrong toolchain/provider, or is unpublished during immediate audit`);
+    check(delivery?.DataHash === sha256(documentText) && delivery.TargetID === target.delivery.targetID && delivery.ToolchainType === "Kubernetes/YAML" && !delivery.ProviderType && Number(delivery.HeadRevisionNum) === Number(delivery.LastReleasedRevisionNum), `${targetName}: delivery Unit differs, has the wrong toolchain/provider, or is unpublished during immediate audit`);
     const appsRootUnits = live.listUnits(target.delivery.appsSpace);
-    const pendingAppsRootUnits = appsRootUnits.filter((row) => Number(row.HeadRevisionNum) !== Number(row.LastAppliedRevisionNum));
+    const pendingAppsRootUnits = appsRootUnits.filter((row) => Number(row.HeadRevisionNum) !== Number(row.LastReleasedRevisionNum));
     check(pendingAppsRootUnits.length === 0, `${targetName}: apps-root contains pending Unit heads during immediate audit: ${pendingAppsRootUnits.map((row) => row.Slug).join(", ")}`);
     const rootRelease = priorRootRelease(state.journal, state.outputRoot, targetName);
     const latestRoot = assertLatestRootRelease(live, targetName, target, rootRelease);
@@ -547,7 +547,7 @@ function observeExactSource(live, targetName, target) {
   check(unit.UnitID === target.source.unitID, `${targetName}: source Unit ID drifted`);
   check(Number(unit.HeadRevisionNum) === target.source.headRevisionNum, `${targetName}: source head revision drifted`);
   check(unit.DataHash === target.source.dataHash, `${targetName}: source data hash drifted`);
-  return { ref: `${target.source.space}/${target.source.unit}`, unitID: unit.UnitID, headRevisionNum: Number(unit.HeadRevisionNum), lastAppliedRevisionNum: Number(unit.LastAppliedRevisionNum), dataHash: unit.DataHash, approvedByCount: approvalCount(unit.ApprovedBy), hasApprovalGate: hasApprovalGate(unit) };
+  return { ref: `${target.source.space}/${target.source.unit}`, unitID: unit.UnitID, headRevisionNum: Number(unit.HeadRevisionNum), lastAppliedRevisionNum: Number(unit.LastReleasedRevisionNum), dataHash: unit.DataHash, approvedByCount: approvalCount(unit.ApprovedBy), hasApprovalGate: hasApprovalGate(unit) };
 }
 
 function assertExactSourceReleaseAuthority(live, targetName, target) {
@@ -679,7 +679,7 @@ function createLiveClient(request) {
     try { return JSON.parse(result.stdout); } catch { check(false, `cub ${args.slice(0, 2).join(" ")} returned invalid JSON`); }
   };
   const unit = (space, slug) => {
-    const rows = unwrapRows(cub(["unit", "list", "--space", space, "--where", `Slug = '${slug}'`, "--select", "Slug,UnitID,DataHash,HeadRevisionNum,LastAppliedRevisionNum,ApprovedBy,ApplyGates,TargetID,ToolchainType,ProviderType,Annotations", "-o", "json"], { json: true }), "Unit");
+    const rows = unwrapRows(cub(["unit", "list", "--space", space, "--where", `Slug = '${slug}'`, "--select", "Slug,UnitID,DataHash,HeadRevisionNum,LastReleasedRevisionNum,ApprovedBy,ApplyGates,TargetID,ToolchainType,ProviderType,Annotations", "-o", "json"], { json: true }), "Unit");
     check(rows.length <= 1, `${space}/${slug}: exact Unit query returned ${rows.length} rows`);
     return rows[0] ?? null;
   };
@@ -712,7 +712,7 @@ function createLiveClient(request) {
       check(namespace?.metadata?.uid === expectedUID, `${clusterContext}: kube-system UID differs from the exact application request`);
     },
     getUnit: unit,
-    listUnits(space) { return unwrapRows(cub(["unit", "list", "--space", space, "--select", "Slug,UnitID,DataHash,HeadRevisionNum,LastAppliedRevisionNum,ApprovedBy,ApplyGates,TargetID,ToolchainType,ProviderType,Annotations", "-o", "json"], { json: true }), "Unit"); },
+    listUnits(space) { return unwrapRows(cub(["unit", "list", "--space", space, "--select", "Slug,UnitID,DataHash,HeadRevisionNum,LastReleasedRevisionNum,ApprovedBy,ApplyGates,TargetID,ToolchainType,ProviderType,Annotations", "-o", "json"], { json: true }), "Unit"); },
     unitData(space, slug) { return cub(["unit", "data", "--space", space, slug]); },
     getTarget(ref) {
       const [space, slug] = ref.split("/");
@@ -1005,12 +1005,12 @@ function createFakeClient(request, outputRoot) {
   const putUnit = (space, slug, data, extra = {}) => {
     const existing = units.get(unitKey(space, slug));
     const head = existing ? Number(existing.HeadRevisionNum) + 1 : 1;
-    const row = { Slug: slug, UnitID: existing?.UnitID ?? deterministicUUID(`unit:${space}/${slug}`), DataHash: sha256(data), HeadRevisionNum: head, LastAppliedRevisionNum: existing?.LastAppliedRevisionNum ?? 0, ApprovedBy: existing?.ApprovedBy ?? [], TargetID: extra.TargetID ?? existing?.TargetID ?? null, ToolchainType: extra.ToolchainType ?? existing?.ToolchainType ?? "Kubernetes/YAML", ProviderType: null, ...extra, __data: data };
+    const row = { Slug: slug, UnitID: existing?.UnitID ?? deterministicUUID(`unit:${space}/${slug}`), DataHash: sha256(data), HeadRevisionNum: head, LastReleasedRevisionNum: existing?.LastReleasedRevisionNum ?? 0, ApprovedBy: existing?.ApprovedBy ?? [], TargetID: extra.TargetID ?? existing?.TargetID ?? null, ToolchainType: extra.ToolchainType ?? existing?.ToolchainType ?? "Kubernetes/YAML", ProviderType: null, ...extra, __data: data };
     units.set(unitKey(space, slug), row);
     return row;
   };
   for (const [name, target] of Object.entries(request.spec.targets)) {
-    units.set(unitKey(target.source.space, target.source.unit), { Slug: target.source.unit, UnitID: target.source.unitID, DataHash: target.source.dataHash, HeadRevisionNum: target.source.headRevisionNum, LastAppliedRevisionNum: 0, ApprovedBy: [], ApplyGates: target.approval.required ? { "require-approval": {} } : {}, TargetID: null, __data: "source" });
+    units.set(unitKey(target.source.space, target.source.unit), { Slug: target.source.unit, UnitID: target.source.unitID, DataHash: target.source.dataHash, HeadRevisionNum: target.source.headRevisionNum, LastReleasedRevisionNum: 0, ApprovedBy: [], ApplyGates: target.approval.required ? { "require-approval": {} } : {}, TargetID: null, __data: "source" });
     releases.set(target.source.space, []);
     releases.set(target.delivery.appsSpace, []);
     targetRows.set(target.delivery.targetRef, { TargetID: target.delivery.targetID, ProviderType: "OCI", ToolchainType: "Any" });
@@ -1078,7 +1078,7 @@ function createFakeClient(request, outputRoot) {
     publish(space) {
       mutationAttempts += 1;
       const rows = [...units.entries()].filter(([key]) => key.startsWith(`${space}/`)).map(([, row]) => row);
-      for (const row of rows) row.LastAppliedRevisionNum = row.HeadRevisionNum;
+      for (const row of rows) row.LastReleasedRevisionNum = row.HeadRevisionNum;
       const target = Object.values(request.spec.targets).find((row) => row.source.space === space);
       const release = target
         ? { ReleaseNum: ++releaseNumber, Digest: target.source.releaseBundleDigest, ManifestDigest: target.source.releaseManifestDigest, CreatedAt: `self-test-${releaseNumber}` }

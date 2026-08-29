@@ -93,7 +93,10 @@ const EXPECTED_FILTERS = Object.freeze([
   }),
 ]);
 const SPACE_READ_SELECT = "SpaceID,OrganizationID,Labels,Annotations,ReleaseTargetID,TriggerFilterID,TriggerIDs,WhereTrigger,DeleteGates";
-const UNIT_READ_SELECT = "SpaceID,Labels,Annotations,TargetID,UpstreamUnitID,DeleteGates,DestroyGates,ToolchainType,ProviderType,Data,DataHash,ContentHash,HeadRevisionNum,LastAppliedRevisionNum,ApprovedBy,ApplyGates";
+// Data is not a selectable Unit field any more -- naming it is a 400 -- and DataHash is
+// the only hash. The body is read from the Unit's data endpoint and attached as
+// ConfigData, which is why ConfigData rather than Data is a snapshot field below.
+const UNIT_READ_SELECT = "SpaceID,Labels,Annotations,TargetID,UpstreamUnitID,DeleteGates,DestroyGates,ToolchainType,ProviderType,DataHash,HeadRevisionNum,LastReleasedRevisionNum,ApprovedBy,ApplyGates";
 const LINK_READ_SELECT = "SpaceID,FromUnitID,ToUnitID,ToSpaceID,UpdateType,AutoUpdate,Labels,Annotations,UpstreamLastMergedRevisionNum,DownstreamLastMergedRevisionNum";
 const TRIGGER_READ_SELECT = "SpaceID,Event,ToolchainType,FunctionName,Arguments,Disabled,Validating,FailOpenAfter";
 const FILTER_READ_SELECT = "SpaceID,From,Where";
@@ -102,7 +105,7 @@ const CORE_CONFIGHUB_FINGERPRINT_RESOURCES = Object.freeze(["space", "unit", "re
 const FULL_CONFIGHUB_FINGERPRINT_RESOURCES = Object.freeze([...CORE_CONFIGHUB_FINGERPRINT_RESOURCES, "trigger", "filter", "tag"]);
 const CONFIGHUB_FINGERPRINT_FIELD_SETS = Object.freeze({
   space: Object.freeze(["OrganizationID", "SpaceID", "Slug", "Labels", "Annotations", "ReleaseTargetID", "TriggerFilterID", "TriggerIDs", "WhereTrigger", "DeleteGates"]),
-  unit: Object.freeze(["SpaceID", "UnitID", "Slug", "Labels", "Annotations", "TargetID", "UpstreamUnitID", "DeleteGates", "DestroyGates", "ToolchainType", "ProviderType", "Data", "DataHash", "ContentHash", "HeadRevisionNum", "LastAppliedRevisionNum", "ApprovedBy", "ApplyGates"]),
+  unit: Object.freeze(["SpaceID", "UnitID", "Slug", "Labels", "Annotations", "TargetID", "UpstreamUnitID", "DeleteGates", "DestroyGates", "ToolchainType", "ProviderType", "ConfigData", "DataHash", "HeadRevisionNum", "LastReleasedRevisionNum", "ApprovedBy", "ApplyGates"]),
   release: Object.freeze(["SpaceID", "ReleaseID", "TagID", "Digest", "ManifestDigest", "ReleaseNum", "UnitCount", "CreatedAt"]),
   link: Object.freeze(["SpaceID", "LinkID", "Slug", "FromUnitID", "ToUnitID", "ToSpaceID", "UpdateType", "AutoUpdate", "UpstreamLastMergedRevisionNum", "DownstreamLastMergedRevisionNum", "Labels", "Annotations"]),
   target: Object.freeze(["SpaceID", "TargetID", "Slug", "ProviderType", "ToolchainType", "Annotations"]),
@@ -672,6 +675,18 @@ function pinnedCubClient() {
   return {
     coordinate,
     json(args) { return JSON.parse(command("cub", [...contextArgs, ...args, "-o", "json"])); },
+    // The bytes go to a file rather than stdout: stdout normalizes the trailing
+    // newline and DataHash covers the stored bytes exactly.
+    data(space, slug) {
+      const directory = mkdtempSync(join(tmpdir(), "kubara-unit-data-"));
+      const path = join(directory, "data");
+      try {
+        command("cub", [...contextArgs, "unit", "data", slug, "--space", space, "--output-file", path, "--quiet"]);
+        return readFileSync(path);
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
+    },
   };
 }
 
@@ -733,20 +748,22 @@ function setDifference(left, right) {
   return [...left].filter((item) => !right.has(item)).sort();
 }
 
-function decodeBulkUnitData(unit, ref) {
-  check(typeof unit?.Data === "string", `${ref}: organization-wide Unit row omitted Data`);
-  check(/^[a-f0-9]{64}$/.test(unit.DataHash ?? ""), `${ref}: organization-wide Unit row has an invalid DataHash`);
-  const decoded = Buffer.from(unit.Data, "base64");
-  check(
-    unit.Data.length % 4 === 0 && decoded.toString("base64") === unit.Data,
-    `${ref}: organization-wide Unit row contains non-canonical base64 Data`,
-  );
-  check(sha256(decoded) === unit.DataHash, `${ref}: organization-wide Unit DataHash does not match decoded Data`);
+// The configuration is not a Unit field any more, so an organization-wide row carries
+// metadata only. `client.data` reads the body from the Unit's own data endpoint and it
+// is attached as ConfigData; these are the ingress checks that body still has to pass.
+function decodeUnitConfigBytes(bytes, dataHash, ref) {
+  check(/^[a-f0-9]{64}$/.test(dataHash ?? ""), `${ref}: organization-wide Unit row has an invalid DataHash`);
+  check(sha256(bytes) === dataHash, `${ref}: organization-wide Unit DataHash does not match its data`);
   try {
-    return new TextDecoder("utf-8", { fatal: true }).decode(decoded);
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
-    check(false, `${ref}: organization-wide Unit decoded Data is not valid UTF-8`);
+    check(false, `${ref}: organization-wide Unit data is not valid UTF-8`);
   }
+}
+
+function decodeBulkUnitData(unit, ref) {
+  check(typeof unit?.ConfigData === "string", `${ref}: organization-wide Unit row omitted its configuration`);
+  return decodeUnitConfigBytes(Buffer.from(unit.ConfigData, "utf8"), unit.DataHash, ref);
 }
 
 function canonicalSnapshotRows(rows, fields) {
@@ -908,8 +925,10 @@ function readConfigHubInventory(client, plan, findings) {
   const units = scopedRowsByRef(unitRows, "Unit", spaceSlugByID, findings);
   const unitDataByRef = new Map();
   for (const [ref, unit] of units) {
-    // The bulk row is the sole Unit body read for this bracket. Validate it at
-    // ingress before any caller can consume or cache it.
+    // The row carries no body, so it is read from the Unit's data endpoint and
+    // validated at ingress before any caller can consume or cache it.
+    const [unitSpace, unitSlug] = splitRef(ref);
+    unit.ConfigData = decodeUnitConfigBytes(client.data(unitSpace, unitSlug), unit.DataHash, ref);
     unitDataByRef.set(ref, decodeBulkUnitData(unit, ref));
   }
   const linkRows = listRows("link", [
@@ -2467,23 +2486,23 @@ function selfTest(plan) {
 
   const unitText = "apiVersion: v1\nkind: ConfigMap\n";
   const canonicalUnit = {
-    Data: Buffer.from(unitText, "utf8").toString("base64"),
+    ConfigData: unitText,
     DataHash: sha256(unitText),
   };
-  check(decodeBulkUnitData(canonicalUnit, "self-test/unit") === unitText, "canonical bulk Unit Data did not round-trip");
+  check(decodeBulkUnitData(canonicalUnit, "self-test/unit") === unitText, "canonical bulk Unit configuration did not round-trip");
   const largeUnitText = `apiVersion: v1\nkind: ConfigMap\ndata:\n  payload: ${"x".repeat(512 * 1024)}\n`;
   const largeCanonicalUnit = {
-    Data: Buffer.from(largeUnitText, "utf8").toString("base64"),
+    ConfigData: largeUnitText,
     DataHash: sha256(largeUnitText),
   };
   check(
     decodeBulkUnitData(largeCanonicalUnit, "self-test/large unit") === largeUnitText,
-    "large canonical organization-wide Unit Data did not round-trip",
+    "large canonical organization-wide Unit configuration did not round-trip",
   );
   expectFailure(
-    () => decodeBulkUnitData({ ...canonicalUnit, Data: "not-base64!" }, "self-test/unit"),
-    /non-canonical base64/,
-    "bulk Unit malformed base64",
+    () => decodeBulkUnitData({ ...canonicalUnit, ConfigData: undefined }, "self-test/unit"),
+    /omitted its configuration/,
+    "bulk Unit missing configuration",
   );
   expectFailure(
     () => decodeBulkUnitData({ ...canonicalUnit, DataHash: "0".repeat(64) }, "self-test/unit"),
@@ -2492,7 +2511,7 @@ function selfTest(plan) {
   );
   const invalidUtf8 = Buffer.from([0xff]);
   expectFailure(
-    () => decodeBulkUnitData({ Data: invalidUtf8.toString("base64"), DataHash: sha256(invalidUtf8) }, "self-test/unit"),
+    () => decodeUnitConfigBytes(invalidUtf8, sha256(invalidUtf8), "self-test/unit"),
     /not valid UTF-8/,
     "bulk Unit invalid UTF-8",
   );
