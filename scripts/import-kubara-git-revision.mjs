@@ -300,7 +300,7 @@ function inspectDestination({ requestPath, outputPath, context, credentialScanRe
       const sourceUnit = exactUnit(workload.sourceSpace, workload.sourceUnit, `${cluster} preserved workload source`);
       const release = client.latestRelease(workload.sourceSpace);
       validatePublishedRelease(workload.sourceSpace, release, "preserved workload source release");
-      check(Number(application.row.HeadRevisionNum ?? 0) === Number(application.row.LastAppliedRevisionNum ?? 0), `${target.delivery.appsSpace}/${workload.unit}: preserved workload head is not published`);
+      check(Number(application.row.HeadRevisionNum ?? 0) === Number(application.row.LastReleasedRevisionNum ?? 0), `${target.delivery.appsSpace}/${workload.unit}: preserved workload head is not published`);
       workload.unitID = application.row.UnitID;
       workload.dataHash = application.row.DataHash;
       workload.dataSHA256 = sha256(application.data);
@@ -350,7 +350,7 @@ function createCubInspectionClient(context) {
       return rows[0];
     },
     space(slug) { return one("space", "", slug, "Slug,SpaceID,OrganizationID,ReleaseTargetID,Labels,Annotations"); },
-    unit(space, slug) { return one("unit", space, slug, "Slug,UnitID,DataHash,HeadRevisionNum,LastAppliedRevisionNum,TargetID,UpstreamUnitID,ToolchainType,ProviderType,Labels,Annotations"); },
+    unit(space, slug) { return one("unit", space, slug, "Slug,UnitID,DataHash,HeadRevisionNum,LastReleasedRevisionNum,TargetID,UpstreamUnitID,ToolchainType,ProviderType,Labels,Annotations"); },
     target(space, slug) { return one("target", space, slug, "Slug,TargetID,SpaceID,ProviderType,ToolchainType,Annotations"); },
     unitData(space, slug) {
       const result = commandResult("cub", [...contextArgs, "unit", "data", "--space", space, slug]);
@@ -2788,8 +2788,8 @@ function assertExactPriorOrCurrentTransitionState({ compiled, client, expected, 
       && (live.TargetID ?? null) === (prior.targetID ?? null)
       && (live.UpstreamUnitID ?? null) === (prior.upstreamUnitID ?? null)
       && Number(live.HeadRevisionNum ?? 0) >= Number(prior.headRevisionNum ?? 0)
-      && Number(live.LastAppliedRevisionNum ?? 0) >= Number(prior.lastAppliedRevisionNum ?? 0)
-      && Number(live.LastAppliedRevisionNum ?? 0) <= Number(live.HeadRevisionNum ?? 0);
+      && Number(live.LastReleasedRevisionNum ?? 0) >= Number(prior.lastAppliedRevisionNum ?? 0)
+      && Number(live.LastReleasedRevisionNum ?? 0) <= Number(live.HeadRevisionNum ?? 0);
     check(priorExact || currentExact, `${ref}: live Unit is neither exact prior receipt state nor exact current transition payload`);
     check(isImporterOwned(live, compiled) || isPriorTransitionOwned(live, transition, "unit", ref), `${ref}: live Unit ownership is neither exact prior nor exact current transition state`);
   }
@@ -2824,7 +2824,7 @@ function assertPreservedWorkloadHeads(client, clusterPlan) {
   check(clusterPlan, "delivery apps Space lacks a pinned cluster plan");
   for (const workload of clusterPlan.workloadApplications ?? []) {
     const unit = client.getUnit(clusterPlan.appsSpace, workload.unit);
-    check(unit?.UnitID === workload.unitID && unit.DataHash === workload.dataHash && Number(unit.HeadRevisionNum ?? 0) === workload.headRevisionNum && Number(unit.LastAppliedRevisionNum ?? 0) === workload.headRevisionNum, `${clusterPlan.appsSpace}/${workload.unit}: refusing root publication with a changed or pending preserved workload head`);
+    check(unit?.UnitID === workload.unitID && unit.DataHash === workload.dataHash && Number(unit.HeadRevisionNum ?? 0) === workload.headRevisionNum && Number(unit.LastReleasedRevisionNum ?? 0) === workload.headRevisionNum, `${clusterPlan.appsSpace}/${workload.unit}: refusing root publication with a changed or pending preserved workload head`);
   }
 }
 
@@ -3197,13 +3197,13 @@ function preflightDeliveryInfrastructure({ compiled, client, allSpaces, expected
         const workload = allowed.workload;
         check(unit.UnitID === workload.unitID && unit.DataHash === workload.dataHash, `${delivery.appsSpace}/${unit.Slug}: preserved workload Application identity/data hash differs`);
         check(sha256(client.unitData(delivery.appsSpace, unit.Slug)) === workload.dataSHA256, `${delivery.appsSpace}/${unit.Slug}: preserved workload Application exact bytes differ`);
-        check(!unit.UpstreamUnitID && Number(unit.HeadRevisionNum ?? 0) === workload.headRevisionNum && Number(unit.LastAppliedRevisionNum ?? 0) === workload.headRevisionNum, `${delivery.appsSpace}/${unit.Slug}: preserved workload Application has an unpinned or unpublished head`);
+        check(!unit.UpstreamUnitID && Number(unit.HeadRevisionNum ?? 0) === workload.headRevisionNum && Number(unit.LastReleasedRevisionNum ?? 0) === workload.headRevisionNum, `${delivery.appsSpace}/${unit.Slug}: preserved workload Application has an unpinned or unpublished head`);
         assertPreservedWorkloadApplicationData(client.unitData(delivery.appsSpace, unit.Slug), workload.unit, destination.spaceReleaseOCIBase, workload.sourceSpace, workload.sourceReleaseManifestDigest);
         const sourceSpace = allSpaces.get(workload.sourceSpace);
         check(sourceSpace?.SpaceID === workload.sourceSpaceID && sourceSpace.OrganizationID === destination.organizationID, `${workload.sourceSpace}: preserved workload source Space identity differs`);
         const sourceUnit = client.getUnit(workload.sourceSpace, workload.sourceUnit);
         check(sourceUnit?.UnitID === workload.sourceUnitID, `${workload.sourceSpace}/${workload.sourceUnit}: preserved workload source Unit identity differs`);
-        check(client.listUnits(workload.sourceSpace).every((row) => Number(row.HeadRevisionNum ?? 0) === Number(row.LastAppliedRevisionNum ?? 0)), `${workload.sourceSpace}: preserved workload source has unpublished heads`);
+        check(client.listUnits(workload.sourceSpace).every((row) => Number(row.HeadRevisionNum ?? 0) === Number(row.LastReleasedRevisionNum ?? 0)), `${workload.sourceSpace}: preserved workload source has unpublished heads`);
         check(latestReleaseRow(client.listPublishedReleases(workload.sourceSpace))?.ManifestDigest === workload.sourceReleaseManifestDigest, `${workload.sourceSpace}: preserved workload source release manifest differs`);
       } else if (allowed.id) {
         check(unit.UnitID === allowed.id, `${delivery.appsSpace}/${unit.Slug}: bootstrap Application Unit ID differs from the request`);
@@ -3235,7 +3235,7 @@ function preflightDeliveryInfrastructure({ compiled, client, allSpaces, expected
     check(argobotUnits[0].TargetID === target.targetID && argobotUnits[0].UpstreamUnitID === basePlan.unitID, `${delivery.argobot.space}/${delivery.argobot.unit}: target or upstream lineage differs`);
     check(argobotUnits[0].DataHash === delivery.argobot.dataHash, `${delivery.argobot.space}/${delivery.argobot.unit}: ConfigHub DataHash differs from the request`);
     check(sha256(client.unitData(delivery.argobot.space, delivery.argobot.unit)) === delivery.argobot.dataSHA256, `${delivery.argobot.space}/${delivery.argobot.unit}: exact request-pinned argobot Unit bytes differ`);
-    check(Number(argobotUnits[0].HeadRevisionNum ?? 0) === Number(argobotUnits[0].LastAppliedRevisionNum ?? 0), `${delivery.argobot.space}/${delivery.argobot.unit}: exact argobot head is not published`);
+    check(Number(argobotUnits[0].HeadRevisionNum ?? 0) === Number(argobotUnits[0].LastReleasedRevisionNum ?? 0), `${delivery.argobot.space}/${delivery.argobot.unit}: exact argobot head is not published`);
     validatePublishedRelease(delivery.argobot.space, latestReleaseRow(client.listPublishedReleases(delivery.argobot.space)), "request-pinned argobot release");
     const argobotLinks = client.listLinks(delivery.argobot.space);
     check(argobotLinks.length === 1 && argobotLinks[0].Slug === `upgrade-${delivery.argobot.unit}` && argobotLinks[0].UpdateType === "UpgradeUnit" && argobotLinks[0].FromUnitID === delivery.argobot.unitID && argobotLinks[0].ToUnitID === basePlan.unitID && argobotLinks[0].ToSpaceID === basePlan.spaceID, `${delivery.argobot.space}: argobot UpgradeUnit Link differs`);
@@ -3325,7 +3325,7 @@ function transitionAllowsPriorUnit(transition, ref, unit, data) {
     && unit.DataHash === prior.dataHash
     && sha256(data) === prior.dataSHA256
     && Number(unit.HeadRevisionNum ?? 0) === Number(prior.headRevisionNum)
-    && Number(unit.LastAppliedRevisionNum ?? 0) === Number(prior.lastAppliedRevisionNum)
+    && Number(unit.LastReleasedRevisionNum ?? 0) === Number(prior.lastAppliedRevisionNum)
     && (unit.TargetID ?? null) === (prior.targetID ?? null)
     && (unit.UpstreamUnitID ?? null) === (prior.upstreamUnitID ?? null);
 }
@@ -3573,7 +3573,7 @@ function ensureManagedLink(client, plan, state, transition = null) {
 function ensurePublishedRelease(client, space, state) {
   const units = client.listUnits(space);
   check(units.length > 0, `${space}: refusing to publish an empty Space release`);
-  const unreleased = units.some((unit) => Number(unit.HeadRevisionNum ?? 0) !== Number(unit.LastAppliedRevisionNum ?? 0));
+  const unreleased = units.some((unit) => Number(unit.HeadRevisionNum ?? 0) !== Number(unit.LastReleasedRevisionNum ?? 0));
   const releases = client.listPublishedReleases(space);
   if (!unreleased && releases.length > 0) return latestReleaseRow(releases);
   const boundary = releaseBoundary(units);
@@ -3586,7 +3586,7 @@ function ensurePublishedRelease(client, space, state) {
     check(latest, `${space}: ConfigHub reported an unchanged bundle but no published release exists`);
     const after = client.listUnits(space);
     check(stableJson(releaseBoundary(after)) === stableJson(boundary), `${space}: Unit identity, data, or head changed during unchanged-bundle recovery`);
-    check(after.every((unit) => Number(unit.HeadRevisionNum ?? 0) === Number(unit.LastAppliedRevisionNum ?? 0)), `${space}: ConfigHub reported an unchanged bundle while Unit heads remain unreleased`);
+    check(after.every((unit) => Number(unit.HeadRevisionNum ?? 0) === Number(unit.LastReleasedRevisionNum ?? 0)), `${space}: ConfigHub reported an unchanged bundle while Unit heads remain unreleased`);
     validatePublishedRelease(space, latest, "reused unchanged-bundle release");
     return latest;
   }
@@ -3665,7 +3665,7 @@ function verifyAppliedImport({ compiled, client, expected, consumed, attestation
         dataHash: live.DataHash,
         dataSHA256: sha256(client.unitData(space, plan.slug)),
         headRevisionNum: live.HeadRevisionNum,
-        lastAppliedRevisionNum: live.LastAppliedRevisionNum,
+        lastAppliedRevisionNum: live.LastReleasedRevisionNum,
         targetID: live.TargetID ?? null,
         upstreamUnitID: live.UpstreamUnitID ?? null,
       });
@@ -3723,12 +3723,12 @@ function verifyAppliedImport({ compiled, client, expected, consumed, attestation
       dataHash: live.DataHash,
       dataSHA256: sha256(client.unitData(plan.space, plan.slug)),
       headRevisionNum: live.HeadRevisionNum,
-      lastAppliedRevisionNum: live.LastAppliedRevisionNum,
+      lastAppliedRevisionNum: live.LastReleasedRevisionNum,
     });
   }
   for (const appsSpace of [...new Set(compiled.plan.spec.configHub.deliveryApplications.map((row) => row.space))].sort()) {
     const liveUnits = client.listUnits(appsSpace);
-    check(liveUnits.every((unit) => Number(unit.HeadRevisionNum ?? 0) === Number(unit.LastAppliedRevisionNum ?? 0)), `${appsSpace}: delivery root Unit heads remain unpublished`);
+    check(liveUnits.every((unit) => Number(unit.HeadRevisionNum ?? 0) === Number(unit.LastReleasedRevisionNum ?? 0)), `${appsSpace}: delivery root Unit heads remain unpublished`);
     const release = latestReleaseRow(client.listPublishedReleases(appsSpace));
     check(/^sha256:[0-9a-f]{64}$/.test(release?.Digest ?? "") && /^sha256:[0-9a-f]{64}$/.test(release?.ManifestDigest ?? ""), `${appsSpace}: delivery root release evidence is missing`);
     deliveryRootReleases.push({ space: appsSpace, releaseNum: release.ReleaseNum, bundleDigest: release.Digest, manifestDigest: release.ManifestDigest });
@@ -3739,12 +3739,12 @@ function verifyAppliedImport({ compiled, client, expected, consumed, attestation
     argobotReleases.push({ space: cluster.argobot.space, releaseNum: release.ReleaseNum, bundleDigest: release.Digest, manifestDigest: release.ManifestDigest });
     for (const workload of cluster.workloadApplications ?? []) {
       const unit = client.getUnit(cluster.appsSpace, workload.unit);
-      preservedWorkloadApplications.push({ ref: `${cluster.appsSpace}/${workload.unit}`, unitID: unit.UnitID, dataHash: unit.DataHash, dataSHA256: sha256(client.unitData(cluster.appsSpace, workload.unit)), headRevisionNum: unit.HeadRevisionNum, lastAppliedRevisionNum: unit.LastAppliedRevisionNum, sourceSpace: workload.sourceSpace, sourceUnitID: workload.sourceUnitID, sourceReleaseManifestDigest: workload.sourceReleaseManifestDigest });
+      preservedWorkloadApplications.push({ ref: `${cluster.appsSpace}/${workload.unit}`, unitID: unit.UnitID, dataHash: unit.DataHash, dataSHA256: sha256(client.unitData(cluster.appsSpace, workload.unit)), headRevisionNum: unit.HeadRevisionNum, lastAppliedRevisionNum: unit.LastReleasedRevisionNum, sourceSpace: workload.sourceSpace, sourceUnitID: workload.sourceUnitID, sourceReleaseManifestDigest: workload.sourceReleaseManifestDigest });
     }
   }
   for (const plan of compiled.plan.spec.oci.configReleases) {
     const liveUnits = client.listUnits(plan.releaseSpace);
-    check(liveUnits.every((unit) => Number(unit.HeadRevisionNum ?? 0) === Number(unit.LastAppliedRevisionNum ?? 0)), `${plan.releaseSpace}: Unit heads remain unpublished`);
+    check(liveUnits.every((unit) => Number(unit.HeadRevisionNum ?? 0) === Number(unit.LastReleasedRevisionNum ?? 0)), `${plan.releaseSpace}: Unit heads remain unpublished`);
     const release = latestReleaseRow(client.listPublishedReleases(plan.releaseSpace));
     check(/^sha256:[0-9a-f]{64}$/.test(release?.Digest ?? "") && /^sha256:[0-9a-f]{64}$/.test(release?.ManifestDigest ?? ""), `${plan.releaseSpace}: exact ConfigHub release evidence is missing`);
     releases.push({ space: plan.releaseSpace, releaseNum: release.ReleaseNum, bundleDigest: release.Digest, manifestDigest: release.ManifestDigest });
@@ -3984,11 +3984,11 @@ function createCubClient(context, destination) {
     },
     listSpaces() { return unwrapRows(run(["space", "list", "--select", "Slug,SpaceID,Labels,Annotations,OrganizationID,ReleaseTargetID", "-o", "json"], { json: true }), "Space"); },
     getSpace(space) { const row = run(["space", "get", space, "-o", "json"], { json: true, allowNotFound: true }); return row ? unwrapEntity(row, "Space") : null; },
-    listUnits(space) { return unwrapRows(run(["unit", "list", "--space", space, "--select", "Slug,UnitID,Labels,Annotations,TargetID,UpstreamUnitID,ToolchainType,ProviderType,DataHash,HeadRevisionNum,LastAppliedRevisionNum", "-o", "json"], { json: true }), "Unit"); },
+    listUnits(space) { return unwrapRows(run(["unit", "list", "--space", space, "--select", "Slug,UnitID,Labels,Annotations,TargetID,UpstreamUnitID,ToolchainType,ProviderType,DataHash,HeadRevisionNum,LastReleasedRevisionNum", "-o", "json"], { json: true }), "Unit"); },
     getUnit(space, slug) {
       const rows = unwrapRows(run([
         "unit", "list", "--space", space, "--where", `Slug = '${slug}'`,
-        "--select", "Slug,UnitID,Labels,Annotations,TargetID,UpstreamUnitID,ToolchainType,ProviderType,DataHash,HeadRevisionNum,LastAppliedRevisionNum", "-o", "json",
+        "--select", "Slug,UnitID,Labels,Annotations,TargetID,UpstreamUnitID,ToolchainType,ProviderType,DataHash,HeadRevisionNum,LastReleasedRevisionNum", "-o", "json",
       ], { json: true }), "Unit");
       check(rows.length <= 1, `${space}/${slug}: narrow Unit identity query returned ${rows.length} rows`);
       return rows[0] ?? null;
@@ -4766,7 +4766,7 @@ function createFakeHub(compiled) {
       UpstreamUnitID: extra.UpstreamUnitID ?? null,
       DataHash: sha256(data),
       HeadRevisionNum: extra.HeadRevisionNum ?? 1,
-      LastAppliedRevisionNum: extra.LastAppliedRevisionNum ?? 1,
+      LastReleasedRevisionNum: extra.LastReleasedRevisionNum ?? 1,
     };
     units.get(space).set(slug, row);
     unitData.set(`${space}/${slug}`, data);
@@ -4882,7 +4882,7 @@ function createFakeHub(compiled) {
         const slug = commandArgs[spaceIndex + 2];
         const path = commandArgs[spaceIndex + 3];
         const provider = flag(commandArgs, "--provider");
-        const row = putUnit(space, slug, readFileSync(path, "utf8"), { ToolchainType: flag(commandArgs, "--toolchain") ?? "Kubernetes/YAML", ProviderType: provider, LastAppliedRevisionNum: 0 });
+        const row = putUnit(space, slug, readFileSync(path, "utf8"), { ToolchainType: flag(commandArgs, "--toolchain") ?? "Kubernetes/YAML", ProviderType: provider, LastReleasedRevisionNum: 0 });
         applyPairs(row, commandArgs);
         return {};
       }
@@ -4920,7 +4920,7 @@ function createFakeHub(compiled) {
         addSpace(space, id("space", space), { Labels: clone(upstream.Labels), Annotations: clone(upstream.Annotations), ReleaseTargetID: targetID });
         for (const upstreamUnit of units.get(upstreamSpace).values()) {
           const data = unitData.get(`${upstreamSpace}/${upstreamUnit.Slug}`);
-          const cloned = putUnit(space, upstreamUnit.Slug, data, { Labels: clone(upstreamUnit.Labels), Annotations: clone(upstreamUnit.Annotations), ToolchainType: upstreamUnit.ToolchainType, ProviderType: upstreamUnit.ProviderType, TargetID: targetID, UpstreamUnitID: upstreamUnit.UnitID, LastAppliedRevisionNum: 0 });
+          const cloned = putUnit(space, upstreamUnit.Slug, data, { Labels: clone(upstreamUnit.Labels), Annotations: clone(upstreamUnit.Annotations), ToolchainType: upstreamUnit.ToolchainType, ProviderType: upstreamUnit.ProviderType, TargetID: targetID, UpstreamUnitID: upstreamUnit.UnitID, LastReleasedRevisionNum: 0 });
           putLink(space, `upgrade-${upstreamUnit.Slug}`, { UpdateType: "UpgradeUnit", FromUnitID: cloned.UnitID, ToUnitID: upstreamUnit.UnitID, ToSpaceID: upstream.SpaceID });
         }
         if (targetRef) {
@@ -4928,7 +4928,7 @@ function createFakeHub(compiled) {
           check(appPlan, `${space}: fake delivery Application plan missing`);
           const target = requestTargetByRef(request, targetRef);
           const autoApp = autoGeneratedPlatformDeliveryApplication(destination.spaceReleaseOCIBase, space, appPlan.destinationNamespace);
-          const app = putUnit(appPlan.space, appPlan.slug, `${toYaml(autoApp)}\n`, { TargetID: target.targetID, LastAppliedRevisionNum: 0 });
+          const app = putUnit(appPlan.space, appPlan.slug, `${toYaml(autoApp)}\n`, { TargetID: target.targetID, LastReleasedRevisionNum: 0 });
           app.Labels = {};
         }
         return {};
@@ -4954,7 +4954,7 @@ function createFakeHub(compiled) {
       if (resource === "release" && verb === "publish") {
         const space = commandArgs[2];
         const rows = [...units.get(space).values()];
-        for (const row of rows) row.LastAppliedRevisionNum = row.HeadRevisionNum;
+        for (const row of rows) row.LastReleasedRevisionNum = row.HeadRevisionNum;
         if (unchangedReleaseResponses.delete(space)) {
           throw new Error(`cub release publish ${space} failed\nHTTP 400: ${UNCHANGED_RELEASE_ERROR}`);
         }
