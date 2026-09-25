@@ -95,8 +95,8 @@ Use the repo-local preflight helper before Gate A. It is read-only and does
 not create clusters, install Kyverno, apply policies, or sync Argo.
 
 ```bash
-examples/mini-kubaras/case-03-policy-admission/preflight.sh --explain
-examples/mini-kubaras/case-03-policy-admission/preflight.sh
+examples/mini-kubara/case-03-policy-admission/preflight.sh --explain
+examples/mini-kubara/case-03-policy-admission/preflight.sh
 ```
 
 The helper:
@@ -125,7 +125,7 @@ on the strength of this helper.
 Authoring fixture in this repo:
 
 ```text
-examples/mini-kubaras/case-03-policy-admission/fixtures/
+examples/mini-kubara/case-03-policy-admission/fixtures/
   README.md
   policies/require-safe-container.yaml
   workloads/deployment-bad.yaml
@@ -165,8 +165,8 @@ Public graduation targets:
 Run Mini-Kubara Case 03: Policy Admission.
 
 Start with the read-only preflight.
-  examples/mini-kubaras/case-03-policy-admission/preflight.sh --explain
-  examples/mini-kubaras/case-03-policy-admission/preflight.sh
+  examples/mini-kubara/case-03-policy-admission/preflight.sh --explain
+  examples/mini-kubara/case-03-policy-admission/preflight.sh
 
 Do not create a cluster, install Kyverno, apply the policy, or sync the
 ApplicationSet on the strength of the preflight alone.

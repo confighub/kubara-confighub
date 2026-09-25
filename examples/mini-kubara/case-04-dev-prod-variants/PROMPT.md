@@ -14,12 +14,9 @@ must not leak into prod during promotion. The case can run on one laptop, but
 it must not claim real production readiness.
 
 Read first:
-- AGENTS.md
 - examples/mini-kubara/README.md
 - examples/mini-kubara/case-04-dev-prod-variants/GUIDE.md
-- incubator/AI_START_HERE.md
-- incubator/ai-guide-standard.md
-- incubator/standard-ai-demo-pacing.md
+- examples/mini-kubara/AI_START_HERE.md
 
 Operating rules:
 - You are fresh. Do not assume kind, Argo, ConfigHub auth, workers, targets,

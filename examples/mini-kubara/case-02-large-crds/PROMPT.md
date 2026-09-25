@@ -14,13 +14,10 @@ controller readiness, and a dependent custom resource. Do not rediscover the
 external-secrets failure halfway through a sync.
 
 Read first:
-- AGENTS.md
 - examples/mini-kubara/README.md
 - examples/mini-kubara/case-02-large-crds/GUIDE.md
 - examples/mini-kubara/case-02-large-crds/fixtures/README.md
-- incubator/AI_START_HERE.md
-- incubator/ai-guide-standard.md
-- incubator/standard-ai-demo-pacing.md
+- examples/mini-kubara/AI_START_HERE.md
 
 Operating rules:
 - You are fresh. Do not assume kind, Argo, ConfigHub auth, workers, targets,

@@ -14,12 +14,9 @@ Argo owns one generated Application, a one-shot sync converges, and closeout is
 clean. This is the green baseline for later harder cases.
 
 Read first:
-- AGENTS.md
 - examples/mini-kubara/README.md
 - examples/mini-kubara/case-01-clean-handoff/GUIDE.md
-- incubator/AI_START_HERE.md
-- incubator/ai-guide-standard.md
-- incubator/standard-ai-demo-pacing.md
+- examples/mini-kubara/AI_START_HERE.md
 
 Operating rules:
 - You are fresh. Do not assume kind, Argo, ConfigHub auth, workers, targets,

@@ -15,10 +15,9 @@ by fixing governed desired state or explicitly approving a dev-only policy
 relaxation. Do not retry the same rejected manifest blindly.
 
 Read first:
-- AGENTS.md
-- examples/mini-kubaras/README.md
-- examples/mini-kubaras/case-03-policy-admission/GUIDE.md
-- examples/mini-kubaras/case-03-policy-admission/fixtures/README.md
+- examples/mini-kubara/README.md
+- examples/mini-kubara/case-03-policy-admission/GUIDE.md
+- examples/mini-kubara/case-03-policy-admission/fixtures/README.md
 - docs/product/LOVABLE_UX_UVB_CONTRACT.md
 - docs/product/TRUST_SURFACE_DENSITY_CONTRACT.md
 - docs/templates/PROOF_CLOSEOUT_TEMPLATE.md
@@ -40,7 +39,7 @@ Operating rules:
   relaxations, or app syncs.
 - Do not mutate public examples. Use them only as read-only references.
 - The repo already ships deterministic Case 03 fixtures under
-  examples/mini-kubaras/case-03-policy-admission/fixtures. Do not regenerate
+  examples/mini-kubara/case-03-policy-admission/fixtures. Do not regenerate
   or overwrite them mid-run. Do not invent a fourth workload variant or a
   different policy. If a fixture appears missing, stop and report the blocker.
 
@@ -50,8 +49,8 @@ Initial preflight, read-only:
    and helper files.
 3. Run the repo-local preflight helper FIRST, in --explain mode, then in the
    default read-only form:
-     examples/mini-kubaras/case-03-policy-admission/preflight.sh --explain
-     examples/mini-kubaras/case-03-policy-admission/preflight.sh
+     examples/mini-kubara/case-03-policy-admission/preflight.sh --explain
+     examples/mini-kubara/case-03-policy-admission/preflight.sh
    The helper is read-only: it confirms the fixture layout and proves the bad
    workload violates the policy by construction and the fixed workload
    satisfies it by construction. Do not treat a successful preflight as
