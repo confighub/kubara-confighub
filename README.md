@@ -124,6 +124,15 @@ Around that mechanism sits the lifecycle teams actually ask for. Production Spac
 
 Chapter 6 of the tutorial runs this cycle end to end, and every claim above has its receipt.
 
+## Practise the handoff on small cases
+
+[Mini-Kubara](examples/mini-kubara/README.md) has small drills for the same
+platform facts at a size you can rerun in minutes, on a local kind cluster
+with Argo CD. Three have scripts: a clean ConfigHub-to-Argo CD handoff, CRDs
+too large for client-side apply, and an admission policy that blocks a bad
+workload. The fourth, dev and prod variants of one app, is a written design
+with its workload fixtures only.
+
 ## Two paths from here
 
 ### View the platform
