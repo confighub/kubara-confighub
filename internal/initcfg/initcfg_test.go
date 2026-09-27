@@ -40,6 +40,9 @@ func TestWriteProducesAConfigPlanCanRead(t *testing.T) {
 	if got := strings.Join(p.Config.Clusters[1].Enabled(), ","); got != "cert-manager,traefik" {
 		t.Fatalf("spoke services = %s", got)
 	}
+	if p.Config.Clusters[0].ArgoCD.SelfManaged != "enabled" || p.Config.Clusters[1].ArgoCD.SelfManaged != "disabled" {
+		t.Fatalf("selfManaged hub=%q spoke=%q; the hub's Argo CD delivers to spokes", p.Config.Clusters[0].ArgoCD.SelfManaged, p.Config.Clusters[1].ArgoCD.SelfManaged)
+	}
 	env, _ := os.ReadFile(filepath.Join(dir, ".env.example"))
 	if !strings.Contains(string(env), "ARGOCD_WIZARD_ACCOUNT_PASSWORD=replace-before-use") {
 		t.Fatalf(".env.example should hold placeholders only:\n%s", env)

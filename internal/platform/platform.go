@@ -22,10 +22,13 @@ type Config struct {
 }
 
 type Cluster struct {
-	Name     string                   `yaml:"name"`
-	Stage    string                   `yaml:"stage"`
-	Type     string                   `yaml:"type"`
-	DNSName  string                   `yaml:"dnsName"`
+	Name    string `yaml:"name"`
+	Stage   string `yaml:"stage"`
+	Type    string `yaml:"type"`
+	DNSName string `yaml:"dnsName"`
+	ArgoCD  struct {
+		SelfManaged string `yaml:"selfManaged"`
+	} `yaml:"argocd"`
 	Catalogs []string                 `yaml:"catalogs"`
 	Services map[string]ServiceConfig `yaml:"services"`
 }
@@ -124,6 +127,7 @@ func (c Config) CatalogVersion() (string, []string) {
 	var problems []string
 	seen := map[string]bool{}
 	for _, cl := range c.Clusters {
+		var general []string
 		for _, ref := range cl.Catalogs {
 			name, version, ok := catalog.ParseRef(ref)
 			if !ok {
@@ -131,8 +135,16 @@ func (c Config) CatalogVersion() (string, []string) {
 				continue
 			}
 			if name == "general" {
+				general = append(general, version)
 				seen[version] = true
 			}
+		}
+		switch len(general) {
+		case 0:
+			problems = append(problems, fmt.Sprintf("cluster %s reads no Kubara general catalog, so its services cannot be resolved", cl.Name))
+		case 1:
+		default:
+			problems = append(problems, fmt.Sprintf("cluster %s reads %d general catalogs (%s); cub kubara expects one", cl.Name, len(general), strings.Join(general, ", ")))
 		}
 	}
 	var versions []string

@@ -131,3 +131,40 @@ func TestExplicitStageOrder(t *testing.T) {
 		t.Fatalf("default order = %v", got)
 	}
 }
+
+const catalogPerCluster = `version: v1alpha4
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0
+clusters:
+  - name: hub
+    stage: dev
+    type: hub
+    argocd: {selfManaged: enabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:3.0.0]
+    services: {traefik: {status: enabled}}
+  - name: spoke
+    stage: prod
+    type: spoke
+    argocd: {selfManaged: enabled}
+    services: {traefik: {status: enabled}}
+`
+
+func TestEveryClusterNeedsItsOwnGeneralCatalog(t *testing.T) {
+	pl, err := Build(writeConfig(t, catalogPerCluster), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(pl.Problems, "\n")
+	if !strings.Contains(joined, "cluster spoke reads no Kubara general catalog") {
+		t.Fatalf("expected a per-cluster catalog problem, got:\n%s", joined)
+	}
+}
+
+func TestSpokeWithItsOwnArgoCDIsAProblem(t *testing.T) {
+	pl, err := Build(writeConfig(t, catalogPerCluster), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(strings.Join(pl.Problems, "\n"), "spoke spoke has argocd.selfManaged enabled") {
+		t.Fatalf("expected a selfManaged problem, got %v", pl.Problems)
+	}
+}

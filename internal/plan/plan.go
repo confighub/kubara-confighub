@@ -142,6 +142,15 @@ func Build(p platform.Platform, opts Options) (Plan, error) {
 			out.Hub = cl.Name
 		}
 	}
+	for _, cl := range p.Config.Clusters {
+		sm := cl.ArgoCD.SelfManaged
+		if cl.Type == "spoke" && sm == "enabled" {
+			out.Problems = append(out.Problems, fmt.Sprintf("spoke %s has argocd.selfManaged enabled; in Kubara's hub-and-spoke the hub's Argo CD delivers to spokes, so set it to disabled", cl.Name))
+		}
+		if cl.Type == "hub" && sm == "disabled" {
+			out.Problems = append(out.Problems, fmt.Sprintf("hub %s has argocd.selfManaged disabled; the hub runs the Argo CD that delivers to the spokes", cl.Name))
+		}
+	}
 	if hubs == 0 {
 		out.Problems = append(out.Problems, "no cluster has type hub; Kubara needs one hub")
 	} else if hubs > 1 {

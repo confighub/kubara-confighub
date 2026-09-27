@@ -127,7 +127,12 @@ func Write(opts Options) (Result, error) {
 			Catalogs: []string{general.OCI},
 			Services: map[string]service{},
 		}
-		cl.ArgoCD.SelfManaged = "enabled"
+		// Kubara's hub-and-spoke: the hub's Argo CD manages itself and delivers
+		// to the spokes, so a spoke runs no Argo CD of its own.
+		cl.ArgoCD.SelfManaged = "disabled"
+		if spec.Type == "hub" {
+			cl.ArgoCD.SelfManaged = "enabled"
+		}
 		cl.ArgoCD.Repo.HTTPS.Configs = gitRef{URL: opts.Repository, TargetRevision: "main"}
 		cl.ArgoCD.Repo.HTTPS.Components = gitRef{URL: opts.Repository, TargetRevision: "main"}
 		for _, svc := range general.Services {
