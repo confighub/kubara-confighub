@@ -21,10 +21,12 @@ step() { printf '\n== %s\n' "$*"; }
 stages_are() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.Stages[].Name] | join(",")')" = "$3" ]; }
 approval_is() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.AttestationPrerequisites[]? | select(.Name == "approval") | (.AllowAuthors // false)] | first // false | tostring')" = "$3" ]; }
 # A variant takes its cluster's render once, as the first change after the
-# clone. Later revisions are changes made in ConfigHub, which a re-run leaves
-# alone.
+# clone. Later changes are made in ConfigHub, and a re-run leaves them alone.
+# The server's own revisions, the clone and a resolve, are not changes.
 take_render() {
-  if [ "$(cub unit get --space "$1" "$2" -o jq=.Unit.HeadRevisionNum)" -le 2 ]; then
+  local edits
+  edits=$(cub revision list --space "$1" "$2" -o 'jq=[.[] | .Revision.Source | select(. != "CloneUnit" and . != "Resolve")] | length')
+  if [ "$edits" = 0 ]; then
     cub unit update --space "$1" "$2" "$3" --change-desc "$4" --quiet
   else
     echo "$1/$2 already has its cluster's render"
@@ -62,17 +64,17 @@ stages_are kx-homer-dashboard-base rollout dev || echo '{"Stages":[{"Name":"dev"
 approval_is kx-homer-dashboard-base rollout true || echo '{"AttestationPrerequisites":[{"AllowAuthors":true,"Count":1,"Name":"approval","Type":"Approval"}]}' | cub changeworkflow update --patch --space kx-homer-dashboard-base rollout --from-stdin --quiet
 
 step "2/2 A variant per cluster, holding that cluster's own render"
-cub variant create hub kx-bootstrap-crds-base --stage dev --space-pattern template:kx-bootstrap-crds-hub --allow-exists --quiet
+cub variant create hub kx-bootstrap-crds-base --stage dev --space-pattern template:kx-bootstrap-crds-hub --allow-exists --quiet >/dev/null
 echo 'kx-bootstrap-crds-hub: the base is this cluster'\''s render'
-cub variant create edge kx-bootstrap-crds-base --stage prod --space-pattern template:kx-bootstrap-crds-edge --allow-exists --quiet
+cub variant create edge kx-bootstrap-crds-base --stage prod --space-pattern template:kx-bootstrap-crds-edge --allow-exists --quiet >/dev/null
 echo 'kx-bootstrap-crds-edge: Kubara renders it the same as on hub; no change to record'
-cub variant create hub kx-traefik-base --stage dev --space-pattern template:kx-traefik-hub --allow-exists --quiet
+cub variant create hub kx-traefik-base --stage dev --space-pattern template:kx-traefik-hub --allow-exists --quiet >/dev/null
 echo 'kx-traefik-hub: the base is this cluster'\''s render'
-cub variant create edge kx-traefik-base --stage prod --space-pattern template:kx-traefik-edge --allow-exists --quiet
+cub variant create edge kx-traefik-base --stage prod --space-pattern template:kx-traefik-edge --allow-exists --quiet >/dev/null
 take_render kx-traefik-edge traefik traefik/edge.yaml 'Kubara'\''s values for edge'
-cub variant create hub kx-argo-cd-base --stage dev --space-pattern template:kx-argo-cd-hub --allow-exists --quiet
+cub variant create hub kx-argo-cd-base --stage dev --space-pattern template:kx-argo-cd-hub --allow-exists --quiet >/dev/null
 echo 'kx-argo-cd-hub: the base is this cluster'\''s render'
-cub variant create hub kx-homer-dashboard-base --stage dev --space-pattern template:kx-homer-dashboard-hub --allow-exists --quiet
+cub variant create hub kx-homer-dashboard-base --stage dev --space-pattern template:kx-homer-dashboard-hub --allow-exists --quiet >/dev/null
 echo 'kx-homer-dashboard-hub: the base is this cluster'\''s render'
 
 step "Done"
