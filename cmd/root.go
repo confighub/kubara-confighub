@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/confighub/kubara-confighub/internal/apply"
 	"github.com/confighub/kubara-confighub/internal/catalog"
 	"github.com/confighub/kubara-confighub/internal/initcfg"
 	"github.com/confighub/kubara-confighub/internal/plan"
@@ -63,7 +64,10 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
             name, and a record of the chart versions and evidence. Offline.
   plan      reads a Kubara config.yaml or a generated platform and shows what
             ConfigHub would hold: a base per component, a variant per cluster,
-            a Target per cluster, and the stage order. Offline; changes nothing.
+            and the stage order. Offline; changes nothing.
+  apply     renders each cluster of a generated platform and writes the plan
+            as files and one script of cub steps, apply.sh, for you to read
+            and run. It runs nothing itself.
 
 Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kubara.md`,
 		SilenceUsage:  true,
@@ -145,6 +149,62 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 	planCmd.Flags().StringVar(&po.Prefix, "prefix", "kubara", "prefix for everything the plan would create in ConfigHub")
 	planCmd.Flags().StringVar(&stages, "stages", "", "the stage order, comma-separated; by default dev, staging, prod, then any others")
 
+	var ao plan.Options
+	var aStages, aOut string
+	var allowAuthors bool
+	applyCmd := &cobra.Command{
+		Use:   "apply <kubara-dir> --out <dir>",
+		Short: "Write a generated Kubara platform as renders and one script of cub steps",
+		Long: `Render each cluster of a platform Kubara has generated, with the ConfigHub
+Workshop plugin's cub stack from-kubara, and write:
+
+  apply.sh                     the cub steps; read it, then run it
+  plan.txt                     the plan it carries out
+  <component>/base.yaml        the render of the cluster a change reaches first
+  <component>/<cluster>.yaml   another cluster's render, where it differs
+  <component>/change-workflow.yaml
+                               the stage order, with an approval before each release
+
+apply.sh creates a component, a base Space and a rollout workflow per Kubara
+component, then a variant Space per cluster holding that cluster's render.
+It creates no Targets and releases nothing: Kubara's hub, AppProject and
+ApplicationSets keep delivering from Git until takeover.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			p, err := platform.Load(args[0])
+			if err != nil {
+				return err
+			}
+			ao.Stages = split(aStages)
+			pl, err := plan.Build(p, ao)
+			if err != nil {
+				return err
+			}
+			res, err := apply.Write(pl, apply.Options{Out: aOut, AllowAuthors: allowAuthors})
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			fmt.Fprintf(w, "Wrote %s: %d components, %d variants.\n", res.Script, res.Components, res.Variants)
+			if len(res.Secrets) > 0 {
+				fmt.Fprintf(w, "These Secrets go to ConfigHub with their keys and without their values:\n")
+				for _, name := range res.Secrets {
+					fmt.Fprintf(w, "  %s\n", name)
+				}
+			}
+			for _, v := range res.Unchanged {
+				fmt.Fprintf(w, "  %s renders the same as its base, so it records no change\n", v)
+			}
+			fmt.Fprintf(w, "\nNext\n  less %s        # read what it will do\n  bash %s\n", res.Script, res.Script)
+			return nil
+		},
+	}
+	applyCmd.Flags().StringVar(&aOut, "out", "", "directory to write the renders, workflows and apply.sh (required)")
+	applyCmd.Flags().StringVar(&ao.Prefix, "prefix", "kubara", "prefix for everything apply.sh creates in ConfigHub")
+	applyCmd.Flags().StringVar(&aStages, "stages", "", "the stage order, comma-separated; by default dev, staging, prod, then any others")
+	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
+	_ = applyCmd.MarkFlagRequired("out")
+
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print the plugin version",
@@ -154,7 +214,7 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 		},
 	}
 
-	root.AddCommand(services, initCmd, planCmd, versionCmd)
+	root.AddCommand(services, initCmd, planCmd, applyCmd, versionCmd)
 	return root
 }
 

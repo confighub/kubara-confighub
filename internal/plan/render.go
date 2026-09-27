@@ -26,7 +26,7 @@ func Render(p Plan) string {
 			if cl.Type != "hub" {
 				delivery = "delivered by " + p.Hub + "'s Argo CD, as Kubara wires it"
 			}
-			w("     %-22s %-5s  Target %s; %s", cl.Name, cl.Type, cl.Target, delivery)
+			w("     %-22s %-5s  %s", cl.Name, cl.Type, delivery)
 			w("     %-22s        runs %s", "", strings.Join(cl.Components, ", "))
 		}
 	}
@@ -57,13 +57,13 @@ func Render(p Plan) string {
 	w("                   Kubara's catalogs stay the source of every component; evidence only annotates it. Workshop Catalog at %s.", short(p.Workshop.Commit))
 	w("")
 
-	w("ConfigHub would hold %d Spaces", p.SpaceCount())
-	w("  %s  the rollout workflow: each stage waits for the stage ahead to release,", p.Control)
-	w("  %s  and a release needs an approval attestation (cub variant approve) first.", strings.Repeat(" ", len(p.Control)))
-	w("  one Space per cluster for its Target;")
-	w("  one base Space per component, and one variant Space per cluster it runs on.")
-	w("  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them. How approved")
-	w("  releases reach the hub's Argo CD is settled at takeover, which this version does not do yet.")
+	w("ConfigHub would hold %d Spaces: a base Space per component, and a variant Space per cluster it runs on.", p.SpaceCount())
+	w("  Each base holds what Kubara generated for the earliest-stage cluster that runs it, and a rollout workflow:")
+	w("  the stages above in order, each waiting for the stage ahead, and an approval attestation")
+	w("  (cub variant approve) before each release. Each variant records its cluster's own render as a change.")
+	w("  Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.")
+	w("  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering")
+	w("  from Git. Pointing them at approved releases is takeover, which this version does not do yet.")
 	w("")
 
 	if len(p.Notes) > 0 {
@@ -83,17 +83,13 @@ func Render(p Plan) string {
 
 	w("Next")
 	if p.Generated {
-		for _, st := range p.Stages {
-			for _, cl := range st.Clusters {
-				w("  cub stack from-kubara %s --cluster %s   # check what Kubara generated, with the Workshop plugin", p.Source, cl.Name)
-			}
-		}
+		w("  cub kubara apply %s --out <dir>   # render each cluster and write apply.sh, the cub steps above", p.Source)
 	} else {
 		w("  kubara --work-dir %s --config-file config.yaml --env-file .env generate --helm", p.Source)
 		w("  cub kubara plan %s   # again, with the versions Kubara wrote", p.Source)
 	}
 	w("")
-	w("Offline: no account, no cluster, nothing changed. Writing these steps as a script (cub kubara apply) is not in this version yet.")
+	w("Offline: no account, no cluster, nothing changed.")
 	return b.String()
 }
 

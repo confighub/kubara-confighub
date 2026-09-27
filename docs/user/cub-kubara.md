@@ -3,9 +3,10 @@
 `cub kubara` is a plugin for the ConfigHub CLI. It takes a Kubara platform,
 either one you are about to create or one Kubara has already generated, and
 shows what ConfigHub would hold for it: a base for each component, a variant
-for each cluster it runs on, a Target for each cluster, and the order a change
-rolls out in. It works offline, with no account and no cluster, and changes
-nothing.
+for each cluster it runs on, and the order a change rolls out in. That much
+works offline, with no account and no cluster, and changes nothing. When you
+are ready, it writes the cub steps that bring the platform into ConfigHub as
+one script you read before you run it.
 
 Kubara keeps doing what it does. Its catalogs stay the source of every
 component, and Kubara still generates the platform. The ConfigHub Workshop
@@ -75,9 +76,8 @@ cub kubara plan my-platform
 `plan` reads a Kubara work directory or a `config.yaml`. When Kubara has already
 generated the platform, it reads the exact chart versions Kubara wrote.
 Otherwise it takes them from the catalog. For this example the plan shows three
-stages, dev, staging and prod, from each cluster's `stage` field. Each cluster
-gets a Target, and each component gets a base and a variant for every cluster
-it runs on. Every chart is listed with its evidence, and a summary line counts
+stages, dev, staging and prod, from each cluster's `stage` field. Each
+component gets a base and a variant for every cluster it runs on. Every chart is listed with its evidence, and a summary line counts
 how many were checked at the exact version.
 
 Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them:
@@ -88,27 +88,60 @@ define, or a hub-only service on a spoke.
 Pass `--stages dev,canary,prod` to set the stage order yourself, and
 `--prefix` to change the prefix of everything the plan would create.
 
-## Check what Kubara generated
+## Bring the platform into ConfigHub
 
-`plan` ends by naming the next step. To check the platform Kubara generated,
-use the ConfigHub Workshop plugin, one cluster at a time:
+Once Kubara has generated the platform, `apply` renders every cluster and
+writes the steps as a script:
 
 ```bash
 cub plugin install confighub/cub-workshop
-cub stack from-kubara my-platform --cluster hub-dev
-cub stack check my-platform/confighub/stack.yaml
+cub kubara apply my-platform --out my-platform-confighub
+less my-platform-confighub/apply.sh
+bash my-platform-confighub/apply.sh
 ```
 
-`cub stack check` looks for conflicts between components, CRD ordering, API
-versions, webhooks that need a certificate, and namespaces. It works offline.
+`apply` renders with the Workshop plugin's `cub stack from-kubara`, so both
+plugins render a Kubara platform the same way. It runs nothing in ConfigHub
+itself. It writes `apply.sh`, the plan it carries out as `plan.txt`, and a
+directory per component holding its renders and its rollout workflow.
+
+The script creates a component, a base Space and a rollout workflow for each
+Kubara component. The base holds the render of the cluster in the earliest
+stage that runs it. The workflow orders the stages, holds each one until the
+stage ahead has released, and asks for an approval before each release. Then
+the script creates a variant for each cluster. A variant whose cluster renders
+differently records that render as its first change, described as Kubara's
+values for that cluster. You can run the script again safely. It skips what
+exists and leaves alone any change made in ConfigHub since, except that it sets
+a workflow's stages and approval rule back to the plan's when they differ, as
+when a cluster joins in a new stage or you pass `--allow-authors=false`.
+
+Secret values stay out of ConfigHub. A chart can generate a credential at
+render time, as Kubara's bundled Grafana does with its admin password, so every
+Secret goes to ConfigHub with its keys and without its values. `apply` and the
+top of `apply.sh` name each Secret it emptied. The values belong in the
+cluster's secret store.
+
+The script creates no Targets and releases nothing. Kubara's hub, AppProject
+and ApplicationSets keep delivering from Git. To change the platform, edit a
+base, then move the change through the stages with `cub changeorder create`,
+`cub variant promote` and `cub variant approve`.
+
+`cub stack check` looks at one cluster's render for conflicts between
+components, CRD ordering, API versions, webhooks that need a certificate, and
+namespaces, offline:
+
+```bash
+cub stack from-kubara my-platform --cluster hub-dev --out hub-dev
+cub stack check hub-dev/stack.yaml
+```
 
 ## What this version does not do yet
 
-- **Write the import as a script** (`cub kubara apply --out`). The committed
-  scripts in this repository still do the import; see
-  [the six-step tutorial](../demo/kubara/adoption.md).
-- **Take over a running Kubara hub** (`cub kubara takeover`). The approval model
-  will use attestations and a ChangeWorkflow, as `cub sveltos` does.
+`cub kubara takeover` will point Kubara's hub at the releases ConfigHub has
+approved, so a change reaches a cluster only after its stage approves it. Until
+then, the committed scripts in this repository show a takeover; see
+[the six-step tutorial](../demo/kubara/adoption.md).
 
 ## Refresh the plugin's data
 
