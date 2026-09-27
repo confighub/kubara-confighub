@@ -1,0 +1,1203 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    helm.sh/chart: argo-cd-10.7.0
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/instance: argo-cd
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/version: v3.5.2
+data:
+  accounts.wizard: login, apiKey
+  accounts.wizard.enabled: 'true'
+  admin.enabled: 'false'
+  application.instanceLabelKey: argocd.argoproj.io/instance
+  application.sync.impersonation.enabled: 'false'
+  exec.enabled: 'false'
+  jsonnet.enable: 'false'
+  kustomize.buildOptions: '--enable-helm'
+  repo.server.git.submodule.enabled: 'false'
+  resource.compareoptions: |
+    ignoreResourceStatusField: all
+  resource.customizations.ignoreDifferences.admissionregistration.k8s.io_MutatingWebhookConfiguration: |
+    jqPathExpressions:
+      - '.webhooks[].clientConfig.caBundle'
+  resource.customizations.ignoreDifferences.admissionregistration.k8s.io_ValidatingWebhookConfiguration: |
+    jqPathExpressions:
+      - '.webhooks[].clientConfig.caBundle'
+  resource.customizations.ignoreDifferences.apiextensions.k8s.io_CustomResourceDefinition: |
+    jqPathExpressions:
+      - '.spec.conversion.webhook.clientConfig.caBundle'
+  resource.customizations.ignoreResourceUpdates.ConfigMap: |
+    jqPathExpressions:
+      # Ignore the cluster-autoscaler status
+      - '.metadata.annotations."cluster-autoscaler.kubernetes.io/last-updated"'
+      # Ignore the annotation of the legacy Leases election
+      - '.metadata.annotations."control-plane.alpha.kubernetes.io/leader"'
+  resource.customizations.ignoreResourceUpdates.Endpoints: |
+    jsonPointers:
+      - /metadata
+      - /subsets
+  resource.customizations.ignoreResourceUpdates.all: |
+    jsonPointers:
+      - /status
+  resource.customizations.ignoreResourceUpdates.apps_ReplicaSet: |
+    jqPathExpressions:
+      - '.metadata.annotations."deployment.kubernetes.io/desired-replicas"'
+      - '.metadata.annotations."deployment.kubernetes.io/max-replicas"'
+      - '.metadata.annotations."rollout.argoproj.io/desired-replicas"'
+  resource.customizations.ignoreResourceUpdates.argoproj.io_Application: |
+    jqPathExpressions:
+      - '.metadata.annotations."notified.notifications.argoproj.io"'
+      - '.metadata.annotations."argocd.argoproj.io/refresh"'
+      - '.metadata.annotations."argocd.argoproj.io/hydrate"'
+      - '.operation'
+  resource.customizations.ignoreResourceUpdates.argoproj.io_Rollout: |
+    jqPathExpressions:
+      - '.metadata.annotations."notified.notifications.argoproj.io"'
+  resource.customizations.ignoreResourceUpdates.autoscaling_HorizontalPodAutoscaler: |
+    jqPathExpressions:
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/behavior"'
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/conditions"'
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/metrics"'
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/current-metrics"'
+  resource.customizations.ignoreResourceUpdates.discovery.k8s.io_EndpointSlice: |
+    jsonPointers:
+      - /metadata
+      - /endpoints
+      - /ports
+  resource.exclusions: >
+    ### Velero Backups and dynamic runtime operations do not need to be managed by ArgoCD
+
+    - apiGroups:
+        - velero.io
+      kinds:
+        - Backup
+        - Restore
+        - DownloadRequest
+        - DeleteBackupRequest
+        - PodVolumeBackup
+        - PodVolumeRestore
+    ### Added via: helm inspect values argo/argo-cd|yq '.configs.cm."resource.exclusions"'
+
+    ### Network resources created by the Kubernetes control plane and excluded to reduce the number of watched events
+    and UI clutter
+
+    - apiGroups:
+        - ''
+        - discovery.k8s.io
+      kinds:
+        - Endpoints
+        - EndpointSlice
+    ### Internal Kubernetes resources excluded reduce the number of watched events
+
+    - apiGroups:
+        - coordination.k8s.io
+      kinds:
+        - Lease
+    ### Internal Kubernetes Authz/Authn resources excluded reduce the number of watched events
+
+    - apiGroups:
+        - authentication.k8s.io
+        - authorization.k8s.io
+      kinds:
+        - SelfSubjectReview
+        - TokenReview
+        - LocalSubjectAccessReview
+        - SelfSubjectAccessReview
+        - SelfSubjectRulesReview
+        - SubjectAccessReview
+    ### Intermediate Certificate Request excluded reduce the number of watched events
+
+    - apiGroups:
+        - certificates.k8s.io
+      kinds:
+        - CertificateSigningRequest
+    - apiGroups:
+        - cert-manager.io
+      kinds:
+        - CertificateRequest
+    ### Cert-Manager ACME issuance transients
+
+    - apiGroups:
+        - acme.cert-manager.io
+      kinds:
+        - Order
+        - Challenge
+    ### Cilium internal resources excluded reduce the number of watched events and UI Clutter
+
+    - apiGroups:
+        - cilium.io
+      kinds:
+        - CiliumIdentity
+        - CiliumEndpoint
+        - CiliumEndpointSlice
+    ### Kyverno intermediate and reporting resources excluded reduce the number of watched events and improve
+    performance
+
+    - apiGroups:
+        - kyverno.io
+        - reports.kyverno.io
+        - wgpolicyk8s.io
+      kinds:
+        - PolicyReport
+        - ClusterPolicyReport
+        - EphemeralReport
+        - ClusterEphemeralReport
+        - AdmissionReport
+        - ClusterAdmissionReport
+        - BackgroundScanReport
+        - ClusterBackgroundScanReport
+        - UpdateRequest
+    ### Longhorn runtime state objects
+
+    - apiGroups:
+        - longhorn.io
+      kinds:
+        - Snapshot
+        - Engine
+        - Replica
+        - Instance
+  resource.respectRBAC: normal
+  server.rbac.log.enforce.enable: 'true'
+  statusbadge.enabled: 'false'
+  timeout.hard.reconciliation: 0s
+  timeout.reconciliation: 120s
+  timeout.reconciliation.jitter: 60s
+  url: https://hx-dev.traefik.me
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+spec:
+  permitOnlyProjectScopedClusters: false
+  description: |-
+    The default project is just here to validate your authentication.
+    It is completely restricted and cannot be used to spawn any projects.
+  sourceRepos:
+    - ''
+  destinations:
+    - name: ''
+      server: ''
+  sourceNamespaces:
+    - '*'
+  clusterResourceWhitelist:
+    - group: ''
+      kind: ''
+  clusterResourceBlacklist:
+    - group: '*'
+      kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: hx-dev-dev
+  namespace: argocd
+spec:
+  permitOnlyProjectScopedClusters: false
+  description: hx-dev-dev project
+  destinations:
+    - server: '*'
+      namespace: '*'
+  sourceNamespaces:
+    - '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    ignore:
+      - kind: Secret
+        name: cert-manager-webhook-ca
+    warn: false
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{name}}-argocd'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/argo-cd
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/argo-cd
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: argocd
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/argo-cd/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/argo-cd/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/argo-cd/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            cert-manager: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-cert-manager'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/cert-manager
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/cert-manager
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: cert-manager
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/cert-manager/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/cert-manager/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/cert-manager/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: cert-manager
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: external-dns
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            external-dns: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-external-dns'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/external-dns
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/external-dns
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: external-dns
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/external-dns/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/external-dns/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/external-dns/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: external-dns
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: external-secrets
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            external-secrets: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-external-secrets'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/external-secrets
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/external-secrets
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: external-secrets
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/external-secrets/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/external-secrets/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/external-secrets/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: external-secrets
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: homer-dashboard
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            homer-dashboard: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-homer-dashboard'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/homer-dashboard
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/homer-dashboard
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: homer-dashboard
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/homer-dashboard/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/homer-dashboard/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/homer-dashboard/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: homer-dashboard
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            kube-prometheus-stack: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-kube-prometheus-stack'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/kube-prometheus-stack
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/kube-prometheus-stack
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: kube-prometheus-stack
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kube-prometheus-stack/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kube-prometheus-stack/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kube-prometheus-stack/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: kube-prometheus-stack
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kyverno
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            kyverno: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-kyverno'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/kyverno
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/kyverno
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: kyverno
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: kyverno
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kyverno-policies
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            kyverno-policies: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-kyverno-policies'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/kyverno-policies
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/kyverno-policies
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: kyverno-policies
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno-policies/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno-policies/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno-policies/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: kyverno-policies
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: kyverno-policy-reporter
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            kyverno-policy-reporter: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-kyverno-policy-reporter'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/kyverno-policy-reporter
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/kyverno-policy-reporter
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: kyverno-policy-reporter
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno-policy-reporter/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno-policy-reporter/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/kyverno-policy-reporter/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: kyverno-policy-reporter
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: loki
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            loki: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-loki'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/loki
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/loki
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: loki
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/loki/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/loki/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/loki/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: loki
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: longhorn
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            longhorn: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-longhorn'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/longhorn
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/longhorn
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: longhorn
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/longhorn/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/longhorn/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/longhorn/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: longhorn
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: metallb
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            metallb: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-metallb'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/metallb
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/metallb
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: metallb
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/metallb/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/metallb/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/metallb/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: metallb
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: metrics-server
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            metrics-server: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-metrics-server'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/metrics-server
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/metrics-server
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: metrics-server
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/metrics-server/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/metrics-server/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/metrics-server/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: metrics-server
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: oauth2-proxy
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            oauth2-proxy: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-oauth2-proxy'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/oauth2-proxy
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/oauth2-proxy
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: oauth2-proxy
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/oauth2-proxy/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/oauth2-proxy/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/oauth2-proxy/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: oauth2-proxy
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: reloader
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            reloader: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-reloader'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/reloader
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/reloader
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: reloader
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/reloader/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/reloader/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/reloader/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: reloader
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            traefik: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-traefik'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/traefik
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/traefik
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: traefik
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/traefik/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/traefik/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/traefik/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: traefik
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: velero
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            velero: enabled
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: '{{name}}-velero'
+      annotations:
+        argocd.argoproj.io/manifest-generate-paths: .;..;/platform-configs/{{name}}/helm/velero
+    spec:
+      project: hx-dev-dev
+      sources:
+        - repoURL: https://github.com/example/platform.git
+          targetRevision: main
+          ref: valuesRepo
+        - repoURL: https://github.com/example/platform.git
+          path: platform-components/helm/velero
+          targetRevision: main
+          helm:
+            ignoreMissingValueFiles: true
+            releaseName: velero
+            valueFiles:
+              - values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/velero/values.generated.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/velero/additional-values.yaml
+              - $valuesRepo/platform-configs/{{name}}/helm/velero/values-*.yaml
+      destination:
+        name: '{{name}}'
+        namespace: velero
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        retry:
+          limit: 5
+          refresh: true
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 5m
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true
+          - FailOnSharedResource=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+          - ServerSideApply=true

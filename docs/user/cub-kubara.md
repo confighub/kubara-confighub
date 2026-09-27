@@ -136,12 +136,42 @@ cub stack from-kubara my-platform --cluster hub-dev --out hub-dev
 cub stack check hub-dev/stack.yaml
 ```
 
-## What this version does not do yet
+## Hand the hub to ConfigHub
 
-`cub kubara takeover` will point Kubara's hub at the releases ConfigHub has
-approved, so a change reaches a cluster only after its stage approves it. Until
-then, the committed scripts in this repository show a takeover; see
-[the six-step tutorial](../demo/kubara/adoption.md).
+`takeover` writes the steps that follow `apply.sh`. After them, a change reaches
+a cluster only once its stage has approved and released it:
+
+```bash
+cub kubara takeover my-platform --out my-platform-confighub
+less my-platform-confighub/takeover.sh
+HUB_CONTEXT=<kubectl context of Kubara's hub> bash my-platform-confighub/takeover.sh
+```
+
+Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet whose
+chart ConfigHub holds reads the cluster's approved release from ConfigHub's OCI
+gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or
+later reads those releases; Kubara v0.16 ships 3.5.
+
+The script gives each cluster a Target and releases every variant through its
+rollout workflow, stage by stage, with argo-cd last. It then changes the hub in
+two ways. It stores a credential for the gateway, and it applies the argo-cd
+ApplicationSet, whose release carries every other one. Before that, it
+compares what each Application manages with the release it will read. Kubara's
+ApplicationSets prune, so the script stops if Argo CD would delete anything.
+
+Secrets keep their live values. ConfigHub holds each Secret's keys, and each
+ApplicationSet tells Argo CD to leave Secret data alone. A cluster that joins
+later gets its Secrets without values, for its secret store to fill. A manual
+sync must keep `RespectIgnoreDifferences`, which Kubara's sync options include.
+A sync without it empties those values.
+
+bootstrap-crds is installed by Kubara's bootstrap, not by an ApplicationSet,
+so it stays with Kubara.
+
+`takeover.sh` has not yet been run against a live Kubara hub. The switch of an
+Application from Git to an OCI release, with the Secret handling above, was
+measured on kind with Argo CD 3.5.2 and Kubara-shaped ApplicationSets. The
+full script is next to be proved live.
 
 ## Refresh the plugin's data
 

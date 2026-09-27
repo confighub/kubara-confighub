@@ -13,6 +13,7 @@ import (
 	"github.com/confighub/kubara-confighub/internal/initcfg"
 	"github.com/confighub/kubara-confighub/internal/plan"
 	"github.com/confighub/kubara-confighub/internal/platform"
+	"github.com/confighub/kubara-confighub/internal/takeover"
 )
 
 var (
@@ -68,6 +69,9 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
   apply     renders each cluster of a generated platform and writes the plan
             as files and one script of cub steps, apply.sh, for you to read
             and run. It runs nothing itself.
+  takeover  writes takeover.sh, which runs after apply.sh: each cluster gets a
+            Target and a first approved release, and Kubara's hub reads those
+            releases from ConfigHub instead of Git.
 
 Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kubara.md`,
 		SilenceUsage:  true,
@@ -205,6 +209,129 @@ ApplicationSets keep delivering from Git until takeover.`,
 	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
 	_ = applyCmd.MarkFlagRequired("out")
 
+	var to plan.Options
+	var tStages, tOut, gateway string
+	takeoverCmd := &cobra.Command{
+		Use:   "takeover <kubara-dir> --out <dir>",
+		Short: "Write the steps that point Kubara's hub at ConfigHub's approved releases",
+		Long: `Write takeover.sh, the steps that follow apply.sh. It gives each cluster a
+Target, releases every variant through its rollout workflow, and points each of
+Kubara's ApplicationSets at the cluster's approved release in ConfigHub instead
+of Git. Kubara's hub, AppProject and ApplicationSets stay.
+
+Before the hub switches, takeover.sh compares what each Application manages
+with the release it will read, and stops if Argo CD would delete anything.
+Secrets keep their live values: ConfigHub holds their keys, and each
+ApplicationSet tells Argo CD to leave their data alone.
+
+Use the same --prefix and --stages as apply.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			p, err := platform.Load(args[0])
+			if err != nil {
+				return err
+			}
+			to.Stages = split(tStages)
+			pl, err := plan.Build(p, to)
+			if err != nil {
+				return err
+			}
+			res, err := takeover.Write(pl, takeover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender})
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			fmt.Fprintf(w, "Wrote %s. These ApplicationSets will read ConfigHub instead of Git:\n", res.Script)
+			for _, r := range res.Routes {
+				fmt.Fprintf(w, "  %-24s %s\n", r.ApplicationSet, r.RepoURL)
+			}
+			if len(res.WithKubara) > 0 {
+				fmt.Fprintf(w, "No ApplicationSet delivers %s, so Kubara's bootstrap keeps it.\n", strings.Join(res.WithKubara, ", "))
+			}
+			if len(res.OnGit) > 0 {
+				fmt.Fprintf(w, "Left on Git, for services this platform does not enable: %s\n", strings.Join(res.OnGit, ", "))
+			}
+			fmt.Fprintf(w, "\nNext, after apply.sh\n  less %s\n  HUB_CONTEXT=<kubectl context of Kubara's hub> bash %s\n", res.Script, res.Script)
+			return nil
+		},
+	}
+	takeoverCmd.Flags().StringVar(&tOut, "out", "", "directory to write takeover.sh (required); the apply --out directory is a good choice")
+	takeoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
+	takeoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
+	takeoverCmd.Flags().StringVar(&gateway, "gateway", takeover.DefaultGateway, "host ConfigHub serves releases from")
+	_ = takeoverCmd.MarkFlagRequired("out")
+
+	var rPrefix, rGateway, rCharts, rOnly string
+	routeCmd := &cobra.Command{
+		Use:    "route-appsets <argo-cd render>",
+		Short:  "Point the ApplicationSets in an argo-cd render at ConfigHub (used by takeover.sh)",
+		Hidden: true,
+		Args:   cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			b, err := os.ReadFile(args[0])
+			if err != nil {
+				return err
+			}
+			if rOnly != "" {
+				doc, err := takeover.Only(b, rOnly)
+				if err != nil {
+					return err
+				}
+				_, err = c.OutOrStdout().Write(doc)
+				return err
+			}
+			charts := map[string]bool{}
+			for _, ch := range split(rCharts) {
+				charts[ch] = true
+			}
+			out, _, err := takeover.RouteApplicationSets(b, charts, rPrefix, rGateway)
+			if err != nil {
+				return err
+			}
+			_, err = c.OutOrStdout().Write(out)
+			return err
+		},
+	}
+	routeCmd.Flags().StringVar(&rPrefix, "prefix", "kubara", "the prefix apply used")
+	routeCmd.Flags().StringVar(&rGateway, "gateway", takeover.DefaultGateway, "host ConfigHub serves releases from")
+	routeCmd.Flags().StringVar(&rCharts, "charts", "", "chart directories ConfigHub holds, comma-separated")
+	routeCmd.Flags().StringVar(&rOnly, "only", "", "print only this ApplicationSet, unchanged")
+
+	var pApp, pRelease, pName string
+	pruneCmd := &cobra.Command{
+		Use:    "would-prune --application <file> --release <file>",
+		Short:  "List what an Application would prune on reading a release (used by takeover.sh)",
+		Hidden: true,
+		Args:   cobra.NoArgs,
+		RunE: func(c *cobra.Command, _ []string) error {
+			app, err := os.ReadFile(pApp)
+			if err != nil {
+				return err
+			}
+			rel, err := os.ReadFile(pRelease)
+			if err != nil {
+				return err
+			}
+			gone, err := takeover.WouldPrune(app, rel)
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			if len(gone) == 0 {
+				fmt.Fprintf(w, "%s: prunes nothing\n", pName)
+				return nil
+			}
+			fmt.Fprintf(w, "%s would delete %d object(s) its release does not hold:\n", pName, len(gone))
+			for _, r := range gone {
+				fmt.Fprintf(w, "  %s\n", r)
+			}
+			return errProblems{}
+		},
+	}
+	pruneCmd.Flags().StringVar(&pApp, "application", "", "the Application, as kubectl get application -o json")
+	pruneCmd.Flags().StringVar(&pRelease, "release", "", "the release, as cub unit data")
+	pruneCmd.Flags().StringVar(&pName, "name", "the Application", "the Application's name, for the report")
+
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print the plugin version",
@@ -214,7 +341,7 @@ ApplicationSets keep delivering from Git until takeover.`,
 		},
 	}
 
-	root.AddCommand(services, initCmd, planCmd, applyCmd, versionCmd)
+	root.AddCommand(services, initCmd, planCmd, applyCmd, takeoverCmd, routeCmd, pruneCmd, versionCmd)
 	return root
 }
 
@@ -227,6 +354,25 @@ type initOptions struct {
 	repository     string
 	dnsDomain      string
 	email          string
+}
+
+// hubArgoRender renders the hub's argo-cd chart with the Workshop plugin, the
+// renderer apply uses, and discards everything else it rendered.
+func hubArgoRender(kubaraDir, cluster string) ([]byte, error) {
+	tmp, err := os.MkdirTemp("", "cub-kubara-hub-")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmp)
+	renders, err := apply.WorkshopRenderer(kubaraDir, cluster, tmp)
+	if err != nil {
+		return nil, err
+	}
+	path, ok := renders["argo-cd"]
+	if !ok {
+		return nil, fmt.Errorf("cub stack from-kubara rendered no argo-cd for %s", cluster)
+	}
+	return os.ReadFile(path)
 }
 
 func (o *initOptions) register(c *cobra.Command) {

@@ -32,13 +32,15 @@ cub kubara init --out my-platform --services cert-manager,metrics-server,traefik
 kubara --work-dir my-platform --config-file config.yaml --env-file .env generate --helm
 cub kubara plan my-platform                           # bases, variants, stages, evidence
 cub kubara apply my-platform --out my-platform-confighub   # writes apply.sh; read it, then run it
+cub kubara takeover my-platform --out my-platform-confighub  # writes takeover.sh, run after apply.sh
 ```
 
 Kubara's catalogs stay the source of every component. Where the ConfigHub
 Workshop Catalog has checked the exact chart version Kubara pins, the plan links
 to what it installs and needs. [The cub kubara guide](docs/user/cub-kubara.md)
-walks through each command. Taking over a running hub comes next; until then,
-the scripts below show it.
+walks through each command. `takeover.sh` has not yet been run against a live
+hub. The scripts below are the path proved live so far, with a small Argo CD
+reconciler on each cluster.
 
 ## Start a small platform
 
