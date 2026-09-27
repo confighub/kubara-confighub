@@ -9,6 +9,7 @@ package apply
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -163,7 +164,8 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		line("cub space create %s --component %s --allow-exists --quiet", c.Base, component)
 		line("cub unit create --space %s %s %s/base.yaml --change-desc %s --allow-exists --quiet", c.Base, c.Name, c.Name, q(fmt.Sprintf("Kubara's %s as generated for %s: the shared base", c.Name, first)))
 		line("cub changeworkflow create --space %s rollout --filename %s/change-workflow.yaml --allow-exists --quiet", c.Base, c.Name)
-		line("stages_are %s rollout %s || cub changeworkflow update --space %s rollout --filename %s/change-workflow.yaml --quiet", c.Base, strings.Join(stages, ","), c.Base, c.Name)
+		line("stages_are %s rollout %s || echo %s | cub changeworkflow update --patch --space %s rollout --from-stdin --quiet", c.Base, strings.Join(stages, ","), q(stagesJSON(stages)), c.Base)
+		line("approval_is %s rollout %v || echo %s | cub changeworkflow update --patch --space %s rollout --from-stdin --quiet", c.Base, opts.AllowAuthors, q(approvalJSON(opts.AllowAuthors)), c.Base)
 		res.Components++
 		for _, v := range c.Variants {
 			src, ok := renders[v.Cluster][c.ChartPath]
@@ -243,9 +245,11 @@ func writeHeader(s *strings.Builder, p plan.Plan, secrets []string) {
 	s.WriteString(`set -euo pipefail
 cd "$(dirname "$0")"
 step() { printf '\n== %s\n' "$*"; }
-# A cluster that joins in a stage the workflow does not have yet adds that
-# stage. Approval settings made since are kept unless the stages differ.
+# A re-run patches a workflow only where it differs from this plan: the stages,
+# when a cluster joins in a stage the workflow does not have yet, and the
+# approval rule, when --allow-authors changes. Anything else set since is kept.
 stages_are() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.Stages[].Name] | join(",")')" = "$3" ]; }
+approval_is() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.AttestationPrerequisites[]? | select(.Name == "approval") | (.AllowAuthors // false)] | first // false | tostring')" = "$3" ]; }
 # A variant takes its cluster's render once, as the first change after the
 # clone. Later revisions are changes made in ConfigHub, which a re-run leaves
 # alone.
@@ -316,6 +320,34 @@ AttestationPrerequisites:
 		b.WriteString("    ReleasePrerequisites:\n      - approval\n")
 	}
 	return b.String()
+}
+
+type stageJSON struct {
+	Name                 string
+	WhereSpace           string
+	Prerequisites        []string `json:",omitempty"`
+	ReleasePrerequisites []string
+}
+
+// stagesJSON is the patch that sets a workflow's stages to the plan's.
+func stagesJSON(stages []string) string {
+	out := make([]stageJSON, len(stages))
+	for i, st := range stages {
+		out[i] = stageJSON{Name: st, WhereSpace: fmt.Sprintf("Labels.Stage = '%s'", st), ReleasePrerequisites: []string{"approval"}}
+		if i > 0 {
+			out[i].Prerequisites = []string{"Released"}
+		}
+	}
+	b, _ := json.Marshal(map[string]any{"Stages": out})
+	return string(b)
+}
+
+// approvalJSON is the patch that sets a workflow's approval rule to the plan's.
+func approvalJSON(allowAuthors bool) string {
+	b, _ := json.Marshal(map[string]any{"AttestationPrerequisites": []map[string]any{
+		{"Name": "approval", "Type": "Approval", "Count": 1, "AllowAuthors": allowAuthors},
+	}})
+	return string(b)
 }
 
 func q(s string) string {

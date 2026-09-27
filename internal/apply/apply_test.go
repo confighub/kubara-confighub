@@ -160,3 +160,29 @@ func TestWithoutSecretValuesKeepsOtherDocuments(t *testing.T) {
 		t.Fatalf("names = %v", names)
 	}
 }
+
+func TestWithoutSecretValuesReadsEveryStyle(t *testing.T) {
+	in := "kind: \"Secret\"\nmetadata:\n  name: quoted\ndata:\n  a: c2VjcmV0\n---\n{kind: !!str Secret, metadata: {name: flow}, stringData: {b: secret}}\n---\nkind: List\nitems:\n  - kind: Secret\n    metadata:\n      name: listed\n    data:\n      c: c2VjcmV0\n"
+	out, names, err := withoutSecretValues([]byte(in))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(out), "c2VjcmV0") || strings.Contains(string(out), ": secret") {
+		t.Fatalf("a Secret value survived:\n%s", out)
+	}
+	if strings.Join(names, ";") != "Secret quoted (1 value);Secret flow (1 value);Secret listed (1 value)" {
+		t.Fatalf("names = %v", names)
+	}
+}
+
+func TestApprovalPatchCarriesAllowAuthors(t *testing.T) {
+	for _, allow := range []bool{true, false} {
+		want := `"AllowAuthors":` + map[bool]string{true: "true", false: "false"}[allow]
+		if got := approvalJSON(allow); !strings.Contains(got, want) || !strings.Contains(got, `"Name":"approval"`) {
+			t.Fatalf("approvalJSON(%v) = %s", allow, got)
+		}
+	}
+	if got := stagesJSON([]string{"dev", "prod"}); got != `{"Stages":[{"Name":"dev","WhereSpace":"Labels.Stage = 'dev'","ReleasePrerequisites":["approval"]},{"Name":"prod","WhereSpace":"Labels.Stage = 'prod'","Prerequisites":["Released"],"ReleasePrerequisites":["approval"]}]}` {
+		t.Fatalf("stagesJSON = %s", got)
+	}
+}

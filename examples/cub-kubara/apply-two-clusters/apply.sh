@@ -15,9 +15,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 step() { printf '\n== %s\n' "$*"; }
-# A cluster that joins in a stage the workflow does not have yet adds that
-# stage. Approval settings made since are kept unless the stages differ.
+# A re-run patches a workflow only where it differs from this plan: the stages,
+# when a cluster joins in a stage the workflow does not have yet, and the
+# approval rule, when --allow-authors changes. Anything else set since is kept.
 stages_are() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.Stages[].Name] | join(",")')" = "$3" ]; }
+approval_is() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.AttestationPrerequisites[]? | select(.Name == "approval") | (.AllowAuthors // false)] | first // false | tostring')" = "$3" ]; }
 # A variant takes its cluster's render once, as the first change after the
 # clone. Later revisions are changes made in ConfigHub, which a re-run leaves
 # alone.
@@ -38,22 +40,26 @@ cub component create kx-bootstrap-crds --allow-exists --quiet
 cub space create kx-bootstrap-crds-base --component kx-bootstrap-crds --allow-exists --quiet
 cub unit create --space kx-bootstrap-crds-base bootstrap-crds bootstrap-crds/base.yaml --change-desc 'Kubara'\''s bootstrap-crds as generated for hub: the shared base' --allow-exists --quiet
 cub changeworkflow create --space kx-bootstrap-crds-base rollout --filename bootstrap-crds/change-workflow.yaml --allow-exists --quiet
-stages_are kx-bootstrap-crds-base rollout dev,prod || cub changeworkflow update --space kx-bootstrap-crds-base rollout --filename bootstrap-crds/change-workflow.yaml --quiet
+stages_are kx-bootstrap-crds-base rollout dev,prod || echo '{"Stages":[{"Name":"dev","WhereSpace":"Labels.Stage = '\''dev'\''","ReleasePrerequisites":["approval"]},{"Name":"prod","WhereSpace":"Labels.Stage = '\''prod'\''","Prerequisites":["Released"],"ReleasePrerequisites":["approval"]}]}' | cub changeworkflow update --patch --space kx-bootstrap-crds-base rollout --from-stdin --quiet
+approval_is kx-bootstrap-crds-base rollout true || echo '{"AttestationPrerequisites":[{"AllowAuthors":true,"Count":1,"Name":"approval","Type":"Approval"}]}' | cub changeworkflow update --patch --space kx-bootstrap-crds-base rollout --from-stdin --quiet
 cub component create kx-traefik --allow-exists --quiet
 cub space create kx-traefik-base --component kx-traefik --allow-exists --quiet
 cub unit create --space kx-traefik-base traefik traefik/base.yaml --change-desc 'Kubara'\''s traefik as generated for hub: the shared base' --allow-exists --quiet
 cub changeworkflow create --space kx-traefik-base rollout --filename traefik/change-workflow.yaml --allow-exists --quiet
-stages_are kx-traefik-base rollout dev,prod || cub changeworkflow update --space kx-traefik-base rollout --filename traefik/change-workflow.yaml --quiet
+stages_are kx-traefik-base rollout dev,prod || echo '{"Stages":[{"Name":"dev","WhereSpace":"Labels.Stage = '\''dev'\''","ReleasePrerequisites":["approval"]},{"Name":"prod","WhereSpace":"Labels.Stage = '\''prod'\''","Prerequisites":["Released"],"ReleasePrerequisites":["approval"]}]}' | cub changeworkflow update --patch --space kx-traefik-base rollout --from-stdin --quiet
+approval_is kx-traefik-base rollout true || echo '{"AttestationPrerequisites":[{"AllowAuthors":true,"Count":1,"Name":"approval","Type":"Approval"}]}' | cub changeworkflow update --patch --space kx-traefik-base rollout --from-stdin --quiet
 cub component create kx-argo-cd --allow-exists --quiet
 cub space create kx-argo-cd-base --component kx-argo-cd --allow-exists --quiet
 cub unit create --space kx-argo-cd-base argo-cd argo-cd/base.yaml --change-desc 'Kubara'\''s argo-cd as generated for hub: the shared base' --allow-exists --quiet
 cub changeworkflow create --space kx-argo-cd-base rollout --filename argo-cd/change-workflow.yaml --allow-exists --quiet
-stages_are kx-argo-cd-base rollout dev || cub changeworkflow update --space kx-argo-cd-base rollout --filename argo-cd/change-workflow.yaml --quiet
+stages_are kx-argo-cd-base rollout dev || echo '{"Stages":[{"Name":"dev","WhereSpace":"Labels.Stage = '\''dev'\''","ReleasePrerequisites":["approval"]}]}' | cub changeworkflow update --patch --space kx-argo-cd-base rollout --from-stdin --quiet
+approval_is kx-argo-cd-base rollout true || echo '{"AttestationPrerequisites":[{"AllowAuthors":true,"Count":1,"Name":"approval","Type":"Approval"}]}' | cub changeworkflow update --patch --space kx-argo-cd-base rollout --from-stdin --quiet
 cub component create kx-homer-dashboard --allow-exists --quiet
 cub space create kx-homer-dashboard-base --component kx-homer-dashboard --allow-exists --quiet
 cub unit create --space kx-homer-dashboard-base homer-dashboard homer-dashboard/base.yaml --change-desc 'Kubara'\''s homer-dashboard as generated for hub: the shared base' --allow-exists --quiet
 cub changeworkflow create --space kx-homer-dashboard-base rollout --filename homer-dashboard/change-workflow.yaml --allow-exists --quiet
-stages_are kx-homer-dashboard-base rollout dev || cub changeworkflow update --space kx-homer-dashboard-base rollout --filename homer-dashboard/change-workflow.yaml --quiet
+stages_are kx-homer-dashboard-base rollout dev || echo '{"Stages":[{"Name":"dev","WhereSpace":"Labels.Stage = '\''dev'\''","ReleasePrerequisites":["approval"]}]}' | cub changeworkflow update --patch --space kx-homer-dashboard-base rollout --from-stdin --quiet
+approval_is kx-homer-dashboard-base rollout true || echo '{"AttestationPrerequisites":[{"AllowAuthors":true,"Count":1,"Name":"approval","Type":"Approval"}]}' | cub changeworkflow update --patch --space kx-homer-dashboard-base rollout --from-stdin --quiet
 
 step "2/2 A variant per cluster, holding that cluster's own render"
 cub variant create hub kx-bootstrap-crds-base --stage dev --space-pattern template:kx-bootstrap-crds-hub --allow-exists --quiet

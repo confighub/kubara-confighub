@@ -111,8 +111,10 @@ stage that runs it. The workflow orders the stages, holds each one until the
 stage ahead has released, and asks for an approval before each release. Then
 the script creates a variant for each cluster. A variant whose cluster renders
 differently records that render as its first change, described as Kubara's
-values for that cluster. You can run the script again safely: it skips what
-exists and leaves alone any change made in ConfigHub since.
+values for that cluster. You can run the script again safely. It skips what
+exists and leaves alone any change made in ConfigHub since, except that it sets
+a workflow's stages and approval rule back to the plan's when they differ, as
+when a cluster joins in a new stage or you pass `--allow-authors=false`.
 
 Secret values stay out of ConfigHub. A chart can generate a credential at
 render time, as Kubara's bundled Grafana does with its admin password, so every

@@ -26,32 +26,14 @@ func withoutSecretValues(render []byte) ([]byte, []string, error) {
 	docs := docSeparator.Split(string(render), -1)
 	var names []string
 	for i, doc := range docs {
-		if !strings.Contains(doc, "kind: Secret") {
-			continue
-		}
 		var root yaml.Node
 		if err := yaml.Unmarshal([]byte(doc), &root); err != nil {
 			return nil, nil, err
 		}
-		if len(root.Content) == 0 || root.Content[0].Kind != yaml.MappingNode {
-			continue
-		}
-		top := root.Content[0]
-		if value(top, "kind") == nil || value(top, "kind").Value != "Secret" {
-			continue
-		}
-		emptied := 0
-		for _, field := range []string{"data", "stringData"} {
-			m := value(top, field)
-			if m == nil || m.Kind != yaml.MappingNode {
-				continue
-			}
-			for j := 1; j < len(m.Content); j += 2 {
-				m.Content[j] = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: ""}
-				emptied++
-			}
-		}
-		if emptied == 0 {
+		// Every document is parsed, whatever its style: kind: "Secret" and a
+		// Secret inside a List are Secrets too.
+		found := emptySecrets(&root)
+		if len(found) == 0 {
 			continue
 		}
 		var buf bytes.Buffer
@@ -61,22 +43,7 @@ func withoutSecretValues(render []byte) ([]byte, []string, error) {
 			return nil, nil, err
 		}
 		docs[i] = buf.String()
-		name := "Secret"
-		if meta := value(top, "metadata"); meta != nil {
-			if ns := value(meta, "namespace"); ns != nil {
-				name += " " + ns.Value + "/"
-			} else {
-				name += " "
-			}
-			if n := value(meta, "name"); n != nil {
-				name += n.Value
-			}
-		}
-		unit := "values"
-		if emptied == 1 {
-			unit = "value"
-		}
-		names = append(names, fmt.Sprintf("%s (%d %s)", name, emptied, unit))
+		names = append(names, found...)
 	}
 	out := strings.Join(docs, "---\n")
 	if len(names) > 0 {
@@ -85,6 +52,54 @@ func withoutSecretValues(render []byte) ([]byte, []string, error) {
 		out = secretChecksum.ReplaceAllString(out, `${1}""`)
 	}
 	return []byte(out), names, nil
+}
+
+// emptySecrets walks a document and empties the data and stringData values of
+// every Secret in it, naming each one it changed.
+func emptySecrets(n *yaml.Node) []string {
+	var names []string
+	if n.Kind == yaml.MappingNode {
+		if k := value(n, "kind"); k != nil && k.Kind == yaml.ScalarNode && k.Value == "Secret" {
+			emptied := 0
+			for _, field := range []string{"data", "stringData"} {
+				m := value(n, field)
+				if m == nil || m.Kind != yaml.MappingNode {
+					continue
+				}
+				for j := 1; j < len(m.Content); j += 2 {
+					m.Content[j] = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: ""}
+					emptied++
+				}
+			}
+			if emptied > 0 {
+				names = append(names, secretName(n, emptied))
+			}
+			return names
+		}
+	}
+	for _, c := range n.Content {
+		names = append(names, emptySecrets(c)...)
+	}
+	return names
+}
+
+func secretName(n *yaml.Node, emptied int) string {
+	name := "Secret"
+	if meta := value(n, "metadata"); meta != nil {
+		if ns := value(meta, "namespace"); ns != nil {
+			name += " " + ns.Value + "/"
+		} else {
+			name += " "
+		}
+		if nm := value(meta, "name"); nm != nil {
+			name += nm.Value
+		}
+	}
+	unit := "values"
+	if emptied == 1 {
+		unit = "value"
+	}
+	return fmt.Sprintf("%s (%d %s)", name, emptied, unit)
 }
 
 func value(m *yaml.Node, key string) *yaml.Node {
