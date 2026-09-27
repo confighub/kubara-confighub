@@ -1,0 +1,335 @@
+{
+  "name": "general",
+  "version": "5.1.0",
+  "tag": "general-v5.1.0",
+  "oci": "oci://ghcr.io/kubara-io/catalogs/general:5.1.0",
+  "source": "https://github.com/kubara-io/catalogs/tree/general-v5.1.0/general",
+  "services": [
+    {
+      "name": "cert-manager",
+      "category": "security",
+      "chartPath": "cert-manager",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.5.5",
+      "upstream": [
+        {
+          "name": "cert-manager",
+          "version": "1.21.2",
+          "rawVersion": "v1.21.2",
+          "repository": "https://charts.jetstack.io"
+        }
+      ]
+    },
+    {
+      "name": "crossplane",
+      "category": "infrastructure",
+      "chartPath": "crossplane",
+      "default": "disabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.1.1",
+      "upstream": [
+        {
+          "name": "crossplane",
+          "version": "2.4.1",
+          "rawVersion": "2.4.1",
+          "repository": "https://charts.crossplane.io/stable"
+        }
+      ]
+    },
+    {
+      "name": "external-dns",
+      "category": "networking",
+      "chartPath": "external-dns",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.4.0",
+      "upstream": [
+        {
+          "name": "external-dns",
+          "version": "1.22.0",
+          "rawVersion": "1.22.0",
+          "repository": "https://kubernetes-sigs.github.io/external-dns/"
+        }
+      ]
+    },
+    {
+      "name": "external-secrets",
+      "category": "security",
+      "chartPath": "external-secrets",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.16.2",
+      "upstream": [
+        {
+          "name": "external-secrets",
+          "version": "2.10.0",
+          "rawVersion": "2.10.0",
+          "repository": "https://charts.external-secrets.io/"
+        }
+      ]
+    },
+    {
+      "name": "homer-dashboard",
+      "category": "application-management",
+      "chartPath": "homer-dashboard",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub"
+      ],
+      "wrapperVersion": "0.1.4"
+    },
+    {
+      "name": "kube-prometheus-stack",
+      "category": "observability",
+      "chartPath": "kube-prometheus-stack",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "6.2.1",
+      "upstream": [
+        {
+          "name": "kube-prometheus-stack",
+          "version": "91.4.1",
+          "rawVersion": "91.4.1",
+          "repository": "https://prometheus-community.github.io/helm-charts"
+        },
+        {
+          "name": "prometheus-blackbox-exporter",
+          "version": "11.18.0",
+          "rawVersion": "11.18.0",
+          "repository": "https://prometheus-community.github.io/helm-charts"
+        }
+      ]
+    },
+    {
+      "name": "kyverno",
+      "category": "security",
+      "chartPath": "kyverno",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.5.3",
+      "upstream": [
+        {
+          "name": "kyverno",
+          "version": "3.9.1",
+          "rawVersion": "3.9.1",
+          "repository": "https://kyverno.github.io/kyverno"
+        }
+      ]
+    },
+    {
+      "name": "kyverno-policies",
+      "category": "security",
+      "chartPath": "kyverno-policies",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.5.1",
+      "upstream": [
+        {
+          "name": "kyverno-policies",
+          "version": "3.9.1",
+          "rawVersion": "3.9.1",
+          "repository": "https://kyverno.github.io/kyverno"
+        }
+      ]
+    },
+    {
+      "name": "kyverno-policy-reporter",
+      "category": "security",
+      "chartPath": "kyverno-policy-reporter",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.6.2",
+      "upstream": [
+        {
+          "name": "policy-reporter",
+          "version": "3.10.0",
+          "rawVersion": "3.10.0",
+          "repository": "https://kyverno.github.io/policy-reporter"
+        }
+      ]
+    },
+    {
+      "name": "loki",
+      "category": "observability",
+      "chartPath": "loki",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "1.9.3",
+      "upstream": [
+        {
+          "name": "loki",
+          "version": "7.3.0",
+          "rawVersion": "7.3.0",
+          "repository": "https://grafana.github.io/helm-charts"
+        },
+        {
+          "name": "alloy",
+          "version": "1.12.1",
+          "rawVersion": "1.12.1",
+          "repository": "https://grafana.github.io/helm-charts"
+        }
+      ]
+    },
+    {
+      "name": "longhorn",
+      "category": "storage",
+      "chartPath": "longhorn",
+      "default": "disabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.4.4",
+      "upstream": [
+        {
+          "name": "longhorn",
+          "version": "1.12.1",
+          "rawVersion": "1.12.1",
+          "repository": "https://charts.longhorn.io"
+        }
+      ]
+    },
+    {
+      "name": "metallb",
+      "category": "networking",
+      "chartPath": "metallb",
+      "default": "disabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.2.4",
+      "upstream": [
+        {
+          "name": "metallb",
+          "version": "0.16.1",
+          "rawVersion": "0.16.1",
+          "repository": "https://metallb.github.io/metallb"
+        }
+      ]
+    },
+    {
+      "name": "metrics-server",
+      "category": "observability",
+      "chartPath": "metrics-server",
+      "default": "disabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.2.2",
+      "upstream": [
+        {
+          "name": "metrics-server",
+          "version": "3.14.0",
+          "rawVersion": "3.14.0",
+          "repository": "https://kubernetes-sigs.github.io/metrics-server"
+        }
+      ]
+    },
+    {
+      "name": "oauth2-proxy",
+      "category": "security",
+      "chartPath": "oauth2-proxy",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.9.3",
+      "upstream": [
+        {
+          "name": "oauth2-proxy",
+          "version": "10.7.0",
+          "rawVersion": "10.7.0",
+          "repository": "https://oauth2-proxy.github.io/manifests"
+        }
+      ]
+    },
+    {
+      "name": "reloader",
+      "category": "application-management",
+      "chartPath": "reloader",
+      "default": "disabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "1.0.6",
+      "upstream": [
+        {
+          "name": "reloader",
+          "version": "2.2.17",
+          "rawVersion": "2.2.17",
+          "repository": "https://stakater.github.io/stakater-charts"
+        }
+      ]
+    },
+    {
+      "name": "traefik",
+      "category": "networking",
+      "chartPath": "traefik",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "2.7.0",
+      "upstream": [
+        {
+          "name": "traefik",
+          "version": "41.6.0",
+          "rawVersion": "41.6.0",
+          "repository": "oci://ghcr.io/traefik/helm"
+        }
+      ]
+    },
+    {
+      "name": "velero",
+      "category": "storage",
+      "chartPath": "velero",
+      "default": "disabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "0.4.0",
+      "upstream": [
+        {
+          "name": "velero",
+          "version": "12.2.0",
+          "rawVersion": "12.2.0",
+          "repository": "https://vmware-tanzu.github.io/helm-charts"
+        }
+      ]
+    }
+  ]
+}

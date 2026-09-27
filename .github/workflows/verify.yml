@@ -29,3 +29,22 @@ jobs:
         run: npm run kubara-faithful-hub-spoke:verify
       - name: Certified bundle receipts
         run: npm run certified-bundles:verify
+
+  # The cub kubara plugin: its tests hold the committed plan and services
+  # examples under examples/cub-kubara, so a behaviour change shows up as a diff.
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+      - run: go vet ./...
+      - run: go test ./...
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [[ -n "$unformatted" ]]; then
+            echo "::error::not gofmt'd:"; echo "$unformatted"; exit 1
+          fi
