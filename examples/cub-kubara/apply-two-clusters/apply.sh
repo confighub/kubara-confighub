@@ -22,10 +22,11 @@ stages_are() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWork
 approval_is() { [ "$(cub changeworkflow get --space "$1" "$2" -o 'jq=[.ChangeWorkflow.AttestationPrerequisites[]? | select(.Name == "approval") | (.AllowAuthors // false)] | first // false | tostring')" = "$3" ]; }
 # A variant takes its cluster's render once, as the first change after the
 # clone. Later changes are made in ConfigHub, and a re-run leaves them alone.
-# The server's own revisions, the clone and a resolve, are not changes.
+# The clone is revisions 1 and 2, and the server may resolve it once as
+# revision 3; anything else, a later resolve included, counts as a change.
 take_render() {
   local edits
-  edits=$(cub revision list --space "$1" "$2" -o 'jq=[.[] | .Revision.Source | select(. != "CloneUnit" and . != "Resolve")] | length')
+  edits=$(cub revision list --space "$1" "$2" -o 'jq=[.[] | .Revision | select(.RevisionNum > 2) | select(.RevisionNum != 3 or .Source != "Resolve")] | length')
   if [ "$edits" = 0 ]; then
     cub unit update --space "$1" "$2" "$3" --change-desc "$4" --quiet
   else
