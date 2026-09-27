@@ -1,0 +1,79 @@
+Kubara platform  examples/kubara/current-platform/source  (config only; Kubara has not generated it yet)
+Catalogs         oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0, oci://ghcr.io/kubara-io/catalogs/general:1.1.0
+
+Stages, in the order a change rolls out
+  1. dev
+     hx-app-dev             hub    Target hx-app-dev/hx-app-dev; runs Kubara's hub Argo CD
+                                   runs argo-cd, bootstrap-crds, cert-manager, external-secrets, homer-dashboard, kube-prometheus-stack, metrics-server, traefik
+  2. staging
+     hx-app-staging         spoke  Target hx-app-staging/hx-app-staging; delivered by hx-app-dev's Argo CD, as Kubara wires it
+                                   runs bootstrap-crds, cert-manager, traefik
+  3. prod
+     hx-app-prod-a          spoke  Target hx-app-prod-a/hx-app-prod-a; delivered by hx-app-dev's Argo CD, as Kubara wires it
+                                   runs bootstrap-crds, cert-manager, traefik
+     hx-app-prod-b          spoke  Target hx-app-prod-b/hx-app-prod-b; delivered by hx-app-dev's Argo CD, as Kubara wires it
+                                   runs bootstrap-crds, cert-manager, traefik
+
+Components: a base per component, a variant per cluster it runs on
+  argo-cd  (bootstrap 1.1.0)
+    base      hx-argo-cd-base  reaches no cluster
+    variants  hx-argo-cd-<cluster> for hx-app-dev
+    chart     argo-cd 10.2.1 from https://argoproj.github.io/argo-helm
+              Workshop checked this version (default flatten-with-routes; no-crds flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/argo-cd-argo-cd-10-2-1.html
+  bootstrap-crds  (bootstrap 1.1.0)
+    base      hx-bootstrap-crds-base  reaches no cluster
+    variants  hx-bootstrap-crds-<cluster> for hx-app-dev, hx-app-staging, hx-app-prod-a, hx-app-prod-b
+    chart     cert-manager 1.21.0 from https://charts.jetstack.io
+              Workshop checked this version (crds-enabled flatten-with-routes; default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/jetstack-cert-manager-v1-21-0.html
+    chart     kube-prometheus-stack 87.19.2 from https://prometheus-community.github.io/helm-charts
+              Workshop checked this version (default unsafe-to-flatten; existing-secret unsafe-to-flatten; minimal flatten-with-routes; no-crds unsafe-to-flatten): https://confighub.github.io/helm-expt/site/charts/prometheus-community-kube-prometheus-stack-87-19-2.html
+    chart     external-secrets 2.8.0 from https://charts.external-secrets.io
+              Workshop checked this version (default flatten-with-routes; no-crds flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/external-secrets-external-secrets-2-8-0.html
+  cert-manager  (general 1.1.0)
+    base      hx-cert-manager-base  reaches no cluster
+    variants  hx-cert-manager-<cluster> for hx-app-dev, hx-app-staging, hx-app-prod-a, hx-app-prod-b
+    chart     cert-manager 1.21.0 from https://charts.jetstack.io
+              Workshop checked this version (crds-enabled flatten-with-routes; default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/jetstack-cert-manager-v1-21-0.html
+  external-secrets  (general 1.1.0)
+    base      hx-external-secrets-base  reaches no cluster
+    variants  hx-external-secrets-<cluster> for hx-app-dev
+    chart     external-secrets 2.8.0 from https://charts.external-secrets.io/
+              Workshop checked this version (default flatten-with-routes; no-crds flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/external-secrets-external-secrets-2-8-0.html
+  homer-dashboard  (general 1.1.0)
+    base      hx-homer-dashboard-base  reaches no cluster
+    variants  hx-homer-dashboard-<cluster> for hx-app-dev
+    chart     Kubara's own chart; no upstream chart to check
+  kube-prometheus-stack  (general 1.1.0)
+    base      hx-kube-prometheus-stack-base  reaches no cluster
+    variants  hx-kube-prometheus-stack-<cluster> for hx-app-dev
+    chart     kube-prometheus-stack 87.19.2 from https://prometheus-community.github.io/helm-charts
+              Workshop checked this version (default unsafe-to-flatten; existing-secret unsafe-to-flatten; minimal flatten-with-routes; no-crds unsafe-to-flatten): https://confighub.github.io/helm-expt/site/charts/prometheus-community-kube-prometheus-stack-87-19-2.html
+    chart     prometheus-blackbox-exporter 11.15.1 from https://prometheus-community.github.io/helm-charts
+              Workshop checked this version (default safe-to-flatten): https://confighub.github.io/helm-expt/site/charts/prometheus-community-prometheus-blackbox-exporter-11-15-1.html
+  metrics-server  (general 1.1.0)
+    base      hx-metrics-server-base  reaches no cluster
+    variants  hx-metrics-server-<cluster> for hx-app-dev
+    chart     metrics-server 3.13.1 from https://kubernetes-sigs.github.io/metrics-server
+              Workshop checked this version (default safe-to-flatten; external-tls-ca unsafe-to-flatten): https://confighub.github.io/helm-expt/site/charts/metrics-server-metrics-server-3-13-1.html
+  traefik  (general 1.1.0)
+    base      hx-traefik-base  reaches no cluster
+    variants  hx-traefik-<cluster> for hx-app-dev, hx-app-staging, hx-app-prod-a, hx-app-prod-b
+    chart     traefik 41.0.2 from oci://ghcr.io/traefik/helm
+              Workshop checked this version (default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/traefik-traefik-41-0-2.html
+
+Workshop evidence  10 of 10 upstream charts checked at the exact version Kubara pins; 0 checked at another version; 0 from another repository; 0 not in the Workshop Catalog.
+                   Kubara's catalogs stay the source of every component; evidence only annotates it. Workshop Catalog at c808d0db7.
+
+ConfigHub would hold 30 Spaces
+  hx-platform  the rollout workflow: each stage waits for the stage ahead to release,
+               and a release needs an approval attestation (cub variant approve) first.
+  one Space per cluster for its Target;
+  one base Space per component, and one variant Space per cluster it runs on.
+  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them. How approved
+  releases reach the hub's Argo CD is settled at takeover, which this version does not do yet.
+
+Next
+  kubara --work-dir examples/kubara/current-platform/source --config-file config.yaml --env-file .env generate --helm
+  cub kubara plan examples/kubara/current-platform/source   # again, with the versions Kubara wrote
+
+Offline: no account, no cluster, nothing changed. Writing these steps as a script (cub kubara apply) is not in this version yet.

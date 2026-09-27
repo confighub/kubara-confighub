@@ -1,0 +1,53 @@
+Kubara catalogs  oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0, oci://ghcr.io/kubara-io/catalogs/general:3.0.0
+
+Always installed, from the bootstrap catalog
+    argo-cd                    hub clusters  (on by default)
+                                 argo-cd 10.7.0  Workshop has 9.5.15, 9.5.17, 10.1.3, 10.2.1
+    bootstrap-crds             hub, spoke clusters  (on by default)
+                                 cert-manager 1.21.1  Workshop has 1.20.2, 1.21.0
+                                 kube-prometheus-stack 88.6.3  Workshop has 85.3.3, 86.1.0, 87.15.1, 87.19.2
+                                 external-secrets 2.10.0  Workshop has 2.5.0, 2.7.0, 2.8.0
+
+Services you choose, from the general catalog
+  application-management
+    homer-dashboard            hub clusters  (on by default)
+                                 Kubara's own chart; no upstream chart to check
+    reloader                   hub, spoke clusters
+                                 reloader 2.2.16  Workshop has 2.2.12, 2.2.14
+  networking
+    external-dns               hub, spoke clusters  (on by default)
+                                 external-dns 1.21.1  checked: https://confighub.github.io/helm-expt/site/charts/external-dns-external-dns-1-21-1.html
+    metallb                    hub, spoke clusters
+                                 metallb 0.16.1  checked: https://confighub.github.io/helm-expt/site/charts/metallb-metallb-0-16-1.html
+    traefik                    hub, spoke clusters  (on by default)
+                                 traefik 41.4.0  Workshop has 41.0.2
+  observability
+    kube-prometheus-stack      hub, spoke clusters  (on by default)
+                                 kube-prometheus-stack 88.6.3  Workshop has 85.3.3, 86.1.0, 87.15.1, 87.19.2
+                                 prometheus-blackbox-exporter 11.18.0  Workshop has 11.10.0, 11.15.1
+    loki                       hub, spoke clusters  (on by default)
+                                 loki 7.3.0  Workshop has 7.0.0, 7.1.0
+                                 alloy 1.12.1  Workshop has 1.8.2, 1.11.0
+    metrics-server             hub, spoke clusters
+                                 metrics-server 3.14.0  Workshop has 3.13.0, 3.13.1
+  security
+    cert-manager               hub, spoke clusters  (on by default)
+                                 cert-manager 1.21.1  Workshop has 1.20.2, 1.21.0
+    external-secrets           hub, spoke clusters  (on by default)
+                                 external-secrets 2.10.0  Workshop has 2.5.0, 2.7.0, 2.8.0
+    kyverno                    hub, spoke clusters  (on by default)
+                                 kyverno 3.9.0  Workshop has 3.8.1, 3.8.2
+    kyverno-policies           hub, spoke clusters  (on by default)
+                                 kyverno-policies 3.9.0  Workshop has 3.8.0, 3.8.2
+    kyverno-policy-reporter    hub, spoke clusters  (on by default)
+                                 policy-reporter 3.10.0  Workshop has 3.9.1
+    oauth2-proxy               hub, spoke clusters  (on by default)
+                                 oauth2-proxy 10.7.0  checked: https://confighub.github.io/helm-expt/site/charts/oauth2-proxy-oauth2-proxy-10-7-0.html
+  storage
+    longhorn                   hub, spoke clusters
+                                 longhorn 1.12.1  Workshop has 1.11.2, 1.12.0
+    velero                     hub, spoke clusters
+                                 velero 12.1.0  checked: https://confighub.github.io/helm-expt/site/charts/velero-velero-12-1-0.html
+
+"checked" means the Workshop Catalog has this exact chart version; open its page for what it installs and what it needs.
+Kubara's catalogs stay the source of every service. Workshop Catalog at c808d0db7.

@@ -1,0 +1,57 @@
+{
+  "name": "bootstrap",
+  "version": "3.0.0",
+  "tag": "bootstrap-v3.0.0",
+  "oci": "oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0",
+  "source": "https://github.com/kubara-io/catalogs/tree/bootstrap-v3.0.0/bootstrap",
+  "services": [
+    {
+      "name": "argo-cd",
+      "category": "application-management",
+      "chartPath": "argo-cd",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub"
+      ],
+      "wrapperVersion": "1.8.0",
+      "upstream": [
+        {
+          "name": "argo-cd",
+          "version": "10.7.0",
+          "rawVersion": "10.7.0",
+          "repository": "https://argoproj.github.io/argo-helm"
+        }
+      ]
+    },
+    {
+      "name": "bootstrap-crds",
+      "chartPath": "bootstrap-crds",
+      "default": "enabled",
+      "clusterTypes": [
+        "hub",
+        "spoke"
+      ],
+      "wrapperVersion": "1.0.0",
+      "upstream": [
+        {
+          "name": "cert-manager",
+          "version": "1.21.1",
+          "rawVersion": "v1.21.1",
+          "repository": "https://charts.jetstack.io"
+        },
+        {
+          "name": "kube-prometheus-stack",
+          "version": "88.6.3",
+          "rawVersion": "88.6.3",
+          "repository": "https://prometheus-community.github.io/helm-charts"
+        },
+        {
+          "name": "external-secrets",
+          "version": "2.10.0",
+          "rawVersion": "2.10.0",
+          "repository": "https://charts.external-secrets.io"
+        }
+      ]
+    }
+  ]
+}
