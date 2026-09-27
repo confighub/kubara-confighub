@@ -1,0 +1,17 @@
+# Two clusters, listed prod first: the base still comes from dev, the stage a
+# change reaches first.
+version: v1alpha4
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0
+clusters:
+  - name: edge
+    stage: prod
+    type: spoke
+    argocd: {selfManaged: disabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:3.0.0]
+    services: {traefik: {status: enabled}}
+  - name: hub
+    stage: dev
+    type: hub
+    argocd: {selfManaged: enabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:3.0.0]
+    services: {traefik: {status: enabled}, homer-dashboard: {status: enabled}}

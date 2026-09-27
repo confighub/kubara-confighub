@@ -22,21 +22,23 @@ The detailed case — what stays Kubara, what becomes better, and how to verify 
 ## Start with cub kubara
 
 `cub kubara` is a plugin for the ConfigHub CLI. It shows what ConfigHub would
-hold for a Kubara platform, offline, with no account and no cluster:
+hold for a Kubara platform, offline, with no account and no cluster, then
+writes the steps that bring the platform into ConfigHub as one script.
 
 ```bash
 cub plugin install confighub/kubara-confighub
 cub kubara services                                   # Kubara's catalog, with Workshop evidence
 cub kubara init --out my-platform --services cert-manager,metrics-server,traefik
 kubara --work-dir my-platform --config-file config.yaml --env-file .env generate --helm
-cub kubara plan my-platform                           # bases, variants, Targets, stages
+cub kubara plan my-platform                           # bases, variants, stages, evidence
+cub kubara apply my-platform --out my-platform-confighub   # writes apply.sh; read it, then run it
 ```
 
 Kubara's catalogs stay the source of every component. Where the ConfigHub
 Workshop Catalog has checked the exact chart version Kubara pins, the plan links
 to what it installs and needs. [The cub kubara guide](docs/user/cub-kubara.md)
-walks through each command. Writing the import as a script and taking over a
-running hub come next; until then, the scripts below do the import.
+walks through each command. Taking over a running hub comes next; until then,
+the scripts below show it.
 
 ## Start a small platform
 

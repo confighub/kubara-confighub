@@ -1,6 +1,6 @@
 // Package plan works out what ConfigHub would hold for a Kubara platform,
-// offline: a base per component, a variant per cluster it runs on, a Target per
-// cluster, and the stage order a change follows. It changes nothing.
+// offline: a base per component, a variant per cluster it runs on, and the
+// stage order a change follows. It changes nothing.
 package plan
 
 import (
@@ -27,7 +27,7 @@ type Plan struct {
 	Stages        []Stage
 	Hub           string
 	Components    []Component
-	Control       string
+	Prefix        string
 	Problems      []string
 	Notes         []string
 }
@@ -40,13 +40,12 @@ type Stage struct {
 type ClusterPlan struct {
 	Name       string
 	Type       string
-	Space      string
-	Target     string
 	Components []string
 }
 
 type Component struct {
 	Name      string
+	ChartPath string // the chart directory Kubara generates under platform-components/helm
 	Catalog   string
 	Category  string
 	Upstream  []UpstreamPlan
@@ -63,7 +62,6 @@ type UpstreamPlan struct {
 type Variant struct {
 	Cluster string
 	Space   string
-	Target  string
 }
 
 // Summary counts Workshop evidence across every upstream chart in the plan.
@@ -93,10 +91,7 @@ func (p Plan) Summary() Summary {
 
 // SpaceCount is how many ConfigHub Spaces the plan would create.
 func (p Plan) SpaceCount() int {
-	n := 1
-	for _, st := range p.Stages {
-		n += len(st.Clusters)
-	}
+	n := 0
 	for _, c := range p.Components {
 		n += 1 + len(c.Variants)
 	}
@@ -110,7 +105,7 @@ func Build(p platform.Platform, opts Options) (Plan, error) {
 	if opts.Prefix == "" {
 		opts.Prefix = "kubara"
 	}
-	out := Plan{Source: p.Dir, Generated: len(p.Generated) > 0, ConfigVersion: p.Config.Version, Control: opts.Prefix + "-platform"}
+	out := Plan{Source: p.Dir, Generated: len(p.Generated) > 0, ConfigVersion: p.Config.Version, Prefix: opts.Prefix}
 	if p.Config.Version != "v1alpha4" {
 		out.Problems = append(out.Problems, fmt.Sprintf("config version is %q; cub kubara reads Kubara's v1alpha4 config", p.Config.Version))
 	}
@@ -164,7 +159,7 @@ func Build(p platform.Platform, opts Options) (Plan, error) {
 	add := func(cat catalog.Catalog, svc catalog.Service, cluster platform.Cluster) {
 		c, ok := byName[svc.Name]
 		if !ok {
-			c = &Component{Name: svc.Name, Catalog: cat.Name + " " + cat.Version, Category: svc.Category, Base: fmt.Sprintf("%s-%s-base", opts.Prefix, svc.Name)}
+			c = &Component{Name: svc.Name, ChartPath: svc.ChartPath, Catalog: cat.Name + " " + cat.Version, Category: svc.Category, Base: fmt.Sprintf("%s-%s-base", opts.Prefix, svc.Name)}
 			upstream := svc.Upstream
 			if gen, ok := p.Generated[svc.ChartPath]; ok && len(gen) > 0 {
 				upstream, c.FromChart = gen, true
@@ -175,12 +170,12 @@ func Build(p platform.Platform, opts Options) (Plan, error) {
 			byName[svc.Name] = c
 			order = append(order, svc.Name)
 		}
-		c.Variants = append(c.Variants, Variant{Cluster: cluster.Name, Space: fmt.Sprintf("%s-%s-%s", opts.Prefix, svc.Name, cluster.Name), Target: cluster.Name + "/" + cluster.Name})
+		c.Variants = append(c.Variants, Variant{Cluster: cluster.Name, Space: fmt.Sprintf("%s-%s-%s", opts.Prefix, svc.Name, cluster.Name)})
 	}
 	stageClusters := map[string][]ClusterPlan{}
 	var seenStages []string
 	for _, cl := range p.Config.Clusters {
-		cp := ClusterPlan{Name: cl.Name, Type: cl.Type, Space: cl.Name, Target: cl.Name + "/" + cl.Name}
+		cp := ClusterPlan{Name: cl.Name, Type: cl.Type}
 		for _, svc := range boot.Services {
 			if allowed(svc, cl.Type) {
 				add(boot, svc, cl)
@@ -217,8 +212,18 @@ func Build(p platform.Platform, opts Options) (Plan, error) {
 			out.Problems = append(out.Problems, fmt.Sprintf("--stages names %s, and no cluster has that stage", s))
 		}
 	}
+	// Variants follow the stage order, so a component's first variant is the
+	// cluster a change reaches first, and its render is the base.
+	rank := map[string]int{}
+	for _, st := range out.Stages {
+		for _, cl := range st.Clusters {
+			rank[cl.Name] = len(rank)
+		}
+	}
 	for _, name := range order {
-		out.Components = append(out.Components, *byName[name])
+		c := *byName[name]
+		sort.SliceStable(c.Variants, func(i, j int) bool { return rank[c.Variants[i].Cluster] < rank[c.Variants[j].Cluster] })
+		out.Components = append(out.Components, c)
 	}
 	return out, nil
 }

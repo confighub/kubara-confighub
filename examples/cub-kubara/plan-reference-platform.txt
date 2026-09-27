@@ -3,15 +3,15 @@ Catalogs         oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0, oci://ghcr.io
 
 Stages, in the order a change rolls out
   1. dev
-     hx-app-dev             hub    Target hx-app-dev/hx-app-dev; runs Kubara's hub Argo CD
+     hx-app-dev             hub    runs Kubara's hub Argo CD
                                    runs argo-cd, bootstrap-crds, cert-manager, external-secrets, homer-dashboard, kube-prometheus-stack, metrics-server, traefik
   2. staging
-     hx-app-staging         spoke  Target hx-app-staging/hx-app-staging; delivered by hx-app-dev's Argo CD, as Kubara wires it
+     hx-app-staging         spoke  delivered by hx-app-dev's Argo CD, as Kubara wires it
                                    runs bootstrap-crds, cert-manager, traefik
   3. prod
-     hx-app-prod-a          spoke  Target hx-app-prod-a/hx-app-prod-a; delivered by hx-app-dev's Argo CD, as Kubara wires it
+     hx-app-prod-a          spoke  delivered by hx-app-dev's Argo CD, as Kubara wires it
                                    runs bootstrap-crds, cert-manager, traefik
-     hx-app-prod-b          spoke  Target hx-app-prod-b/hx-app-prod-b; delivered by hx-app-dev's Argo CD, as Kubara wires it
+     hx-app-prod-b          spoke  delivered by hx-app-dev's Argo CD, as Kubara wires it
                                    runs bootstrap-crds, cert-manager, traefik
 
 Components: a base per component, a variant per cluster it runs on
@@ -64,16 +64,16 @@ Components: a base per component, a variant per cluster it runs on
 Workshop evidence  10 of 10 upstream charts checked at the exact version Kubara pins; 0 checked at another version; 0 from another repository; 0 not in the Workshop Catalog.
                    Kubara's catalogs stay the source of every component; evidence only annotates it. Workshop Catalog at c808d0db7.
 
-ConfigHub would hold 30 Spaces
-  hx-platform  the rollout workflow: each stage waits for the stage ahead to release,
-               and a release needs an approval attestation (cub variant approve) first.
-  one Space per cluster for its Target;
-  one base Space per component, and one variant Space per cluster it runs on.
-  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them. How approved
-  releases reach the hub's Argo CD is settled at takeover, which this version does not do yet.
+ConfigHub would hold 25 Spaces: a base Space per component, and a variant Space per cluster it runs on.
+  Each base holds what Kubara generated for the earliest-stage cluster that runs it, and a rollout workflow:
+  the stages above in order, each waiting for the stage ahead, and an approval attestation
+  (cub variant approve) before each release. Each variant records its cluster's own render as a change.
+  Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.
+  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering
+  from Git. Pointing them at approved releases is takeover, which this version does not do yet.
 
 Next
   kubara --work-dir examples/kubara/current-platform/source --config-file config.yaml --env-file .env generate --helm
   cub kubara plan examples/kubara/current-platform/source   # again, with the versions Kubara wrote
 
-Offline: no account, no cluster, nothing changed. Writing these steps as a script (cub kubara apply) is not in this version yet.
+Offline: no account, no cluster, nothing changed.

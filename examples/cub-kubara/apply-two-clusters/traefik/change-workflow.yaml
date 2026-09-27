@@ -1,0 +1,21 @@
+# The order a change moves through this component's clusters, and what each
+# stage waits for. ConfigHub enforces both on the server.
+#
+# AllowAuthors lets the person who promoted a change also approve it, which one
+# person trying this needs. Set it to false once a second person approves.
+AttestationPrerequisites:
+  - Name: approval
+    Type: Approval
+    Count: 1
+    AllowAuthors: true
+Stages:
+  - Name: dev
+    WhereSpace: "Labels.Stage = 'dev'"
+    ReleasePrerequisites:
+      - approval
+  - Name: prod
+    WhereSpace: "Labels.Stage = 'prod'"
+    Prerequisites:
+      - Released
+    ReleasePrerequisites:
+      - approval
