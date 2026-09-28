@@ -149,7 +149,19 @@ bash my-platform-confighub/apply.sh
 
 `apply` renders each cluster the way Kubara's hub delivers it, so each render
 holds exactly the objects Kubara's Argo CD runs there. It needs `helm` on your
-PATH. It runs nothing in ConfigHub itself. It writes `apply.sh`, the plan it carries out as `plan.txt`, and a
+PATH. It runs nothing in ConfigHub itself.
+
+Argo CD renders each chart with the target cluster's Kubernetes version and the
+APIs it serves. To render the same way, give `apply` a kubectl context for each
+cluster:
+
+```bash
+cub kubara apply my-platform --out my-platform-confighub \
+  --capabilities hub-dev=<hub context> --capabilities edge-prod=<spoke context>
+```
+
+Without `--capabilities`, a cluster renders with Helm's default capabilities and
+the CRDs bootstrap-crds provides, and `apply` says so. It writes `apply.sh`, the plan it carries out as `plan.txt`, and a
 directory per component holding its renders and its rollout workflow.
 
 The script creates a component, a base Space and a rollout workflow for each
