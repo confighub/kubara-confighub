@@ -29,7 +29,7 @@ base.
 ## 0.2.0, 2026-09-28
 
 **Handover.** `cub kubara handover` writes `handover.sh`. It gives each
-cluster a Target and releases every variant stage by stage. It then points
+cluster a Target and releases every variant an ApplicationSet delivers, stage by stage. It then points
 each of Kubara's ApplicationSets at the cluster's approved release in
 ConfigHub, after checking that Argo CD would delete nothing. The first live
 run found three faults, and each is fixed in this release. The

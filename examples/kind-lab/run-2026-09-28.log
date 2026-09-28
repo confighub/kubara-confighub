@@ -16,7 +16,9 @@
 #   hub's argocd Application, and stops it (section 3).
 # - check fails on dev straight after the release, until Argo CD pulls it, and
 #   then passes; the spoke stays on one replica (section 5).
-# - check --record writes a Pass for every variant (section 6).
+# - check --record writes a Pass for each of the 8 variants Argo CD delivers.
+#   The 2 bootstrap-crds variants are skipped, because Kubara's bootstrap keeps
+#   them (section 6).
 
 ######## bash examples/kind-lab/up.sh
 

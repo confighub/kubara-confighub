@@ -161,7 +161,7 @@ HUB_CONTEXT=<hub context> bash my-platform-confighub/handover.sh
 
 ![Before handover, Argo CD on Kubara's hub reads the platform from Git. After handover.sh, the same Argo CD and ApplicationSets read each cluster's approved release from ConfigHub as OCI. Nothing is reinstalled.](docs/images/cub-kubara/handover-before-after.svg)
 
-`handover.sh` gives each cluster a Target, and releases every variant through
+`handover.sh` gives each cluster a Target, and releases every variant an ApplicationSet delivers, through
 its rollout workflow, stage by stage. Then it changes the hub, and it checks
 first. For each Application, it compares what Argo CD manages today with the
 release it is about to read. If Argo CD would delete anything, it stops and
