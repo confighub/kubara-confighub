@@ -72,7 +72,9 @@ which Kubara ships.
 ## What you can do with it
 
 The examples below come from the [kind lab](examples/kind-lab/README.md): a hub
-called `hub` in stage `dev`, and a spoke called `spoke` in stage `prod`.
+called `hub` in stage `dev`, and a spoke called `spoke` in stage `prod`. Each
+screen is from its [recorded run](examples/kind-lab/run-2026-09-28.log), which
+has the same output as text.
 
 ### 1. See what ConfigHub will hold
 
@@ -83,24 +85,7 @@ changes nothing:
 cub kubara plan my-platform
 ```
 
-```text
-Stages, in the order a change rolls out
-  1. dev
-     hub                    hub    runs Kubara's hub Argo CD
-                                   runs argo-cd, bootstrap-crds, cert-manager, homer-dashboard, metrics-server, traefik
-  2. prod
-     spoke                  spoke  delivered by hub's Argo CD, as Kubara wires it
-                                   runs bootstrap-crds, cert-manager, metrics-server, traefik
-
-Components: a base per component, a variant per cluster it runs on
-  cert-manager  (general 3.0.0)
-    base      kubara-cert-manager-base  reaches no cluster
-    variants  kubara-cert-manager-<cluster> for hub, spoke
-    chart     cert-manager 1.21.1 from https://charts.jetstack.io
-              Workshop checked 1.20.2, 1.21.0, not 1.21.1
-  ...
-ConfigHub would hold 16 Spaces: a base Space per component, and a variant Space per cluster it runs on.
-```
+![cub kubara plan on the kind lab: stage dev holds the hub, stage prod the spoke; each component gets a base and a variant per cluster; each chart shows the versions the Workshop checked; ConfigHub would hold 16 Spaces; offline, nothing changed.](docs/images/cub-kubara/kind-lab-02-plan.png)
 
 The stages come from the `stage` you gave each cluster in Kubara. Where the
 [ConfigHub Workshop Catalog](https://confighub.github.io/helm-expt/site/) has
@@ -140,13 +125,7 @@ less my-platform-confighub/apply.sh
 bash my-platform-confighub/apply.sh
 ```
 
-```text
-Wrote confighub/apply.sh: 6 components, 10 variants.
-Rendered hub with its own capabilities, from context kind-kubara-hub: Kubernetes v1.35.0, 168 APIs.
-Rendered spoke with its own capabilities, from context kind-kubara-spoke: Kubernetes v1.35.0, 168 APIs.
-These Secrets go to ConfigHub with their keys and without their values:
-  argo-cd: Secret argocd/cluster-kubernetes.default.svc (3 values)
-```
+![cub kubara apply renders hub and spoke with their own capabilities (Kubernetes v1.35.0, 168 APIs), names the Secret whose values stay out of ConfigHub, then apply.sh creates a base and rollout workflow per component and a variant per cluster.](docs/images/cub-kubara/kind-lab-03-apply.png)
 
 `apply.sh` creates a base and a rollout workflow per component, and a variant
 per cluster. It changes nothing on your clusters, and it is safe to run again.
@@ -161,28 +140,14 @@ HUB_CONTEXT=<hub context> bash my-platform-confighub/handover.sh
 
 ![Before handover, Argo CD on Kubara's hub reads the platform from Git. After handover.sh, the same Argo CD and ApplicationSets read each cluster's approved release from ConfigHub as OCI. Nothing is reinstalled.](docs/images/cub-kubara/handover-before-after.svg)
 
-`handover.sh` gives each cluster a Target, and releases every variant an ApplicationSet delivers, through
-its rollout workflow, stage by stage. Then it changes the hub, and it checks
-first. For each Application, it compares what Argo CD manages today with the
-release it is about to read. If Argo CD would delete anything, it stops and
-names it:
+`handover.sh` gives each cluster a Target, and releases every variant an
+ApplicationSet delivers, through its rollout workflow, stage by stage. Then it
+changes the hub, and it checks first. For each Application, it compares what
+Argo CD manages today with the release it is about to read, and stops if Argo
+CD would delete anything. Then it points each ApplicationSet at the cluster's
+approved release in ConfigHub, and waits until every Application reads it.
 
-```text
-hub-cert-manager: prunes nothing
-spoke-cert-manager: prunes nothing
-...
-hub-argocd: prunes nothing
-```
-
-Then it points each ApplicationSet at the cluster's approved release in
-ConfigHub, and waits until every Application reads it:
-
-```text
-hub-cert-manager reads oci://oci.hub.confighub.com/space/kubara-cert-manager-hub
-spoke-cert-manager reads oci://oci.hub.confighub.com/space/kubara-cert-manager-spoke
-...
-Done. Kubara's hub now reads each cluster's approved release from ConfigHub.
-```
+![handover.sh step 5 on the kind lab: all 8 Applications prune nothing, the AppProject and 5 ApplicationSets are applied and their Git sources removed, a sync Argo CD started from Git is stopped, and every Application then reads its own cluster's release from oci://oci.hub.confighub.com.](docs/images/cub-kubara/kind-lab-04-handover.png)
 
 Nothing is reinstalled. On the kind lab, every Application synced from
 ConfigHub, nothing was pruned, no workload restarted, and every Secret kept
@@ -212,17 +177,19 @@ cub release publish kubara-metrics-server-hub --revision ChangeOrder:kubara-metr
 Kubara's hub delivers it to the hub cluster. The spoke keeps one replica until
 the change is promoted, approved and published in prod as well.
 
+![The change reaches dev: after approval and release, check fails until Argo CD pulls release 2, the hub runs 2 metrics-server replicas while the spoke still runs 1, and check then passes.](docs/images/cub-kubara/kind-lab-06-change-dev-first.png)
+
+Then the same three commands for prod:
+
+![The change in prod after its own approval and release: the spoke runs 2 replicas, and check --record writes a Pass for each of the 8 delivered variants.](docs/images/cub-kubara/kind-lab-07-change-prod.png)
+
 ### 6. Check that each cluster runs what was approved
 
 ```bash
 cub kubara check my-platform --hub-context <hub context>
 ```
 
-```text
-kubara-cert-manager-spoke: spoke-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
-kubara-metrics-server-hub: hub-metrics-server runs release 2, synced, prunes nothing, keeps Secret values; health Healthy
-kubara-metrics-server-spoke: spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
-```
+![cub kubara check on the kind lab: each of the 8 variants Argo CD delivers runs release 1, is synced, prunes nothing and keeps Secret values; the 2 bootstrap-crds variants are skipped because Kubara's bootstrap keeps them.](docs/images/cub-kubara/kind-lab-05-check.png)
 
 `check` compares the digest Argo CD synced with the digest of the release
 ConfigHub published. It also checks that Argo CD would delete nothing, and
@@ -297,6 +264,11 @@ cub auth login
 bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
+
+After `up.sh`, Kubara's hub delivers every service to both clusters from Git,
+before ConfigHub is involved:
+
+![After up.sh: Argo CD on the hub shows 8 Applications, hub and spoke, all Synced from Git; cert-manager is Degraded and traefik Progressing, as expected on kind.](docs/images/cub-kubara/kind-lab-01-kubara-delivers-from-git.png)
 
 Its [recorded run](examples/kind-lab/run-2026-09-28.log) shows every command
 and what it printed. The plugin's tests run offline with `go test ./...`.
