@@ -209,6 +209,8 @@ less my-platform-confighub/handover.sh
 HUB_CONTEXT=<kubectl context of Kubara's hub> bash my-platform-confighub/handover.sh
 ```
 
+![Before handover, Argo CD on Kubara's hub reads the platform from Git. After handover.sh, the same Argo CD and ApplicationSets read each cluster's approved release from ConfigHub as OCI. Nothing is reinstalled.](../images/cub-kubara/handover-before-after.svg)
+
 Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet whose
 chart ConfigHub holds reads the cluster's approved release from ConfigHub's OCI
 gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or

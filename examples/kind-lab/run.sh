@@ -22,11 +22,12 @@ cub space list --quiet >/dev/null 2>&1 || { echo "cub is not logged in: run cub 
 export HELM_REPOSITORY_CONFIG=$LAB/helm/repositories.yaml HELM_REPOSITORY_CACHE=$LAB/helm/cache HELM_CACHE_HOME=$LAB/helm/cache-home
 
 section() { printf '\n== %s\n' "$*"; }
-# Argo CD takes a minute or two to sync each release it has just started reading.
+# Argo CD takes a few minutes to sync each release it has just started reading:
+# wait until every Application has synced a ConfigHub release, an OCI digest.
 settle() {
-  for _ in $(seq 1 60); do
+  for _ in $(seq 1 120); do
     kubectl --context "$HUB_CONTEXT" -n argocd get applications -o json \
-      | jq -e 'all(.items[]; .status.sync.status == "Synced")' >/dev/null && return 0
+      | jq -e 'all(.items[]; .status.sync.status == "Synced" and (.status.sync.revision // "" | startswith("sha256:")))' >/dev/null && return 0
     sleep 5
   done
 }

@@ -16,17 +16,7 @@ This repository has three things:
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-  you["You, or an AI assistant"] -->|"change once"| base["ConfigHub<br/>base"]
-  kubara["kubara generate"] -->|"cub kubara apply"| base
-  base --> dev["variant<br/>hub (dev)"]
-  base --> prod["variant<br/>spoke (prod)"]
-  dev -->|"approved release"| argo["Kubara's hub<br/>Argo CD ApplicationSets"]
-  prod -->|"approved release"| argo
-  argo --> hub["cluster hub"]
-  argo --> spoke["cluster spoke"]
-```
+![Kubara generates the platform from config.yaml and its catalogs. cub kubara apply puts it into ConfigHub as a base per component and a variant per cluster. A change is made once on the base, and approved and released stage by stage. Argo CD on Kubara's hub, with the same ApplicationSets, delivers each cluster's approved release as OCI.](docs/images/cub-kubara/how-it-fits.svg)
 
 - **Kubara generates the platform.** You describe clusters and services in
   `config.yaml`, and `kubara generate` writes the charts and each cluster's
@@ -169,16 +159,7 @@ cub kubara handover my-platform --out my-platform-confighub --capabilities hub=<
 HUB_CONTEXT=<hub context> bash my-platform-confighub/handover.sh
 ```
 
-```mermaid
-flowchart LR
-  subgraph before["Before: Kubara delivers from Git"]
-    git["Git<br/>platform repo"] --> as1["Kubara's<br/>ApplicationSets"] --> c1["hub, spoke"]
-  end
-  subgraph after["After: Kubara delivers what ConfigHub approved"]
-    ch["ConfigHub<br/>approved release<br/>per cluster"] -->|"OCI"| as2["the same<br/>ApplicationSets"] --> c2["hub, spoke"]
-  end
-  before --> after
-```
+![Before handover, Argo CD on Kubara's hub reads the platform from Git. After handover.sh, the same Argo CD and ApplicationSets read each cluster's approved release from ConfigHub as OCI. Nothing is reinstalled.](docs/images/cub-kubara/handover-before-after.svg)
 
 `handover.sh` gives each cluster a Target, and releases every variant through
 its rollout workflow, stage by stage. Then it changes the hub, and it checks
@@ -317,8 +298,7 @@ bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
 
-Its [recorded run](examples/kind-lab/run-2026-09-28.log) shows every command
-and what it printed. The plugin's tests run offline with `go test ./...`.
+The plugin's tests run offline with `go test ./...`.
 
 ## Documentation
 
