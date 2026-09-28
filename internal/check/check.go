@@ -76,6 +76,19 @@ type application struct {
 		Health struct {
 			Status string `json:"status"`
 		} `json:"health"`
+		OperationState struct {
+			Phase     string `json:"phase"`
+			Operation struct {
+				Sync struct {
+					Source *struct {
+						RepoURL string `json:"repoURL"`
+					} `json:"source"`
+					Sources []struct {
+						RepoURL string `json:"repoURL"`
+					} `json:"sources"`
+				} `json:"sync"`
+			} `json:"operation"`
+		} `json:"operationState"`
 		Resources []struct {
 			Kind            string `json:"kind"`
 			Namespace       string `json:"namespace"`
@@ -182,6 +195,21 @@ func judge(r *Result, a *application) {
 	r.Health = a.Status.Health.Status
 	if len(a.Spec.Sources) > 0 {
 		r.Problems = append(r.Problems, "it still lists Git sources, which Argo CD reads before the release")
+	}
+	if op := a.Status.OperationState; op.Phase == "Running" {
+		repos := []string{}
+		if op.Operation.Sync.Source != nil {
+			repos = append(repos, op.Operation.Sync.Source.RepoURL)
+		}
+		for _, src := range op.Operation.Sync.Sources {
+			repos = append(repos, src.RepoURL)
+		}
+		for _, repo := range repos {
+			if !strings.HasPrefix(repo, "oci://") {
+				r.Problems = append(r.Problems, "a sync Argo CD started from Git is still running, and cannot finish against the release; run handover.sh again to stop it")
+				break
+			}
+		}
 	}
 	if a.Status.Sync.Status != "Synced" {
 		r.Problems = append(r.Problems, "sync status is "+or(a.Status.Sync.Status, "unknown"))

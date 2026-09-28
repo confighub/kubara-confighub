@@ -1,0 +1,244 @@
+# Before cub kubara: the adapted reference platform
+
+Before `cub kubara`, this repository ran a Kubara platform through ConfigHub by
+adapting it. The adapted platform dropped Kubara's own Argo CD and ran
+ConfigHub's delivery on every cluster, with one Argo CD Application per
+component and no ApplicationSets. It has four kind clusters, two example
+applications, a fleet matrix and a committed evidence chain, and all of it
+still verifies.
+
+`cub kubara` does the same job without changing Kubara: Kubara's hub, its
+ApplicationSets and its catalogs all stay. Start there unless you want the
+adapted platform itself. See the [README](../README.md).
+
+This page keeps the adapted platform's material as it was, so every link and
+receipt still resolves.
+
+Kubara keeps what it is good at ([this introduction](https://itnext.io/what-is-kubara-a-gitops-first-approach-to-reusable-kubernetes-platforms-3f91a060b39c) explains what Kubara is). It selects components from its catalogs, wires a hub and spokes, and generates the platform files. ConfigHub adds what teams ask for next: component identity with retained versions, approvals before production, exact-digest releases, one-target rollback, drift repair, a fleet matrix, and queryable wiring. Argo CD remains the cluster reconciler on every target.
+
+## Why we did this
+
+Teams who adopt Kubara like what it generates and then meet the same operational questions every platform meets. Which exact version of each component runs on which cluster? Who approved this before it reached production? Can we roll one production cluster back without touching its twin? Did anything drift, and is anything left behind that nobody owns? Folder trees and mutable tags answer none of these well.
+
+Running the Kubara platform through ConfigHub answers them without changing what Kubara produces:
+
+- One 36-cell matrix shows every component and application on every cluster, and keeps four facts apart that a status page usually collapses into a single green tick: what should be placed there, which release was actually delivered, what the reconciler says it synced, and what Kubernetes reports as ready.
+- Production changes pass an approval gate bound to the exact revision, not to whatever the tag points at today.
+- Releases are immutable digests; promotion moves the reviewed revision, and rollback restores one target while its peer keeps the newer release.
+- Drift gets detected and repaired as an attributed action, and a scoped audit proves zero unowned residue.
+- The wiring between apps and platform services becomes queryable data instead of folder convention.
+- The cost of reconciliation is measured and disclosed, not asserted.
+
+The detailed case — what stays Kubara, what becomes better, and how to verify each claim — is in [the Kubara with ConfigHub overview](demo/kubara/index.md).
+
+## Start a small platform
+
+Create one native Kubara development platform before opening the full four-cluster
+example:
+
+```sh
+npm run kubara-platform:start -- \
+  --name my-platform \
+  --repository https://github.com/acme/platform.git \
+  --services cert-manager,metrics-server,traefik \
+  --output ../my-platform
+```
+
+The command writes Kubara's ordinary `config.yaml`, a safe `.env.example`, a short
+README, and a companion `source-and-intent.yaml`. The companion record pins the
+Kubara catalogs and exact component versions, links them to Config Workshop Catalog
+evidence, and names the hooks, CRDs, Secrets, setup work, and target facts that must
+be reviewed after generation. It does not claim that the platform has already been
+generated or deployed.
+
+List every Kubara service that the starter can select:
+
+```sh
+npm run kubara-platform:start -- --list-services
+```
+
+Use `--services` to choose the platform components. Components with a matching
+Config Workshop entry carry a link to the tested chart version and its exact
+package. Services without that evidence remain visible as unchecked.
+
+You may also record an application or model-server image beside the platform. The
+image must be pinned by digest:
+
+```sh
+npm run kubara-platform:start -- \
+  --name my-platform \
+  --repository https://github.com/acme/platform.git \
+  --services cert-manager,metrics-server,traefik,kube-prometheus-stack \
+  --runtime-image inference=registry.example.com/inference@sha256:<64-hex-digest> \
+  --output ../my-platform
+```
+
+This writes `runtime-images.yaml` and records the same reference in
+`source-and-intent.yaml`. Kubara does not deploy that file. Add the image to your
+application configuration beside the generated platform, then review that complete
+application before deployment.
+
+The committed [inference platform starter](../examples/kubara/inference-platform/)
+shows that exact output with cert-manager, Metrics Server, Traefik,
+kube-prometheus-stack, and the digest-pinned vLLM CPU image used by the Config
+Workshop runtime proof. Verify it with:
+
+```sh
+npm run kubara-platform:inference-example:verify
+```
+
+The committed [starter platform](../examples/kubara/starter-platform/) uses cert-manager,
+Metrics Server, and Traefik. Verify it with:
+
+```sh
+npm run kubara-platform:example:verify
+```
+
+## See the result first
+
+One application, four clusters, every placement healthy at its exact retained release. Production B stays on the older release because production A was rolled back one target at a time:
+
+![The hx-web application and platform binding across the four clusters](images/kubara/04-application-four-clusters.png)
+
+The fleet matrix keeps desired placement separate from observed release, sync, health, and readiness. Here is its development column, every component observed, Synced, and Healthy at its exact version or digest:
+
+![The development column of the fleet matrix](images/kubara/matrix/matrix-dev.png)
+
+A column where everything is green does not show that those four fields are kept apart. Production A does. Four components are `disabled` there, and the row says so four times over — no sync to report, no health to report, nothing observed — instead of collapsing to one grey tick:
+
+![The production A column, where four components are disabled and four are observed](images/kubara/matrix/matrix-prod-a.png)
+
+Beneath the matrix, the live overlay receipt and the scoped residue audit tie the page to committed evidence — all 36 cells validated, zero audited residue, the audit's own SHA-256 in the page:
+
+![The live overlay receipt and scoped residue audit identity](images/kubara/matrix/receipts.png)
+
+Values overrides stay declared Kubara inputs, listed per cluster and component, never silently reclassified as live departures:
+
+![Declared values overrides per cluster and component](images/kubara/matrix/declared-values-overrides.png)
+
+The whole page is captured a section at a time in [docs/images/kubara/matrix](images/kubara/matrix), one frame per cluster column, because four columns of this density in a single frame are not readable. The [GUI tour](demo/kubara/gui-tour.md) walks the six original frames with their key takeaways.
+
+## How applications work
+
+Here is the second example application, Cubbychat, as ConfigHub sees it: one base definition fanning out to all four clusters, every placement Healthy and Synced at the same retained release, with upstream-newer signals kept visible instead of hidden:
+
+![The cubbychat application deployed from one base to all four clusters](images/kubara/details/cubbychat-four-clusters.png)
+
+Your application code does not move into ConfigHub; its delivery does. The reviewed application source lives in a base Space (`hx-web-base` keeps one Unit per Kubernetes resource; `hx-cubbychat-base` keeps one Unit for the whole app), and a variant Space per cluster binds that source to the cluster's target. Upgrade links connect each variant back to its base, and NeedsProvides links declare what the app needs from the platform — its Ingress needs the traefik ingress class, its Certificate needs cert-manager — so the wiring that was implicit in folders becomes queryable facts:
+
+![The hx-cubbychat development Unit's native links to traefik and cert-manager](images/kubara/05-native-links.png)
+
+Deployment is deliberately boring. Publishing a Space's Units creates an immutable release with an exact OCI `ManifestDigest`. The reconciler revalidates that release, waits until no Argo operation is active, and submits exactly `operation.sync.revision=<ManifestDigest>` with a Kubernetes compare-and-set on the Application object. Argo CD stays the cluster-local reconciler it always was; the retained argobot runs refresh-only and cannot deploy. The managed Application keeps `targetRevision: latest` for discovery only and has no automated sync, so a moving `latest` pointer can never bypass review — the approved digest is the only thing a cluster will converge to.
+
+Around that mechanism sits the lifecycle teams actually ask for. Production Spaces carry approval gates, and an approval binds to the exact observed revision head, so approving yesterday's revision authorizes nothing about today's. Promotion moves the exact reviewed revision downstream instead of rebuilding from a tag. Rollback restores one production target to an exact earlier release while its peer keeps the newer one. A reviewed per-target departure — staging's extra environment variable — survives later promotions instead of being silently overwritten. All of it is retained as numbered releases on the Unit, which is what the production history looks like after a real cycle:
+
+![hx-web production revision history with approval gates, promotion, rollback, and the applied release](images/kubara-adoption/06-app-governance-live.png)
+
+Chapter 6 of the tutorial runs this cycle end to end, and every claim above has its receipt.
+
+## Practise the handoff on small cases
+
+[Mini-Kubara](../examples/mini-kubara/README.md) has small drills for the same
+platform facts at a size you can rerun in minutes, on a local kind cluster
+with Argo CD. Three have scripts: a clean ConfigHub-to-Argo CD handoff, CRDs
+too large for client-side apply, and an admission policy that blocks a bad
+workload. The fourth, dev and prod variants of one app, is a written design
+with its workload fixtures only.
+
+## Two paths from here
+
+### View the platform
+
+Read the [GUI tour](demo/kubara/gui-tour.md) to see the running integration frame by frame, then the [six-step tutorial](demo/kubara/adoption.md) as the story of how it was built. The [checkpoints ledger](demo/kubara/checkpoints.md) records what is machine-proven and what remains gated.
+
+### Build your own platform
+
+Start on your laptop. Clone this repository and run one command; it needs Node.js and nothing else — no cluster, no registry, no ConfigHub account:
+
+```sh
+npm run kubara-adoption:self-test
+```
+
+This rehearses the whole journey on your machine: reading the Kubara config, compiling the generated platform into packages, importing them, and handing off application releases. It runs against built-in stand-ins for Git, the OCI registry, and ConfigHub, so nothing external is touched. Four "self-test passed" lines mean the exact tooling you would later run for real works end to end, including refusing bad input.
+
+When you are ready to build for real, you need [Kubara](https://github.com/kubara-io) if you want to generate your own platform rather than reuse the committed example, the [cub CLI](https://docs.confighub.com) logged into your own ConfigHub organization, and clusters (kind works; the reference fleet is kind). Your platform code lives wherever your Git lives: fork this repository, or start a fresh one and copy [examples/kubara/git-import/](../examples/kubara/git-import/) as your request templates.
+
+The command sequence, end to end:
+
+```bash
+# 1. Rehearse everything against built-in fake surfaces. Node.js only,
+#    nothing external touched. About two minutes.
+npm run kubara-adoption:self-test
+
+# 2. Check the committed evidence chain you are about to rely on.
+#    A few seconds each.
+npm run kubara-mini-idp:receipt-verify
+npm run kubara-platform-matrix:verify
+
+# 3. Point the tooling at your platform: copy the request templates and
+#    fill in your Git repository and revision.
+cp examples/kubara/git-import/portable-request.example.yaml my-request.yaml
+
+# 4. Compile your exact revision into per-component OCI packages plus the
+#    digest-bound platform index. Offline; the output is inspectable files.
+#    A few minutes for a full platform.
+node scripts/import-kubara-git-revision.mjs --request my-request.yaml
+
+# 5. First live contact. Log into YOUR organization, then compile the
+#    resumable import contract. The compile itself takes seconds. The compiler executes nothing; organization
+#    and cluster bootstrap remain explicit steps in the journal it emits.
+cub auth login
+node scripts/compile-kubara-selected-org-workflow.mjs --request my-workflow.yaml
+
+# 6. Execute the journal's ordered commands. Interruptions are safe: the
+#    journal is prefix-resumable, and a rerun replays only what is proven.
+#    Budget tens of minutes end to end: cluster bootstrap runs a few minutes
+#    per cluster, and Argo convergence dominates the rest. Our reference
+#    no-op reconciliation measures about 77 seconds once converged.
+```
+
+Each step matches a tutorial chapter below; steps 1 to 4 are fully offline, step 5 is your first live contact, and step 6 hands off applications:
+
+1. [Choose the platform in native Kubara config](demo/kubara/adoption-1-choose.md)
+2. [Run Kubara and verify the generated platform](demo/kubara/adoption-2-generate.md)
+3. [Commit the exact hand-off to Git](demo/kubara/adoption-3-git.md)
+4. [Compile per-component OCI packages and the digest index](demo/kubara/adoption-4-oci.md)
+5. [Import into a selected ConfigHub organization](demo/kubara/adoption-5-confighub-org.md)
+6. [Add, promote, approve, and roll back applications](demo/kubara/adoption-6-apps.md)
+
+The honest status: every step has deterministic self-tests that pass, the complete journey has passed live against the reference organization below, and the general fresh-organization path has not yet passed its complete live acceptance run. That distinction stays visible in the [checkpoints ledger](demo/kubara/checkpoints.md) until it is earned.
+
+## The reference deployment behind these pages
+
+Everything you see here comes from one live reference integration that we operate:
+
+- A ConfigHub organization named **Kubara** on hub.confighub.com holding 55 Spaces, 63 managed Units, and 25 curated NeedsProvides Links.
+- Four kind clusters (`hx-app-dev`, `hx-app-staging`, `hx-app-prod-a`, `hx-app-prod-b`) forming the hub-and-spoke fleet, each running its own Argo CD.
+- The platform components Kubara selected (cert-manager, traefik, external-secrets, kube-prometheus-stack, metrics-server, homer-dashboard) plus two example applications.
+
+You do not need access to that organization. Every claim these pages make about it is bound by SHA-256 to a committed receipt in [runs/](../runs/) and [data/](../data/), every screenshot binds the same source commit as the receipts, and the verifiers below let you check the chain yourself.
+
+## Check that we are not making this up
+
+A screenshot of a healthy dashboard proves nothing about the system that produced it. So every screenshot and measured number on these pages ships with a receipt: a YAML file committed in this repository that records where it came from — the exact Git commit, the ConfigHub organization, the capture time — plus a SHA-256 fingerprint of every file involved.
+
+These commands recompute the fingerprints and compare them against the receipts. They fail loudly if any image, page, or number was edited after the evidence was recorded:
+
+```sh
+npm run kubara-mini-idp:receipt-verify
+npm run kubara-mini-idp:performance:receipt-verify
+npm run kubara-mini-idp:orphan-audit:receipt-verify
+npm run kubara-platform-matrix:verify
+npm run kubara-wiring:verify
+npm run certified-bundles:verify
+```
+
+Every platform component also carries a certified bundle receipt under `data/certified-bundles/`: a per-file fingerprint of the component definition, the digest index it belongs to, and a flattening-safety lane. Where a wrapped chart version exactly matches an audited verdict in [confighub/helm-expt](https://github.com/confighub/helm-expt), the lane is certified by citation; everywhere else the receipt says plainly that it is provisional and why. The receipt spec's canonical home is that repository; the schema here is a byte-faithful copy so these receipts verify standalone.
+
+When evidence is missing or stale, the pages say so themselves instead of showing a green badge. A screenshot never replaces a machine checkpoint.
+
+## Where your Helm charts come from
+
+If you build your own platform, your charts keep coming from Kubara's own catalogs, exactly as they do today. Your `config.yaml` names them (`oci://ghcr.io/kubara-io/catalogs/bootstrap`, `oci://ghcr.io/kubara-io/catalogs/general`), Kubara resolves components from them, and ConfigHub imports what Kubara generated. Nothing in this repository substitutes chart sources or sits between you and the Kubara catalogs.
+
+Separately, our test lab [confighub/helm-expt](https://github.com/confighub/helm-expt) maintains its own Helm chart catalog that we used to cross-check Kubara's rendered output byte for byte. That catalog stayed in helm-expt, and it is the instrument we would pick up again to rebuild this platform at a newer Kubara release and cross-check the regenerated output the same way. A few deep generated evidence views under `data/kubara-catalog-release/recipe-views/` link into it; no tutorial step depends on them. This project moved here from [confighub/helm-expt](https://github.com/confighub/helm-expt) at commit `6b4bc9d6b`, and the receipts committed here chain back to that public history, so a rebuild can prove exactly what changed since this snapshot.

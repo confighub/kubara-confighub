@@ -1,0 +1,60 @@
+# A read-only Git server inside the hub cluster, for the kind lab. Argo CD
+# needs Git's smart HTTP protocol, so git-server.py hands every request to
+# git http-backend. The repository is copied onto the node at /srv/git by up.sh.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: git-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git
+  namespace: git-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git
+  template:
+    metadata:
+      labels:
+        app: git
+    spec:
+      containers:
+        - name: git
+          image: python:3.12-alpine
+          # On Alpine, http-backend is in git-daemon. docker cp leaves the
+          # repository owned by your user, so git must trust it.
+          command:
+            - sh
+            - -c
+            - apk add --no-cache git git-daemon >/dev/null && git config --global --add safe.directory '*' && exec python /app/server.py
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: repos
+              mountPath: /srv/git
+              readOnly: true
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: repos
+          hostPath:
+            path: /srv/git
+            type: Directory
+        - name: app
+          configMap:
+            name: git-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git
+  namespace: git-server
+spec:
+  selector:
+    app: git
+  ports:
+    - port: 80
+      targetPort: 80

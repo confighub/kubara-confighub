@@ -108,6 +108,8 @@ func TestCheckNamesEachProblem(t *testing.T) {
 	stale = strings.Replace(stale, `"RespectIgnoreDifferences=true"`, `"Validate=true"`, 1)
 	stale = strings.Replace(stale, `"spec":{"source"`, `"spec":{"sources":[{"repoURL":"http://git.example/platform.git"}],"source"`, 1)
 	stale = strings.Replace(stale, `"status":"Synced"`, `"status":"OutOfSync"`, 1)
+	stale = strings.Replace(stale, `"health":{"status":"Healthy"},`, `"health":{"status":"Healthy"},
+  "operationState":{"phase":"Running","operation":{"sync":{"sources":[{"repoURL":"http://git.example/platform.git"}]}}},`, 1)
 	f := &fake{
 		apps: []string{stale},
 		releases: map[string]string{
@@ -123,6 +125,7 @@ func TestCheckNamesEachProblem(t *testing.T) {
 	for _, want := range []string{
 		"still lists Git sources",
 		"sync status is OutOfSync",
+		"a sync Argo CD started from Git is still running",
 		"Argo CD would delete Job/argocd/dex-restarter",
 		"overwrite live Secret values",
 		"Argo CD runs sha256:a1, and the latest release, 2, is sha256:b2",
