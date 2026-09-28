@@ -13,6 +13,55 @@ component, and Kubara still generates the platform. The ConfigHub Workshop
 Catalog adds evidence: where it has checked the exact chart version Kubara pins,
 the plan links to what that chart installs and what it needs.
 
+## How Kubara, cub kubara and Workshop stacks fit together
+
+Three pieces meet here, and each has one job.
+
+**Kubara generates the platform.** You write a `config.yaml` that chooses services
+from Kubara's catalogs. `kubara generate` writes a wrapper chart for each service
+and each cluster's values. Kubara's hub Argo CD then delivers to every cluster
+through ApplicationSets. Kubara knows nothing about ConfigHub.
+
+**`cub kubara` is for people who run Kubara.** It governs a Kubara platform in
+ConfigHub without changing how Kubara works. Your path is:
+
+```text
+kubara generate  →  cub kubara plan  →  cub kubara apply  →  cub kubara handover
+```
+
+Kubara generates. `cub kubara` puts the result under ConfigHub's governance, as a
+base for each component and a variant for each cluster, with an approval before
+each release. `handover` then points Kubara's hub at the approved releases.
+`handover` is still a draft (#13). There is no stack step on this path.
+
+`cub kubara apply` borrows one thing from the ConfigHub Workshop. It renders
+Kubara's charts with the Workshop plugin's `cub stack from-kubara`, so both render
+a Kubara platform the same way. That is an internal dependency, not a step you
+take. It goes away once `cub helm template` can declare capabilities
+([confighub/cub-helm#2](https://github.com/confighub/cub-helm/issues/2)). Then
+`cub kubara` renders Kubara's wrapper charts with `cub helm` itself, and writes the
+certified bundle shape directly.
+
+**Workshop stacks serve a different job:** using a Kubara platform as a stack,
+rather than governing it the way Kubara runs it. Reach for `cub stack` when you
+want to:
+
+- check the platform before anything runs, for components that conflict, CRD
+  order, and webhooks that need a certificate;
+- compose apps onto it with `cub app`;
+- publish it as OCI, or place it on clusters without Kubara's hub Argo CD;
+- produce a platform on demand, when someone asks their AI for one. Kubara is one
+  way to produce it, and the result is a stack like any other.
+
+`cub stack from-kubara` makes that stack. Today it makes one stack per cluster;
+one stack for the whole platform, a hub and its spokes, is next
+([confighub/cub-workshop#59](https://github.com/confighub/cub-workshop/issues/59)).
+
+The two tools share only the renderer and the certified bundle format. The rules
+they share are in
+One flattening model for every plugin, in review as
+[confighub/helm-expt#2000](https://github.com/confighub/helm-expt/pull/2000).
+
 ## Install
 
 ```bash
@@ -138,9 +187,10 @@ cub stack check hub-dev/stack.yaml
 
 ## What this version does not do yet
 
-`cub kubara takeover` will point Kubara's hub at the releases ConfigHub has
-approved, so a change reaches a cluster only after its stage approves it. Until
-then, the committed scripts in this repository show a takeover; see
+`cub kubara handover`, in draft as #13, will point Kubara's hub at the releases
+ConfigHub has approved, so a change reaches a cluster only after its stage
+approves it. Until then, the committed scripts in this repository show an older
+kind of handover, where each cluster runs its own reconciler; see
 [the six-step tutorial](../demo/kubara/adoption.md).
 
 ## Refresh the plugin's data
