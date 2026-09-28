@@ -216,7 +216,7 @@ chart ConfigHub holds reads the cluster's approved release from ConfigHub's OCI
 gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or
 later reads those releases; Kubara v0.16 ships 3.5.
 
-The script gives each cluster a Target and releases every variant through its
+The script gives each cluster a Target and releases every variant an ApplicationSet delivers, through its
 rollout workflow, stage by stage, with argo-cd last. On a re-run it skips a
 component whose variants all have a release. A change made since then belongs
 to your own change orders, and may be part way through its stages. argo-cd is
@@ -325,7 +325,7 @@ Run it after a release, when Argo CD has had time to sync. Until then it
 reports the release Argo CD has not pulled yet:
 
 ```text
-kubara-metrics-server-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
 With `--record`, `check` records each verdict in the variant's Space as a

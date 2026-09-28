@@ -24,10 +24,10 @@
 # ConfigHub. Each fix is in pull request #13, and re-running the script was
 # safe each time.
 #
-# Then `cub kubara check` passed every variant. A change to metrics-server was
+# Then `cub kubara check` passed every variant Argo CD delivers. A change to metrics-server was
 # promoted, approved and released to the dev cluster. check failed until Argo
 # CD synced the new release, then passed, and the prod spoke stayed on its
-# release. check --record wrote a LiveCheck attestation per variant. A re-run
+# release. check --record wrote a LiveCheck attestation for each of them. A re-run
 # of handover.sh with the released v0.2.0, while that change was only in dev,
 # stopped before touching the hub; v0.2.1 fixes it. The change then went on to
 # prod, and check passed both clusters on release 2.

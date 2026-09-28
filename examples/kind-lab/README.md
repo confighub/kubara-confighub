@@ -13,6 +13,9 @@ bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
 
+The [recorded run](run-2026-09-28.log) shows each command and what it printed,
+from scratch, with `cub kubara` v0.2.2.
+
 
 ## What you need
 
