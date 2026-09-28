@@ -165,12 +165,16 @@ drop_git_sources
 # starts again from ConfigHub. A Git sync that finishes first can write the Git
 # sources back, so they are dropped again until every Application reads ConfigHub.
 reads() { k -n argocd get application "$1" -o jsonpath='{.spec.sources[*].repoURL}{.spec.source.repoURL}' 2>/dev/null; }
+# A sync names its sources, or at least its revisions: a Git sync has commit
+# SHAs, and a sync of a ConfigHub release has an OCI digest.
 git_operation() {
-  local op r
-  op=$(k -n argocd get application "$1" -o jsonpath='{.status.operationState.phase} {.status.operationState.operation.sync.sources[*].repoURL} {.status.operationState.operation.sync.source.repoURL}' 2>/dev/null) || return 1
+  local op t
+  op=$(k -n argocd get application "$1" -o jsonpath='{.status.operationState.phase} {.status.operationState.operation.sync.sources[*].repoURL} {.status.operationState.operation.sync.source.repoURL} {.status.operationState.syncResult.sources[*].repoURL} {.status.operationState.syncResult.source.repoURL} {.status.operationState.operation.sync.revisions[*]} {.status.operationState.operation.sync.revision} {.status.operationState.syncResult.revisions[*]} {.status.operationState.syncResult.revision}' 2>/dev/null) || return 1
   read -ra op <<<"$op"
   [ "${op[0]:-}" = Running ] || return 1
-  for r in "${op[@]:1}"; do case "$r" in oci://*) ;; *) return 0 ;; esac; done
+  for t in "${op[@]:1}"; do
+    case "$t" in oci://* | sha256:*) ;; *) return 0 ;; esac
+  done
   return 1
 }
 for _ in $(seq 1 60); do

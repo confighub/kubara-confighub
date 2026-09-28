@@ -79,15 +79,9 @@ type application struct {
 		OperationState struct {
 			Phase     string `json:"phase"`
 			Operation struct {
-				Sync struct {
-					Source *struct {
-						RepoURL string `json:"repoURL"`
-					} `json:"source"`
-					Sources []struct {
-						RepoURL string `json:"repoURL"`
-					} `json:"sources"`
-				} `json:"sync"`
+				Sync syncRecord `json:"sync"`
 			} `json:"operation"`
+			SyncResult syncRecord `json:"syncResult"`
 		} `json:"operationState"`
 		Resources []struct {
 			Kind            string `json:"kind"`
@@ -97,6 +91,39 @@ type application struct {
 			Hook            bool   `json:"hook"`
 		} `json:"resources"`
 	} `json:"status"`
+}
+
+// syncRecord is what Argo CD records about a sync: the sources it reads, or at
+// least the revisions it syncs.
+type syncRecord struct {
+	Source *struct {
+		RepoURL string `json:"repoURL"`
+	} `json:"source"`
+	Sources []struct {
+		RepoURL string `json:"repoURL"`
+	} `json:"sources"`
+	Revision  string   `json:"revision"`
+	Revisions []string `json:"revisions"`
+}
+
+// fromGit reports whether a sync names a Git source, or a revision that is a
+// commit rather than an OCI digest.
+func (s syncRecord) fromGit() bool {
+	var names []string
+	if s.Source != nil {
+		names = append(names, s.Source.RepoURL)
+	}
+	for _, src := range s.Sources {
+		names = append(names, src.RepoURL)
+	}
+	names = append(names, s.Revision)
+	names = append(names, s.Revisions...)
+	for _, n := range names {
+		if n != "" && !strings.HasPrefix(n, "oci://") && !strings.HasPrefix(n, "sha256:") {
+			return true
+		}
+	}
+	return false
 }
 
 type release struct {
@@ -196,20 +223,8 @@ func judge(r *Result, a *application) {
 	if len(a.Spec.Sources) > 0 {
 		r.Problems = append(r.Problems, "it still lists Git sources, which Argo CD reads before the release")
 	}
-	if op := a.Status.OperationState; op.Phase == "Running" {
-		repos := []string{}
-		if op.Operation.Sync.Source != nil {
-			repos = append(repos, op.Operation.Sync.Source.RepoURL)
-		}
-		for _, src := range op.Operation.Sync.Sources {
-			repos = append(repos, src.RepoURL)
-		}
-		for _, repo := range repos {
-			if !strings.HasPrefix(repo, "oci://") {
-				r.Problems = append(r.Problems, "a sync Argo CD started from Git is still running, and cannot finish against the release; run handover.sh again to stop it")
-				break
-			}
-		}
+	if op := a.Status.OperationState; op.Phase == "Running" && (op.Operation.Sync.fromGit() || op.SyncResult.fromGit()) {
+		r.Problems = append(r.Problems, "a sync Argo CD started from Git is still running, and cannot finish against the release; run handover.sh again to stop it")
 	}
 	if a.Status.Sync.Status != "Synced" {
 		r.Problems = append(r.Problems, "sync status is "+or(a.Status.Sync.Status, "unknown"))

@@ -114,14 +114,22 @@ settled() {
     then (.items | length) else 0 end'
 }
 last=0
+ready=no
 for _ in $(seq 1 90); do
   n=$(settled)
   # The same number of settled Applications twice running: the ApplicationSets have caught up.
-  [ "$n" -gt 0 ] && [ "$n" = "$last" ] && break
+  if [ "$n" -gt 0 ] && [ "$n" = "$last" ]; then ready=yes; break; fi
   last=$n
   sleep 10
 done
 hub -n argocd get applications -o custom-columns='APPLICATION:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status'
+if [ "$ready" != yes ]; then
+  echo
+  echo "Argo CD has not synced every Application after 15 minutes. Look at the ones above"
+  echo "that are not Synced (kubectl --kubeconfig $LAB/hub.kubeconfig -n argocd describe application <name>),"
+  echo "then run up.sh again."
+  exit 1
+fi
 echo
 echo "On kind, cert-manager is Degraded (Let's Encrypt refuses the example.com"
 echo "contact), traefik is Progressing (no load balancer), and argocd waits for an"
