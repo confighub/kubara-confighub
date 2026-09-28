@@ -62,3 +62,29 @@ func TestKubaraAppsReadsTheHubApplicationSets(t *testing.T) {
 		t.Fatalf("apps = %v", got)
 	}
 }
+
+func TestKubaraAppsReadsOnlyTheConfiguredHub(t *testing.T) {
+	apps, err := KubaraApps("testdata/kubara-render")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, a := range apps {
+		if a.Name == "stale-web" {
+			t.Fatal("read the ApplicationSets of a directory that is not the configured hub")
+		}
+	}
+}
+
+func TestParseAPIResources(t *testing.T) {
+	out := `pods                              po           v1                                true         Pod
+bindings                                       v1                                true         Binding
+servicemonitors                   smon         monitoring.coreos.com/v1          true         ServiceMonitor
+deployments                       deploy       apps/v1                           true         Deployment
+`
+	got := strings.Join(parseAPIResources(out), ",")
+	for _, want := range []string{"v1/Pod", "monitoring.coreos.com/v1", "monitoring.coreos.com/v1/ServiceMonitor", "apps/v1/Deployment", "v1/Binding"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("parsed APIs lack %s: %s", want, got)
+		}
+	}
+}

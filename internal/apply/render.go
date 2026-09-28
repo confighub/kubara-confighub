@@ -2,6 +2,7 @@ package apply
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -35,6 +36,64 @@ func (a App) ReleaseNamespace() string {
 
 const bootstrapCRDs = "bootstrap-crds"
 
+// Capabilities are what Argo CD renders a chart with on a live cluster: the
+// server's Kubernetes version and every API it serves. Without them a render
+// uses Helm's defaults plus the APIs whose CRDs bootstrap-crds provides.
+type Capabilities struct {
+	Source      string // the kubectl context they were read from
+	KubeVersion string
+	APIs        []string
+}
+
+// ReadCapabilities asks a cluster for its version and the APIs it serves, as
+// group/version and group/version/Kind, the forms helm --api-versions takes.
+func ReadCapabilities(context string) (Capabilities, error) {
+	c := Capabilities{Source: context}
+	out, err := exec.Command("kubectl", "--context", context, "version", "-o", "json").Output()
+	if err != nil {
+		return c, fmt.Errorf("kubectl --context %s version: %w", context, err)
+	}
+	var v struct {
+		ServerVersion struct {
+			GitVersion string `json:"gitVersion"`
+		} `json:"serverVersion"`
+	}
+	if err := json.Unmarshal(out, &v); err != nil || v.ServerVersion.GitVersion == "" {
+		return c, fmt.Errorf("kubectl --context %s version reported no server version", context)
+	}
+	c.KubeVersion = v.ServerVersion.GitVersion
+	out, err = exec.Command("kubectl", "--context", context, "api-resources", "--no-headers").Output()
+	if err != nil {
+		return c, fmt.Errorf("kubectl --context %s api-resources: %w", context, err)
+	}
+	c.APIs = parseAPIResources(string(out))
+	return c, nil
+}
+
+// parseAPIResources reads kubectl api-resources output, whose last three
+// columns are APIVERSION, NAMESPACED and KIND.
+func parseAPIResources(out string) []string {
+	seen := map[string]bool{}
+	for _, line := range strings.Split(out, "\n") {
+		f := strings.Fields(line)
+		if len(f) < 4 {
+			continue
+		}
+		gv, kind := f[len(f)-3], f[len(f)-1]
+		seen[gv] = true
+		seen[gv+"/"+kind] = true
+	}
+	return sortedKeys(seen)
+}
+
+// NewKubaraRenderer renders like KubaraRenderer, with each named cluster's
+// own capabilities.
+func NewKubaraRenderer(caps map[string]Capabilities) Renderer {
+	return func(kubaraDir, cluster, dir string) (map[string]string, error) {
+		return renderKubara(kubaraDir, cluster, dir, caps[cluster])
+	}
+}
+
 // KubaraRenderer renders one cluster the way Kubara delivers it. Each service
 // the cluster enables renders from its wrapper chart with the release name,
 // namespace and values files its ApplicationSet uses. bootstrap-crds renders
@@ -42,6 +101,10 @@ const bootstrapCRDs = "bootstrap-crds"
 // bootstrap-crds provides are declared to the charts that check for them,
 // as a cluster where those CRDs exist would.
 func KubaraRenderer(kubaraDir, cluster, dir string) (map[string]string, error) {
+	return renderKubara(kubaraDir, cluster, dir, Capabilities{})
+}
+
+func renderKubara(kubaraDir, cluster, dir string, caps Capabilities) (map[string]string, error) {
 	if _, err := exec.LookPath("helm"); err != nil {
 		return nil, fmt.Errorf("rendering needs helm on your PATH: cub kubara renders Kubara's wrapper charts with it")
 	}
@@ -76,7 +139,7 @@ func KubaraRenderer(kubaraDir, cluster, dir string) (map[string]string, error) {
 
 	// bootstrap-crds first: its CRDs are on every cluster before Argo CD runs.
 	if _, err := os.Stat(filepath.Join(charts, bootstrapCRDs, "Chart.yaml")); err == nil {
-		docs, err := helmTemplate(bootstrapCRDs, filepath.Join(charts, bootstrapCRDs), "kube-system", valuesFiles(filepath.Join(configs, bootstrapCRDs)), nil)
+		docs, err := helmTemplate(bootstrapCRDs, filepath.Join(charts, bootstrapCRDs), "kube-system", valuesFiles(filepath.Join(configs, bootstrapCRDs)), caps.APIs, caps.KubeVersion)
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +179,11 @@ func KubaraRenderer(kubaraDir, cluster, dir string) (map[string]string, error) {
 		if _, err := os.Stat(filepath.Join(dirPath, "Chart.yaml")); err != nil {
 			return nil, fmt.Errorf("Kubara generated no chart for %s under platform-components/helm", app.Path)
 		}
-		docs, err := helmTemplate(app.Name, dirPath, app.ReleaseNamespace(), valuesFiles(filepath.Join(configs, app.Path)), sortedKeys(provided))
+		apis := caps.APIs
+		if len(apis) == 0 {
+			apis = sortedKeys(provided)
+		}
+		docs, err := helmTemplate(app.Name, dirPath, app.ReleaseNamespace(), valuesFiles(filepath.Join(configs, app.Path)), apis, caps.KubeVersion)
 		if err != nil {
 			return nil, err
 		}
@@ -137,52 +204,57 @@ func KubaraRenderer(kubaraDir, cluster, dir string) (map[string]string, error) {
 }
 
 // KubaraApps reads the services Kubara's hub ApplicationSets deliver, from the
-// argo-cd values of the hub, merged in the order Argo CD reads them.
+// configured hub's argo-cd values, merged in the order Argo CD reads them.
 func KubaraApps(kubaraDir string) ([]App, error) {
-	configs := filepath.Join(kubaraDir, "platform-configs")
-	entries, err := os.ReadDir(configs)
+	p, err := platform.Load(kubaraDir)
 	if err != nil {
-		return nil, fmt.Errorf("no platform-configs: run kubara generate --helm first")
+		return nil, err
 	}
-	for _, e := range entries {
-		argo := filepath.Join(configs, e.Name(), "helm", "argo-cd")
-		files := append([]string{filepath.Join(kubaraDir, "platform-components", "helm", "argo-cd", "values.yaml")}, valuesFiles(argo)...)
-		merged := map[string]any{}
-		for _, f := range files {
-			b, err := os.ReadFile(f)
-			if err != nil {
-				continue
-			}
-			var v map[string]any
-			if err := yaml.Unmarshal(b, &v); err != nil {
-				return nil, fmt.Errorf("%s: %w", f, err)
-			}
-			merge(merged, v)
+	hub := ""
+	for _, cl := range p.Config.Clusters {
+		if cl.Type == "hub" {
+			hub = cl.Name
 		}
-		bv, _ := merged["bootstrapValues"].(map[string]any)
-		sets, _ := bv["applicationSets"].(map[string]any)
-		if len(sets) == 0 {
+	}
+	if hub == "" {
+		return nil, fmt.Errorf("config.yaml names no hub, whose Argo CD delivers every service")
+	}
+	argo := filepath.Join(p.Dir, "platform-configs", hub, "helm", "argo-cd")
+	files := append([]string{filepath.Join(p.Dir, "platform-components", "helm", "argo-cd", "values.yaml")}, valuesFiles(argo)...)
+	merged := map[string]any{}
+	for _, f := range files {
+		b, err := os.ReadFile(f)
+		if err != nil {
 			continue
 		}
-		var apps []App
-		for _, setName := range sortedMapKeys(sets) {
-			set, _ := sets[setName].(map[string]any)
-			list, _ := set["apps"].(map[string]any)
-			for _, key := range sortedMapKeys(list) {
-				b, _ := yaml.Marshal(list[key])
-				var a App
-				if err := yaml.Unmarshal(b, &a); err != nil {
-					return nil, err
-				}
-				if a.Name == "" || a.Path == "" {
-					continue
-				}
-				apps = append(apps, a)
-			}
+		var v map[string]any
+		if err := yaml.Unmarshal(b, &v); err != nil {
+			return nil, fmt.Errorf("%s: %w", f, err)
 		}
-		return apps, nil
+		merge(merged, v)
 	}
-	return nil, fmt.Errorf("no cluster's argo-cd values name Kubara's ApplicationSets; is this a platform Kubara generated?")
+	bv, _ := merged["bootstrapValues"].(map[string]any)
+	sets, _ := bv["applicationSets"].(map[string]any)
+	if len(sets) == 0 {
+		return nil, fmt.Errorf("the hub %s's argo-cd values name no ApplicationSets; is this a platform Kubara generated?", hub)
+	}
+	var apps []App
+	for _, setName := range sortedMapKeys(sets) {
+		set, _ := sets[setName].(map[string]any)
+		list, _ := set["apps"].(map[string]any)
+		for _, key := range sortedMapKeys(list) {
+			b, _ := yaml.Marshal(list[key])
+			var a App
+			if err := yaml.Unmarshal(b, &a); err != nil {
+				return nil, err
+			}
+			if a.Name == "" || a.Path == "" {
+				continue
+			}
+			apps = append(apps, a)
+		}
+	}
+	return apps, nil
 }
 
 // valuesFiles lists a cluster's values for one chart in the order Kubara's
@@ -200,7 +272,7 @@ func valuesFiles(dir string) []string {
 	return append(files, extra...)
 }
 
-func helmTemplate(release, chartDir, namespace string, values, apis []string) ([]string, error) {
+func helmTemplate(release, chartDir, namespace string, values, apis []string, kubeVersion string) ([]string, error) {
 	if b, err := os.ReadFile(filepath.Join(chartDir, "Chart.yaml")); err == nil && bytes.Contains(b, []byte("dependencies:")) {
 		if _, err := os.Stat(filepath.Join(chartDir, "charts")); err != nil {
 			if out, err := exec.Command("helm", "dependency", "build", chartDir).CombinedOutput(); err != nil {
@@ -211,6 +283,9 @@ func helmTemplate(release, chartDir, namespace string, values, apis []string) ([
 		}
 	}
 	args := []string{"template", release, chartDir, "--namespace", namespace, "--include-crds"}
+	if kubeVersion != "" {
+		args = append(args, "--kube-version", kubeVersion)
+	}
 	for _, a := range apis {
 		args = append(args, "--api-versions", a)
 	}
