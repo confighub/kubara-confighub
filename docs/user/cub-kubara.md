@@ -34,13 +34,12 @@ base for each component and a variant for each cluster, with an approval before
 each release. `handover` then points Kubara's hub at the approved releases.
 `handover` is still a draft (#13). There is no stack step on this path.
 
-`cub kubara apply` borrows one thing from the ConfigHub Workshop. It renders
-Kubara's charts with the Workshop plugin's `cub stack from-kubara`, so both render
-a Kubara platform the same way. That is an internal dependency, not a step you
-take. It goes away once `cub helm template` can declare capabilities
-([confighub/cub-helm#2](https://github.com/confighub/cub-helm/issues/2)). Then
-`cub kubara` renders Kubara's wrapper charts with `cub helm` itself, and writes the
-certified bundle shape directly.
+`cub kubara apply` renders each service the way Kubara's hub delivers it. It uses
+the chart its ApplicationSet names, with the same release name, namespace and
+values files, in the same order. bootstrap-crds becomes the CRDs `kubara bootstrap`
+applies, and nothing else. It uses `helm` today. Once `cub helm template` can declare
+capabilities ([confighub/cub-helm#2](https://github.com/confighub/cub-helm/issues/2)),
+it uses `cub helm` and writes the certified bundle shape directly.
 
 **Workshop stacks serve a different job:** using a Kubara platform as a stack,
 rather than governing it the way Kubara runs it. Reach for `cub stack` when you
@@ -143,15 +142,14 @@ Once Kubara has generated the platform, `apply` renders every cluster and
 writes the steps as a script:
 
 ```bash
-cub plugin install confighub/cub-workshop
 cub kubara apply my-platform --out my-platform-confighub
 less my-platform-confighub/apply.sh
 bash my-platform-confighub/apply.sh
 ```
 
-`apply` renders with the Workshop plugin's `cub stack from-kubara`, so both
-plugins render a Kubara platform the same way. It runs nothing in ConfigHub
-itself. It writes `apply.sh`, the plan it carries out as `plan.txt`, and a
+`apply` renders each cluster the way Kubara's hub delivers it, so each render
+holds exactly the objects Kubara's Argo CD runs there. It needs `helm` on your
+PATH. It runs nothing in ConfigHub itself. It writes `apply.sh`, the plan it carries out as `plan.txt`, and a
 directory per component holding its renders and its rollout workflow.
 
 The script creates a component, a base Space and a rollout workflow for each

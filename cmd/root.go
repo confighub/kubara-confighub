@@ -155,8 +155,9 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 	applyCmd := &cobra.Command{
 		Use:   "apply <kubara-dir> --out <dir>",
 		Short: "Write a generated Kubara platform as renders and one script of cub steps",
-		Long: `Render each cluster of a platform Kubara has generated, with the ConfigHub
-Workshop plugin's cub stack from-kubara, and write:
+		Long: `Render each cluster of a platform Kubara has generated, the way Kubara's hub
+delivers it: each service's chart with the release name, namespace and values
+files its ApplicationSet uses. Then write:
 
   apply.sh                     the cub steps; read it, then run it
   plan.txt                     the plan it carries out
