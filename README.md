@@ -231,7 +231,7 @@ because it depends on the cluster as much as on the release. Straight after a
 release, before Argo CD has pulled it, `check` says so:
 
 ```text
-kubara-metrics-server-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
 With `--record`, `check` writes each result into the variant's Space as an
@@ -298,7 +298,8 @@ bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
 
-The plugin's tests run offline with `go test ./...`.
+Its [recorded run](examples/kind-lab/run-2026-09-28.log) shows every command
+and what it printed. The plugin's tests run offline with `go test ./...`.
 
 ## Documentation
 

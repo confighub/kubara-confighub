@@ -325,7 +325,7 @@ Run it after a release, when Argo CD has had time to sync. Until then it
 reports the release Argo CD has not pulled yet:
 
 ```text
-kubara-metrics-server-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
 With `--record`, `check` records each verdict in the variant's Space as a
