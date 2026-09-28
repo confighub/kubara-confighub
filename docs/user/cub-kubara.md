@@ -187,9 +187,10 @@ cub stack check hub-dev/stack.yaml
 
 ## What this version does not do yet
 
-`cub kubara takeover` will point Kubara's hub at the releases ConfigHub has
-approved, so a change reaches a cluster only after its stage approves it. Until
-then, the committed scripts in this repository show a takeover; see
+`cub kubara handover`, in draft as #13, will point Kubara's hub at the releases
+ConfigHub has approved, so a change reaches a cluster only after its stage
+approves it. Until then, the committed scripts in this repository show an older
+kind of handover, where each cluster runs its own reconciler; see
 [the six-step tutorial](../demo/kubara/adoption.md).
 
 ## Refresh the plugin's data
