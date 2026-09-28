@@ -27,7 +27,10 @@
 # Then `cub kubara check` passed every variant. A change to metrics-server was
 # promoted, approved and released to the dev cluster. check failed until Argo
 # CD synced the new release, then passed, and the prod spoke stayed on its
-# release. check --record wrote a LiveCheck attestation per variant.
+# release. check --record wrote a LiveCheck attestation per variant. A re-run
+# of handover.sh with the released v0.2.0, while that change was only in dev,
+# stopped before touching the hub; v0.2.1 fixes it. The change then went on to
+# prod, and check passed both clusters on release 2.
 #
 # Commands ran with CUB_CONTEXT set to the hosted organisation and
 # HUB_CONTEXT=kind-kubara-lab. Repeated promote progress lines are cut.
@@ -247,4 +250,57 @@ metrics-server   1/1     1            1           54m
 exit 0
 lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 2, synced, prunes nothing, keeps Secret values; health Progressing; recorded a Pass (bce42698-3dac-45c7-aa1d-3a8c02058a1a)
 lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy; recorded a Pass (2a357b7a-f1bd-45fd-a15f-09cbe4da072b)
+exit 0
+
+== handover.sh again, with the released v0.2.0, while that change was only in dev
+== 4/5 Release each variant, stage by stage: promote, approve, publish
+cert-manager: every variant is released
+homer-dashboard: every variant is released
+Failed: HTTP 400 for req ...: unit metrics-server: the targets are at different revisions of it (2, 3); upgrade them to the same revision or narrow the spaces the change order is headed for
+exit 1
+-- It stopped before step 5, so the hub was not touched. v0.2.0 opened its own
+-- change order on a base whose change was part way through its stages. v0.2.1
+-- skips a component whose variants all have a release, and still re-checks
+-- argo-cd, whose base step 3 changes.
+
+== handover.sh again, with the fix
+== 4/5 Release each variant, stage by stage: promote, approve, publish
+cert-manager: every variant has a release; later changes go through your own change orders
+homer-dashboard: every variant has a release; later changes go through your own change orders
+metrics-server: every variant has a release; later changes go through your own change orders
+traefik: every variant has a release; later changes go through your own change orders
+argo-cd: every variant is released
+== 5/5 Hand the hub to ConfigHub (your hub cluster)
+... (as in run 3: prunes nothing, all eight read ConfigHub)
+exit 0
+
+== The change goes on to prod
+$ cub variant promote --change-order lab-metrics-server-base/two-replicas --target-stage prod --quiet
+exit 0
+$ cub variant approve --change-order lab-metrics-server-base/two-replicas --stage prod
+Recorded pass Approval attestation 7b179c5f-394b-40c9-9695-494d8b1e635e in lab-metrics-server-lab-spoke, covering 1 revision(s)
+exit 0
+$ cub release publish lab-metrics-server-lab-spoke --revision ChangeOrder:lab-metrics-server-base/two-replicas --quiet
+exit 0
+$ kubectl --context kind-kubara-lab -n argocd annotate application lab-spoke-metrics-server argocd.argoproj.io/refresh=normal --overwrite
+application.argoproj.io/lab-spoke-metrics-server annotated
+exit 0
+$ kubectl --context kind-kubara-lab-spoke -n metrics-server get deploy metrics-server
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   2/2     2            2           75m
+exit 0
+$ cub changeorder get --space lab-metrics-server-base two-replicas -o jq=.ChangeOrder.Stage
+Completed
+exit 0
+$ cub kubara check platform --prefix lab --hub-context kind-kubara-lab
+lab-argo-cd-lab-hub: lab-hub-argocd runs release 2, synced, prunes nothing, keeps Secret values; health Degraded
+lab-bootstrap-crds-lab-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+lab-bootstrap-crds-lab-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+lab-cert-manager-lab-hub: lab-hub-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
+lab-cert-manager-lab-spoke: lab-spoke-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
+lab-homer-dashboard-lab-hub: lab-hub-homer-dashboard runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 2, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 2, synced, prunes nothing, keeps Secret values; health Healthy
+lab-traefik-lab-hub: lab-hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; health Progressing
+lab-traefik-lab-spoke: lab-spoke-traefik runs release 1, synced, prunes nothing, keeps Secret values; health Progressing
 exit 0

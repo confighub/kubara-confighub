@@ -187,15 +187,25 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		for _, v := range c.Variants {
 			names = append(names, v.Space)
 		}
-		// One change order per base revision: a re-run releases a base that
-		// changed since, and skips one already released.
+		// A component whose variants are all released is done: a change since
+		// then is the platform's own, and may be part way through its stages.
+		// argo-cd is the exception, because step 3 changes its base. Its change
+		// order is named after the base's revision, so a re-run releases a
+		// routing change it has not released yet.
+		in := ""
+		if c.ChartPath != unitArgoCD {
+			in = "  "
+			line("if released %s; then", strings.Join(names, " "))
+			line("  echo %s", q(c.Name+": every variant has a release; later changes go through your own change orders"))
+			line("else")
+		}
 		sum := sha256.Sum256([]byte("handover|" + c.Base + "|" + strings.Join(names, ",")))
-		line("order=handover-%x-r$(cub unit get --space %s %s -o jq=.Unit.HeadRevisionNum)", sum[:4], c.Base, c.Name)
+		line(in+"order=handover-%x-r$(cub unit get --space %s %s -o jq=.Unit.HeadRevisionNum)", sum[:4], c.Base, c.Name)
 		ref := c.Base + `/"$order"`
-		line(`cub changeorder create --space %s "$order" --change-workflow %s/%s --description %s --allow-exists --quiet`, c.Base, c.Base, workflowSlug, q("Release "+strings.Join(names, ", ")+" for handover"))
-		line("if rolled_out %s; then", ref)
-		line("  echo %s", q(c.Name+": every variant is released"))
-		line("else")
+		line(in+`cub changeorder create --space %s "$order" --change-workflow %s/%s --description %s --allow-exists --quiet`, c.Base, c.Base, workflowSlug, q("Release "+strings.Join(names, ", ")+" for handover"))
+		line(in+"if rolled_out %s; then", ref)
+		line(in+"  echo %s", q(c.Name+": every variant is released"))
+		line(in + "else")
 		for _, st := range p.Stages {
 			var inStage []string
 			for _, v := range c.Variants {
@@ -206,13 +216,16 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 			if len(inStage) == 0 {
 				continue
 			}
-			line("  cub variant promote --change-order %s --target-stage %s --quiet", ref, st.Name)
-			line("  cub variant approve --change-order %s --stage %s --quiet", ref, st.Name)
+			line(in+"  cub variant promote --change-order %s --target-stage %s --quiet", ref, st.Name)
+			line(in+"  cub variant approve --change-order %s --stage %s --quiet", ref, st.Name)
 			for _, sp := range inStage {
-				line("  publish %s %s", sp, ref)
+				line(in+"  publish %s %s", sp, ref)
 			}
 		}
-		line("fi")
+		line(in + "fi")
+		if c.ChartPath != unitArgoCD {
+			line("fi")
+		}
 	}
 
 	line("")
@@ -340,6 +353,14 @@ k() { kubectl ${HUB_CONTEXT:+--context "$HUB_CONTEXT"} "$@"; }
 step() { printf '\n== %s\n' "$*"; }
 # A finished change order is skipped, so a re-run releases only what is new.
 rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.Stage)" = Completed ]; }
+# released <space>...: each Space has a published release. Once it has, later
+# changes go through the platform's own change orders, not this script.
+released() {
+  local s
+  for s in "$@"; do
+    [ "$(cub release list --space "$s" -o 'jq=[.[]|select(.Release.Published)]|length')" -gt 0 ] || return 1
+  done
+}
 publish() {
   local out
   out=$(cub release publish "$1" --revision "ChangeOrder:$2" --quiet 2>&1) && return 0

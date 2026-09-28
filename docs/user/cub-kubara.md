@@ -212,9 +212,12 @@ gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or
 later reads those releases; Kubara v0.16 ships 3.5.
 
 The script gives each cluster a Target and releases every variant through its
-rollout workflow, stage by stage, with argo-cd last. Each release gets its own
-change order, named after the base's revision, so a re-run releases a base that
-changed since and skips one already released.
+rollout workflow, stage by stage, with argo-cd last. On a re-run it skips a
+component whose variants all have a release. A change made since then belongs
+to your own change orders, and may be part way through its stages. argo-cd is
+the exception, because the script changes its base. Its change order is named
+after the base's revision, so a re-run releases a routing change that was not
+released yet.
 
 Then the script changes the hub. Before any change, it compares what each
 Application manages with the release it will read. Kubara's ApplicationSets
