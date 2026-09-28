@@ -1,8 +1,8 @@
-// Package takeover points a Kubara hub at the releases ConfigHub approves. It
+// Package handover points a Kubara hub at the releases ConfigHub approves. It
 // keeps Kubara's hub, AppProject and ApplicationSets: each ApplicationSet whose
 // chart ConfigHub holds reads the cluster's variant release from ConfigHub's
 // OCI gateway instead of Git, and Argo CD keeps each Secret's live values.
-package takeover
+package handover
 
 import (
 	"bytes"

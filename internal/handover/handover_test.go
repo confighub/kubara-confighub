@@ -1,4 +1,4 @@
-package takeover
+package handover
 
 import (
 	"flag"
@@ -177,7 +177,7 @@ metadata:
 	}
 }
 
-func TestWriteTakeoverScript(t *testing.T) {
+func TestWriteHandoverScript(t *testing.T) {
 	p, err := platform.Load("../apply/testdata/platform")
 	if err != nil {
 		t.Fatal(err)
@@ -189,7 +189,7 @@ func TestWriteTakeoverScript(t *testing.T) {
 	out := t.TempDir()
 	res, err := Write(pl, Options{Out: out, Render: func(_, cluster string) ([]byte, error) {
 		if cluster != "hub" {
-			t.Fatalf("rendered %s; takeover reads only the hub's argo-cd", cluster)
+			t.Fatalf("rendered %s; handover reads only the hub's argo-cd", cluster)
 		}
 		return fixture(t), nil
 	}})
@@ -209,9 +209,9 @@ func TestWriteTakeoverScript(t *testing.T) {
 		t.Fatal("argo-cd must be released after every other component")
 	}
 	if strings.Contains(script, "kx-bootstrap-crds") {
-		t.Fatal("no ApplicationSet delivers bootstrap-crds, so takeover must leave it alone")
+		t.Fatal("no ApplicationSet delivers bootstrap-crds, so handover must leave it alone")
 	}
-	check(t, "takeover.sh", script)
+	check(t, "handover.sh", script)
 }
 
 func check(t *testing.T, name, got string) {
@@ -225,7 +225,7 @@ func check(t *testing.T, name, got string) {
 	}
 	want, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("%s: %v (run go test ./internal/takeover -update)", path, err)
+		t.Fatalf("%s: %v (run go test ./internal/handover -update)", path, err)
 	}
 	if string(want) != got {
 		t.Fatalf("%s differs from the output; rerun with -update after reviewing:\n%s", path, got)

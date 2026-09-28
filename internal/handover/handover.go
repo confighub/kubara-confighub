@@ -1,4 +1,4 @@
-package takeover
+package handover
 
 import (
 	"crypto/sha256"
@@ -21,7 +21,7 @@ const (
 	MinimumArgoCD = "v3.1.0"
 )
 
-// HubRender renders the hub's argo-cd chart, whose ApplicationSets takeover
+// HubRender renders the hub's argo-cd chart, whose ApplicationSets handover
 // reads to learn which chart each one delivers.
 type HubRender func(kubaraDir, cluster string) ([]byte, error)
 
@@ -39,12 +39,12 @@ type Result struct {
 	Projects   []string
 }
 
-// Write works out what takeover changes and writes takeover.sh, which runs
+// Write works out what handover changes and writes handover.sh, which runs
 // after apply.sh.
 func Write(p plan.Plan, opts Options) (Result, error) {
 	var res Result
 	if !p.Generated {
-		return res, fmt.Errorf("takeover needs a platform Kubara has generated; run kubara ... generate --helm in %s first", p.Source)
+		return res, fmt.Errorf("handover needs a platform Kubara has generated; run kubara ... generate --helm in %s first", p.Source)
 	}
 	if len(p.Problems) > 0 {
 		return res, fmt.Errorf("the plan has problems to fix first:\n  - %s", strings.Join(p.Problems, "\n  - "))
@@ -74,7 +74,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		}
 	}
 	if argo == nil {
-		return res, fmt.Errorf("the plan holds no argo-cd component; takeover points Kubara's hub Argo CD at ConfigHub, so the hub must run it")
+		return res, fmt.Errorf("the plan holds no argo-cd component; handover points Kubara's hub Argo CD at ConfigHub, so the hub must run it")
 	}
 	render, err := opts.Render(p.Source, hub)
 	if err != nil {
@@ -187,10 +187,10 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		for _, v := range c.Variants {
 			names = append(names, v.Space)
 		}
-		sum := sha256.Sum256([]byte("takeover|" + c.Base + "|" + strings.Join(names, ",")))
-		order := fmt.Sprintf("takeover-%x", sum[:4])
+		sum := sha256.Sum256([]byte("handover|" + c.Base + "|" + strings.Join(names, ",")))
+		order := fmt.Sprintf("handover-%x", sum[:4])
 		ref := c.Base + "/" + order
-		line("cub changeorder create --space %s %s --change-workflow %s/%s --description %s --allow-exists --quiet", c.Base, order, c.Base, workflowSlug, q("First release of "+strings.Join(names, ", ")+" for takeover"))
+		line("cub changeorder create --space %s %s --change-workflow %s/%s --description %s --allow-exists --quiet", c.Base, order, c.Base, workflowSlug, q("First release of "+strings.Join(names, ", ")+" for handover"))
 		line("if rolled_out %s; then", ref)
 		line("  echo %s", q(c.Name+": every variant is released"))
 		line("else")
@@ -253,7 +253,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`echo "A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;"`)
 	line(`echo "without it, Argo CD empties the values of the Secrets ConfigHub holds without values."`)
 
-	script := filepath.Join(opts.Out, "takeover.sh")
+	script := filepath.Join(opts.Out, "handover.sh")
 	if err := os.WriteFile(script, []byte(s.String()), 0o755); err != nil {
 		return res, err
 	}
@@ -265,9 +265,9 @@ func header(p plan.Plan, gateway string, res Result) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, `#!/usr/bin/env bash
 # Hand the Kubara hub in %s to ConfigHub. Run it after apply.sh.
-# Written by `+"`cub kubara takeover`"+`. Read it, then run it:
+# Written by `+"`cub kubara handover`"+`. Read it, then run it:
 #
-#   HUB_CONTEXT=<kubectl context of Kubara's hub> bash takeover.sh
+#   HUB_CONTEXT=<kubectl context of Kubara's hub> bash handover.sh
 #
 # cub uses its current context; set CUB_CONTEXT to choose another.
 # Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet below

@@ -138,13 +138,13 @@ cub stack check hub-dev/stack.yaml
 
 ## Hand the hub to ConfigHub
 
-`takeover` writes the steps that follow `apply.sh`. After them, a change reaches
+`handover` writes the steps that follow `apply.sh`. After them, a change reaches
 a cluster only once its stage has approved and released it:
 
 ```bash
-cub kubara takeover my-platform --out my-platform-confighub
-less my-platform-confighub/takeover.sh
-HUB_CONTEXT=<kubectl context of Kubara's hub> bash my-platform-confighub/takeover.sh
+cub kubara handover my-platform --out my-platform-confighub
+less my-platform-confighub/handover.sh
+HUB_CONTEXT=<kubectl context of Kubara's hub> bash my-platform-confighub/handover.sh
 ```
 
 Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet whose
@@ -168,7 +168,7 @@ A sync without it empties those values.
 bootstrap-crds is installed by Kubara's bootstrap, not by an ApplicationSet,
 so it stays with Kubara.
 
-`takeover.sh` has not yet been run against a live Kubara hub. The switch of an
+`handover.sh` has not yet been run against a live Kubara hub. The switch of an
 Application from Git to an OCI release, with the Secret handling above, was
 measured on kind with Argo CD 3.5.2 and Kubara-shaped ApplicationSets. The
 full script is next to be proved live.

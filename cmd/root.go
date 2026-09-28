@@ -10,10 +10,10 @@ import (
 
 	"github.com/confighub/kubara-confighub/internal/apply"
 	"github.com/confighub/kubara-confighub/internal/catalog"
+	"github.com/confighub/kubara-confighub/internal/handover"
 	"github.com/confighub/kubara-confighub/internal/initcfg"
 	"github.com/confighub/kubara-confighub/internal/plan"
 	"github.com/confighub/kubara-confighub/internal/platform"
-	"github.com/confighub/kubara-confighub/internal/takeover"
 )
 
 var (
@@ -69,7 +69,7 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
   apply     renders each cluster of a generated platform and writes the plan
             as files and one script of cub steps, apply.sh, for you to read
             and run. It runs nothing itself.
-  takeover  writes takeover.sh, which runs after apply.sh: each cluster gets a
+  handover  writes handover.sh, which runs after apply.sh: each cluster gets a
             Target and a first approved release, and Kubara's hub reads those
             releases from ConfigHub instead of Git.
 
@@ -172,7 +172,7 @@ Workshop plugin's cub stack from-kubara, and write:
 apply.sh creates a component, a base Space and a rollout workflow per Kubara
 component, then a variant Space per cluster holding that cluster's render.
 It creates no Targets and releases nothing: Kubara's hub, AppProject and
-ApplicationSets keep delivering from Git until takeover.`,
+ApplicationSets keep delivering from Git until handover.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
 			p, err := platform.Load(args[0])
@@ -211,15 +211,15 @@ ApplicationSets keep delivering from Git until takeover.`,
 
 	var to plan.Options
 	var tStages, tOut, gateway string
-	takeoverCmd := &cobra.Command{
-		Use:   "takeover <kubara-dir> --out <dir>",
+	handoverCmd := &cobra.Command{
+		Use:   "handover <kubara-dir> --out <dir>",
 		Short: "Write the steps that point Kubara's hub at ConfigHub's approved releases",
-		Long: `Write takeover.sh, the steps that follow apply.sh. It gives each cluster a
+		Long: `Write handover.sh, the steps that follow apply.sh. It gives each cluster a
 Target, releases every variant through its rollout workflow, and points each of
 Kubara's ApplicationSets at the cluster's approved release in ConfigHub instead
 of Git. Kubara's hub, AppProject and ApplicationSets stay.
 
-Before the hub switches, takeover.sh compares what each Application manages
+Before the hub switches, handover.sh compares what each Application manages
 with the release it will read, and stops if Argo CD would delete anything.
 Secrets keep their live values: ConfigHub holds their keys, and each
 ApplicationSet tells Argo CD to leave their data alone.
@@ -236,7 +236,7 @@ Use the same --prefix and --stages as apply.`,
 			if err != nil {
 				return err
 			}
-			res, err := takeover.Write(pl, takeover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender})
+			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender})
 			if err != nil {
 				return err
 			}
@@ -255,16 +255,16 @@ Use the same --prefix and --stages as apply.`,
 			return nil
 		},
 	}
-	takeoverCmd.Flags().StringVar(&tOut, "out", "", "directory to write takeover.sh (required); the apply --out directory is a good choice")
-	takeoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
-	takeoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
-	takeoverCmd.Flags().StringVar(&gateway, "gateway", takeover.DefaultGateway, "host ConfigHub serves releases from")
-	_ = takeoverCmd.MarkFlagRequired("out")
+	handoverCmd.Flags().StringVar(&tOut, "out", "", "directory to write handover.sh (required); the apply --out directory is a good choice")
+	handoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
+	handoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
+	handoverCmd.Flags().StringVar(&gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	_ = handoverCmd.MarkFlagRequired("out")
 
 	var rPrefix, rGateway, rCharts, rOnly string
 	routeCmd := &cobra.Command{
 		Use:    "route-appsets <argo-cd render>",
-		Short:  "Point the ApplicationSets in an argo-cd render at ConfigHub (used by takeover.sh)",
+		Short:  "Point the ApplicationSets in an argo-cd render at ConfigHub (used by handover.sh)",
 		Hidden: true,
 		Args:   cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
@@ -273,7 +273,7 @@ Use the same --prefix and --stages as apply.`,
 				return err
 			}
 			if rOnly != "" {
-				doc, err := takeover.Only(b, rOnly)
+				doc, err := handover.Only(b, rOnly)
 				if err != nil {
 					return err
 				}
@@ -284,7 +284,7 @@ Use the same --prefix and --stages as apply.`,
 			for _, ch := range split(rCharts) {
 				charts[ch] = true
 			}
-			out, _, err := takeover.RouteApplicationSets(b, charts, rPrefix, rGateway)
+			out, _, err := handover.RouteApplicationSets(b, charts, rPrefix, rGateway)
 			if err != nil {
 				return err
 			}
@@ -293,14 +293,14 @@ Use the same --prefix and --stages as apply.`,
 		},
 	}
 	routeCmd.Flags().StringVar(&rPrefix, "prefix", "kubara", "the prefix apply used")
-	routeCmd.Flags().StringVar(&rGateway, "gateway", takeover.DefaultGateway, "host ConfigHub serves releases from")
+	routeCmd.Flags().StringVar(&rGateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
 	routeCmd.Flags().StringVar(&rCharts, "charts", "", "chart directories ConfigHub holds, comma-separated")
 	routeCmd.Flags().StringVar(&rOnly, "only", "", "print only this ApplicationSet, unchanged")
 
 	var pApp, pRelease, pName string
 	pruneCmd := &cobra.Command{
 		Use:    "would-prune --application <file> --release <file>",
-		Short:  "List what an Application would prune on reading a release (used by takeover.sh)",
+		Short:  "List what an Application would prune on reading a release (used by handover.sh)",
 		Hidden: true,
 		Args:   cobra.NoArgs,
 		RunE: func(c *cobra.Command, _ []string) error {
@@ -312,7 +312,7 @@ Use the same --prefix and --stages as apply.`,
 			if err != nil {
 				return err
 			}
-			gone, err := takeover.WouldPrune(app, rel)
+			gone, err := handover.WouldPrune(app, rel)
 			if err != nil {
 				return err
 			}
@@ -341,7 +341,7 @@ Use the same --prefix and --stages as apply.`,
 		},
 	}
 
-	root.AddCommand(services, initCmd, planCmd, applyCmd, takeoverCmd, routeCmd, pruneCmd, versionCmd)
+	root.AddCommand(services, initCmd, planCmd, applyCmd, handoverCmd, routeCmd, pruneCmd, versionCmd)
 	return root
 }
 

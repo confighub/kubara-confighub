@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Hand the Kubara hub in ../apply/testdata/platform to ConfigHub. Run it after apply.sh.
-# Written by `cub kubara takeover`. Read it, then run it:
+# Written by `cub kubara handover`. Read it, then run it:
 #
-#   HUB_CONTEXT=<kubectl context of Kubara's hub> bash takeover.sh
+#   HUB_CONTEXT=<kubectl context of Kubara's hub> bash handover.sh
 #
 # cub uses its current context; set CUB_CONTEXT to choose another.
 # Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet below
@@ -75,32 +75,32 @@ else
 fi
 
 step "4/5 Release each variant, stage by stage: promote, approve, publish"
-cub changeorder create --space kx-traefik-base takeover-5599a242 --change-workflow kx-traefik-base/rollout --description 'First release of kx-traefik-hub, kx-traefik-edge for takeover' --allow-exists --quiet
-if rolled_out kx-traefik-base/takeover-5599a242; then
+cub changeorder create --space kx-traefik-base handover-e84ab4de --change-workflow kx-traefik-base/rollout --description 'First release of kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
+if rolled_out kx-traefik-base/handover-e84ab4de; then
   echo 'traefik: every variant is released'
 else
-  cub variant promote --change-order kx-traefik-base/takeover-5599a242 --target-stage dev --quiet
-  cub variant approve --change-order kx-traefik-base/takeover-5599a242 --stage dev --quiet
-  publish kx-traefik-hub kx-traefik-base/takeover-5599a242
-  cub variant promote --change-order kx-traefik-base/takeover-5599a242 --target-stage prod --quiet
-  cub variant approve --change-order kx-traefik-base/takeover-5599a242 --stage prod --quiet
-  publish kx-traefik-edge kx-traefik-base/takeover-5599a242
+  cub variant promote --change-order kx-traefik-base/handover-e84ab4de --target-stage dev --quiet
+  cub variant approve --change-order kx-traefik-base/handover-e84ab4de --stage dev --quiet
+  publish kx-traefik-hub kx-traefik-base/handover-e84ab4de
+  cub variant promote --change-order kx-traefik-base/handover-e84ab4de --target-stage prod --quiet
+  cub variant approve --change-order kx-traefik-base/handover-e84ab4de --stage prod --quiet
+  publish kx-traefik-edge kx-traefik-base/handover-e84ab4de
 fi
-cub changeorder create --space kx-homer-dashboard-base takeover-0f13094e --change-workflow kx-homer-dashboard-base/rollout --description 'First release of kx-homer-dashboard-hub for takeover' --allow-exists --quiet
-if rolled_out kx-homer-dashboard-base/takeover-0f13094e; then
+cub changeorder create --space kx-homer-dashboard-base handover-0d585623 --change-workflow kx-homer-dashboard-base/rollout --description 'First release of kx-homer-dashboard-hub for handover' --allow-exists --quiet
+if rolled_out kx-homer-dashboard-base/handover-0d585623; then
   echo 'homer-dashboard: every variant is released'
 else
-  cub variant promote --change-order kx-homer-dashboard-base/takeover-0f13094e --target-stage dev --quiet
-  cub variant approve --change-order kx-homer-dashboard-base/takeover-0f13094e --stage dev --quiet
-  publish kx-homer-dashboard-hub kx-homer-dashboard-base/takeover-0f13094e
+  cub variant promote --change-order kx-homer-dashboard-base/handover-0d585623 --target-stage dev --quiet
+  cub variant approve --change-order kx-homer-dashboard-base/handover-0d585623 --stage dev --quiet
+  publish kx-homer-dashboard-hub kx-homer-dashboard-base/handover-0d585623
 fi
-cub changeorder create --space kx-argo-cd-base takeover-050e84af --change-workflow kx-argo-cd-base/rollout --description 'First release of kx-argo-cd-hub for takeover' --allow-exists --quiet
-if rolled_out kx-argo-cd-base/takeover-050e84af; then
+cub changeorder create --space kx-argo-cd-base handover-dec294e7 --change-workflow kx-argo-cd-base/rollout --description 'First release of kx-argo-cd-hub for handover' --allow-exists --quiet
+if rolled_out kx-argo-cd-base/handover-dec294e7; then
   echo 'argo-cd: every variant is released'
 else
-  cub variant promote --change-order kx-argo-cd-base/takeover-050e84af --target-stage dev --quiet
-  cub variant approve --change-order kx-argo-cd-base/takeover-050e84af --stage dev --quiet
-  publish kx-argo-cd-hub kx-argo-cd-base/takeover-050e84af
+  cub variant promote --change-order kx-argo-cd-base/handover-dec294e7 --target-stage dev --quiet
+  cub variant approve --change-order kx-argo-cd-base/handover-dec294e7 --stage dev --quiet
+  publish kx-argo-cd-hub kx-argo-cd-base/handover-dec294e7
 fi
 
 step "5/5 Hand the hub to ConfigHub (your hub cluster)"
