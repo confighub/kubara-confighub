@@ -7,7 +7,7 @@
 # cub uses its current context; set CUB_CONTEXT to choose another.
 # It only creates records in ConfigHub. It changes nothing in Kubara or on any
 # cluster: Kubara's hub, AppProject and ApplicationSets keep delivering from Git
-# until takeover. All of it is safe to re-run.
+# until handover. All of it is safe to re-run.
 #
 # These Secrets are uploaded with their keys and without their values, which
 # belong in the cluster's secret store:
@@ -82,4 +82,4 @@ step "Done"
 echo "Every Kubara component now has a base and a variant per cluster in ConfigHub."
 echo "To change the platform: edit a base, promote the change stage by stage with"
 echo "  cub changeorder create ... then cub variant promote and cub variant approve."
-echo "Kubara's hub still delivers from Git; pointing it at approved releases is takeover."
+echo "Kubara's hub still delivers from Git; pointing it at approved releases is handover."

@@ -4,12 +4,15 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/confighub/kubara-confighub/internal/apply"
 	"github.com/confighub/kubara-confighub/internal/catalog"
+	"github.com/confighub/kubara-confighub/internal/check"
+	"github.com/confighub/kubara-confighub/internal/handover"
 	"github.com/confighub/kubara-confighub/internal/initcfg"
 	"github.com/confighub/kubara-confighub/internal/plan"
 	"github.com/confighub/kubara-confighub/internal/platform"
@@ -68,6 +71,9 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
   apply     renders each cluster of a generated platform and writes the plan
             as files and one script of cub steps, apply.sh, for you to read
             and run. It runs nothing itself.
+  handover  writes handover.sh, which runs after apply.sh: each cluster gets a
+            Target and a first approved release, and Kubara's hub reads those
+            releases from ConfigHub instead of Git.
 
 Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kubara.md`,
 		SilenceUsage:  true,
@@ -170,7 +176,7 @@ files its ApplicationSet uses. Then write:
 apply.sh creates a component, a base Space and a rollout workflow per Kubara
 component, then a variant Space per cluster holding that cluster's render.
 It creates no Targets and releases nothing: Kubara's hub, AppProject and
-ApplicationSets keep delivering from Git until takeover.`,
+ApplicationSets keep delivering from Git until handover.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
 			p, err := platform.Load(args[0])
@@ -182,17 +188,9 @@ ApplicationSets keep delivering from Git until takeover.`,
 			if err != nil {
 				return err
 			}
-			caps := map[string]apply.Capabilities{}
-			for _, pair := range capsFlags {
-				cluster, ctx, ok := strings.Cut(pair, "=")
-				if !ok || cluster == "" || ctx == "" {
-					return fmt.Errorf("--capabilities takes <cluster>=<kubectl context>, not %q", pair)
-				}
-				c, err := apply.ReadCapabilities(ctx)
-				if err != nil {
-					return err
-				}
-				caps[cluster] = c
+			caps, err := readCapabilities(capsFlags)
+			if err != nil {
+				return err
 			}
 			res, err := apply.Write(pl, apply.Options{Out: aOut, AllowAuthors: allowAuthors, Render: apply.NewKubaraRenderer(caps)})
 			if err != nil {
@@ -229,6 +227,135 @@ ApplicationSets keep delivering from Git until takeover.`,
 	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
 	_ = applyCmd.MarkFlagRequired("out")
 
+	var to plan.Options
+	var tStages, tOut, gateway string
+	var tCaps []string
+	handoverCmd := &cobra.Command{
+		Use:   "handover <kubara-dir> --out <dir>",
+		Short: "Write the steps that point Kubara's hub at ConfigHub's approved releases",
+		Long: `Write handover.sh, the steps that follow apply.sh. It gives each cluster a
+Target, releases every variant through its rollout workflow, and points each of
+Kubara's ApplicationSets at the cluster's approved release in ConfigHub instead
+of Git. Kubara's hub, AppProject and ApplicationSets stay.
+
+Before the hub switches, handover.sh compares what each Application manages
+with the release it will read, and stops if Argo CD would delete anything.
+Secrets keep their live values: ConfigHub holds their keys, and each
+ApplicationSet tells Argo CD to leave their data alone.
+
+Use the same --prefix and --stages as apply.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			p, err := platform.Load(args[0])
+			if err != nil {
+				return err
+			}
+			to.Stages = split(tStages)
+			pl, err := plan.Build(p, to)
+			if err != nil {
+				return err
+			}
+			caps, err := readCapabilities(tCaps)
+			if err != nil {
+				return err
+			}
+			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender(caps)})
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			fmt.Fprintf(w, "Wrote %s. These ApplicationSets will read ConfigHub instead of Git:\n", res.Script)
+			for _, r := range res.Routes {
+				fmt.Fprintf(w, "  %-24s %s\n", r.ApplicationSet, r.RepoURL)
+			}
+			if len(res.WithKubara) > 0 {
+				fmt.Fprintf(w, "No ApplicationSet delivers %s, so Kubara's bootstrap keeps it.\n", strings.Join(res.WithKubara, ", "))
+			}
+			if len(res.OnGit) > 0 {
+				fmt.Fprintf(w, "Left on Git, for services this platform does not enable: %s\n", strings.Join(res.OnGit, ", "))
+			}
+			fmt.Fprintf(w, "\nNext, after apply.sh\n  less %s\n  HUB_CONTEXT=<kubectl context of Kubara's hub> bash %s\n", res.Script, res.Script)
+			return nil
+		},
+	}
+	handoverCmd.Flags().StringVar(&tOut, "out", "", "directory to write handover.sh (required); the apply --out directory is a good choice")
+	handoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
+	handoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
+	handoverCmd.Flags().StringVar(&gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	handoverCmd.Flags().StringArrayVar(&tCaps, "capabilities", nil, "render the hub with its own Kubernetes version and APIs, read from a kubectl context: <hub>=<context>")
+	_ = handoverCmd.MarkFlagRequired("out")
+
+	var rPrefix, rGateway, rCharts, rOnly string
+	routeCmd := &cobra.Command{
+		Use:    "route-appsets <argo-cd render>",
+		Short:  "Point the ApplicationSets in an argo-cd render at ConfigHub (used by handover.sh)",
+		Hidden: true,
+		Args:   cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			b, err := os.ReadFile(args[0])
+			if err != nil {
+				return err
+			}
+			if rOnly != "" {
+				doc, err := handover.Only(b, rOnly)
+				if err != nil {
+					return err
+				}
+				_, err = c.OutOrStdout().Write(doc)
+				return err
+			}
+			charts := map[string]bool{}
+			for _, ch := range split(rCharts) {
+				charts[ch] = true
+			}
+			out, _, err := handover.RouteApplicationSets(b, charts, rPrefix, rGateway)
+			if err != nil {
+				return err
+			}
+			_, err = c.OutOrStdout().Write(out)
+			return err
+		},
+	}
+	routeCmd.Flags().StringVar(&rPrefix, "prefix", "kubara", "the prefix apply used")
+	routeCmd.Flags().StringVar(&rGateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	routeCmd.Flags().StringVar(&rCharts, "charts", "", "chart directories ConfigHub holds, comma-separated")
+	routeCmd.Flags().StringVar(&rOnly, "only", "", "print only this ApplicationSet, unchanged")
+
+	var pApp, pRelease, pName string
+	pruneCmd := &cobra.Command{
+		Use:    "would-prune --application <file> --release <file>",
+		Short:  "List what an Application would prune on reading a release (used by handover.sh)",
+		Hidden: true,
+		Args:   cobra.NoArgs,
+		RunE: func(c *cobra.Command, _ []string) error {
+			app, err := os.ReadFile(pApp)
+			if err != nil {
+				return err
+			}
+			rel, err := os.ReadFile(pRelease)
+			if err != nil {
+				return err
+			}
+			gone, err := handover.WouldPrune(app, rel)
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			if len(gone) == 0 {
+				fmt.Fprintf(w, "%s: prunes nothing\n", pName)
+				return nil
+			}
+			fmt.Fprintf(w, "%s would delete %d object(s) its release does not hold:\n", pName, len(gone))
+			for _, r := range gone {
+				fmt.Fprintf(w, "  %s\n", r)
+			}
+			return errProblems{}
+		},
+	}
+	pruneCmd.Flags().StringVar(&pApp, "application", "", "the Application, as kubectl get application -o json")
+	pruneCmd.Flags().StringVar(&pRelease, "release", "", "the release, as cub unit data")
+	pruneCmd.Flags().StringVar(&pName, "name", "the Application", "the Application's name, for the report")
+
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print the plugin version",
@@ -238,7 +365,77 @@ ApplicationSets keep delivering from Git until takeover.`,
 		},
 	}
 
-	root.AddCommand(services, initCmd, planCmd, applyCmd, versionCmd)
+	var ko plan.Options
+	var kStages string
+	var co check.Options
+	checkCmd := &cobra.Command{
+		Use:   "check <kubara-dir>",
+		Short: "Check that each cluster runs the release ConfigHub approved, and optionally record the verdict",
+		Long: `Check Kubara's hub after handover. For each variant, it checks that one
+Application reads the variant's release from ConfigHub and no Git source, that
+Argo CD has synced the latest published release, that Argo CD would delete
+nothing, and that a sync leaves live Secret values alone. Health is shown and
+not judged, because it depends on the cluster as much as on the release.
+
+With --record, each verdict is recorded in the variant's Space as an
+attestation of --type on the released revisions: a Pass, or a rejection that
+names what is wrong.
+
+Use the same --prefix and --stages as apply. It changes nothing on the hub.
+
+  cub kubara check my-platform --hub-context <hub context> --record`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			p, err := platform.Load(args[0])
+			if err != nil {
+				return err
+			}
+			ko.Stages = split(kStages)
+			pl, err := plan.Build(p, ko)
+			if err != nil {
+				return err
+			}
+			results, err := check.Check(pl, runCommand, co)
+			w := c.OutOrStdout()
+			failed := 0
+			for _, r := range results {
+				switch {
+				case r.Skipped != "":
+					fmt.Fprintf(w, "%s: skipped, %s\n", r.Space, r.Skipped)
+				case r.Passed():
+					fmt.Fprintf(w, "%s: %s runs release %d, synced, prunes nothing, keeps Secret values; health %s", r.Space, r.Application, r.Release, r.Health)
+				default:
+					failed++
+					fmt.Fprintf(w, "%s: FAIL: %s", r.Space, strings.Join(r.Problems, "; "))
+				}
+				if r.Skipped == "" {
+					if r.Recorded != "" {
+						verdict := "a Pass"
+						if !r.Passed() {
+							verdict = "a rejection"
+						}
+						fmt.Fprintf(w, "; recorded %s (%s)", verdict, r.Recorded)
+					}
+					fmt.Fprintln(w)
+				}
+			}
+			if err != nil {
+				return err
+			}
+			if failed > 0 {
+				return fmt.Errorf("%d of %d variants do not run their approved release as they should", failed, len(results))
+			}
+			return nil
+		},
+	}
+	checkCmd.Flags().StringVar(&ko.Prefix, "prefix", "kubara", "the prefix apply used")
+	checkCmd.Flags().StringVar(&kStages, "stages", "", "the stage order apply used")
+	checkCmd.Flags().StringVar(&co.HubContext, "hub-context", "", "kubectl context of Kubara's hub; the current context when empty")
+	checkCmd.Flags().StringVar(&co.Gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	checkCmd.Flags().BoolVar(&co.Record, "record", false, "record each verdict in ConfigHub as an attestation")
+	checkCmd.Flags().StringVar(&co.Type, "type", check.DefaultType, "the attestation type --record uses")
+
+	root.AddCommand(services, initCmd, planCmd, applyCmd, handoverCmd, checkCmd, routeCmd, pruneCmd, versionCmd)
 	return root
 }
 
@@ -251,6 +448,45 @@ type initOptions struct {
 	repository     string
 	dnsDomain      string
 	email          string
+}
+
+// hubArgoRender renders the hub's argo-cd chart the way Kubara's hub delivers
+// it, with the hub's own capabilities when a context is given, and discards
+// everything else it rendered.
+func hubArgoRender(caps map[string]apply.Capabilities) handover.HubRender {
+	return func(kubaraDir, cluster string) ([]byte, error) {
+		tmp, err := os.MkdirTemp("", "cub-kubara-hub-")
+		if err != nil {
+			return nil, err
+		}
+		defer os.RemoveAll(tmp)
+		renders, err := apply.NewKubaraRenderer(caps)(kubaraDir, cluster, tmp)
+		if err != nil {
+			return nil, err
+		}
+		path, ok := renders["argo-cd"]
+		if !ok {
+			return nil, fmt.Errorf("rendering produced no argo-cd for the hub %s", cluster)
+		}
+		return os.ReadFile(path)
+	}
+}
+
+// readCapabilities reads each --capabilities <cluster>=<kubectl context> pair.
+func readCapabilities(pairs []string) (map[string]apply.Capabilities, error) {
+	caps := map[string]apply.Capabilities{}
+	for _, pair := range pairs {
+		cluster, ctx, ok := strings.Cut(pair, "=")
+		if !ok || cluster == "" || ctx == "" {
+			return nil, fmt.Errorf("--capabilities takes <cluster>=<kubectl context>, not %q", pair)
+		}
+		c, err := apply.ReadCapabilities(ctx)
+		if err != nil {
+			return nil, err
+		}
+		caps[cluster] = c
+	}
+	return caps, nil
 }
 
 func (o *initOptions) register(c *cobra.Command) {
@@ -294,4 +530,17 @@ func Execute() {
 		}
 		os.Exit(1)
 	}
+}
+
+// runCommand runs a command and returns its standard output, with its
+// standard error in the error when it fails.
+func runCommand(name string, args ...string) ([]byte, error) {
+	cmd := exec.Command(name, args...)
+	var stderr strings.Builder
+	cmd.Stderr = &stderr
+	out, err := cmd.Output()
+	if err != nil {
+		return out, fmt.Errorf("%s %s: %w: %s", name, strings.Join(args, " "), err, strings.TrimSpace(stderr.String()))
+	}
+	return out, nil
 }

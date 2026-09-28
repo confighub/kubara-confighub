@@ -63,7 +63,7 @@ func Render(p Plan) string {
 	w("  (cub variant approve) before each release. Each variant records its cluster's own render as a change.")
 	w("  Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.")
 	w("  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering")
-	w("  from Git. Pointing them at approved releases is takeover, which this version does not do yet.")
+	w("  from Git until handover, which points each ApplicationSet at the cluster's approved release instead.")
 	w("")
 
 	if len(p.Notes) > 0 {

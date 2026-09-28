@@ -1,0 +1,250 @@
+# cub kubara apply and handover on a live Kubara hub and spoke, on kind,
+# 2026-09-28. See docs/user/cub-kubara.md.
+#
+# The platform: Kubara v0.15.0, bootstrap and general catalogs 3.0.0, one hub
+# (lab-hub, stage dev) and one spoke (lab-spoke, stage prod: cert-manager,
+# metrics-server, traefik). `kubara generate --helm` wrote it and
+# `kubara bootstrap` installed Argo CD v3.5.2 on the hub, on kind v0.31.0 with
+# Kubernetes v1.35.0. The hub delivered both clusters from a Git server in the
+# hub cluster before this run. The ConfigHub side was a hosted organisation,
+# with cub v0.6.2 and cub kubara 0.2.0-dev built from pull request #13.
+#
+# Known lab artefacts, present before the handover and after it: cert-manager
+# is Degraded (the ACME email is example.com), traefik is Progressing (kind has
+# no load balancer), and the argocd Application waits on an Ingress that never
+# gets an address.
+#
+# apply.sh created 6 components and 10 variants. Handover took three runs. Run
+# 1 left each Application reading Git: server-side apply added the ConfigHub
+# source but kept Kubara's Git sources, which Kubara's bootstrap owns and Argo
+# CD reads first. Run 2 fixed that and every Application stopped: Kubara's
+# AppProject lists no sourceRepos (its Git is a project-scoped repository), so
+# Argo CD refused the gateway, and the release that would permit it could not
+# sync. Run 3 applied the AppProject first and every Application synced from
+# ConfigHub. Each fix is in pull request #13, and re-running the script was
+# safe each time.
+#
+# Then `cub kubara check` passed every variant. A change to metrics-server was
+# promoted, approved and released to the dev cluster. check failed until Argo
+# CD synced the new release, then passed, and the prod spoke stayed on its
+# release. check --record wrote a LiveCheck attestation per variant.
+#
+# Commands ran with CUB_CONTEXT set to the hosted organisation and
+# HUB_CONTEXT=kind-kubara-lab. Repeated promote progress lines are cut.
+
+== cub kubara apply, live
+$ cub kubara apply platform --out live --prefix lab \
+    --capabilities lab-hub=kind-kubara-lab --capabilities lab-spoke=kind-kubara-lab-spoke
+$ bash live/apply.sh
+
+== 0/2 Check before changing anything
+== 1/2 A component, a base and a rollout workflow per Kubara component
+== 2/2 A variant per cluster, holding that cluster's own render
+lab-argo-cd-lab-hub: the base is this cluster's render
+lab-bootstrap-crds-lab-hub: the base is this cluster's render
+lab-bootstrap-crds-lab-spoke: Kubara renders it the same as on lab-hub; no change to record
+lab-cert-manager-lab-hub: the base is this cluster's render
+lab-homer-dashboard-lab-hub: the base is this cluster's render
+lab-metrics-server-lab-hub: the base is this cluster's render
+lab-traefik-lab-hub: the base is this cluster's render
+
+== Done
+exit 0 (1m49s)
+
+== cub kubara handover, run 1
+$ bash live/handover.sh
+...
+== 4/5 Release each variant, stage by stage: promote, approve, publish
+Promoting lab-metrics-server-lab-hub into stage dev...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+...
+Promoting lab-argo-cd-lab-hub into stage dev...
+Upgraded 1 unit(s) behind their upstream
+
+== 5/5 Hand the hub to ConfigHub (your hub cluster)
+lab-hub-cert-manager: prunes nothing
+lab-spoke-cert-manager: prunes nothing
+lab-hub-homer-dashboard: prunes nothing
+lab-hub-metrics-server: prunes nothing
+lab-spoke-metrics-server: prunes nothing
+lab-hub-traefik: prunes nothing
+lab-spoke-traefik: prunes nothing
+lab-hub-argocd: prunes nothing
+secret/confighub-lab-targets created
+applicationset.argoproj.io/argocd serverside-applied
+Done. Kubara's hub now reads each cluster's approved release from ConfigHub.
+exit 0
+
+-- the hub afterwards: still on Git
+$ kubectl -n argocd get applicationset argocd -o json | jq '.spec.template.spec | {source, sources}'
+source:  oci://oci.hub.confighub.com/space/lab-argo-cd-{{name}} @ latest
+sources: http://git.git-server.svc.cluster.local/platform.git @ main (x2)
+$ kubectl -n argocd get applicationset argocd --show-managed-fields  (owners of spec.template.spec.sources)
+kubara-argocd-bootstrap, argocd-controller
+-- Every Kubara ApplicationSet had the same two owners. The script's own
+-- check read only spec.source and passed.
+
+== cub kubara handover, run 2, removing the Git sources
+applicationset.argoproj.io/argocd serverside-applied
+applicationset.argoproj.io/cert-manager serverside-applied
+applicationset.argoproj.io/homer-dashboard serverside-applied
+applicationset.argoproj.io/metrics-server serverside-applied
+applicationset.argoproj.io/traefik serverside-applied
+applicationset.argoproj.io/argocd patched
+applicationset.argoproj.io/cert-manager patched
+applicationset.argoproj.io/homer-dashboard patched
+applicationset.argoproj.io/metrics-server patched
+applicationset.argoproj.io/traefik patched
+lab-hub-cert-manager reads oci://oci.hub.confighub.com/space/lab-cert-manager-lab-hub
+lab-spoke-cert-manager reads oci://oci.hub.confighub.com/space/lab-cert-manager-lab-spoke
+lab-hub-homer-dashboard reads oci://oci.hub.confighub.com/space/lab-homer-dashboard-lab-hub
+lab-hub-metrics-server reads oci://oci.hub.confighub.com/space/lab-metrics-server-lab-hub
+lab-spoke-metrics-server reads oci://oci.hub.confighub.com/space/lab-metrics-server-lab-spoke
+lab-hub-traefik reads oci://oci.hub.confighub.com/space/lab-traefik-lab-hub
+lab-spoke-traefik reads oci://oci.hub.confighub.com/space/lab-traefik-lab-spoke
+lab-hub-argocd reads oci://oci.hub.confighub.com/space/lab-argo-cd-lab-hub
+exit 0
+
+-- the hub afterwards: every Application refused
+$ kubectl -n argocd get applications
+lab-hub-argocd     Unknown  InvalidSpecError: application repo oci://oci.hub.confighub.com/space/lab-argo-cd-lab-hub is not permitted in project 'lab-hub-dev'
+lab-hub-cert-manager  Unknown  InvalidSpecError: ... not permitted in project 'lab-hub-dev'
+... (all eight the same)
+$ kubectl -n argocd get appproject lab-hub-dev -o jsonpath='{.spec.sourceRepos}'
+(none)
+$ kubectl -n argocd get secrets -l argocd.argoproj.io/secret-type   (url, project)
+https-init-repo-access  repository  http://git.git-server.svc.cluster.local/platform.git  project=lab-hub-dev
+confighub-lab-targets   repo-creds  oci://oci.hub.confighub.com/space/lab-           project=(none)
+
+== cub kubara handover, run 3, the AppProject first
+== 3/5 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base
+== 4/5 Release each variant, stage by stage: promote, approve, publish
+lab-cert-manager-lab-hub already released
+lab-cert-manager-lab-spoke already released
+lab-homer-dashboard-lab-hub already released
+lab-metrics-server-lab-hub already released
+lab-metrics-server-lab-spoke already released
+lab-traefik-lab-hub already released
+lab-traefik-lab-spoke already released
+-- The argo-cd base's new revision (4) got its own change order,
+-- handover-03701ebf-r4, and was promoted, approved and released.
+
+== 5/5 Hand the hub to ConfigHub (your hub cluster)
+lab-hub-cert-manager: prunes nothing
+... (all eight)
+secret/confighub-lab-targets unchanged
+appproject.argoproj.io/lab-hub-dev serverside-applied
+applicationset.argoproj.io/argocd serverside-applied
+applicationset.argoproj.io/cert-manager serverside-applied
+applicationset.argoproj.io/homer-dashboard serverside-applied
+applicationset.argoproj.io/metrics-server serverside-applied
+applicationset.argoproj.io/traefik serverside-applied
+lab-hub-cert-manager reads oci://oci.hub.confighub.com/space/lab-cert-manager-lab-hub
+... (all eight read ConfigHub)
+Done. Kubara's hub now reads each cluster's approved release from ConfigHub.
+exit 0
+
+== The hub after run 3
+$ kubectl -n argocd get appproject lab-hub-dev -o jsonpath='{.spec.sourceRepos}'
+["oci://oci.hub.confighub.com/space/lab-*"]
+$ kubectl -n argocd get applications   (sync, health, last operation)
+lab-hub-argocd            Synced  Degraded     Running    waiting for healthy state of Ingress/argocd-server-grpc
+lab-hub-cert-manager      Synced  Degraded     Succeeded  successfully synced (no more tasks)
+lab-hub-homer-dashboard   Synced  Healthy      Succeeded  successfully synced (all tasks run)
+lab-hub-metrics-server    Synced  Healthy      Succeeded  successfully synced (all tasks run)
+lab-hub-traefik           Synced  Progressing  Succeeded  successfully synced (no more tasks)
+lab-spoke-cert-manager    Synced  Degraded     Succeeded  successfully synced (no more tasks)
+lab-spoke-metrics-server  Synced  Healthy      Succeeded  successfully synced (all tasks run)
+lab-spoke-traefik         Synced  Progressing  Succeeded  successfully synced (no more tasks)
+
+-- Pruning: Argo CD marks four objects in lab-hub-argocd as requiring
+-- pruning, and all four are Helm hooks, which it runs as hooks and never
+-- prunes: ServiceAccount, Role and RoleBinding argocd-redis-secret-init
+-- (pre-install,pre-upgrade) and Job dex-restarter (post-install, there since
+-- the bootstrap). Nothing was deleted.
+
+-- Workloads: no pod in cert-manager, metrics-server, traefik,
+-- homer-dashboard or argocd, on either cluster, was created after the
+-- handover began. Every Deployment is ready.
+
+-- Secrets: a hash of each Secret's data on both clusters, taken before run 2
+-- and after run 3's syncs. The 16 Secrets that existed before are unchanged.
+-- One is new: cert-manager/letsencrypt-staging on the spoke. Under Git the
+-- spoke's cert-manager sync had failed ("failed calling webhook
+-- webhook.cert-manager.io ... connection refused"); from ConfigHub it
+-- succeeded, so the ClusterIssuer exists and cert-manager made its ACME
+-- account key.
+
+-- Confirmed on this run: `cub unit set-target` takes <space>/<target>; a
+-- first promote that carries no changes marks the unit and goes on, and
+-- publish says the variant is already released; one repo-creds Secret scoped
+-- by the URL prefix oci://oci.hub.confighub.com/space/lab- lets Argo CD pull
+-- every variant's release.
+
+== cub kubara check, live
+$ cub kubara check platform --prefix lab --hub-context kind-kubara-lab
+lab-argo-cd-lab-hub: lab-hub-argocd runs release 2, synced, prunes nothing, keeps Secret values; health Degraded
+lab-bootstrap-crds-lab-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+lab-bootstrap-crds-lab-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+lab-cert-manager-lab-hub: lab-hub-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
+lab-cert-manager-lab-spoke: lab-spoke-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
+lab-homer-dashboard-lab-hub: lab-hub-homer-dashboard runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-traefik-lab-hub: lab-hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; health Progressing
+lab-traefik-lab-spoke: lab-spoke-traefik runs release 1, synced, prunes nothing, keeps Secret values; health Progressing
+exit 0
+
+== A change through approval, checked before and after Argo CD pulls it
+-- One change on the metrics-server base, released to the dev cluster only.
+-- Each check is `cub kubara check platform --prefix lab --hub-context kind-kubara-lab`,
+-- and the lines below keep only metrics-server.
+-- before the change
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+exit 0
+
+-- a change on the base: two metrics-server replicas
+$ cub function set --space lab-metrics-server-base --unit metrics-server --change-desc Run two metrics-server replicas set-replicas 2 --quiet
+exit 0
+$ cub changeorder create --space lab-metrics-server-base two-replicas --change-workflow lab-metrics-server-base/rollout --description Two metrics-server replicas
+Successfully created changeorder two-replicas (5e6d1cc6-64db-4c43-aad9-7eb10927d95a)
+exit 0
+$ cub variant promote --change-order lab-metrics-server-base/two-replicas --target-stage dev --quiet
+Promoting lab-metrics-server-lab-hub into stage dev...
+Upgraded 1 unit(s) behind their upstream
+Adding 0 unit(s) from upstream at the change order's start
+exit 0
+
+-- promoted into dev, not yet approved or released: the cluster still runs release 1, which check accepts
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+exit 0
+$ cub variant approve --change-order lab-metrics-server-base/two-replicas --stage dev
+Recorded pass Approval attestation df63e96d-d618-4169-a1ec-5e7093dcc2f0 in lab-metrics-server-lab-hub, covering 1 revision(s)
+exit 0
+$ cub release publish lab-metrics-server-lab-hub --revision ChangeOrder:lab-metrics-server-base/two-replicas --quiet
+exit 0
+
+-- released, before Argo CD has pulled it
+lab-metrics-server-lab-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+error: 1 of 10 variants do not run their approved release as they should
+exit 1
+$ kubectl --context kind-kubara-lab -n argocd annotate application lab-hub-metrics-server argocd.argoproj.io/refresh=normal --overwrite
+application.argoproj.io/lab-hub-metrics-server annotated
+exit 0
+
+-- after Argo CD synced release 2
+$ kubectl --context kind-kubara-lab -n metrics-server get deploy metrics-server
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   2/2     2            2           81m
+exit 0
+$ kubectl --context kind-kubara-lab-spoke -n metrics-server get deploy metrics-server
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   1/1     1            1           54m
+exit 0
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 2, synced, prunes nothing, keeps Secret values; health Progressing; recorded a Pass (bce42698-3dac-45c7-aa1d-3a8c02058a1a)
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy; recorded a Pass (2a357b7a-f1bd-45fd-a15f-09cbe4da072b)
+exit 0

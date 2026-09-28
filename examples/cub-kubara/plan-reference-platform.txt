@@ -70,7 +70,7 @@ ConfigHub would hold 25 Spaces: a base Space per component, and a variant Space 
   (cub variant approve) before each release. Each variant records its cluster's own render as a change.
   Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.
   Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering
-  from Git. Pointing them at approved releases is takeover, which this version does not do yet.
+  from Git until handover, which points each ApplicationSet at the cluster's approved release instead.
 
 Next
   kubara --work-dir examples/kubara/current-platform/source --config-file config.yaml --env-file .env generate --helm

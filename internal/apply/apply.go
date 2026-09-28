@@ -4,7 +4,7 @@
 // cluster carrying that cluster's own render. It runs nothing itself.
 //
 // It changes nothing in Kubara or on a cluster. Kubara's hub, AppProject and
-// ApplicationSets keep delivering from Git until takeover.
+// ApplicationSets keep delivering from Git until handover.
 package apply
 
 import (
@@ -202,7 +202,7 @@ func writeHeader(s *strings.Builder, p plan.Plan, secrets []string) {
 # cub uses its current context; set CUB_CONTEXT to choose another.
 # It only creates records in ConfigHub. It changes nothing in Kubara or on any
 # cluster: Kubara's hub, AppProject and ApplicationSets keep delivering from Git
-# until takeover. All of it is safe to re-run.
+# until handover. All of it is safe to re-run.
 `, p.Source, strings.Join(comps, ", "))
 	if len(secrets) > 0 {
 		s.WriteString("#\n# These Secrets are uploaded with their keys and without their values, which\n# belong in the cluster's secret store:\n")
@@ -245,7 +245,7 @@ step "Done"
 echo "Every Kubara component now has a base and a variant per cluster in ConfigHub."
 echo "To change the platform: edit a base, promote the change stage by stage with"
 echo "  cub changeorder create ... then cub variant promote and cub variant approve."
-echo "Kubara's hub still delivers from Git; pointing it at approved releases is takeover."
+echo "Kubara's hub still delivers from Git; pointing it at approved releases is handover."
 `)
 }
 

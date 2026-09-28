@@ -195,13 +195,91 @@ cub stack from-kubara my-platform --cluster hub-dev --out hub-dev
 cub stack check hub-dev/stack.yaml
 ```
 
-## What this version does not do yet
+## Hand the hub to ConfigHub
 
-`cub kubara handover`, in draft as #13, will point Kubara's hub at the releases
-ConfigHub has approved, so a change reaches a cluster only after its stage
-approves it. Until then, the committed scripts in this repository show an older
-kind of handover, where each cluster runs its own reconciler; see
-[the six-step tutorial](../demo/kubara/adoption.md).
+`handover` writes the steps that follow `apply.sh`. After them, a change reaches
+a cluster only once its stage has approved and released it:
+
+```bash
+cub kubara handover my-platform --out my-platform-confighub --capabilities hub-dev=<hub context>
+less my-platform-confighub/handover.sh
+HUB_CONTEXT=<kubectl context of Kubara's hub> bash my-platform-confighub/handover.sh
+```
+
+Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet whose
+chart ConfigHub holds reads the cluster's approved release from ConfigHub's OCI
+gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or
+later reads those releases; Kubara v0.16 ships 3.5.
+
+The script gives each cluster a Target and releases every variant through its
+rollout workflow, stage by stage, with argo-cd last. Each release gets its own
+change order, named after the base's revision, so a re-run releases a base that
+changed since and skips one already released.
+
+Then the script changes the hub. Before any change, it compares what each
+Application manages with the release it will read. Kubara's ApplicationSets
+prune, so the script stops if Argo CD would delete anything. It then makes
+these changes:
+
+1. It stores one credential for the gateway, scoped to your prefix's Spaces.
+2. It applies the AppProject your ApplicationSets use, so that it permits the
+   gateway. Kubara's AppProject lists no sources, because its Git repository
+   is scoped to the project. The script gives it a list that holds only the
+   gateway, and the Git repository stays permitted.
+3. It applies each routed ApplicationSet and removes its Git sources. Kubara's
+   bootstrap owns those fields, so an apply alone leaves them, and Argo CD
+   reads them before the ConfigHub source.
+4. It waits until every Application reads ConfigHub. If one does not, the
+   script names it and stops. It is safe to run again.
+
+Secrets keep their live values. ConfigHub holds each Secret's keys, and each
+ApplicationSet tells Argo CD to leave Secret data alone. A cluster that joins
+later gets its Secrets without values, for its secret store to fill. A manual
+sync must keep `RespectIgnoreDifferences`, which Kubara's sync options include.
+A sync without it empties those values.
+
+bootstrap-crds is installed by Kubara's bootstrap, not by an ApplicationSet,
+so it stays with Kubara.
+
+`handover.sh` has been run against a live Kubara hub and spoke on kind, with
+Kubara v0.15.0 and Argo CD 3.5.2. Every Application synced from ConfigHub, and
+nothing was pruned. No workload restarted, and every Secret kept its value. The
+first two runs found the AppProject and Git sources problems above, and the
+script now handles both. The log is
+[`examples/cub-kubara/lab-handover-2026-09-28.log`](../../examples/cub-kubara/lab-handover-2026-09-28.log).
+
+## Check that each cluster runs what was approved
+
+`check` looks at Kubara's hub and says, for each variant, whether the cluster
+runs the release ConfigHub approved. It changes nothing on the hub:
+
+```bash
+cub kubara check my-platform --hub-context <hub context>
+```
+
+A variant passes when all of these are true:
+
+- One Application reads the variant's release from ConfigHub, and no Git source.
+- Argo CD has synced the latest published release. `check` compares the digest
+  Argo CD synced with the release's digest.
+- Argo CD would delete nothing. Helm hooks do not count, because Argo CD runs
+  them as hooks and never prunes them.
+- A sync leaves live Secret values alone.
+
+`check` shows each Application's health, but does not judge it. Health depends
+on the cluster as much as on the release. A variant that no ApplicationSet
+delivers, such as bootstrap-crds, is skipped.
+
+Run it after a release, when Argo CD has had time to sync. Until then it
+reports the release Argo CD has not pulled yet:
+
+```text
+lab-metrics-server-lab-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+```
+
+With `--record`, `check` records each verdict in the variant's Space as a
+`LiveCheck` attestation on the released revisions. A failed check records a
+rejection that names what is wrong. `--type` sets another attestation type.
 
 ## Refresh the plugin's data
 
