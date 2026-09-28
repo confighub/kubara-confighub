@@ -14,9 +14,10 @@
 #
 # No ApplicationSet delivers bootstrap-crds; Kubara's bootstrap keeps it.
 #
-# Steps 0 to 4 change only ConfigHub. Step 5 changes the hub: a credential for
-# the gateway, and the argo-cd ApplicationSet, after checking that Argo CD would
-# delete nothing. Secrets keep their live values: ConfigHub holds their keys,
+# Steps 0 to 4 change only ConfigHub. Step 5 changes the hub, after checking
+# that Argo CD would delete nothing: a credential for the gateway, the
+# AppProject so it permits the gateway, and each routed ApplicationSet, which
+# loses its Git sources. Secrets keep their live values: ConfigHub holds their keys,
 # and each ApplicationSet tells Argo CD to leave their data alone. All of it is
 # safe to re-run.
 set -euo pipefail
@@ -75,32 +76,35 @@ else
 fi
 
 step "4/5 Release each variant, stage by stage: promote, approve, publish"
-cub changeorder create --space kx-traefik-base handover-e84ab4de --change-workflow kx-traefik-base/rollout --description 'First release of kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
-if rolled_out kx-traefik-base/handover-e84ab4de; then
+order=handover-e84ab4de-r$(cub unit get --space kx-traefik-base traefik -o jq=.Unit.HeadRevisionNum)
+cub changeorder create --space kx-traefik-base "$order" --change-workflow kx-traefik-base/rollout --description 'Release kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
+if rolled_out kx-traefik-base/"$order"; then
   echo 'traefik: every variant is released'
 else
-  cub variant promote --change-order kx-traefik-base/handover-e84ab4de --target-stage dev --quiet
-  cub variant approve --change-order kx-traefik-base/handover-e84ab4de --stage dev --quiet
-  publish kx-traefik-hub kx-traefik-base/handover-e84ab4de
-  cub variant promote --change-order kx-traefik-base/handover-e84ab4de --target-stage prod --quiet
-  cub variant approve --change-order kx-traefik-base/handover-e84ab4de --stage prod --quiet
-  publish kx-traefik-edge kx-traefik-base/handover-e84ab4de
+  cub variant promote --change-order kx-traefik-base/"$order" --target-stage dev --quiet
+  cub variant approve --change-order kx-traefik-base/"$order" --stage dev --quiet
+  publish kx-traefik-hub kx-traefik-base/"$order"
+  cub variant promote --change-order kx-traefik-base/"$order" --target-stage prod --quiet
+  cub variant approve --change-order kx-traefik-base/"$order" --stage prod --quiet
+  publish kx-traefik-edge kx-traefik-base/"$order"
 fi
-cub changeorder create --space kx-homer-dashboard-base handover-0d585623 --change-workflow kx-homer-dashboard-base/rollout --description 'First release of kx-homer-dashboard-hub for handover' --allow-exists --quiet
-if rolled_out kx-homer-dashboard-base/handover-0d585623; then
+order=handover-0d585623-r$(cub unit get --space kx-homer-dashboard-base homer-dashboard -o jq=.Unit.HeadRevisionNum)
+cub changeorder create --space kx-homer-dashboard-base "$order" --change-workflow kx-homer-dashboard-base/rollout --description 'Release kx-homer-dashboard-hub for handover' --allow-exists --quiet
+if rolled_out kx-homer-dashboard-base/"$order"; then
   echo 'homer-dashboard: every variant is released'
 else
-  cub variant promote --change-order kx-homer-dashboard-base/handover-0d585623 --target-stage dev --quiet
-  cub variant approve --change-order kx-homer-dashboard-base/handover-0d585623 --stage dev --quiet
-  publish kx-homer-dashboard-hub kx-homer-dashboard-base/handover-0d585623
+  cub variant promote --change-order kx-homer-dashboard-base/"$order" --target-stage dev --quiet
+  cub variant approve --change-order kx-homer-dashboard-base/"$order" --stage dev --quiet
+  publish kx-homer-dashboard-hub kx-homer-dashboard-base/"$order"
 fi
-cub changeorder create --space kx-argo-cd-base handover-dec294e7 --change-workflow kx-argo-cd-base/rollout --description 'First release of kx-argo-cd-hub for handover' --allow-exists --quiet
-if rolled_out kx-argo-cd-base/handover-dec294e7; then
+order=handover-dec294e7-r$(cub unit get --space kx-argo-cd-base argo-cd -o jq=.Unit.HeadRevisionNum)
+cub changeorder create --space kx-argo-cd-base "$order" --change-workflow kx-argo-cd-base/rollout --description 'Release kx-argo-cd-hub for handover' --allow-exists --quiet
+if rolled_out kx-argo-cd-base/"$order"; then
   echo 'argo-cd: every variant is released'
 else
-  cub variant promote --change-order kx-argo-cd-base/handover-dec294e7 --target-stage dev --quiet
-  cub variant approve --change-order kx-argo-cd-base/handover-dec294e7 --stage dev --quiet
-  publish kx-argo-cd-hub kx-argo-cd-base/handover-dec294e7
+  cub variant promote --change-order kx-argo-cd-base/"$order" --target-stage dev --quiet
+  cub variant approve --change-order kx-argo-cd-base/"$order" --stage dev --quiet
+  publish kx-argo-cd-hub kx-argo-cd-base/"$order"
 fi
 
 step "5/5 Hand the hub to ConfigHub (your hub cluster)"
@@ -123,14 +127,45 @@ k -n argocd create secret generic confighub-kx-targets \
   --from-file=username=<(cub worker get --space kx-targets server-worker -o jq=.BridgeWorker.BridgeWorkerID | tr -d '\n') \
   --from-file=password=<(cub worker get --space kx-targets server-worker --include-secret -o jq=.BridgeWorker.Secret | tr -d '\n') \
   --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml | k apply -f -
-# The one change Kubara's Git does not make: the argo-cd ApplicationSet reads
-# the hub's argo-cd release, and that release carries every other routed one.
+# The change Kubara's Git does not make: each routed ApplicationSet reads
+# ConfigHub, and its AppProject, applied first, permits it; Argo CD cannot
+# sync the release that permits the gateway until the gateway is permitted.
+# Server-side apply keeps fields other managers own, and Kubara's
+# bootstrap owns each ApplicationSet's Git sources, which Argo CD reads before
+# source. So each routed ApplicationSet also loses its sources.
+drop_git_sources() {
+  local a
+  for a in argocd traefik homer-dashboard; do
+    [ -z "$(k -n argocd get applicationset "$a" -o jsonpath='{.spec.template.spec.sources}')" ] ||
+      k -n argocd patch applicationset "$a" --type=json -p '[{"op":"remove","path":"/spec/template/spec/sources"}]'
+  done
+}
 cub unit data --space kx-argo-cd-hub argo-cd -O argo-cd/released.yaml
-cub kubara route-appsets argo-cd/released.yaml --only argocd | k apply --server-side --force-conflicts -f -
+cub kubara route-appsets argo-cd/released.yaml --only hx-dev-dev,argocd,traefik,homer-dashboard | k apply --server-side --force-conflicts -f -
+drop_git_sources
+# A sync the hub's argo-cd Application started from Git can write the sources
+# back. Wait until it reads its release and is idle, then drop them again.
 for _ in $(seq 1 60); do
-  [ "$(k -n argocd get application hub-argocd -o jsonpath='{.spec.source.repoURL}' 2>/dev/null)" = 'oci://oci.hub.confighub.com/space/kx-argo-cd-hub' ] && break
+  [ "$(k -n argocd get application hub-argocd -o jsonpath='{.status.operationState.phase}')" != Running ] &&
+    [ -z "$(k -n argocd get application hub-argocd -o jsonpath='{.spec.sources}')" ] && break
   sleep 5
 done
+drop_git_sources
+# Every Application Kubara delivers here now reads ConfigHub, or this says
+# which does not. The ApplicationSet controller takes a moment to catch up.
+reads() { k -n argocd get application "$1" -o jsonpath='{.spec.sources[*].repoURL}{.spec.source.repoURL}' 2>/dev/null; }
+for _ in $(seq 1 60); do
+  left=0
+  for app in hub-traefik edge-traefik hub-homer-dashboard hub-argocd; do
+    case "$(reads "$app")" in oci://oci.hub.confighub.com/*) ;; *) left=1 ;; esac
+  done
+  [ "$left" = 0 ] && break
+  sleep 5
+done
+for app in hub-traefik edge-traefik hub-homer-dashboard hub-argocd; do
+  echo "$app reads $(reads "$app")"
+done
+[ "$left" = 0 ] || { echo "Some Applications do not read ConfigHub yet. Re-run this script once the hub is idle."; exit 1; }
 
 echo
 echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub."

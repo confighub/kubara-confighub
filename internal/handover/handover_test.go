@@ -50,6 +50,16 @@ func TestRouteKeepsKubarasShapeAndPointsAtConfigHub(t *testing.T) {
 	if len(routed.Routes) != 3 || len(routed.OnGit) != 14 {
 		t.Fatalf("routes=%d onGit=%d %v", len(routed.Routes), len(routed.OnGit), routed.OnGit)
 	}
+	two, err := Only(out, "argocd,traefik,hx-dev-dev")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n := strings.Count(string(two), "kind: ApplicationSet"); n != 2 || !strings.HasPrefix(string(two), "apiVersion: argoproj.io/v1alpha1\nkind: AppProject") {
+		t.Errorf("Only(argocd,traefik,hx-dev-dev) gave %d ApplicationSets, or not the AppProject first:\n%s", n, two)
+	}
+	if _, err := Only(out, "traefik,nope"); err == nil || !strings.Contains(err.Error(), "nope") {
+		t.Errorf("Only with a missing name: err = %v", err)
+	}
 	doc, err := Only(out, "traefik")
 	if err != nil {
 		t.Fatal(err)
@@ -74,19 +84,32 @@ func TestRouteKeepsKubarasShapeAndPointsAtConfigHub(t *testing.T) {
 	}
 }
 
-// Every document that is not a routed ApplicationSet keeps its exact bytes,
-// including argocd-cm, whose block scalars a YAML round trip rewrites.
+// Every document that is not a routed ApplicationSet, or the AppProject they
+// use, keeps its exact bytes, including argocd-cm, whose block scalars a YAML
+// round trip rewrites.
 func TestRouteChangesNothingElse(t *testing.T) {
 	in := fixture(t)
-	out, _, err := RouteApplicationSets(in, charts, "kx", DefaultGateway)
+	out, routed, err := RouteApplicationSets(in, charts, "kx", DefaultGateway)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if strings.Join(routed.Used, ",") != "hx-dev-dev" || strings.Join(routed.Projects, ",") != "hx-dev-dev" {
+		t.Fatalf("used=%v projects=%v", routed.Used, routed.Projects)
+	}
+	// Kubara's AppProject lists no sources: its Git is a project-scoped
+	// repository. It gains a list holding only the gateway.
+	project, err := Only(out, "hx-dev-dev")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(project), "sourceRepos:\n    - oci://oci.hub.confighub.com/space/kx-*\n") {
+		t.Errorf("the AppProject does not permit the gateway:\n%s", project)
 	}
 	inDocs, outDocs := docSeparator.Split(string(in), -1), docSeparator.Split(string(out), -1)
 	if len(inDocs) != len(outDocs) {
 		t.Fatalf("documents %d -> %d", len(inDocs), len(outDocs))
 	}
-	routedName := regexp.MustCompile(`(?m)^kind: ApplicationSet\nmetadata:\n  name: (argocd|cert-manager|traefik)\n`)
+	routedName := regexp.MustCompile(`(?m)^kind: (ApplicationSet\nmetadata:\n  name: (argocd|cert-manager|traefik)|AppProject\nmetadata:\n  name: hx-dev-dev)\n`)
 	for i := range inDocs {
 		if routedName.MatchString(inDocs[i]) {
 			continue

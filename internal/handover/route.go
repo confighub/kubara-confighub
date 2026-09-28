@@ -35,6 +35,10 @@ type Routed struct {
 	Routes   []Route
 	OnGit    []string // ApplicationSets whose chart ConfigHub does not hold
 	Projects []string // AppProjects given the gateway as a source
+	// Used lists the AppProjects the routed ApplicationSets use, changed or
+	// not. handover.sh applies them before the ApplicationSets, because Argo CD
+	// cannot sync the release that permits the gateway until it is permitted.
+	Used []string
 }
 
 // SpaceRepo is the gateway repository of a variant Space. {{name}} is the
@@ -50,8 +54,10 @@ func projectPattern(gateway, prefix string) string {
 
 // RouteApplicationSets rewrites the ApplicationSets in an argo-cd render. Each
 // one whose chart directory is in charts reads from ConfigHub, and ignores the
-// data of Secrets, which ConfigHub holds without values. An AppProject that
-// lists its sources gains the gateway. Every other document is kept byte for
+// data of Secrets, which ConfigHub holds without values. Each AppProject they
+// use permits the gateway: one that lists its sources gains it, and one that
+// lists none, as Kubara's do (its Git is a project-scoped repository), gains a
+// list holding only the gateway, which leaves the scoped repository permitted. Every other document is kept byte for
 // byte, and a render already routed comes back unchanged.
 func RouteApplicationSets(render []byte, charts map[string]bool, prefix, gateway string) ([]byte, Routed, error) {
 	docs := docSeparator.Split(string(render), -1)
@@ -99,9 +105,19 @@ func RouteApplicationSets(render []byte, charts map[string]bool, prefix, gateway
 		if top == nil || scalar(top, "kind") != "AppProject" || !projects[scalar(value(top, "metadata"), "name")] {
 			continue
 		}
-		repos := value(value(top, "spec"), "sourceRepos")
-		if repos == nil || repos.Kind != yaml.SequenceNode {
-			continue // Argo CD applies the same rule to OCI as to Git.
+		name := scalar(value(top, "metadata"), "name")
+		out.Used = append(out.Used, name)
+		spec := value(top, "spec")
+		if spec == nil || spec.Kind != yaml.MappingNode {
+			continue
+		}
+		repos := value(spec, "sourceRepos")
+		if repos == nil {
+			repos = &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq"}
+			spec.Content = append(spec.Content, str("sourceRepos"), repos)
+		}
+		if repos.Kind != yaml.SequenceNode {
+			continue
 		}
 		allowed := false
 		for _, r := range repos.Content {
@@ -111,7 +127,7 @@ func RouteApplicationSets(render []byte, charts map[string]bool, prefix, gateway
 		}
 		if !allowed {
 			repos.Content = append(repos.Content, str(pattern))
-			out.Projects = append(out.Projects, scalar(value(top, "metadata"), "name"))
+			out.Projects = append(out.Projects, name)
 			changed[i] = true
 		}
 	}
@@ -128,6 +144,7 @@ func RouteApplicationSets(render []byte, charts map[string]bool, prefix, gateway
 		docs[i] = buf.String()
 	}
 	sort.Strings(out.OnGit)
+	sort.Strings(out.Used)
 	return []byte(strings.Join(docs, "---\n")), out, nil
 }
 
@@ -210,11 +227,21 @@ func hasSecretIgnore(spec *yaml.Node) bool {
 	return false
 }
 
-// Only returns the named ApplicationSet from a render, for the one kubectl
-// apply that hands the hub to ConfigHub.
-func Only(render []byte, applicationSet string) ([]byte, error) {
+// Only returns the named AppProjects and ApplicationSets from a render, for
+// the kubectl apply that hands the hub to ConfigHub: the AppProjects first, so
+// each permits the gateway before an ApplicationSet reads it, then the
+// ApplicationSets, each in the render's order. names is comma-separated.
+func Only(render []byte, names string) ([]byte, error) {
+	want := map[string]bool{}
+	for _, n := range strings.Split(names, ",") {
+		if n = strings.TrimSpace(n); n != "" {
+			want[n] = true
+		}
+	}
+	var projects, docs []string
+	found := map[string]bool{}
 	for _, doc := range docSeparator.Split(string(render), -1) {
-		if !strings.Contains(doc, "ApplicationSet") {
+		if !strings.Contains(doc, "ApplicationSet") && !strings.Contains(doc, "AppProject") {
 			continue
 		}
 		var root yaml.Node
@@ -222,11 +249,33 @@ func Only(render []byte, applicationSet string) ([]byte, error) {
 			return nil, err
 		}
 		top := mapping(&root)
-		if top != nil && scalar(top, "kind") == "ApplicationSet" && scalar(value(top, "metadata"), "name") == applicationSet {
-			return []byte(doc), nil
+		kind := ""
+		if top != nil {
+			kind = scalar(top, "kind")
+		}
+		if kind != "ApplicationSet" && kind != "AppProject" {
+			continue
+		}
+		if name := scalar(value(top, "metadata"), "name"); want[name] && !found[name] {
+			found[name] = true
+			if kind == "AppProject" {
+				projects = append(projects, strings.TrimSpace(doc)+"\n")
+			} else {
+				docs = append(docs, strings.TrimSpace(doc)+"\n")
+			}
 		}
 	}
-	return nil, fmt.Errorf("the render holds no ApplicationSet %s", applicationSet)
+	var missing []string
+	for n := range want {
+		if !found[n] {
+			missing = append(missing, n)
+		}
+	}
+	if len(missing) > 0 {
+		sort.Strings(missing)
+		return nil, fmt.Errorf("the render holds no AppProject or ApplicationSet %s", strings.Join(missing, ", "))
+	}
+	return []byte(strings.Join(append(projects, docs...), "---\n")), nil
 }
 
 func mapping(root *yaml.Node) *yaml.Node {

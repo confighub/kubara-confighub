@@ -212,11 +212,25 @@ gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or
 later reads those releases; Kubara v0.16 ships 3.5.
 
 The script gives each cluster a Target and releases every variant through its
-rollout workflow, stage by stage, with argo-cd last. It then changes the hub in
-two ways. It stores a credential for the gateway, and it applies the argo-cd
-ApplicationSet, whose release carries every other one. Before that, it
-compares what each Application manages with the release it will read. Kubara's
-ApplicationSets prune, so the script stops if Argo CD would delete anything.
+rollout workflow, stage by stage, with argo-cd last. Each release gets its own
+change order, named after the base's revision, so a re-run releases a base that
+changed since and skips one already released.
+
+Then the script changes the hub. Before any change, it compares what each
+Application manages with the release it will read. Kubara's ApplicationSets
+prune, so the script stops if Argo CD would delete anything. It then makes
+these changes:
+
+1. It stores one credential for the gateway, scoped to your prefix's Spaces.
+2. It applies the AppProject your ApplicationSets use, so that it permits the
+   gateway. Kubara's AppProject lists no sources, because its Git repository
+   is scoped to the project. The script gives it a list that holds only the
+   gateway, and the Git repository stays permitted.
+3. It applies each routed ApplicationSet and removes its Git sources. Kubara's
+   bootstrap owns those fields, so an apply alone leaves them, and Argo CD
+   reads them before the ConfigHub source.
+4. It waits until every Application reads ConfigHub. If one does not, the
+   script names it and stops. It is safe to run again.
 
 Secrets keep their live values. ConfigHub holds each Secret's keys, and each
 ApplicationSet tells Argo CD to leave Secret data alone. A cluster that joins
@@ -227,10 +241,12 @@ A sync without it empties those values.
 bootstrap-crds is installed by Kubara's bootstrap, not by an ApplicationSet,
 so it stays with Kubara.
 
-`handover.sh` has not yet been run against a live Kubara hub. The switch of an
-Application from Git to an OCI release, with the Secret handling above, was
-measured on kind with Argo CD 3.5.2 and Kubara-shaped ApplicationSets. The
-full script is next to be proved live.
+`handover.sh` has been run against a live Kubara hub and spoke on kind, with
+Kubara v0.15.0 and Argo CD 3.5.2. Every Application synced from ConfigHub, and
+nothing was pruned. No workload restarted, and every Secret kept its value. The
+first two runs found the AppProject and Git sources problems above, and the
+script now handles both. The log is
+[`examples/cub-kubara/lab-handover-2026-09-28.log`](../../examples/cub-kubara/lab-handover-2026-09-28.log).
 
 ## Refresh the plugin's data
 

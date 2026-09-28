@@ -187,10 +187,12 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		for _, v := range c.Variants {
 			names = append(names, v.Space)
 		}
+		// One change order per base revision: a re-run releases a base that
+		// changed since, and skips one already released.
 		sum := sha256.Sum256([]byte("handover|" + c.Base + "|" + strings.Join(names, ",")))
-		order := fmt.Sprintf("handover-%x", sum[:4])
-		ref := c.Base + "/" + order
-		line("cub changeorder create --space %s %s --change-workflow %s/%s --description %s --allow-exists --quiet", c.Base, order, c.Base, workflowSlug, q("First release of "+strings.Join(names, ", ")+" for handover"))
+		line("order=handover-%x-r$(cub unit get --space %s %s -o jq=.Unit.HeadRevisionNum)", sum[:4], c.Base, c.Name)
+		ref := c.Base + `/"$order"`
+		line(`cub changeorder create --space %s "$order" --change-workflow %s/%s --description %s --allow-exists --quiet`, c.Base, c.Base, workflowSlug, q("Release "+strings.Join(names, ", ")+" for handover"))
 		line("if rolled_out %s; then", ref)
 		line("  echo %s", q(c.Name+": every variant is released"))
 		line("else")
@@ -238,14 +240,59 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`  --from-file=username=<(%s -o jq=.BridgeWorker.BridgeWorkerID | tr -d '\n') \`, worker)
 	line(`  --from-file=password=<(%s --include-secret -o jq=.BridgeWorker.Secret | tr -d '\n') \`, worker)
 	line(`  --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml | k apply -f -`)
-	line("# The one change Kubara's Git does not make: the argo-cd ApplicationSet reads")
-	line("# the hub's argo-cd release, and that release carries every other routed one.")
+	// The argo-cd ApplicationSet comes first: once the hub's argo-cd Application
+	// reads its release, that release carries every other routed one.
+	appsets := []string{routedChart[unitArgoCD].ApplicationSet}
+	var apps []string
+	for _, c := range comps {
+		r := routedChart[c.ChartPath]
+		if r.ApplicationSet != appsets[0] {
+			appsets = append(appsets, r.ApplicationSet)
+		}
+		for _, v := range c.Variants {
+			apps = append(apps, v.Cluster+"-"+r.ApplicationSet)
+		}
+	}
+	line("# The change Kubara's Git does not make: each routed ApplicationSet reads")
+	line("# ConfigHub, and its AppProject, applied first, permits it; Argo CD cannot")
+	line("# sync the release that permits the gateway until the gateway is permitted.")
+	line("# Server-side apply keeps fields other managers own, and Kubara's")
+	line("# bootstrap owns each ApplicationSet's Git sources, which Argo CD reads before")
+	line("# source. So each routed ApplicationSet also loses its sources.")
+	line("drop_git_sources() {")
+	line("  local a")
+	line(`  for a in %s; do`, strings.Join(appsets, " "))
+	line(`    [ -z "$(k -n %s get applicationset "$a" -o jsonpath='{.spec.template.spec.sources}')" ] ||`, argoNamespace)
+	line(`      k -n %s patch applicationset "$a" --type=json -p '[{"op":"remove","path":"/spec/template/spec/sources"}]'`, argoNamespace)
+	line("  done")
+	line("}")
 	line("cub unit data --space %s %s -O %s/released.yaml", hubArgo, unitArgoCD, unitArgoCD)
-	line("cub kubara route-appsets %s/released.yaml --only %s | k apply --server-side --force-conflicts -f -", unitArgoCD, routedChart[unitArgoCD].ApplicationSet)
+	line("cub kubara route-appsets %s/released.yaml --only %s | k apply --server-side --force-conflicts -f -", unitArgoCD, strings.Join(append(append([]string{}, routed.Used...), appsets...), ","))
+	line("drop_git_sources")
+	line("# A sync the hub's argo-cd Application started from Git can write the sources")
+	line("# back. Wait until it reads its release and is idle, then drop them again.")
+	hubApp := hub + "-" + appsets[0]
 	line("for _ in $(seq 1 60); do")
-	line(`  [ "$(k -n %s get application %s-%s -o jsonpath='{.spec.source.repoURL}' 2>/dev/null)" = %s ] && break`, argoNamespace, hub, routedChart[unitArgoCD].ApplicationSet, q(strings.ReplaceAll(routedChart[unitArgoCD].RepoURL, "{{name}}", hub)))
+	line(`  [ "$(k -n %s get application %s -o jsonpath='{.status.operationState.phase}')" != Running ] &&`, argoNamespace, hubApp)
+	line(`    [ -z "$(k -n %s get application %s -o jsonpath='{.spec.sources}')" ] && break`, argoNamespace, hubApp)
 	line("  sleep 5")
 	line("done")
+	line("drop_git_sources")
+	line("# Every Application Kubara delivers here now reads ConfigHub, or this says")
+	line("# which does not. The ApplicationSet controller takes a moment to catch up.")
+	line("reads() { k -n %s get application \"$1\" -o jsonpath='{.spec.sources[*].repoURL}{.spec.source.repoURL}' 2>/dev/null; }", argoNamespace)
+	line("for _ in $(seq 1 60); do")
+	line("  left=0")
+	line("  for app in %s; do", strings.Join(apps, " "))
+	line(`    case "$(reads "$app")" in oci://%s/*) ;; *) left=1 ;; esac`, opts.Gateway)
+	line("  done")
+	line(`  [ "$left" = 0 ] && break`)
+	line("  sleep 5")
+	line("done")
+	line("for app in %s; do", strings.Join(apps, " "))
+	line(`  echo "$app reads $(reads "$app")"`)
+	line("done")
+	line(`[ "$left" = 0 ] || { echo "Some Applications do not read ConfigHub yet. Re-run this script once the hub is idle."; exit 1; }`)
 	line("")
 	line("echo")
 	line(`echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub."`)
@@ -281,9 +328,10 @@ func header(p plan.Plan, gateway string, res Result) string {
 		fmt.Fprintf(&b, "#\n# No ApplicationSet delivers %s; Kubara's bootstrap keeps it.\n", strings.Join(res.WithKubara, ", "))
 	}
 	b.WriteString(`#
-# Steps 0 to 4 change only ConfigHub. Step 5 changes the hub: a credential for
-# the gateway, and the argo-cd ApplicationSet, after checking that Argo CD would
-# delete nothing. Secrets keep their live values: ConfigHub holds their keys,
+# Steps 0 to 4 change only ConfigHub. Step 5 changes the hub, after checking
+# that Argo CD would delete nothing: a credential for the gateway, the
+# AppProject so it permits the gateway, and each routed ApplicationSet, which
+# loses its Git sources. Secrets keep their live values: ConfigHub holds their keys,
 # and each ApplicationSet tells Argo CD to leave their data alone. All of it is
 # safe to re-run.
 set -euo pipefail
