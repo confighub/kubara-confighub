@@ -26,6 +26,14 @@ k() { kubectl ${HUB_CONTEXT:+--context "$HUB_CONTEXT"} "$@"; }
 step() { printf '\n== %s\n' "$*"; }
 # A finished change order is skipped, so a re-run releases only what is new.
 rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.Stage)" = Completed ]; }
+# released <space>...: each Space has a published release. Once it has, later
+# changes go through the platform's own change orders, not this script.
+released() {
+  local s
+  for s in "$@"; do
+    [ "$(cub release list --space "$s" -o 'jq=[.[]|select(.Release.Published)]|length')" -gt 0 ] || return 1
+  done
+}
 publish() {
   local out
   out=$(cub release publish "$1" --revision "ChangeOrder:$2" --quiet 2>&1) && return 0
@@ -76,26 +84,34 @@ else
 fi
 
 step "4/5 Release each variant, stage by stage: promote, approve, publish"
-order=handover-e84ab4de-r$(cub unit get --space kx-traefik-base traefik -o jq=.Unit.HeadRevisionNum)
-cub changeorder create --space kx-traefik-base "$order" --change-workflow kx-traefik-base/rollout --description 'Release kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
-if rolled_out kx-traefik-base/"$order"; then
-  echo 'traefik: every variant is released'
+if released kx-traefik-hub kx-traefik-edge; then
+  echo 'traefik: every variant has a release; later changes go through your own change orders'
 else
-  cub variant promote --change-order kx-traefik-base/"$order" --target-stage dev --quiet
-  cub variant approve --change-order kx-traefik-base/"$order" --stage dev --quiet
-  publish kx-traefik-hub kx-traefik-base/"$order"
-  cub variant promote --change-order kx-traefik-base/"$order" --target-stage prod --quiet
-  cub variant approve --change-order kx-traefik-base/"$order" --stage prod --quiet
-  publish kx-traefik-edge kx-traefik-base/"$order"
+  order=handover-e84ab4de-r$(cub unit get --space kx-traefik-base traefik -o jq=.Unit.HeadRevisionNum)
+  cub changeorder create --space kx-traefik-base "$order" --change-workflow kx-traefik-base/rollout --description 'Release kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
+  if rolled_out kx-traefik-base/"$order"; then
+    echo 'traefik: every variant is released'
+  else
+    cub variant promote --change-order kx-traefik-base/"$order" --target-stage dev --quiet
+    cub variant approve --change-order kx-traefik-base/"$order" --stage dev --quiet
+    publish kx-traefik-hub kx-traefik-base/"$order"
+    cub variant promote --change-order kx-traefik-base/"$order" --target-stage prod --quiet
+    cub variant approve --change-order kx-traefik-base/"$order" --stage prod --quiet
+    publish kx-traefik-edge kx-traefik-base/"$order"
+  fi
 fi
-order=handover-0d585623-r$(cub unit get --space kx-homer-dashboard-base homer-dashboard -o jq=.Unit.HeadRevisionNum)
-cub changeorder create --space kx-homer-dashboard-base "$order" --change-workflow kx-homer-dashboard-base/rollout --description 'Release kx-homer-dashboard-hub for handover' --allow-exists --quiet
-if rolled_out kx-homer-dashboard-base/"$order"; then
-  echo 'homer-dashboard: every variant is released'
+if released kx-homer-dashboard-hub; then
+  echo 'homer-dashboard: every variant has a release; later changes go through your own change orders'
 else
-  cub variant promote --change-order kx-homer-dashboard-base/"$order" --target-stage dev --quiet
-  cub variant approve --change-order kx-homer-dashboard-base/"$order" --stage dev --quiet
-  publish kx-homer-dashboard-hub kx-homer-dashboard-base/"$order"
+  order=handover-0d585623-r$(cub unit get --space kx-homer-dashboard-base homer-dashboard -o jq=.Unit.HeadRevisionNum)
+  cub changeorder create --space kx-homer-dashboard-base "$order" --change-workflow kx-homer-dashboard-base/rollout --description 'Release kx-homer-dashboard-hub for handover' --allow-exists --quiet
+  if rolled_out kx-homer-dashboard-base/"$order"; then
+    echo 'homer-dashboard: every variant is released'
+  else
+    cub variant promote --change-order kx-homer-dashboard-base/"$order" --target-stage dev --quiet
+    cub variant approve --change-order kx-homer-dashboard-base/"$order" --stage dev --quiet
+    publish kx-homer-dashboard-hub kx-homer-dashboard-base/"$order"
+  fi
 fi
 order=handover-dec294e7-r$(cub unit get --space kx-argo-cd-base argo-cd -o jq=.Unit.HeadRevisionNum)
 cub changeorder create --space kx-argo-cd-base "$order" --change-workflow kx-argo-cd-base/rollout --description 'Release kx-argo-cd-hub for handover' --allow-exists --quiet
