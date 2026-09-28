@@ -33,14 +33,16 @@ kubara --work-dir my-platform --config-file config.yaml --env-file .env generate
 cub kubara plan my-platform                           # bases, variants, stages, evidence
 cub kubara apply my-platform --out my-platform-confighub   # writes apply.sh; read it, then run it
 cub kubara handover my-platform --out my-platform-confighub  # writes handover.sh, run after apply.sh
+cub kubara check my-platform --hub-context <hub context>     # each cluster runs its approved release
 ```
 
 Kubara's catalogs stay the source of every component. Where the ConfigHub
 Workshop Catalog has checked the exact chart version Kubara pins, the plan links
 to what it installs and needs. [The cub kubara guide](docs/user/cub-kubara.md)
-walks through each command. `handover.sh` has not yet been run against a live
-hub. The scripts below are the path proved live so far, with a small Argo CD
-reconciler on each cluster.
+walks through each command. The whole path, from `apply` to `check`, has run
+against a live Kubara hub and spoke; [the log](examples/cub-kubara/lab-handover-2026-09-28.log)
+shows each command and what it printed. The scripts below are the earlier path,
+with a small Argo CD reconciler on each cluster.
 
 ## Start a small platform
 

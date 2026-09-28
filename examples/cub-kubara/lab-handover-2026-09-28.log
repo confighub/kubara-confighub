@@ -24,6 +24,11 @@
 # ConfigHub. Each fix is in pull request #13, and re-running the script was
 # safe each time.
 #
+# Then `cub kubara check` passed every variant. A change to metrics-server was
+# promoted, approved and released to the dev cluster. check failed until Argo
+# CD synced the new release, then passed, and the prod spoke stayed on its
+# release. check --record wrote a LiveCheck attestation per variant.
+#
 # Commands ran with CUB_CONTEXT set to the hosted organisation and
 # HUB_CONTEXT=kind-kubara-lab. Repeated promote progress lines are cut.
 
@@ -176,3 +181,70 @@ lab-spoke-traefik         Synced  Progressing  Succeeded  successfully synced (n
 -- publish says the variant is already released; one repo-creds Secret scoped
 -- by the URL prefix oci://oci.hub.confighub.com/space/lab- lets Argo CD pull
 -- every variant's release.
+
+== cub kubara check, live
+$ cub kubara check platform --prefix lab --hub-context kind-kubara-lab
+lab-argo-cd-lab-hub: lab-hub-argocd runs release 2, synced, prunes nothing, keeps Secret values; health Degraded
+lab-bootstrap-crds-lab-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+lab-bootstrap-crds-lab-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+lab-cert-manager-lab-hub: lab-hub-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
+lab-cert-manager-lab-spoke: lab-spoke-cert-manager runs release 1, synced, prunes nothing, keeps Secret values; health Degraded
+lab-homer-dashboard-lab-hub: lab-hub-homer-dashboard runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-traefik-lab-hub: lab-hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; health Progressing
+lab-traefik-lab-spoke: lab-spoke-traefik runs release 1, synced, prunes nothing, keeps Secret values; health Progressing
+exit 0
+
+== A change through approval, checked before and after Argo CD pulls it
+-- One change on the metrics-server base, released to the dev cluster only.
+-- Each check is `cub kubara check platform --prefix lab --hub-context kind-kubara-lab`,
+-- and the lines below keep only metrics-server.
+-- before the change
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+exit 0
+
+-- a change on the base: two metrics-server replicas
+$ cub function set --space lab-metrics-server-base --unit metrics-server --change-desc Run two metrics-server replicas set-replicas 2 --quiet
+exit 0
+$ cub changeorder create --space lab-metrics-server-base two-replicas --change-workflow lab-metrics-server-base/rollout --description Two metrics-server replicas
+Successfully created changeorder two-replicas (5e6d1cc6-64db-4c43-aad9-7eb10927d95a)
+exit 0
+$ cub variant promote --change-order lab-metrics-server-base/two-replicas --target-stage dev --quiet
+Promoting lab-metrics-server-lab-hub into stage dev...
+Upgraded 1 unit(s) behind their upstream
+Adding 0 unit(s) from upstream at the change order's start
+exit 0
+
+-- promoted into dev, not yet approved or released: the cluster still runs release 1, which check accepts
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+exit 0
+$ cub variant approve --change-order lab-metrics-server-base/two-replicas --stage dev
+Recorded pass Approval attestation df63e96d-d618-4169-a1ec-5e7093dcc2f0 in lab-metrics-server-lab-hub, covering 1 revision(s)
+exit 0
+$ cub release publish lab-metrics-server-lab-hub --revision ChangeOrder:lab-metrics-server-base/two-replicas --quiet
+exit 0
+
+-- released, before Argo CD has pulled it
+lab-metrics-server-lab-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy
+error: 1 of 10 variants do not run their approved release as they should
+exit 1
+$ kubectl --context kind-kubara-lab -n argocd annotate application lab-hub-metrics-server argocd.argoproj.io/refresh=normal --overwrite
+application.argoproj.io/lab-hub-metrics-server annotated
+exit 0
+
+-- after Argo CD synced release 2
+$ kubectl --context kind-kubara-lab -n metrics-server get deploy metrics-server
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   2/2     2            2           81m
+exit 0
+$ kubectl --context kind-kubara-lab-spoke -n metrics-server get deploy metrics-server
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   1/1     1            1           54m
+exit 0
+lab-metrics-server-lab-hub: lab-hub-metrics-server runs release 2, synced, prunes nothing, keeps Secret values; health Progressing; recorded a Pass (bce42698-3dac-45c7-aa1d-3a8c02058a1a)
+lab-metrics-server-lab-spoke: lab-spoke-metrics-server runs release 1, synced, prunes nothing, keeps Secret values; health Healthy; recorded a Pass (2a357b7a-f1bd-45fd-a15f-09cbe4da072b)
+exit 0

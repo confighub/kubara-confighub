@@ -312,3 +312,18 @@ func scalar(m *yaml.Node, key string) string {
 }
 
 func str(s string) *yaml.Node { return &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: s} }
+
+// ChartOf is the chart directory an ApplicationSet delivers, read from one
+// ApplicationSet as kubectl prints it (JSON is YAML), whether it still reads
+// Kubara's Git or reads ConfigHub. It is empty when neither says.
+func ChartOf(applicationSet []byte, prefix string) (string, error) {
+	var root yaml.Node
+	if err := yaml.Unmarshal(applicationSet, &root); err != nil {
+		return "", err
+	}
+	spec := value(value(value(mapping(&root), "spec"), "template"), "spec")
+	if spec == nil {
+		return "", nil
+	}
+	return chartOf(spec, prefix), nil
+}

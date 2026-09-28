@@ -248,6 +248,39 @@ first two runs found the AppProject and Git sources problems above, and the
 script now handles both. The log is
 [`examples/cub-kubara/lab-handover-2026-09-28.log`](../../examples/cub-kubara/lab-handover-2026-09-28.log).
 
+## Check that each cluster runs what was approved
+
+`check` looks at Kubara's hub and says, for each variant, whether the cluster
+runs the release ConfigHub approved. It changes nothing on the hub:
+
+```bash
+cub kubara check my-platform --hub-context <hub context>
+```
+
+A variant passes when all of these are true:
+
+- One Application reads the variant's release from ConfigHub, and no Git source.
+- Argo CD has synced the latest published release. `check` compares the digest
+  Argo CD synced with the release's digest.
+- Argo CD would delete nothing. Helm hooks do not count, because Argo CD runs
+  them as hooks and never prunes them.
+- A sync leaves live Secret values alone.
+
+`check` shows each Application's health, but does not judge it. Health depends
+on the cluster as much as on the release. A variant that no ApplicationSet
+delivers, such as bootstrap-crds, is skipped.
+
+Run it after a release, when Argo CD has had time to sync. Until then it
+reports the release Argo CD has not pulled yet:
+
+```text
+lab-metrics-server-lab-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+```
+
+With `--record`, `check` records each verdict in the variant's Space as a
+`LiveCheck` attestation on the released revisions. A failed check records a
+rejection that names what is wrong. `--type` sets another attestation type.
+
 ## Refresh the plugin's data
 
 The plugin carries a snapshot of Kubara's catalogs and of the Workshop Catalog,

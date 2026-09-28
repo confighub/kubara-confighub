@@ -4,12 +4,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/confighub/kubara-confighub/internal/apply"
 	"github.com/confighub/kubara-confighub/internal/catalog"
+	"github.com/confighub/kubara-confighub/internal/check"
 	"github.com/confighub/kubara-confighub/internal/handover"
 	"github.com/confighub/kubara-confighub/internal/initcfg"
 	"github.com/confighub/kubara-confighub/internal/plan"
@@ -363,7 +365,77 @@ Use the same --prefix and --stages as apply.`,
 		},
 	}
 
-	root.AddCommand(services, initCmd, planCmd, applyCmd, handoverCmd, routeCmd, pruneCmd, versionCmd)
+	var ko plan.Options
+	var kStages string
+	var co check.Options
+	checkCmd := &cobra.Command{
+		Use:   "check <kubara-dir>",
+		Short: "Check that each cluster runs the release ConfigHub approved, and optionally record the verdict",
+		Long: `Check Kubara's hub after handover. For each variant, it checks that one
+Application reads the variant's release from ConfigHub and no Git source, that
+Argo CD has synced the latest published release, that Argo CD would delete
+nothing, and that a sync leaves live Secret values alone. Health is shown and
+not judged, because it depends on the cluster as much as on the release.
+
+With --record, each verdict is recorded in the variant's Space as an
+attestation of --type on the released revisions: a Pass, or a rejection that
+names what is wrong.
+
+Use the same --prefix and --stages as apply. It changes nothing on the hub.
+
+  cub kubara check my-platform --hub-context <hub context> --record`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			p, err := platform.Load(args[0])
+			if err != nil {
+				return err
+			}
+			ko.Stages = split(kStages)
+			pl, err := plan.Build(p, ko)
+			if err != nil {
+				return err
+			}
+			results, err := check.Check(pl, runCommand, co)
+			w := c.OutOrStdout()
+			failed := 0
+			for _, r := range results {
+				switch {
+				case r.Skipped != "":
+					fmt.Fprintf(w, "%s: skipped, %s\n", r.Space, r.Skipped)
+				case r.Passed():
+					fmt.Fprintf(w, "%s: %s runs release %d, synced, prunes nothing, keeps Secret values; health %s", r.Space, r.Application, r.Release, r.Health)
+				default:
+					failed++
+					fmt.Fprintf(w, "%s: FAIL: %s", r.Space, strings.Join(r.Problems, "; "))
+				}
+				if r.Skipped == "" {
+					if r.Recorded != "" {
+						verdict := "a Pass"
+						if !r.Passed() {
+							verdict = "a rejection"
+						}
+						fmt.Fprintf(w, "; recorded %s (%s)", verdict, r.Recorded)
+					}
+					fmt.Fprintln(w)
+				}
+			}
+			if err != nil {
+				return err
+			}
+			if failed > 0 {
+				return fmt.Errorf("%d of %d variants do not run their approved release as they should", failed, len(results))
+			}
+			return nil
+		},
+	}
+	checkCmd.Flags().StringVar(&ko.Prefix, "prefix", "kubara", "the prefix apply used")
+	checkCmd.Flags().StringVar(&kStages, "stages", "", "the stage order apply used")
+	checkCmd.Flags().StringVar(&co.HubContext, "hub-context", "", "kubectl context of Kubara's hub; the current context when empty")
+	checkCmd.Flags().StringVar(&co.Gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	checkCmd.Flags().BoolVar(&co.Record, "record", false, "record each verdict in ConfigHub as an attestation")
+	checkCmd.Flags().StringVar(&co.Type, "type", check.DefaultType, "the attestation type --record uses")
+
+	root.AddCommand(services, initCmd, planCmd, applyCmd, handoverCmd, checkCmd, routeCmd, pruneCmd, versionCmd)
 	return root
 }
 
@@ -458,4 +530,17 @@ func Execute() {
 		}
 		os.Exit(1)
 	}
+}
+
+// runCommand runs a command and returns its standard output, with its
+// standard error in the error when it fails.
+func runCommand(name string, args ...string) ([]byte, error) {
+	cmd := exec.Command(name, args...)
+	var stderr strings.Builder
+	cmd.Stderr = &stderr
+	out, err := cmd.Output()
+	if err != nil {
+		return out, fmt.Errorf("%s %s: %w: %s", name, strings.Join(args, " "), err, strings.TrimSpace(stderr.String()))
+	}
+	return out, nil
 }
