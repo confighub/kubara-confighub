@@ -13,6 +13,10 @@ component, and Kubara still generates the platform. The ConfigHub Workshop
 Catalog adds evidence: where it has checked the exact chart version Kubara pins,
 the plan links to what that chart installs and what it needs.
 
+To see all of it before you use your own platform, run the
+[kind lab](../../examples/kind-lab/README.md). It builds a Kubara hub and spoke
+on your laptop and runs every step below against them.
+
 ## How Kubara, cub kubara and Workshop stacks fit together
 
 Three pieces meet here, and each has one job.
@@ -26,13 +30,13 @@ through ApplicationSets. Kubara knows nothing about ConfigHub.
 ConfigHub without changing how Kubara works. Your path is:
 
 ```text
-kubara generate  →  cub kubara plan  →  cub kubara apply  →  cub kubara handover
+kubara generate  →  cub kubara plan  →  cub kubara apply  →  cub kubara handover  →  cub kubara check
 ```
 
 Kubara generates. `cub kubara` puts the result under ConfigHub's governance, as a
 base for each component and a variant for each cluster, with an approval before
-each release. `handover` then points Kubara's hub at the approved releases.
-`handover` is still a draft (#13). There is no stack step on this path.
+each release. `handover` then points Kubara's hub at the approved releases, and
+`check` confirms that each cluster runs them. There is no stack step on this path.
 
 `cub kubara apply` renders each service the way Kubara's hub delivers it. It uses
 the chart its ApplicationSet names, with the same release name, namespace and
@@ -56,10 +60,9 @@ want to:
 one stack for the whole platform, a hub and its spokes, is next
 ([confighub/cub-workshop#59](https://github.com/confighub/cub-workshop/issues/59)).
 
-The two tools share only the renderer and the certified bundle format. The rules
-they share are in
-One flattening model for every plugin, in review as
-[confighub/helm-expt#2000](https://github.com/confighub/helm-expt/pull/2000).
+The two tools share only the renderer and the certified bundle format. See
+[one flattening model for every plugin](https://github.com/confighub/helm-expt/blob/main/docs/reference/flattening-across-plugins.md)
+for the rules they share.
 
 ## Install
 
@@ -232,7 +235,11 @@ these changes:
 3. It applies each routed ApplicationSet and removes its Git sources. Kubara's
    bootstrap owns those fields, so an apply alone leaves them, and Argo CD
    reads them before the ConfigHub source.
-4. It waits until every Application reads ConfigHub. If one does not, the
+4. It stops any sync Argo CD started from Git and has not finished. After the
+   switch, such a sync can never finish, because Argo CD retries it against the
+   ConfigHub source. The script stops it, as `argocd app terminate-op` does,
+   and the automated sync starts again from ConfigHub.
+5. It waits until every Application reads ConfigHub. If one does not, the
    script names it and stops. It is safe to run again.
 
 Secrets keep their live values. ConfigHub holds each Secret's keys, and each
@@ -247,9 +254,48 @@ so it stays with Kubara.
 `handover.sh` has been run against a live Kubara hub and spoke on kind, with
 Kubara v0.15.0 and Argo CD 3.5.2. Every Application synced from ConfigHub, and
 nothing was pruned. No workload restarted, and every Secret kept its value. The
-first two runs found the AppProject and Git sources problems above, and the
-script now handles both. The log is
-[`examples/cub-kubara/lab-handover-2026-09-28.log`](../../examples/cub-kubara/lab-handover-2026-09-28.log).
+first runs found the Git sources, AppProject and Git sync problems above, and
+the script now handles each. See the
+[first live run](../../examples/cub-kubara/lab-handover-2026-09-28.log) for how
+they were found, and the [kind lab](../../examples/kind-lab/README.md) to run it
+yourself.
+
+## Change the platform after handover
+
+After handover you change the platform with ConfigHub's own commands. Make a
+change once, on the base, and take it through the stages. Here, two replicas
+for metrics-server:
+
+```bash
+cub function set --space kubara-metrics-server-base --unit metrics-server \
+  --change-desc "Run two metrics-server replicas" set-replicas 2
+cub changeorder create --space kubara-metrics-server-base two-replicas \
+  --change-workflow kubara-metrics-server-base/rollout --description "Two metrics-server replicas"
+```
+
+In each stage, promote the change, approve it, and publish each variant's
+release:
+
+```bash
+cub variant promote --change-order kubara-metrics-server-base/two-replicas --target-stage dev
+cub variant approve --change-order kubara-metrics-server-base/two-replicas --stage dev
+cub release publish kubara-metrics-server-hub --revision ChangeOrder:kubara-metrics-server-base/two-replicas
+```
+
+Kubara's hub pulls the new release within a few minutes, and `check` confirms
+it. Then do the same for prod. ConfigHub refuses to promote into a stage before
+the stage ahead has released the change.
+
+A change that comes from Kubara itself, such as a new catalog version, is not
+automatic yet. `apply.sh` leaves alone what already exists, so it does not
+replace a base. Run `kubara generate` and `cub kubara apply` again, then bring
+each new render into its base as a change you review, and take it through the
+stages as above:
+
+```bash
+cub unit update --space kubara-metrics-server-base metrics-server \
+  my-platform-confighub/metrics-server/base.yaml --change-desc "Kubara catalog 3.1.0"
+```
 
 ## Check that each cluster runs what was approved
 
@@ -277,12 +323,23 @@ Run it after a release, when Argo CD has had time to sync. Until then it
 reports the release Argo CD has not pulled yet:
 
 ```text
-lab-metrics-server-lab-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
+kubara-metrics-server-hub: FAIL: Argo CD runs sha256:4036b0725aa0, and the latest release, 2, is sha256:4350343dd3b4
 ```
 
 With `--record`, `check` records each verdict in the variant's Space as a
 `LiveCheck` attestation on the released revisions. A failed check records a
 rejection that names what is wrong. `--type` sets another attestation type.
+
+## If something goes wrong
+
+| You see | What it means | What to do |
+| --- | --- | --- |
+| `Argo CD would delete the objects above` from `handover.sh` | The release a cluster would read lacks objects Argo CD manages there today. | Look at the named objects. Usually the render differs from what Kubara delivers: rerun `apply` with `--capabilities` for that cluster. Rerun with `ALLOW_PRUNE=yes` only if the deletion is what you want. |
+| `Some Applications do not read ConfigHub yet` | An ApplicationSet has not caught up, or something wrote its Git sources back. | Run `handover.sh` again once the hub is idle. It is safe to run again. |
+| `InvalidSpecError ... is not permitted in project` on an Application | The AppProject does not permit the gateway. | Run `handover.sh` again; it applies the AppProject first. |
+| `check` says `a sync Argo CD started from Git is still running` | A sync from before the switch cannot finish. | Run `handover.sh` again; it stops such a sync. |
+| `check` says `Argo CD runs …, and the latest release … is …` | Argo CD has not pulled the newest release yet. | Wait a few minutes, or refresh the Application in Argo CD, then run `check` again. |
+| Secret values empty after a manual sync | The sync left out `RespectIgnoreDifferences`. | Restore the values from your secret store, and keep the option on every manual sync. |
 
 ## Refresh the plugin's data
 

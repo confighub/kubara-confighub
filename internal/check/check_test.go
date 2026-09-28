@@ -108,6 +108,8 @@ func TestCheckNamesEachProblem(t *testing.T) {
 	stale = strings.Replace(stale, `"RespectIgnoreDifferences=true"`, `"Validate=true"`, 1)
 	stale = strings.Replace(stale, `"spec":{"source"`, `"spec":{"sources":[{"repoURL":"http://git.example/platform.git"}],"source"`, 1)
 	stale = strings.Replace(stale, `"status":"Synced"`, `"status":"OutOfSync"`, 1)
+	stale = strings.Replace(stale, `"health":{"status":"Healthy"},`, `"health":{"status":"Healthy"},
+  "operationState":{"phase":"Running","operation":{"sync":{}},"syncResult":{"revisions":["96826f05d3af330414f5049b63d3c6fed98f6717"]}},`, 1)
 	f := &fake{
 		apps: []string{stale},
 		releases: map[string]string{
@@ -123,6 +125,7 @@ func TestCheckNamesEachProblem(t *testing.T) {
 	for _, want := range []string{
 		"still lists Git sources",
 		"sync status is OutOfSync",
+		"a sync Argo CD started from Git is still running",
 		"Argo CD would delete Job/argocd/dex-restarter",
 		"overwrite live Secret values",
 		"Argo CD runs sha256:a1, and the latest release, 2, is sha256:b2",
@@ -145,6 +148,27 @@ func TestCheckNamesEachProblem(t *testing.T) {
 	}
 	if !rejected {
 		t.Errorf("a failed check records a rejection:\n%s", strings.Join(f.calls, "\n"))
+	}
+}
+
+func TestFromGit(t *testing.T) {
+	for _, c := range []struct {
+		rec  syncRecord
+		want bool
+	}{
+		{syncRecord{}, false},
+		{syncRecord{Revision: "sha256:0541963d7e2e"}, false},
+		{syncRecord{Revisions: []string{"96826f05d3af330414f5049b63d3c6fed98f6717"}}, true},
+		{syncRecord{Sources: []struct {
+			RepoURL string `json:"repoURL"`
+		}{{RepoURL: "oci://oci.hub.confighub.com/space/kubara-argo-cd-hub"}}}, false},
+		{syncRecord{Sources: []struct {
+			RepoURL string `json:"repoURL"`
+		}{{RepoURL: "http://git.example/platform.git"}}}, true},
+	} {
+		if got := c.rec.fromGit(); got != c.want {
+			t.Errorf("fromGit(%+v) = %v, want %v", c.rec, got, c.want)
+		}
 	}
 }
 

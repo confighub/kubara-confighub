@@ -159,21 +159,34 @@ drop_git_sources() {
 cub unit data --space kx-argo-cd-hub argo-cd -O argo-cd/released.yaml
 cub kubara route-appsets argo-cd/released.yaml --only hx-dev-dev,argocd,traefik,homer-dashboard | k apply --server-side --force-conflicts -f -
 drop_git_sources
-# A sync the hub's argo-cd Application started from Git can write the sources
-# back. Wait until it reads its release and is idle, then drop them again.
-for _ in $(seq 1 60); do
-  [ "$(k -n argocd get application hub-argocd -o jsonpath='{.status.operationState.phase}')" != Running ] &&
-    [ -z "$(k -n argocd get application hub-argocd -o jsonpath='{.spec.sources}')" ] && break
-  sleep 5
-done
-drop_git_sources
-# Every Application Kubara delivers here now reads ConfigHub, or this says
-# which does not. The ApplicationSet controller takes a moment to catch up.
+# An operation Argo CD started from Git names Git's sources. After the switch
+# it can never finish, because Argo CD retries it against the ConfigHub source.
+# The script stops it, as argocd app terminate-op does, and the automated sync
+# starts again from ConfigHub. A Git sync that finishes first can write the Git
+# sources back, so they are dropped again until every Application reads ConfigHub.
 reads() { k -n argocd get application "$1" -o jsonpath='{.spec.sources[*].repoURL}{.spec.source.repoURL}' 2>/dev/null; }
+# A sync names its sources, or at least its revisions: a Git sync has commit
+# SHAs, and a sync of a ConfigHub release has an OCI digest.
+git_operation() {
+  local op t
+  op=$(k -n argocd get application "$1" -o jsonpath='{.status.operationState.phase} {.status.operationState.operation.sync.sources[*].repoURL} {.status.operationState.operation.sync.source.repoURL} {.status.operationState.syncResult.sources[*].repoURL} {.status.operationState.syncResult.source.repoURL} {.status.operationState.operation.sync.revisions[*]} {.status.operationState.operation.sync.revision} {.status.operationState.syncResult.revisions[*]} {.status.operationState.syncResult.revision}' 2>/dev/null) || return 1
+  read -ra op <<<"$op"
+  [ "${op[0]:-}" = Running ] || return 1
+  for t in "${op[@]:1}"; do
+    case "$t" in oci://* | sha256:*) ;; *) return 0 ;; esac
+  done
+  return 1
+}
 for _ in $(seq 1 60); do
+  drop_git_sources
   left=0
   for app in hub-traefik edge-traefik hub-homer-dashboard hub-argocd; do
-    case "$(reads "$app")" in oci://oci.hub.confighub.com/*) ;; *) left=1 ;; esac
+    case "$(reads "$app")" in oci://oci.hub.confighub.com/*) ;; *) left=1; continue ;; esac
+    if git_operation "$app"; then
+      echo "$app: stopping a sync Argo CD started from Git"
+      k -n argocd patch application "$app" --type merge -p '{"status":{"operationState":{"phase":"Terminating"}}}' >/dev/null
+      left=1
+    fi
   done
   [ "$left" = 0 ] && break
   sleep 5
