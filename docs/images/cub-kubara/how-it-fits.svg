@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="436" viewBox="0 0 1000 436" role="img" aria-label="Kubara generates the platform from config.yaml and its catalogs. cub kubara apply puts it into ConfigHub as a base per component and a variant per cluster. A change is made once on the base and approved and released stage by stage. Kubara’s hub Argo CD, with the same ApplicationSets, delivers each cluster’s approved release as OCI to the hub and the spoke.">
+  <style>
+    .bg { fill: #f6f7f5 }
+    .zone { fill: #eef1ed; stroke: #d5ddd7 }
+    .box { fill: #ffffff; stroke: #1b2420; stroke-width: 1.25 }
+    .boxa { fill: #ffffff; stroke: #0d6b5f; stroke-width: 1.75 }
+    .rule { stroke: #d5ddd7 }
+    .h { fill: #1b2420; font: 600 15px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .t { fill: #1b2420; font: 600 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .t12 { fill: #1b2420; font: 600 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .s { fill: #5d6b64; font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .p { fill: #1b2420; font: 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .cap { fill: #5d6b64; font: 600 10px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; letter-spacing: .06em }
+    .ac { fill: #0d6b5f; font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .ln { fill: none; stroke: #1b2420; stroke-width: 1.5 }
+    .lna { fill: none; stroke: #0d6b5f; stroke-width: 1.75 }
+    .el { fill: none; stroke: #1b2420; stroke-width: 1; opacity: .4 }
+    .mk { fill: #1b2420 }
+    .mka { fill: #0d6b5f }
+    .badge { fill: #ffffff; stroke: #0d6b5f; stroke-width: 1.5 }
+    .bn { fill: #0d6b5f; font: 600 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; text-anchor: middle }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #101613 }
+      .zone { fill: #141c18; stroke: #2c3a34 }
+      .box { fill: #18211d; stroke: #e4eae6 }
+      .boxa { fill: #18211d; stroke: #5fc9b4 }
+      .rule { stroke: #2c3a34 }
+      .h, .t, .t12, .p { fill: #e4eae6 }
+      .s, .cap { fill: #97a69e }
+      .ac, .bn { fill: #5fc9b4 }
+      .ln, .el { stroke: #e4eae6 }
+      .lna { stroke: #5fc9b4 }
+      .mk { fill: #e4eae6 }
+      .mka { fill: #5fc9b4 }
+      .badge { fill: #18211d; stroke: #5fc9b4 }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk" d="M0 0L10 5L0 10z"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mka" d="M0 0L10 5L0 10z"/></marker>
+  </defs>
+  <rect class="bg" width="1000" height="436" rx="10"/>
+  <rect class="zone" x="20" y="20" width="290" height="350" rx="8"/>
+  <text class="cap" x="36" y="44">KUBARA GENERATES</text>
+  <rect class="zone" x="330" y="20" width="320" height="350" rx="8"/>
+  <text class="cap" x="346" y="44">CONFIGHUB DECIDES</text>
+  <rect class="zone" x="670" y="20" width="310" height="350" rx="8"/>
+  <text class="cap" x="686" y="44">KUBARA’S HUB DELIVERS</text>
+  <rect class="box" x="45" y="70" width="240" height="52" rx="6"/>
+  <text class="t" x="165.0" y="93.0" text-anchor="middle">config.yaml</text>
+  <text class="s" x="165.0" y="109.0" text-anchor="middle">your clusters, stages and services</text>
+  <rect class="box" x="45" y="170" width="240" height="52" rx="6"/>
+  <text class="t" x="165.0" y="193.0" text-anchor="middle">kubara generate</text>
+  <text class="s" x="165.0" y="209.0" text-anchor="middle">charts, and each cluster’s values</text>
+  <rect class="box" x="45" y="280" width="240" height="52" rx="6"/>
+  <text class="t" x="165.0" y="303.0" text-anchor="middle">Kubara’s catalogs</text>
+  <text class="s" x="165.0" y="319.0" text-anchor="middle">the source of every component</text>
+  <path class="ln" d="M165 122 L165 168" marker-end="url(#a)"/>
+  <path class="ln" d="M165 280 L165 224" marker-end="url(#a)"/>
+  <rect class="box" x="365" y="70" width="250" height="44" rx="6"/>
+  <text class="t" x="490.0" y="97.0" text-anchor="middle">You, or an AI assistant</text>
+  <rect class="boxa" x="365" y="150" width="250" height="52" rx="6"/>
+  <text class="t" x="490.0" y="173.0" text-anchor="middle">base, one per component</text>
+  <text class="s" x="490.0" y="189.0" text-anchor="middle">kubara-metrics-server-base</text>
+  <path class="ln" d="M490 114 L490 148" marker-end="url(#a)"/>
+  <text class="ac" x="498" y="136" text-anchor="start">change once</text>
+  <rect class="box" x="385" y="240" width="210" height="44" rx="6"/>
+  <text class="t" x="490.0" y="259.0" text-anchor="middle">variant for hub</text>
+  <text class="s" x="490.0" y="275.0" text-anchor="middle">stage dev: approve, release</text>
+  <rect class="box" x="385" y="306" width="210" height="44" rx="6"/>
+  <text class="t" x="490.0" y="325.0" text-anchor="middle">variant for spoke</text>
+  <text class="s" x="490.0" y="341.0" text-anchor="middle">stage prod: approve, release</text>
+  <path class="ln" d="M490 202 L490 238" marker-end="url(#a)"/>
+  <path class="ln" d="M365 190 L352 190 L352 328 L383 328" marker-end="url(#a)"/>
+  <path class="lna" d="M285 196 C325 196 325 176 363 176" marker-end="url(#ag)"/>
+  <text class="ac" x="300" y="252" text-anchor="end">cub kubara apply</text>
+  <rect class="boxa" x="700" y="120" width="250" height="60" rx="6"/>
+  <text class="t" x="825.0" y="147.0" text-anchor="middle">Argo CD on Kubara’s hub</text>
+  <text class="s" x="825.0" y="163.0" text-anchor="middle">the same ApplicationSets and AppProject</text>
+  <path class="lna" d="M595 262 C650 262 650 160 698 160" marker-end="url(#ag)"/>
+  <path class="lna" d="M595 328 C665 328 665 170 698 170" marker-end="url(#ag)"/>
+  <text class="ac" x="825" y="106" text-anchor="middle">each cluster’s approved release, as OCI</text>
+  <rect class="box" x="700" y="280" width="115" height="48" rx="6"/>
+  <text class="t" x="757.5" y="309.0" text-anchor="middle">cluster hub</text>
+  <rect class="box" x="835" y="280" width="115" height="48" rx="6"/>
+  <text class="t" x="892.5" y="309.0" text-anchor="middle">cluster spoke</text>
+  <path class="ln" d="M880 180 L880 278" marker-end="url(#a)"/>
+  <path class="ln" d="M757 182 L757 278" marker-end="url(#a)"/>
+  <text class="p" x="500" y="398" text-anchor="middle">Kubara keeps generating the platform, and its hub keeps delivering it. ConfigHub holds what each cluster runs.</text>
+  <text class="p" x="500" y="416" text-anchor="middle">A change is made once, on the base, and reaches a cluster only after that cluster’s stage approves and releases it.</text>
+
+</svg>

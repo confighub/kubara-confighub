@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="360" viewBox="0 0 1000 360" role="img" aria-label="Before handover, Kubara’s hub Argo CD reads the platform from Git and delivers it to the hub and the spoke. After handover.sh, the same Argo CD and ApplicationSets read each cluster’s approved release from ConfigHub as OCI. Nothing is reinstalled.">
+  <style>
+    .bg { fill: #f6f7f5 }
+    .zone { fill: #eef1ed; stroke: #d5ddd7 }
+    .box { fill: #ffffff; stroke: #1b2420; stroke-width: 1.25 }
+    .boxa { fill: #ffffff; stroke: #0d6b5f; stroke-width: 1.75 }
+    .rule { stroke: #d5ddd7 }
+    .h { fill: #1b2420; font: 600 15px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .t { fill: #1b2420; font: 600 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .t12 { fill: #1b2420; font: 600 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .s { fill: #5d6b64; font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .p { fill: #1b2420; font: 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .cap { fill: #5d6b64; font: 600 10px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; letter-spacing: .06em }
+    .ac { fill: #0d6b5f; font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif }
+    .ln { fill: none; stroke: #1b2420; stroke-width: 1.5 }
+    .lna { fill: none; stroke: #0d6b5f; stroke-width: 1.75 }
+    .el { fill: none; stroke: #1b2420; stroke-width: 1; opacity: .4 }
+    .mk { fill: #1b2420 }
+    .mka { fill: #0d6b5f }
+    .badge { fill: #ffffff; stroke: #0d6b5f; stroke-width: 1.5 }
+    .bn { fill: #0d6b5f; font: 600 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; text-anchor: middle }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #101613 }
+      .zone { fill: #141c18; stroke: #2c3a34 }
+      .box { fill: #18211d; stroke: #e4eae6 }
+      .boxa { fill: #18211d; stroke: #5fc9b4 }
+      .rule { stroke: #2c3a34 }
+      .h, .t, .t12, .p { fill: #e4eae6 }
+      .s, .cap { fill: #97a69e }
+      .ac, .bn { fill: #5fc9b4 }
+      .ln, .el { stroke: #e4eae6 }
+      .lna { stroke: #5fc9b4 }
+      .mk { fill: #e4eae6 }
+      .mka { fill: #5fc9b4 }
+      .badge { fill: #18211d; stroke: #5fc9b4 }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk" d="M0 0L10 5L0 10z"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mka" d="M0 0L10 5L0 10z"/></marker>
+  </defs>
+  <rect class="bg" width="1000" height="360" rx="10"/>
+  <rect class="zone" x="20" y="20" width="440" height="270" rx="8"/>
+  <text class="cap" x="36" y="44">BEFORE HANDOVER</text>
+  <rect class="zone" x="540" y="20" width="440" height="270" rx="8"/>
+  <text class="cap" x="556" y="44">AFTER HANDOVER</text>
+  <rect class="box" x="45" y="70" width="160" height="52" rx="6"/>
+  <text class="t" x="125.0" y="93.0" text-anchor="middle">Git</text>
+  <text class="s" x="125.0" y="109.0" text-anchor="middle">the platform repository</text>
+  <rect class="box" x="255" y="70" width="180" height="52" rx="6"/>
+  <text class="t" x="345.0" y="93.0" text-anchor="middle">Argo CD on the hub</text>
+  <text class="s" x="345.0" y="109.0" text-anchor="middle">ApplicationSets read Git</text>
+  <path class="ln" d="M205 96 L253 96" marker-end="url(#a)"/>
+  <rect class="box" x="255" y="180" width="85" height="44" rx="6"/>
+  <text class="t" x="297.5" y="207.0" text-anchor="middle">hub</text>
+  <rect class="box" x="350" y="180" width="85" height="44" rx="6"/>
+  <text class="t" x="392.5" y="207.0" text-anchor="middle">spoke</text>
+  <path class="ln" d="M297 122 L297 178" marker-end="url(#a)"/>
+  <path class="ln" d="M392 122 L392 178" marker-end="url(#a)"/>
+  <text class="p" x="240" y="258" text-anchor="middle">A merge to the platform repository reaches every cluster.</text>
+  <rect class="boxa" x="565" y="70" width="160" height="52" rx="6"/>
+  <text class="t" x="645.0" y="93.0" text-anchor="middle">ConfigHub</text>
+  <text class="s" x="645.0" y="109.0" text-anchor="middle">each cluster’s approved release</text>
+  <rect class="boxa" x="775" y="70" width="180" height="52" rx="6"/>
+  <text class="t" x="865.0" y="93.0" text-anchor="middle">the same Argo CD</text>
+  <text class="s" x="865.0" y="109.0" text-anchor="middle">ApplicationSets read ConfigHub</text>
+  <path class="lna" d="M725 96 L773 96" marker-end="url(#ag)"/>
+  <text class="ac" x="749" y="88" text-anchor="middle">OCI</text>
+  <rect class="box" x="775" y="180" width="85" height="44" rx="6"/>
+  <text class="t" x="817.5" y="207.0" text-anchor="middle">hub</text>
+  <rect class="box" x="870" y="180" width="85" height="44" rx="6"/>
+  <text class="t" x="912.5" y="207.0" text-anchor="middle">spoke</text>
+  <path class="ln" d="M817 122 L817 178" marker-end="url(#a)"/>
+  <path class="ln" d="M912 122 L912 178" marker-end="url(#a)"/>
+  <text class="p" x="760" y="258" text-anchor="middle">A change reaches a cluster once its stage approves it.</text>
+  <path class="lna" d="M462 150 L538 150" marker-end="url(#ag)"/>
+  <text class="ac" x="500" y="140" text-anchor="middle">handover.sh</text>
+  <text class="p" x="500" y="322" text-anchor="middle">Nothing is reinstalled. The hub, its AppProject, its ApplicationSets and Kubara’s sync settings stay.</text>
+  <text class="p" x="500" y="340" text-anchor="middle">handover.sh stops first if Argo CD would delete anything, and Secrets keep their live values.</text>
+
+</svg>

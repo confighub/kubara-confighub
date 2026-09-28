@@ -13,11 +13,12 @@ bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
 
-The [recorded run](run-2026-09-28.log) shows each command and what it printed.
 
 ## What you need
 
-- Docker, with about 5 GB of memory to spare for two kind clusters.
+- Docker, with about 5 GB of memory and a few CPU cores to spare for two kind
+  clusters. On a busy machine, Argo CD's repo server can fail its health
+  checks and restart, which slows every sync.
 - `kind`, `kubectl`, `helm`, `git` and `jq`.
 - [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer.
 - The `cub` CLI and the plugin: `cub plugin install confighub/kubara-confighub`.
