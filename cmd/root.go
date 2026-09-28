@@ -152,11 +152,13 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 	var ao plan.Options
 	var aStages, aOut string
 	var allowAuthors bool
+	var capsFlags []string
 	applyCmd := &cobra.Command{
 		Use:   "apply <kubara-dir> --out <dir>",
 		Short: "Write a generated Kubara platform as renders and one script of cub steps",
-		Long: `Render each cluster of a platform Kubara has generated, with the ConfigHub
-Workshop plugin's cub stack from-kubara, and write:
+		Long: `Render each cluster of a platform Kubara has generated, the way Kubara's hub
+delivers it: each service's chart with the release name, namespace and values
+files its ApplicationSet uses. Then write:
 
   apply.sh                     the cub steps; read it, then run it
   plan.txt                     the plan it carries out
@@ -180,12 +182,33 @@ ApplicationSets keep delivering from Git until takeover.`,
 			if err != nil {
 				return err
 			}
-			res, err := apply.Write(pl, apply.Options{Out: aOut, AllowAuthors: allowAuthors})
+			caps := map[string]apply.Capabilities{}
+			for _, pair := range capsFlags {
+				cluster, ctx, ok := strings.Cut(pair, "=")
+				if !ok || cluster == "" || ctx == "" {
+					return fmt.Errorf("--capabilities takes <cluster>=<kubectl context>, not %q", pair)
+				}
+				c, err := apply.ReadCapabilities(ctx)
+				if err != nil {
+					return err
+				}
+				caps[cluster] = c
+			}
+			res, err := apply.Write(pl, apply.Options{Out: aOut, AllowAuthors: allowAuthors, Render: apply.NewKubaraRenderer(caps)})
 			if err != nil {
 				return err
 			}
 			w := c.OutOrStdout()
 			fmt.Fprintf(w, "Wrote %s: %d components, %d variants.\n", res.Script, res.Components, res.Variants)
+			for _, st := range pl.Stages {
+				for _, cl := range st.Clusters {
+					if cp, ok := caps[cl.Name]; ok {
+						fmt.Fprintf(w, "Rendered %s with its own capabilities, from context %s: Kubernetes %s, %d APIs.\n", cl.Name, cp.Source, cp.KubeVersion, len(cp.APIs))
+					} else {
+						fmt.Fprintf(w, "Rendered %s with Helm's default capabilities and the CRDs bootstrap-crds provides; pass --capabilities %s=<kubectl context> to render it as Argo CD will.\n", cl.Name, cl.Name)
+					}
+				}
+			}
 			if len(res.Secrets) > 0 {
 				fmt.Fprintf(w, "These Secrets go to ConfigHub with their keys and without their values:\n")
 				for _, name := range res.Secrets {
@@ -202,6 +225,7 @@ ApplicationSets keep delivering from Git until takeover.`,
 	applyCmd.Flags().StringVar(&aOut, "out", "", "directory to write the renders, workflows and apply.sh (required)")
 	applyCmd.Flags().StringVar(&ao.Prefix, "prefix", "kubara", "prefix for everything apply.sh creates in ConfigHub")
 	applyCmd.Flags().StringVar(&aStages, "stages", "", "the stage order, comma-separated; by default dev, staging, prod, then any others")
+	applyCmd.Flags().StringArrayVar(&capsFlags, "capabilities", nil, "render a cluster with its own Kubernetes version and APIs, read from a kubectl context: <cluster>=<context> (repeatable)")
 	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
 	_ = applyCmd.MarkFlagRequired("out")
 
