@@ -156,11 +156,13 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 	var ao plan.Options
 	var aStages, aOut string
 	var allowAuthors bool
+	var capsFlags []string
 	applyCmd := &cobra.Command{
 		Use:   "apply <kubara-dir> --out <dir>",
 		Short: "Write a generated Kubara platform as renders and one script of cub steps",
-		Long: `Render each cluster of a platform Kubara has generated, with the ConfigHub
-Workshop plugin's cub stack from-kubara, and write:
+		Long: `Render each cluster of a platform Kubara has generated, the way Kubara's hub
+delivers it: each service's chart with the release name, namespace and values
+files its ApplicationSet uses. Then write:
 
   apply.sh                     the cub steps; read it, then run it
   plan.txt                     the plan it carries out
@@ -184,12 +186,25 @@ ApplicationSets keep delivering from Git until handover.`,
 			if err != nil {
 				return err
 			}
-			res, err := apply.Write(pl, apply.Options{Out: aOut, AllowAuthors: allowAuthors})
+			caps, err := readCapabilities(capsFlags)
+			if err != nil {
+				return err
+			}
+			res, err := apply.Write(pl, apply.Options{Out: aOut, AllowAuthors: allowAuthors, Render: apply.NewKubaraRenderer(caps)})
 			if err != nil {
 				return err
 			}
 			w := c.OutOrStdout()
 			fmt.Fprintf(w, "Wrote %s: %d components, %d variants.\n", res.Script, res.Components, res.Variants)
+			for _, st := range pl.Stages {
+				for _, cl := range st.Clusters {
+					if cp, ok := caps[cl.Name]; ok {
+						fmt.Fprintf(w, "Rendered %s with its own capabilities, from context %s: Kubernetes %s, %d APIs.\n", cl.Name, cp.Source, cp.KubeVersion, len(cp.APIs))
+					} else {
+						fmt.Fprintf(w, "Rendered %s with Helm's default capabilities and the CRDs bootstrap-crds provides; pass --capabilities %s=<kubectl context> to render it as Argo CD will.\n", cl.Name, cl.Name)
+					}
+				}
+			}
 			if len(res.Secrets) > 0 {
 				fmt.Fprintf(w, "These Secrets go to ConfigHub with their keys and without their values:\n")
 				for _, name := range res.Secrets {
@@ -206,11 +221,13 @@ ApplicationSets keep delivering from Git until handover.`,
 	applyCmd.Flags().StringVar(&aOut, "out", "", "directory to write the renders, workflows and apply.sh (required)")
 	applyCmd.Flags().StringVar(&ao.Prefix, "prefix", "kubara", "prefix for everything apply.sh creates in ConfigHub")
 	applyCmd.Flags().StringVar(&aStages, "stages", "", "the stage order, comma-separated; by default dev, staging, prod, then any others")
+	applyCmd.Flags().StringArrayVar(&capsFlags, "capabilities", nil, "render a cluster with its own Kubernetes version and APIs, read from a kubectl context: <cluster>=<context> (repeatable)")
 	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
 	_ = applyCmd.MarkFlagRequired("out")
 
 	var to plan.Options
 	var tStages, tOut, gateway string
+	var tCaps []string
 	handoverCmd := &cobra.Command{
 		Use:   "handover <kubara-dir> --out <dir>",
 		Short: "Write the steps that point Kubara's hub at ConfigHub's approved releases",
@@ -236,7 +253,11 @@ Use the same --prefix and --stages as apply.`,
 			if err != nil {
 				return err
 			}
-			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender})
+			caps, err := readCapabilities(tCaps)
+			if err != nil {
+				return err
+			}
+			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender(caps)})
 			if err != nil {
 				return err
 			}
@@ -259,6 +280,7 @@ Use the same --prefix and --stages as apply.`,
 	handoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
 	handoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
 	handoverCmd.Flags().StringVar(&gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	handoverCmd.Flags().StringArrayVar(&tCaps, "capabilities", nil, "render the hub with its own Kubernetes version and APIs, read from a kubectl context: <hub>=<context>")
 	_ = handoverCmd.MarkFlagRequired("out")
 
 	var rPrefix, rGateway, rCharts, rOnly string
@@ -356,23 +378,43 @@ type initOptions struct {
 	email          string
 }
 
-// hubArgoRender renders the hub's argo-cd chart with the Workshop plugin, the
-// renderer apply uses, and discards everything else it rendered.
-func hubArgoRender(kubaraDir, cluster string) ([]byte, error) {
-	tmp, err := os.MkdirTemp("", "cub-kubara-hub-")
-	if err != nil {
-		return nil, err
+// hubArgoRender renders the hub's argo-cd chart the way Kubara's hub delivers
+// it, with the hub's own capabilities when a context is given, and discards
+// everything else it rendered.
+func hubArgoRender(caps map[string]apply.Capabilities) handover.HubRender {
+	return func(kubaraDir, cluster string) ([]byte, error) {
+		tmp, err := os.MkdirTemp("", "cub-kubara-hub-")
+		if err != nil {
+			return nil, err
+		}
+		defer os.RemoveAll(tmp)
+		renders, err := apply.NewKubaraRenderer(caps)(kubaraDir, cluster, tmp)
+		if err != nil {
+			return nil, err
+		}
+		path, ok := renders["argo-cd"]
+		if !ok {
+			return nil, fmt.Errorf("rendering produced no argo-cd for the hub %s", cluster)
+		}
+		return os.ReadFile(path)
 	}
-	defer os.RemoveAll(tmp)
-	renders, err := apply.WorkshopRenderer(kubaraDir, cluster, tmp)
-	if err != nil {
-		return nil, err
+}
+
+// readCapabilities reads each --capabilities <cluster>=<kubectl context> pair.
+func readCapabilities(pairs []string) (map[string]apply.Capabilities, error) {
+	caps := map[string]apply.Capabilities{}
+	for _, pair := range pairs {
+		cluster, ctx, ok := strings.Cut(pair, "=")
+		if !ok || cluster == "" || ctx == "" {
+			return nil, fmt.Errorf("--capabilities takes <cluster>=<kubectl context>, not %q", pair)
+		}
+		c, err := apply.ReadCapabilities(ctx)
+		if err != nil {
+			return nil, err
+		}
+		caps[cluster] = c
 	}
-	path, ok := renders["argo-cd"]
-	if !ok {
-		return nil, fmt.Errorf("cub stack from-kubara rendered no argo-cd for %s", cluster)
-	}
-	return os.ReadFile(path)
+	return caps, nil
 }
 
 func (o *initOptions) register(c *cobra.Command) {

@@ -15,7 +15,7 @@ var update = flag.Bool("update", false, "rewrite the golden files under examples
 
 const golden = "../../examples/cub-kubara/apply-two-clusters"
 
-// fakeRender stands in for cub stack from-kubara: bootstrap-crds renders the
+// fakeRender stands in for KubaraRenderer: bootstrap-crds renders the
 // same on every cluster, and every other chart renders with the cluster's name.
 func fakeRender(_, cluster, dir string) (map[string]string, error) {
 	out := map[string]string{}

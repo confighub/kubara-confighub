@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -22,37 +21,6 @@ import (
 // Renderer renders one cluster of a generated Kubara platform into dir, and
 // returns the path of each render by chart directory name.
 type Renderer func(kubaraDir, cluster, dir string) (map[string]string, error)
-
-// WorkshopRenderer renders with the ConfigHub Workshop plugin's
-// `cub stack from-kubara`, so cub kubara and the Workshop render a Kubara
-// platform the same way.
-func WorkshopRenderer(kubaraDir, cluster, dir string) (map[string]string, error) {
-	cmd := exec.Command("cub", "stack", "from-kubara", kubaraDir, "--cluster", cluster, "--out", dir)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	cmd.Stdout = &bytes.Buffer{}
-	if err := cmd.Run(); err != nil {
-		msg := strings.TrimSpace(stderr.String())
-		if _, lookErr := exec.LookPath("cub"); lookErr != nil {
-			return nil, fmt.Errorf("rendering needs cub and the ConfigHub Workshop plugin; install cub, then: cub plugin install confighub/cub-workshop")
-		}
-		if strings.Contains(msg, `unknown command "stack"`) {
-			return nil, fmt.Errorf("rendering needs the ConfigHub Workshop plugin: cub plugin install confighub/cub-workshop")
-		}
-		return nil, fmt.Errorf("cub stack from-kubara --cluster %s: %v: %s\nA Workshop plugin older than the Kubara catalog can fail here; run cub plugin upgrade workshop, then retry", cluster, err, lastLine(msg))
-	}
-	entries, err := os.ReadDir(filepath.Join(dir, "renders"))
-	if err != nil {
-		return nil, fmt.Errorf("cub stack from-kubara wrote no renders for %s: %w", cluster, err)
-	}
-	out := map[string]string{}
-	for _, e := range entries {
-		if name, ok := strings.CutSuffix(e.Name(), ".yaml"); ok {
-			out[name] = filepath.Join(dir, "renders", e.Name())
-		}
-	}
-	return out, nil
-}
 
 type Options struct {
 	Out          string
@@ -79,7 +47,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		return res, fmt.Errorf("the plan has problems to fix first:\n  - %s", strings.Join(p.Problems, "\n  - "))
 	}
 	if opts.Render == nil {
-		opts.Render = WorkshopRenderer
+		opts.Render = KubaraRenderer
 	}
 	if err := os.MkdirAll(opts.Out, 0o755); err != nil {
 		return res, err
@@ -146,7 +114,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		first := c.Variants[0].Cluster
 		baseSrc, ok := renders[first][c.ChartPath]
 		if !ok {
-			return res, fmt.Errorf("cub stack from-kubara rendered no %s for %s", c.Name, first)
+			return res, fmt.Errorf("rendering produced no %s for %s", c.Name, first)
 		}
 		baseBytes, err := read(c.Name, baseSrc)
 		if err != nil {
@@ -170,7 +138,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		for _, v := range c.Variants {
 			src, ok := renders[v.Cluster][c.ChartPath]
 			if !ok {
-				return res, fmt.Errorf("cub stack from-kubara rendered no %s for %s", c.Name, v.Cluster)
+				return res, fmt.Errorf("rendering produced no %s for %s", c.Name, v.Cluster)
 			}
 			b, err := read(c.Name, src)
 			if err != nil {
