@@ -69,6 +69,83 @@ func TestServicesCatalog3(t *testing.T) {
 	check(t, "services-3.0.0.txt", RenderServices(boot, general, w))
 }
 
+// Kubara released general 5.1.0 with bootstrap 5.0.1; the listing pairs them
+// the way 3.0.0 pairs, and shows 5.1.0's new infrastructure category.
+func TestServicesCatalog5(t *testing.T) {
+	boot, general, err := catalog.Pair("5.1.0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := catalog.LoadWorkshop()
+	if err != nil {
+		t.Fatal(err)
+	}
+	check(t, "services-5.1.0.txt", RenderServices(boot, general, w))
+}
+
+const catalog5 = `version: v1alpha4
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:5.0.1
+clusters:
+  - name: hub
+    stage: dev
+    type: hub
+    argocd: {selfManaged: enabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:5.1.0]
+    services: {crossplane: {status: enabled}, homer-dashboard: {status: enabled}}
+  - name: edge
+    stage: prod
+    type: spoke
+    argocd: {selfManaged: disabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:5.1.0]
+    services: {crossplane: {status: enabled}}
+`
+
+// A config on the 5.x catalogs plans the way a 3.0.0 one does.
+func TestPlanCatalog5(t *testing.T) {
+	pl, err := Build(writeConfig(t, catalog5), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pl.Problems) != 0 || len(pl.Notes) != 0 {
+		t.Fatalf("problems %v, notes %v", pl.Problems, pl.Notes)
+	}
+	if pl.Bootstrap.Version != "5.0.1" || pl.General.Version != "5.1.0" {
+		t.Fatalf("catalogs = bootstrap %s, general %s", pl.Bootstrap.Version, pl.General.Version)
+	}
+	got := map[string]string{}
+	for _, c := range pl.Components {
+		var clusters []string
+		for _, v := range c.Variants {
+			clusters = append(clusters, v.Cluster)
+		}
+		got[c.Name] = c.Catalog + " " + strings.Join(clusters, ",")
+	}
+	want := map[string]string{
+		"argo-cd":         "bootstrap 5.0.1 hub",
+		"bootstrap-crds":  "bootstrap 5.0.1 hub,edge",
+		"crossplane":      "general 5.1.0 hub,edge",
+		"homer-dashboard": "general 5.1.0 hub",
+	}
+	for name, w := range want {
+		if got[name] != w {
+			t.Errorf("%s = %q, want %q", name, got[name], w)
+		}
+	}
+	if len(got) != len(want) {
+		t.Errorf("components = %v", got)
+	}
+	for _, c := range pl.Components {
+		if c.Name == "crossplane" && (c.Category != "infrastructure" || len(c.Upstream) != 1 || c.Upstream[0].Chart.Version != "2.4.1") {
+			t.Errorf("crossplane = %+v", c)
+		}
+	}
+	// A bootstrap catalog the plugin does not carry is noted, not refused.
+	pl, err = Build(writeConfig(t, strings.Replace(catalog5, "bootstrap:5.0.1", "bootstrap:5.0.0", 1)), Options{})
+	if err != nil || len(pl.Problems) != 0 || !strings.Contains(strings.Join(pl.Notes, ""), "bootstrapCatalog is 5.0.0; the catalog snapshot that pairs with general 5.1.0 is bootstrap 5.0.1") {
+		t.Fatalf("err %v, problems %v, notes %v", err, pl.Problems, pl.Notes)
+	}
+}
+
 func writeConfig(t *testing.T, body string) platform.Platform {
 	t.Helper()
 	dir := t.TempDir()
