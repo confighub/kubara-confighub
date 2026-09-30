@@ -5,6 +5,33 @@ changing how Kubara works. Each Kubara component gets a base, each cluster
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.2.3, 2026-09-30
+
+**Check judges health.** `cub kubara check --record` used to record a Pass
+while Argo CD reported an Application Degraded. On the kind lab it did so for
+cert-manager. Health is now part of the verdict.
+- Degraded or Missing is a failure that names the Application, and `--record`
+  writes a rejection.
+- Progressing, or any other health that is not Healthy yet, is "not yet".
+  `check` records nothing and exits non-zero, so run it again later.
+- Each attestation carries the Application's health as a claim.
+- `--record` stays off by default.
+
+**Render.** `cub kubara render <kubara-dir> --out <dir>` renders each service
+for each cluster the way Kubara's ApplicationSets deliver it. It writes each
+service's objects and a manifest, `render.json`: each cluster's enabled
+services, and each service's chart and version, values files, API versions,
+object count and digest. It also names the one owner of each object two
+services render. It uses the same renderer as `apply`, and contacts no
+cluster and no ConfigHub server. `cub stack from-kubara` in the ConfigHub
+Workshop is moving to it, so there is one way to render as Kubara delivers.
+- Each rendered document now ends in one newline. Helm 4.3 leaves blank lines
+  between documents that helm 4.1 does not, and a render no longer changes
+  with them. This applies to `apply` renders too.
+
+**Kubara's 5.x catalogs.** Tests now hold general 5.1.0 and bootstrap 5.0.1
+to the same wiring as 3.0.0, in `services`, `init` and `plan`.
+
 ## 0.2.2, 2026-09-28
 
 **Handover stops a sync Argo CD started from Git.** On the kind lab, the
