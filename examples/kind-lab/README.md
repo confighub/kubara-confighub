@@ -88,9 +88,9 @@ So on kind, `check` fails each Application that is Degraded, such as
 cert-manager. It says "not yet" for each one that is Progressing, such as
 Traefik. It exits non-zero, and `run.sh` carries on. With `--record` it
 records a rejection for each Degraded Application, and nothing for one that is
-Progressing. The
-[recorded run](run-2026-09-28.log) used v0.2.2, which recorded a Pass for all
-of them.
+Progressing. The recorded runs of [2026-09-28](run-2026-09-28.log) and
+[2026-09-30](run-2026-09-30.log) used a `check` from before health was judged,
+which passed each of them.
 
 ## Remove it
 

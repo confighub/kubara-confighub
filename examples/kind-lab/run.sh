@@ -139,7 +139,7 @@ echo "ConfigHub's Healthy gate reads that status, so a dry run of the promotion 
 run cub variant promote --change-order "$base/three-replicas" --target-stage prod --dry-run || true
 echo
 echo "check compares digests, and says dev does not run its latest release yet:"
-check || true
+check
 kubectl --context "$HUB_CONTEXT" -n argocd annotate application "$HUB-metrics-server" argocd.argoproj.io/refresh=normal --overwrite >/dev/null
 echo
 echo "Once Argo CD syncs the release and dev is Healthy, prod accepts the change:"
