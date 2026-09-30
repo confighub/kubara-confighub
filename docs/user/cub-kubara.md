@@ -213,14 +213,22 @@ something to fix first, such as two hubs, a service the catalog does not
 define, or a hub-only service on a spoke.
 
 Pass `--stages dev,canary,prod` to set the stage order yourself, and
-`--prefix` to change the prefix of everything the plan would create. Name
-every stage your `config.yaml` uses. Today a stage that `--stages` leaves out
-goes last, after prod, with no warning
-([#36](https://github.com/confighub/kubara-confighub/issues/36)). Read the
-stage order `plan` prints before you go on.
+`--prefix` to change the prefix of everything the plan would create.
+`--stages` must name every stage your `config.yaml` uses, once each. A stage
+it leaves out, a stage no cluster has, or a stage named twice is refused, and
+the error says which:
+
+```text
+error: --stages dev,prod leaves out staging, the stage of edge-staging.
+Name each stage config.yaml uses once, in the order a change reaches them, such as --stages dev,staging,prod, or leave --stages out for that default order
+```
+
+Without `--stages`, the order is dev, staging, prod, then any other stages.
+Read the stage order `plan` prints before you go on.
 
 Pass the same `--prefix` and `--stages` to `apply`, `handover`, `check` and
-`handback`. Each of them finds the Spaces by that prefix and stage order.
+`handback`. Each of them finds the Spaces by that prefix and stage order, and
+each refuses a `--stages` that does not name every stage once.
 
 ## Render the platform as Kubara delivers it
 
@@ -806,8 +814,6 @@ Read these before you use `cub kubara` on a real hub.
   land. See [a new Kubara catalog](#take-a-new-kubara-catalog-through-the-stages).
 - **`handover.sh` approves its own first releases**, in every stage
   ([#40](https://github.com/confighub/kubara-confighub/issues/40)).
-- **`--stages` must name every stage**
-  ([#36](https://github.com/confighub/kubara-confighub/issues/36)).
 - **`kubara bootstrap` after handover is untested**
   ([#39](https://github.com/confighub/kubara-confighub/issues/39)).
 - **A cluster that joins later gets its Secrets without values.** Your secret
