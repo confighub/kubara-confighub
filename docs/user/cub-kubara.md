@@ -238,14 +238,30 @@ CRDs `kubara bootstrap` applies, and nothing else. A hub also runs Argo CD. It
 is the same renderer `apply` uses, and it needs `helm` on your PATH.
 
 `render` contacts no cluster and no ConfigHub server, and needs no account.
-Helm may fetch a chart's dependencies from its Helm repository into the work
-directory, as `apply` does. They land in `platform-components/helm/*/charts/`,
-with a `Chart.lock`, so keep them out of Git (see [`.gitignore`](#start-a-new-platform)).
+Helm may fetch a chart's dependencies from its Helm repository. `render`,
+`apply`, `handover` and `handback` let helm fetch them into a copy of
+`platform-components/helm`, so the work directory stays as it was. They keep
+what helm fetched in your user cache directory, under
+`cub-kubara/chart-dependencies`, and use it again until a chart changes.
+Delete it at any time.
 `render` and `apply` read `config.yaml` in the work directory. Only `plan`
 also takes a config file by path.
 
-On a small platform `render` takes about 10 seconds. With Kubara's default
-services on one hub it took about 25.
+On a small platform `render` takes about 10 seconds the first time, and 3
+once its charts are cached. With Kubara's default services on one hub it took
+about 25.
+
+If helm fails, `render` and `apply` print helm's own error, the chart and the
+values files they passed to it, in order:
+
+```text
+error: cluster hub: helm template external-dns: execution error at (external-dns/charts/external-dns/templates/deployment.yaml:193:20): ERROR: webhook provider needs an image repository and a tag
+  chart:  platform-components/helm/external-dns
+  values: platform-configs/hub/helm/external-dns/values.generated.yaml
+```
+
+Argo CD would fail the same way. Often a service needs settings in
+`config.yaml`, such as a DNS provider for external-dns.
 
 It writes one directory per cluster and service, and a manifest:
 
@@ -817,7 +833,7 @@ Read these before you use `cub kubara` on a real hub.
 
 | You see | What it means | What to do |
 | --- | --- | --- |
-| `render` or `apply` says `helm template <service>: Use --debug flag to render out invalid YAML` | Helm failed, and the plugin shows only its last line ([#37](https://github.com/confighub/kubara-confighub/issues/37)). Argo CD would fail the same way. | In the work directory, run `helm template <service> ./platform-components/helm/<service> -f platform-configs/<cluster>/helm/<service>/values.generated.yaml` to see helm's `Error:` line. Often a service needs settings in `config.yaml`, such as a DNS provider for external-dns. |
+| `render` or `apply` says `helm template <service>: …`, with the chart and values files | Helm could not render the service with those values. Argo CD would fail the same way. | Read helm's error on the first line. Often a service needs settings in `config.yaml`, such as a DNS provider for external-dns. Set them, run `kubara generate` again, then `render`. |
 | `Argo CD would delete the objects above` from `handover.sh` | The release a cluster would read lacks objects Argo CD manages there today. | Look at the named objects. Usually the render differs from what Kubara delivers: rerun `apply` with `--capabilities` for that cluster. Rerun with `ALLOW_PRUNE=yes` only if the deletion is what you want. |
 | `Some Applications do not read ConfigHub yet` | An ApplicationSet has not caught up, or something wrote its Git sources back. | Run `handover.sh` again once the hub is idle. It is safe to run again. |
 | `InvalidSpecError ... is not permitted in project` on an Application | The AppProject does not permit the gateway. | Run `handover.sh` again; it applies the AppProject first. |
