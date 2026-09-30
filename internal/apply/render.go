@@ -337,10 +337,12 @@ func helmTemplate(release, chartDir, namespace string, values, apis []string, ku
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("helm template %s: %s", release, lastLine(stderr.String()))
 	}
+	// Each document ends in exactly one newline. Helm releases differ in the
+	// blank lines they leave between documents, and a render must not.
 	var docs []string
 	for _, d := range docSeparator.Split(stdout.String(), -1) {
 		if kindOf(d) != "" {
-			docs = append(docs, strings.TrimLeft(d, "\n"))
+			docs = append(docs, strings.TrimRight(strings.TrimLeft(d, "\n"), "\n")+"\n")
 		}
 	}
 	return docs, nil
