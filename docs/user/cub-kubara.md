@@ -60,7 +60,9 @@ want to:
 one stack for the whole platform, a hub and its spokes, is next
 ([confighub/cub-workshop#59](https://github.com/confighub/cub-workshop/issues/59)).
 
-The two tools share only the renderer and the certified bundle format. See
+The two tools share only the renderer and the certified bundle format. The
+renderer is `cub kubara render`, below, and `cub stack from-kubara` builds its
+stack from what it writes. See
 [one flattening model for every plugin](https://github.com/confighub/helm-expt/blob/main/docs/reference/flattening-across-plugins.md)
 for the rules they share.
 
@@ -138,6 +140,97 @@ define, or a hub-only service on a spoke.
 
 Pass `--stages dev,canary,prod` to set the stage order yourself, and
 `--prefix` to change the prefix of everything the plan would create.
+
+## Render the platform as Kubara delivers it
+
+Once Kubara has generated the platform, `render` shows exactly what Kubara's
+hub would deliver to each cluster:
+
+```bash
+cub kubara render my-platform --out my-platform-render
+```
+
+For each cluster in `config.yaml`, each service it runs renders from its
+wrapper chart. It uses the release name, namespace and values files the
+service's ApplicationSet uses, in the same order. bootstrap-crds renders as the
+CRDs `kubara bootstrap` applies, and nothing else. A hub also runs Argo CD. It
+is the same renderer `apply` uses, and it needs `helm` on your PATH.
+
+`render` contacts no cluster and no ConfigHub server, and needs no account.
+Helm may fetch a chart's dependencies from its Helm repository into the work
+directory, as `apply` does.
+
+It writes one directory per cluster and service, and a manifest:
+
+```text
+my-platform-render/
+  render.json                      what was rendered, and how
+  hub-dev/
+    bootstrap-crds/objects.yaml    the CRDs kubara bootstrap applies
+    argo-cd/objects.yaml
+    cert-manager/objects.yaml
+  edge-prod/
+    ...
+```
+
+Each `objects.yaml` holds a service's objects as one YAML file, in the order
+helm writes them. Secrets keep their keys and lose their values, as in `apply`.
+Pass `--keep-secret-values` to keep them. They can be credentials a chart
+generates when it renders.
+
+Useful flags:
+
+- `--cluster <name>` renders only that cluster. Repeat it for more.
+- `--json` prints `render.json` to stdout instead of a summary.
+
+Running `render` again into the same `--out` replaces the earlier render. It
+refuses a directory that holds anything else.
+
+### render.json
+
+`render.json` is for programs, such as `cub stack from-kubara`. Its
+`apiVersion` is `kubara.confighub.com/v1alpha1` and its `kind` is
+`KubaraRender`. A change that could break a reader gets a new `apiVersion`.
+
+| Field | What it holds |
+| --- | --- |
+| `generator` | The command and plugin version that wrote it. |
+| `source.workDir` | The Kubara work directory, as you gave it. |
+| `source.configSha256` | The digest of `config.yaml`. |
+| `source.bootstrapCatalog` | The bootstrap catalog `config.yaml` names. |
+| `secretValues` | `emptied`, or `kept` with `--keep-secret-values`. |
+| `clusters[]` | Each cluster rendered, in `config.yaml` order. |
+| `clusters[].name`, `type`, `stage` | The cluster as `config.yaml` names it. `type` is `hub` or `spoke`. |
+| `clusters[].catalogs` | The catalogs the cluster reads. |
+| `clusters[].enabled` | The services `config.yaml` enables on the cluster, sorted. |
+| `clusters[].services[]` | Each service the cluster runs, in the order it rendered: bootstrap-crds, then argo-cd on the hub, then each enabled service. |
+| `services[].name` | The chart directory under `platform-components/helm`. |
+| `services[].release`, `namespace` | The release name and namespace its Application uses. |
+| `services[].delivery` | `applicationset` for a service Kubara's hub delivers, or `bootstrap` for bootstrap-crds. |
+| `services[].chart` | The wrapper chart's `name`, `version` and `path`. |
+| `services[].upstream[]` | Each chart the wrapper depends on: `name`, `version` and `repository`, as its `Chart.yaml` pins it. |
+| `services[].valuesFiles` | The values files passed to helm, in order, after the chart's own `values.yaml`. Paths are relative to the work directory. |
+| `services[].apiVersions` | The API versions passed to helm with `--api-versions`: those whose CRDs the services before it provide. |
+| `services[].file` | Its `objects.yaml`, relative to `--out`. |
+| `services[].objects` | How many objects the file holds. |
+| `services[].leftOut` | Objects in bootstrap-crds that `kubara bootstrap` does not apply. 0 for every other service. |
+| `services[].sha256` | The digest of the file's bytes, as `sha256:<hex>`. |
+| `services[].secrets` | Each Secret written with its keys and without its values. |
+| `clusters[].shared[]` | Each object that more than one service on the cluster renders. |
+| `shared[].object` | The object, as `apiVersion\|kind\|namespace\|name`. |
+| `shared[].services` | The services that render it, in render order. |
+| `shared[].owner` | The one service that owns it. Kubara delivers some CRDs twice, from bootstrap-crds and again from a chart, and bootstrap-crds owns those. Empty when no rule decides. |
+
+Each `objects.yaml` holds every object the service's ApplicationSet delivers,
+shared ones included, because Argo CD applies them from that Application. To
+give each object one owner, drop a shared object from every service but its
+owner. [examples/cub-kubara/render-two-clusters](../../examples/cub-kubara/render-two-clusters)
+is a complete example: a hub and a spoke, with a CRD two services render.
+
+The same platform renders to the same bytes every time, so each `sha256` is
+stable. A chart that makes up a value when it renders, such as a password,
+changes its digest on each render, unless that value is in a Secret, whose
+values `render` empties.
 
 ## Bring the platform into ConfigHub
 

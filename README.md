@@ -57,6 +57,7 @@ cub plugin install confighub/kubara-confighub
 | `cub kubara services` | Lists Kubara's catalog services, with the ConfigHub Workshop's evidence for each chart. **Offline.** |
 | `cub kubara init` | Writes a Kubara `config.yaml` for a new platform, for `kubara generate`. **Offline.** |
 | `cub kubara plan` | Shows what ConfigHub would hold for a platform Kubara generated. **Changes nothing**, and needs no account or cluster. |
+| `cub kubara render` | Renders each service for each cluster the way Kubara's ApplicationSets deliver it, and writes the objects and a manifest, `render.json`. **Offline.** |
 | `cub kubara apply` | Renders each cluster the way Kubara's hub delivers it, and writes `apply.sh` for you to read and then run. |
 | `cub kubara handover` | Writes `handover.sh`, which releases each variant and points Kubara's ApplicationSets at the approved releases. It stops if Argo CD would delete anything. |
 | `cub kubara check` | Checks that each cluster runs the release its stage approved, and can record the result in ConfigHub. |
@@ -248,7 +249,8 @@ can do the work:
 `cub kubara` is for running a Kubara platform. The
 [ConfigHub Workshop](https://confighub.github.io/helm-expt/site/) does a
 different job. `cub stack from-kubara` turns a Kubara platform into a Workshop
-stack. You can then check that it holds together before anything runs, put
+stack. `cub kubara render` is the render both use: each service, for each
+cluster, as Kubara delivers it. You can then check that it holds together before anything runs, put
 apps on it, or publish it as OCI for a cluster Kubara doesn't manage.
 
 ## Try it on your laptop

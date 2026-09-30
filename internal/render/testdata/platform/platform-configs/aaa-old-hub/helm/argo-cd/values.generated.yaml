@@ -1,0 +1,6 @@
+# A stale directory from a hub that was renamed. config.yaml names the hub.
+bootstrapValues:
+  applicationSets:
+    old:
+      apps:
+        web: {name: stale-web, path: web, namespace: stale}

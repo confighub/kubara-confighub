@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-settings
+  namespace: {{ .Release.Namespace }}
+data:
+  replicas: "{{ .Values.replicas }}"
+  level: {{ .Values.level }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-admin
+  namespace: {{ .Release.Namespace }}
+stringData:
+  password: generated-at-render-time
+{{- if .Capabilities.APIVersions.Has "example.com/v1/Widget" }}
+---
+apiVersion: example.com/v1
+kind: Widget
+metadata:
+  name: {{ .Release.Name }}-widget
+  namespace: {{ .Release.Namespace }}
+{{- end }}
+---
+# The chart ships the CRD bootstrap-crds also holds, as some Kubara charts do.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: widgets.example.com
+spec:
+  group: example.com
+  names: {kind: Widget, plural: widgets}
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema: {openAPIV3Schema: {type: object}}
