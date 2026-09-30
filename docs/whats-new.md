@@ -5,6 +5,67 @@ changing how Kubara works. Each Kubara component gets a base, each cluster
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.2.3, 2026-09-30
+
+**Check judges health.** `cub kubara check --record` used to record a Pass
+while Argo CD reported an Application Degraded. On the kind lab it did so for
+cert-manager. Health is now part of the verdict.
+- Degraded or Missing is a failure that names the Application, and `--record`
+  writes a rejection.
+- Progressing, or any other health that is not Healthy yet, is "not yet".
+  `check` records nothing and exits non-zero, so run it again later.
+- Each attestation carries the Application's health as a claim.
+- `--record` stays off by default.
+
+**Render.** `cub kubara render <kubara-dir> --out <dir>` renders each service
+for each cluster the way Kubara's ApplicationSets deliver it. It writes each
+service's objects and a manifest, `render.json`: each cluster's enabled
+services, and each service's chart and version, values files, API versions,
+object count and digest. It also names the one owner of each object two
+services render. It uses the same renderer as `apply`, and contacts no
+cluster and no ConfigHub server. `cub stack from-kubara` in the ConfigHub
+Workshop is moving to it, so there is one way to render as Kubara delivers.
+- Each rendered document now ends in one newline. Helm 4.3 leaves blank lines
+  between documents that helm 4.1 does not, and a render no longer changes
+  with them. This applies to `apply` renders too.
+
+**Kubara's 5.x catalogs.** Tests now hold general 5.1.0 and bootstrap 5.0.1
+to the same wiring as 3.0.0, in `services`, `init` and `plan`.
+
+**Live status after handover.** `handover.sh` now installs argobot on the hub.
+argobot writes each Argo CD Application's sync and health to its variant Space,
+as `confighub.com/live-status`, so a stage can require `Healthy`. It runs as the
+Targets' server worker, not as a person, and may read and patch only Argo CD
+Applications. On the kind lab, prod refused a release that left dev Degraded.
+- The status names the release Argo CD synced. Neither argobot nor the gate
+  compares it with the latest release, so the gate can pass on the previous
+  release's health for a few minutes. Run `check` on the stage ahead first.
+
+**Hand the hub back to Git.** `cub kubara handback` writes `handback.sh`, which
+points Kubara's ApplicationSets and AppProject back at Git, and removes argobot
+and the gateway credential. It stops first if Argo CD would prune anything.
+Secrets keep their live values. ConfigHub keeps every Space and release, so
+`handover.sh` hands the hub over again.
+
+**A new Kubara catalog, as a reviewed change.** Run `apply` and `apply.sh`
+again after `kubara generate`. Each base whose render changed takes the
+difference as one three-way merge that keeps changes made in ConfigHub, in a
+change order for you to take through the stages.
+- `apply.sh` used to create each base with `--allow-exists`, which with cub
+  v0.6.8 merges a new render into an existing base with no change order. It now
+  creates a base only once.
+
+**Kubara v0.16.** The kind lab runs on Kubara v0.16.0 with no change to
+`cub kubara`. There, catalogs bootstrap 5.0.1 and general 5.1.0 took traefik
+v3.7.13 to dev, then prod. An Argo CD upgrade does not land on kind, because
+the hub's argocd Application waits for an Ingress address that never comes.
+
+**The kind lab.** `KIND` names its clusters, so a lab can run beside another,
+and `EMAIL` sets cert-manager's ACME contact. `upgrade.sh` takes newer catalogs
+through the stages, and `handback.sh` hands the hub back to Git. The recorded
+runs are `run-2026-09-30.log`, `handback-2026-09-30.log` and
+`run-v0.16-2026-09-30.log`.
+
 ## 0.2.2, 2026-09-28
 
 **Handover stops a sync Argo CD started from Git.** On the kind lab, the
