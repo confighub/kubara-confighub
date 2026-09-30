@@ -61,14 +61,18 @@ cub plugin install confighub/kubara-confighub
 | `cub kubara apply` | Renders each cluster the way Kubara's hub delivers it, and writes `apply.sh` for you to read and then run. |
 | `cub kubara handover` | Writes `handover.sh`, which releases each variant and points Kubara's ApplicationSets at the approved releases. It stops if Argo CD would delete anything. |
 | `cub kubara check` | Checks that each cluster runs the release its stage approved, and can record the result in ConfigHub. |
+| `cub kubara handback` | Writes `handback.sh`, which undoes handover: Kubara's hub delivers from Git again. |
 | `cub kubara version` | Prints the version. See [what's new](docs/whats-new.md). |
 
 After handover you don't need the plugin day to day. Changes are made with
 ConfigHub's own `cub` commands, shown below.
 
-You need the `cub` CLI (`cub auth login`), `helm`, Kubara v0.15 or newer, and
-`kubectl` access to Kubara's hub. Kubara's hub needs Argo CD 3.1 or newer,
-which Kubara ships.
+Kubara v0.15 or newer generates the platform. `plan`, `render`, `services`
+and `init` need only the `cub` CLI and, for `render`, `helm`. They need no
+account. From `apply.sh` on you also need a ConfigHub organization
+(`cub auth login`), `kubectl` access to Kubara's hub, and `jq`. Kubara's hub
+needs Argo CD 3.1 or newer, which Kubara ships. The versions tested are in the
+[guide](docs/user/cub-kubara.md#install).
 
 ## What you can do with it
 
@@ -142,7 +146,8 @@ HUB_CONTEXT=<hub context> bash my-platform-confighub/handover.sh
 ![Before handover, Argo CD on Kubara's hub reads the platform from Git. After handover.sh, the same Argo CD and ApplicationSets read each cluster's approved release from ConfigHub as OCI. Nothing is reinstalled.](docs/images/cub-kubara/handover-before-after.svg)
 
 `handover.sh` gives each cluster a Target, and releases every variant an
-ApplicationSet delivers, through its rollout workflow, stage by stage. Then it
+ApplicationSet delivers, through its rollout workflow, stage by stage. It
+approves that first release in every stage, prod included, as you. Then it
 changes the hub, and it checks first. For each Application, it compares what
 Argo CD manages today with the release it is about to read, and stops if Argo
 CD would delete anything. Then it points each ApplicationSet at the cluster's
@@ -176,7 +181,8 @@ cub release publish kubara-metrics-server-hub --revision ChangeOrder:kubara-metr
 ```
 
 Kubara's hub delivers it to the hub cluster. The spoke keeps one replica until
-the change is promoted, approved and published in prod as well.
+the change is promoted, approved and published in prod as well. A stage with
+more than one cluster needs one `cub release publish` per variant Space.
 
 ![The change reaches dev: after approval and release, check fails until Argo CD pulls release 2, the hub runs 2 metrics-server replicas while the spoke still runs 1, and check then passes.](docs/images/cub-kubara/kind-lab-06-change-dev-first.png)
 
@@ -269,7 +275,7 @@ against your ConfigHub organization, and takes one change to dev and then prod.
 ```bash
 bash examples/kind-lab/up.sh     # the Kubara platform, about 10 minutes
 cub auth login
-bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
+bash examples/kind-lab/run.sh    # the cub kubara story, about 20 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
 
@@ -295,7 +301,8 @@ and what it printed. The plugin's tests run offline with `go test ./...`.
 
 ## Status
 
-`cub kubara` is tested on kind with Kubara v0.15.0, the 3.0.0 catalogs and
-Argo CD 3.5.2. It has not run on a production platform yet, and not yet with
-Kubara v0.16. We would like to hear from anyone who runs Kubara about what it
-gets wrong about their platform.
+`cub kubara` is tested on kind with Kubara v0.15.0 and v0.16.0, the 3.0.0
+and 5.x catalogs, and Argo CD 3.5.2. It has not run on a production platform
+yet. Read its [known limits](docs/user/cub-kubara.md#known-limits) before you
+use it on a real hub. We would like to hear from anyone who runs Kubara about
+what it gets wrong about their platform.
