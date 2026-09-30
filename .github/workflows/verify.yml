@@ -23,12 +23,28 @@ jobs:
         run: npm run kubara-mini-idp:orphan-audit:receipt-verify
       - name: Platform matrix
         run: npm run kubara-platform-matrix:verify
+      - name: Platform matrix self-test
+        run: npm run kubara-platform-matrix:self-test
       - name: Wiring graph
         run: npm run kubara-wiring:verify
       - name: Faithful hub-spoke proof
         run: npm run kubara-faithful-hub-spoke:verify
       - name: Certified bundle receipts
         run: npm run certified-bundles:verify
+
+  # The Git hand-off preparer, through the importer. helm-expt keeps its own
+  # copy of the preparer, whose self-test stops before the importer, so the
+  # preparer-to-importer round trip is tested only here.
+  handoff-round-trip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: azure/setup-helm@v4
+      - name: Git hand-off preparer self-test
+        run: npm run kubara-git-handoff:self-test
 
   # The cub kubara plugin: its tests hold the committed plan and services
   # examples under examples/cub-kubara, so a behaviour change shows up as a diff.

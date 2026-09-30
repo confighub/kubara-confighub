@@ -166,7 +166,13 @@ receipts, checksums, and the zero-write boundary. The repository gate exercises
 the concrete four-cluster subtree with `npm run
 kubara-git-handoff:verify-current`; `npm run kubara-git-handoff:self-test`
 also proves two-root byte neutrality, atomic interruption, adversarial
-refusals, and preparer-to-importer compile/verify.
+refusals, and preparer-to-importer compile/verify. CI runs it in the
+`handoff-round-trip` job of `.github/workflows/verify.yml`.
+
+helm-expt keeps its own copy of the preparer as an offline generator. Since
+the importer left helm-expt (confighub/helm-expt#2040), that copy's self-test
+stops before the importer, so helm-expt no longer tests the round trip. It is
+tested only here, against this repository's copy of the preparer.
 
 The subsequent import request names an HTTPS repository ending in `.git`, one full 40- or
 64-character lowercase commit object ID, and one selected path. Use a detached,
