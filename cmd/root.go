@@ -16,6 +16,7 @@ import (
 	"github.com/confighub/kubara-confighub/internal/initcfg"
 	"github.com/confighub/kubara-confighub/internal/plan"
 	"github.com/confighub/kubara-confighub/internal/platform"
+	"github.com/confighub/kubara-confighub/internal/render"
 )
 
 var (
@@ -71,6 +72,9 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
   apply     renders each cluster of a generated platform and writes the plan
             as files and one script of cub steps, apply.sh, for you to read
             and run. It runs nothing itself.
+  render    renders each service for each cluster of a generated platform,
+            the way Kubara's ApplicationSets deliver it, and writes the
+            objects and a manifest, render.json. Offline.
   handover  writes handover.sh, which runs after apply.sh: each cluster gets a
             Target and a first approved release, and Kubara's hub reads those
             releases from ConfigHub instead of Git.
@@ -226,6 +230,60 @@ ApplicationSets keep delivering from Git until handover.`,
 	applyCmd.Flags().StringArrayVar(&capsFlags, "capabilities", nil, "render a cluster with its own Kubernetes version and APIs, read from a kubectl context: <cluster>=<context> (repeatable)")
 	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
 	_ = applyCmd.MarkFlagRequired("out")
+
+	var rOut string
+	var rClusters []string
+	var rJSON, rKeepSecrets bool
+	renderCmd := &cobra.Command{
+		Use:   "render <kubara-dir> --out <dir>",
+		Short: "Render each service for each cluster the way Kubara delivers it, with a manifest; offline",
+		Long: `Render a platform Kubara has generated, the way Kubara's hub delivers it.
+For each cluster in config.yaml, each service it runs renders from its wrapper
+chart with the release name, namespace and values files its ApplicationSet
+uses. bootstrap-crds renders as the CRDs kubara bootstrap applies. It uses the
+same renderer as apply, and needs helm on your PATH.
+
+It writes:
+
+  <out>/<cluster>/<service>/objects.yaml   the objects, as Kubara delivers them
+  <out>/render.json                         what was rendered, and how
+
+render.json lists each cluster with its type, stage and enabled services, and
+each service with its chart and version, upstream charts, values files, the
+--api-versions passed to helm, its object count and a sha256 of its file. It
+also lists each object more than one service renders, and which one owns it.
+
+Secrets keep their keys and lose their values, unless --keep-secret-values.
+It contacts no cluster and no ConfigHub server. Running it again into the same
+--out replaces the earlier render.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			var clusters []string
+			for _, cl := range rClusters {
+				clusters = append(clusters, split(cl)...)
+			}
+			m, err := render.Write(render.Options{WorkDir: args[0], Out: rOut, Clusters: clusters, KeepSecretValues: rKeepSecrets, Generator: "cub kubara render " + version})
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			if rJSON {
+				b, err := render.Marshal(m)
+				if err != nil {
+					return err
+				}
+				_, err = w.Write(b)
+				return err
+			}
+			printRender(w, m, rOut)
+			return nil
+		},
+	}
+	renderCmd.Flags().StringVar(&rOut, "out", "", "directory to write the objects and render.json (required)")
+	renderCmd.Flags().StringArrayVar(&rClusters, "cluster", nil, "render only this cluster from config.yaml (repeatable, or comma-separated)")
+	renderCmd.Flags().BoolVar(&rJSON, "json", false, "print render.json to stdout instead of a summary")
+	renderCmd.Flags().BoolVar(&rKeepSecrets, "keep-secret-values", false, "write each Secret with its values; they can be credentials a chart generates")
+	_ = renderCmd.MarkFlagRequired("out")
 
 	var to plan.Options
 	var tStages, tOut, gateway string
@@ -415,7 +473,7 @@ Use the same --prefix and --stages as apply. It changes nothing on the hub.
 	checkCmd.Flags().BoolVar(&co.Record, "record", false, "record each verdict in ConfigHub as an attestation")
 	checkCmd.Flags().StringVar(&co.Type, "type", check.DefaultType, "the attestation type --record uses")
 
-	root.AddCommand(services, initCmd, planCmd, applyCmd, handoverCmd, checkCmd, routeCmd, pruneCmd, versionCmd)
+	root.AddCommand(services, initCmd, planCmd, applyCmd, renderCmd, handoverCmd, checkCmd, routeCmd, pruneCmd, versionCmd)
 	return root
 }
 

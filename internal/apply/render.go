@@ -104,7 +104,48 @@ func KubaraRenderer(kubaraDir, cluster, dir string) (map[string]string, error) {
 	return renderKubara(kubaraDir, cluster, dir, Capabilities{})
 }
 
+// ServiceRender is one service rendered for one cluster the way Kubara
+// delivers it, with everything the render used.
+type ServiceRender struct {
+	Chart     string // the chart directory under platform-components/helm
+	Release   string // the release name its Application uses
+	Namespace string
+	// ByBootstrap is true for bootstrap-crds, which kubara bootstrap applies
+	// as CRDs only; every other service is delivered by an ApplicationSet.
+	ByBootstrap bool
+	ValuesFiles []string // passed to helm in this order, after the chart's own values.yaml
+	APIVersions []string // passed to helm as --api-versions
+	KubeVersion string   // passed to helm as --kube-version; empty is helm's default
+	Docs        []string // the rendered objects, one YAML document each
+	LeftOut     int      // objects the chart renders that kubara bootstrap does not apply
+}
+
 func renderKubara(kubaraDir, cluster, dir string, caps Capabilities) (map[string]string, error) {
+	renders, err := RenderCluster(kubaraDir, cluster, caps)
+	if err != nil {
+		return nil, err
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, err
+	}
+	out := map[string]string{}
+	for _, r := range renders {
+		path := filepath.Join(dir, r.Chart+".yaml")
+		if err := os.WriteFile(path, []byte(strings.Join(r.Docs, "---\n")), 0o644); err != nil {
+			return nil, err
+		}
+		out[r.Chart] = path
+	}
+	return out, nil
+}
+
+// RenderCluster renders every service one cluster runs, the way Kubara
+// delivers it: bootstrap-crds first, as the CRDs kubara bootstrap applies,
+// then Argo CD on the hub, then each service config.yaml enables. Each renders
+// from its wrapper chart with the release name, namespace and values files its
+// ApplicationSet uses. Without capabilities, a chart is told of the APIs whose
+// CRDs the services before it provide, as a cluster where they exist would.
+func RenderCluster(kubaraDir, cluster string, caps Capabilities) ([]ServiceRender, error) {
 	if _, err := exec.LookPath("helm"); err != nil {
 		return nil, fmt.Errorf("rendering needs helm on your PATH: cub kubara renders Kubara's wrapper charts with it")
 	}
@@ -131,39 +172,39 @@ func renderKubara(kubaraDir, cluster, dir string, caps Capabilities) (map[string
 	}
 	charts := filepath.Join(p.Dir, "platform-components", "helm")
 	configs := filepath.Join(p.Dir, "platform-configs", cluster, "helm")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, err
-	}
-	out := map[string]string{}
+	var out []ServiceRender
 	provided := map[string]bool{}
 
 	// bootstrap-crds first: its CRDs are on every cluster before Argo CD runs.
 	if _, err := os.Stat(filepath.Join(charts, bootstrapCRDs, "Chart.yaml")); err == nil {
-		docs, err := helmTemplate(bootstrapCRDs, filepath.Join(charts, bootstrapCRDs), "kube-system", valuesFiles(filepath.Join(configs, bootstrapCRDs)), caps.APIs, caps.KubeVersion)
+		r := ServiceRender{Chart: bootstrapCRDs, Release: bootstrapCRDs, Namespace: "kube-system", ByBootstrap: true,
+			ValuesFiles: valuesFiles(filepath.Join(configs, bootstrapCRDs)), APIVersions: caps.APIs, KubeVersion: caps.KubeVersion}
+		docs, err := helmTemplate(r.Release, filepath.Join(charts, bootstrapCRDs), r.Namespace, r.ValuesFiles, r.APIVersions, r.KubeVersion)
 		if err != nil {
 			return nil, err
 		}
-		var crds []string
 		for _, d := range docs {
-			if kindOf(d) == "CustomResourceDefinition" {
-				crds = append(crds, d)
-				for _, api := range crdAPIs(d) {
-					provided[api] = true
-				}
+			if kindOf(d) != "CustomResourceDefinition" {
+				r.LeftOut++
+				continue
+			}
+			r.Docs = append(r.Docs, d)
+			for _, api := range crdAPIs(d) {
+				provided[api] = true
 			}
 		}
-		path := filepath.Join(dir, bootstrapCRDs+".yaml")
-		if err := os.WriteFile(path, []byte(strings.Join(crds, "---\n")), 0o644); err != nil {
-			return nil, err
-		}
-		out[bootstrapCRDs] = path
+		out = append(out, r)
 	}
 
 	var services []string
 	if cl.Type == "hub" {
 		services = append(services, "argo-cd")
 	}
-	services = append(services, cl.Enabled()...)
+	for _, name := range cl.Enabled() {
+		if name != "argo-cd" && name != bootstrapCRDs {
+			services = append(services, name)
+		}
+	}
 	for _, chart := range services {
 		app, ok := byPath[chart]
 		if !ok {
@@ -183,16 +224,14 @@ func renderKubara(kubaraDir, cluster, dir string, caps Capabilities) (map[string
 		if len(apis) == 0 {
 			apis = sortedKeys(provided)
 		}
-		docs, err := helmTemplate(app.Name, dirPath, app.ReleaseNamespace(), valuesFiles(filepath.Join(configs, app.Path)), apis, caps.KubeVersion)
+		r := ServiceRender{Chart: app.Path, Release: app.Name, Namespace: app.ReleaseNamespace(),
+			ValuesFiles: valuesFiles(filepath.Join(configs, app.Path)), APIVersions: apis, KubeVersion: caps.KubeVersion}
+		r.Docs, err = helmTemplate(r.Release, dirPath, r.Namespace, r.ValuesFiles, r.APIVersions, r.KubeVersion)
 		if err != nil {
 			return nil, err
 		}
-		path := filepath.Join(dir, app.Path+".yaml")
-		if err := os.WriteFile(path, []byte(strings.Join(docs, "---\n")), 0o644); err != nil {
-			return nil, err
-		}
-		out[app.Path] = path
-		for _, d := range docs {
+		out = append(out, r)
+		for _, d := range r.Docs {
 			if kindOf(d) == "CustomResourceDefinition" {
 				for _, api := range crdAPIs(d) {
 					provided[api] = true
@@ -298,10 +337,12 @@ func helmTemplate(release, chartDir, namespace string, values, apis []string, ku
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("helm template %s: %s", release, lastLine(stderr.String()))
 	}
+	// Each document ends in exactly one newline. Helm releases differ in the
+	// blank lines they leave between documents, and a render must not.
 	var docs []string
 	for _, d := range docSeparator.Split(stdout.String(), -1) {
 		if kindOf(d) != "" {
-			docs = append(docs, strings.TrimLeft(d, "\n"))
+			docs = append(docs, strings.TrimRight(strings.TrimLeft(d, "\n"), "\n")+"\n")
 		}
 	}
 	return docs, nil

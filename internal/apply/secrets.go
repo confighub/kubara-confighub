@@ -15,6 +15,12 @@ var docSeparator = regexp.MustCompile(`(?m)^---[ \t]*$\n?`)
 // values, so pods restart when it changes.
 var secretChecksum = regexp.MustCompile(`(?m)^(\s+checksum/secrets?:[ \t]*)[0-9a-f]{64}[ \t]*$`)
 
+// WithoutSecretValues empties every Secret value in a multi-document render,
+// keeping each key, and names each Secret it changed. See withoutSecretValues.
+func WithoutSecretValues(render []byte) ([]byte, []string, error) {
+	return withoutSecretValues(render)
+}
+
 // withoutSecretValues empties every value under data and stringData in each
 // Secret of a multi-document render, keeping its keys, and names each Secret it
 // changed. Charts generate some of these values at render time (a Grafana admin
