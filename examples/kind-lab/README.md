@@ -11,6 +11,7 @@ bash examples/kind-lab/up.sh     # the Kubara platform, about 10 minutes
 cub auth login
 bash examples/kind-lab/run.sh    # the cub kubara story, about 20 minutes
 bash examples/kind-lab/upgrade.sh    # optional: newer Kubara catalogs, through the stages
+bash examples/kind-lab/rebootstrap.sh   # optional: kubara bootstrap again, then handover.sh
 bash examples/kind-lab/handback.sh   # optional: hand the hub back to Git
 bash examples/kind-lab/down.sh   # remove it
 ```
@@ -75,6 +76,14 @@ bootstrap, its AppProject and its ApplicationSets.
 `run.sh` creates Spaces named `kubara-*` in your organization. `PREFIX=<name>`
 chooses another prefix.
 
+With `APPROVE_STAGES=dev`, section 3 changes. `handover.sh` approves only
+dev's first releases. It stops before prod, before it changes the hub, and
+prints a `cub variant approve` command for each release. On a real platform
+someone else runs those commands. The lab has one person, so `run.sh` runs
+them itself. Then it runs `handover.sh` again, which resumes the same change
+orders and hands the hub over. The [recorded run](run-approve-2026-09-30.log)
+shows it.
+
 ## What upgrade.sh does
 
 | Section | What happens |
@@ -89,6 +98,22 @@ The argo-cd change order waits. On kind the hub's argocd Application never
 finishes a sync, because its Ingress gets no address, so an Argo CD upgrade
 cannot land there. The [recorded run on Kubara v0.16](run-v0.16-2026-09-30.log)
 shows it.
+
+## What rebootstrap.sh does
+
+People who run Kubara run `kubara bootstrap` on the hub again, for instance
+after they change Argo CD's settings. `rebootstrap.sh` shows what that does
+to a hub that has been handed over, after `run.sh`.
+
+| Section | What happens |
+| --- | --- |
+| 1 | Every routed ApplicationSet reads ConfigHub, and metrics-server runs the replicas ConfigHub released. |
+| 2 | `kubara bootstrap` runs on the hub again, as in `up.sh`. |
+| 3 | Bootstrap has written Kubara's Git sources back into every routed ApplicationSet. Argo CD reads them first, so every Application syncs from Git, and metrics-server goes back to Git's one replica. `cub kubara check` fails each variant, because it lists Git sources. |
+| 4 | `handover.sh` again. Every release is already published, so it checks that nothing would be pruned and removes the Git sources again. Every Application reads ConfigHub, and metrics-server runs ConfigHub's replicas again. |
+
+The [recorded run](rebootstrap-2026-09-30.log) followed the
+[run with a second approver](run-approve-2026-09-30.log) on the same clusters.
 
 ## What handback.sh does
 
@@ -142,4 +167,5 @@ CONFIGHUB=yes bash examples/kind-lab/down.sh    # and the lab's kubara-* Spaces
 | `EMAIL` | `lab@example.com` | the ACME contact of cert-manager's ClusterIssuer; `up.sh` only |
 | `SERVICES` | `cert-manager,metrics-server,traefik,homer-dashboard` | the Kubara services `init` enables |
 | `PREFIX` | `kubara` | the prefix of the Spaces `run.sh` creates |
+| `APPROVE_STAGES` | empty: every stage | the stages `handover.sh` may approve, passed to `handover --approve-stages`; `run.sh` only |
 | `NODE_IMAGE` | `kindest/node:v1.35.0` | the kind node image |

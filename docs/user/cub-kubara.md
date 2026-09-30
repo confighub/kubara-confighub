@@ -404,8 +404,9 @@ base, then move the change through the stages with `cub changeorder create`,
 default, `--allow-authors` is true: the person who promoted a change may also
 approve it. That suits a first trial. Once a second person approves changes,
 run `apply` with `--allow-authors=false`, and run `apply.sh` again. It sets
-the approval rule on each workflow. Do it after handover, because
-`handover.sh` approves its own first releases (see
+the approval rule on each workflow. From then on, the person who promoted a
+change cannot approve it. `handover.sh` then stops before each first release
+and asks for a second person's approval (see
 [below](#hand-the-hub-to-confighub)).
 
 `cub stack check`, from the ConfigHub Workshop, looks at the platform's render
@@ -447,16 +448,59 @@ Steps 0 to 4 of the script change only ConfigHub. It creates a Space
 `<prefix>-targets`, with a worker called `server-worker` and a Target per
 cluster. It releases every variant an ApplicationSet delivers, through its
 rollout workflow, stage by stage, with argo-cd last. In each stage it
-promotes, approves and publishes, so **it records an approval in every stage,
-prod included, as the person who runs it**. That first release holds what Git
-already delivers. If your team needs someone else to approve prod, stop and
-read [#40](https://github.com/confighub/kubara-confighub/issues/40) first.
-On a re-run it skips a
-component whose variants all have a release. A change made since then belongs
-to your own change orders, and may be part way through its stages. argo-cd is
-the exception, because the script changes its base. Its change order is named
-after the base's revision, so a re-run releases a routing change that was not
-released yet.
+promotes, approves and publishes. That first release holds what Git already
+delivers.
+
+**Who approves the first releases.** By default, `handover.sh` approves every
+stage, prod included, as the person who runs it. To leave a stage to someone
+else, name the stages the script may approve:
+
+```bash
+cub kubara handover my-platform --out my-platform-confighub --approve-stages dev
+```
+
+`--approve-stages none` leaves every stage to someone else. In a stage the
+script may not approve, it promotes each release and stops before publishing
+it. It stops the same way when a workflow does not count its approval, as
+after `apply --allow-authors=false`. It goes on with the other components,
+then exits with status 2 before it changes the hub. The hub still delivers
+from Git. It prints the command for each approval it needs. On the kind lab,
+with `--approve-stages dev` and the prefix `klab24-0930`, it printed:
+
+```text
+klab24-0930-cert-manager-spoke waits for an approval in prod
+klab24-0930-metrics-server-spoke waits for an approval in prod
+klab24-0930-traefik-spoke waits for an approval in prod
+
+handover.sh stopped before it changed the hub. Kubara's hub still delivers from Git.
+These releases wait for an approval from someone other than the person running
+this script. Once they have run each of these commands:
+  cub variant approve --change-order klab24-0930-cert-manager-base/handover-0fa5b8a4-r2 --stage prod
+  cub variant approve --change-order klab24-0930-metrics-server-base/handover-5ea792e9-r2 --stage prod
+  cub variant approve --change-order klab24-0930-traefik-base/handover-a2780c76-r2 --stage prod
+run handover.sh again. It resumes the same change orders, publishes what was
+approved, and then hands the hub over.
+```
+
+The other person runs those commands. Then run `handover.sh` again:
+
+- It resumes the same change orders, so it publishes exactly what they
+  approved. A change made to a base in between is not taken along.
+- It skips each stage that has already released, and does not promote or
+  approve a stage again.
+- It publishes only once ConfigHub accepts the approval. If nobody has
+  approved yet, it stops again, and still changes nothing on the hub.
+
+The [recorded run](../../examples/kind-lab/run-approve-2026-09-30.log) shows
+it, from the stop to the hub reading ConfigHub. The default stays "every
+stage": the first release holds what Git already delivers, so it changes
+nothing that runs, and one person can hand over alone.
+
+On a re-run it skips a component whose variants all have a release. A change
+made since then belongs to your own change orders, and may be part way
+through its stages. argo-cd is the exception, because the script changes its
+base. Its change order is named after the base's revision, so a re-run
+releases a routing change that was not released yet.
 
 Then the script changes the hub, in steps 5 and 6. Before any change, it
 compares what each Application manages with the release it will read. Kubara's
@@ -489,11 +533,30 @@ changed and still delivers from Git. If it stops in step 5, some
 ApplicationSets may read ConfigHub and others Git. Run it again to finish, or
 run [`handback.sh`](#hand-the-hub-back-to-git) to go back to Git.
 
-**Re-running `kubara bootstrap` after handover** has not been tested yet
-([#39](https://github.com/confighub/kubara-confighub/issues/39)). It is
-likely to write Kubara's Git sources back into the ApplicationSets. If you run
-it, run `cub kubara check` afterwards. If an Application reads Git again, run
-`handover.sh` again.
+**After `kubara bootstrap`, run `handover.sh` again.** People who run Kubara
+run `kubara bootstrap` on the hub again, for instance after they change Argo
+CD's settings. On a hub that has been handed over, it hands the hub back to
+Git without a word:
+
+- It writes Kubara's Git sources back into every ApplicationSet that
+  handover routed, argocd included. Its field manager,
+  `kubara-argocd-bootstrap`, owns those fields.
+- Argo CD reads the Git sources before the ConfigHub source. So every
+  Application syncs from Git again, and undoes each change made in ConfigHub
+  since handover. On the kind lab, metrics-server went from the three
+  replicas ConfigHub released back to Git's one.
+- It changes nothing in ConfigHub. argobot reports only Applications that
+  read ConfigHub, so a variant Space can keep a live status that is no
+  longer true, and a `Healthy` gate can pass on it.
+
+`cub kubara check` shows it. Each variant fails with `it still lists Git
+sources, which Argo CD reads before the release`. To recover, run
+`handover.sh` again, straight away. Every release is already published, so it
+goes to step 5. There it checks that nothing would be pruned, and removes the
+Git sources again. On the kind lab, every Application read ConfigHub again
+and metrics-server went back to three replicas. See the
+[recorded run](../../examples/kind-lab/rebootstrap-2026-09-30.log). Until you
+run it, the hub delivers Git, so do not promote while it does.
 
 Secrets keep their live values. ConfigHub holds each Secret's keys, and each
 ApplicationSet tells Argo CD to leave Secret data alone. A cluster that joins
@@ -794,7 +857,7 @@ hub over again afterwards also worked.
 | `services`, `init`, `plan`, `render` | nothing | nothing | Delete the files they wrote. |
 | `apply` | nothing; it writes files | nothing | Delete `--out`. |
 | `apply.sh` | Creates a component, a base Space and a rollout workflow per Kubara component, a variant Space per cluster, and `<prefix>-kubara-generated`. A re-run can add change orders. | nothing | Delete the Spaces, as below. |
-| `handover.sh` steps 0 to 4 | Creates `<prefix>-targets` with a worker and a Target per cluster. Changes the argo-cd base. Promotes, approves and publishes a first release in every stage, as you. | nothing | Delete the Spaces, as below. |
+| `handover.sh` steps 0 to 4 | Creates `<prefix>-targets` with a worker and a Target per cluster. Changes the argo-cd base. Promotes, approves and publishes a first release in each stage. It approves as you only in the stages `--approve-stages` names, every stage by default. | nothing | Delete the Spaces, as below. |
 | `handover.sh` steps 5 and 6 | From then on, argobot writes live status to each variant Space. | On the hub: the Secret `argocd/confighub-<prefix>-targets`, the AppProject, each routed ApplicationSet, and argobot in the `argobot` namespace. The spokes change only as Argo CD syncs to them. | `handback.sh` |
 | a change after handover | A change order, promotions, approvals and releases. | What Argo CD syncs. | Release the state before it, with `--revision Before:ChangeOrder:<change order>`. |
 | `check` | nothing, or attestations with `--record` | nothing | Attestations are kept. `cub attestation revoke` withdraws one. |
@@ -828,10 +891,11 @@ Read these before you use `cub kubara` on a real hub.
 - **An Argo CD upgrade through ConfigHub is not proven.** On kind, the hub's
   argocd Application never finishes a sync, so the argo-cd release did not
   land. See [a new Kubara catalog](#take-a-new-kubara-catalog-through-the-stages).
-- **`handover.sh` approves its own first releases**, in every stage
-  ([#40](https://github.com/confighub/kubara-confighub/issues/40)).
-- **`kubara bootstrap` after handover is untested**
-  ([#39](https://github.com/confighub/kubara-confighub/issues/39)).
+- **By default, `handover.sh` approves its own first releases**, in every
+  stage. Pass `--approve-stages` to leave a stage to someone else.
+- **`kubara bootstrap` on a handed-over hub hands it back to Git.** Run
+  `handover.sh` again straight after it. See
+  [above](#hand-the-hub-to-confighub).
 - **A cluster that joins later gets its Secrets without values.** Your secret
   store must fill them.
 
@@ -841,8 +905,10 @@ Read these before you use `cub kubara` on a real hub.
 | --- | --- | --- |
 | `render` or `apply` says `helm template <service>: …`, with the chart and values files | Helm could not render the service with those values. Argo CD would fail the same way. | Read helm's error on the first line. Often a service needs settings in `config.yaml`, such as a DNS provider for external-dns. Set them, run `kubara generate` again, then `render`. |
 | `Argo CD would delete the objects above` from `handover.sh` | The release a cluster would read lacks objects Argo CD manages there today. | Look at the named objects. Usually the render differs from what Kubara delivers: rerun `apply` with `--capabilities` for that cluster. Rerun with `ALLOW_PRUNE=yes` only if the deletion is what you want. |
+| `handover.sh stopped before it changed the hub`, exit status 2 | A first release waits for an approval the script may not give: its stage is not in `--approve-stages`, or the workflow does not count your approval. | Ask someone else to run the `cub variant approve` commands it printed, then run `handover.sh` again. |
 | `Some Applications do not read ConfigHub yet` | An ApplicationSet has not caught up, or something wrote its Git sources back. | Run `handover.sh` again once the hub is idle. It is safe to run again. |
 | `InvalidSpecError ... is not permitted in project` on an Application | The AppProject does not permit the gateway. | Run `handover.sh` again; it applies the AppProject first. |
+| `check` says `it still lists Git sources, which Argo CD reads before the release`, for every variant | Something wrote Kubara's Git sources back into the ApplicationSets, such as `kubara bootstrap` on the hub. The hub delivers Git again. | Run `handover.sh` again. |
 | `check` says `a sync Argo CD started from Git is still running` | A sync from before the switch cannot finish. | Run `handover.sh` again; it stops such a sync. |
 | `check` says `Argo CD runs …, and the latest release … is …` | Argo CD has not pulled the newest release yet. | Wait a few minutes, or refresh the Application in Argo CD, then run `check` again. |
 | `check` says `NOT YET: … Progressing` | Argo CD runs the release, and the Application is not Healthy yet. | Wait for the rollout, then run `check` again. If it stays Progressing, look at the Application in Argo CD. |

@@ -29,6 +29,10 @@ type Options struct {
 	Out     string
 	Gateway string
 	Render  HubRender
+	// ApproveStages are the stages handover.sh may approve as the person who
+	// runs it. nil means every stage. In any other stage it promotes the
+	// release and stops before publishing it, for someone else to approve.
+	ApproveStages []string
 }
 
 type Result struct {
@@ -37,6 +41,8 @@ type Result struct {
 	WithKubara []string // components no ApplicationSet delivers, which stay with Kubara's bootstrap
 	OnGit      []string // ApplicationSets for charts ConfigHub does not hold
 	Projects   []string
+	Approves   []string // the stages handover.sh approves as the person who runs it
+	Waits      []string // the stages where it stops for someone else's approval
 }
 
 // Write works out what handover changes and writes handover.sh, which runs
@@ -51,6 +57,17 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	}
 	if opts.Gateway == "" {
 		opts.Gateway = DefaultGateway
+	}
+	may, err := approvals(p, opts.ApproveStages)
+	if err != nil {
+		return res, err
+	}
+	for _, st := range p.Stages {
+		if may[st.Name] {
+			res.Approves = append(res.Approves, st.Name)
+		} else {
+			res.Waits = append(res.Waits, st.Name)
+		}
 	}
 	var hub string
 	for _, st := range p.Stages {
@@ -203,12 +220,13 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 			line("else")
 		}
 		sum := sha256.Sum256([]byte("handover|" + c.Base + "|" + strings.Join(names, ",")))
-		line(in+"order=handover-%x-r$(cub unit get --space %s %s -o jq=.Unit.HeadRevisionNum)", sum[:4], c.Base, c.Name)
+		line(in+"order=$(handover_order %s %s handover-%x)", c.Base, c.Name, sum[:4])
 		ref := c.Base + `/"$order"`
 		line(in+`cub changeorder create --space %s "$order" --change-workflow %s/%s --description %s --allow-exists --quiet`, c.Base, c.Base, workflowSlug, q("Release "+strings.Join(names, ", ")+" for handover"))
 		line(in+"if rolled_out %s; then", ref)
 		line(in+"  echo %s", q(c.Name+": every variant is released"))
 		line(in + "else")
+		line(in + "  held=")
 		for _, st := range p.Stages {
 			var inStage []string
 			for _, v := range c.Variants {
@@ -219,17 +237,27 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 			if len(inStage) == 0 {
 				continue
 			}
-			line(in+"  cub variant promote --change-order %s --target-stage %s --quiet", ref, st.Name)
-			line(in+"  cub variant approve --change-order %s --stage %s --quiet", ref, st.Name)
-			for _, sp := range inStage {
-				line(in+"  publish %s %s", sp, ref)
+			who := "someone-else"
+			if may[st.Name] {
+				who = "me"
 			}
+			line(in+"  release_stage %s %s %s %s", ref, st.Name, who, strings.Join(inStage, " "))
 		}
 		line(in + "fi")
 		if c.ChartPath != unitArgoCD {
 			line("fi")
 		}
 	}
+	line(`if [ -n "$waiting" ]; then`)
+	line(`  echo`)
+	line(`  echo "handover.sh stopped before it changed the hub. Kubara's hub still delivers from Git."`)
+	line(`  echo "These releases wait for an approval from someone other than the person running"`)
+	line(`  echo "this script. Once they have run each of these commands:"`)
+	line(`  printf '%%s' "$waiting"`)
+	line(`  echo "run handover.sh again. It resumes the same change orders, publishes what was"`)
+	line(`  echo "approved, and then hands the hub over."`)
+	line(`  exit 2`)
+	line("fi")
 
 	line("")
 	line(`step "5/6 Hand the hub to ConfigHub (your hub cluster)"`)
@@ -400,6 +428,19 @@ func header(p plan.Plan, gateway string, res Result) string {
 	if len(res.WithKubara) > 0 {
 		fmt.Fprintf(&b, "#\n# No ApplicationSet delivers %s; Kubara's bootstrap keeps it.\n", strings.Join(res.WithKubara, ", "))
 	}
+	b.WriteString("#\n# Step 4 releases each variant, stage by stage.\n")
+	if len(res.Approves) > 0 {
+		fmt.Fprintf(&b, "# It approves each release as the person who runs it in: %s.\n", strings.Join(res.Approves, ", "))
+	}
+	if len(res.Waits) > 0 {
+		fmt.Fprintf(&b, "# It approves nothing in: %s (--approve-stages).\n", strings.Join(res.Waits, ", "))
+	}
+	b.WriteString(`# Where a release still needs an approval, because this script may not give
+# it or the workflow does not count it (apply --allow-authors=false), step 4
+# promotes it, prints the cub variant approve command for someone else to
+# run, and the script exits 2 before it changes the hub. Run it again once
+# they have: it resumes the same change orders.
+`)
 	b.WriteString(`#
 # Steps 0 to 4 change only ConfigHub. Step 5 changes the hub, after checking
 # that Argo CD would delete nothing: a credential for the gateway, the
@@ -413,8 +454,63 @@ set -euo pipefail
 cd "$(dirname "$0")"
 k() { kubectl ${HUB_CONTEXT:+--context "$HUB_CONTEXT"} "$@"; }
 step() { printf '\n== %s\n' "$*"; }
-# A finished change order is skipped, so a re-run releases only what is new.
-rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.Stage)" = Completed ]; }
+# A change order every variant has released is skipped, so a re-run releases
+# only what is new.
+rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.State)" = Released ]; }
+# handover_order <base> <unit> <prefix>: the change order that releases the
+# base's variants. One this script started and has not finished is resumed, so
+# what someone approved is what gets published. Otherwise a new one is named
+# after the base's head revision.
+handover_order() {
+  local pending
+  pending=$(cub changeorder list --space "$1" --where "Slug LIKE '$3-r%'" \
+    -o 'jq=[.[] | select(.ChangeOrder.State != "Released" and (.ChangeOrder.AbortedReason // "") == "")] | sort_by(.ChangeOrder.CreatedAt) | last | .ChangeOrder.Slug // ""')
+  if [ -n "$pending" ]; then echo "$pending"; else echo "$3-r$(cub unit get --space "$1" "$2" -o jq=.Unit.HeadRevisionNum)"; fi
+}
+# has <Resolved|Released> <change order> <space>...: each Space has taken the
+# change order (Resolved), or released it (Released).
+has() {
+  local ids s
+  ids=" $(cub changeorder get --space "${2%/*}" "${2#*/}" -o "jq=.ChangeOrder.$1SpaceIDs // [] | join(\" \")") "
+  shift 2
+  for s in "$@"; do
+    case "$ids" in *" $(cub space get "$s" -o jq=.Space.SpaceID) "*) ;; *) return 1 ;; esac
+  done
+}
+# release_stage <change order> <stage> <me|someone-else> <space>...: promote the
+# change order into the stage, approve it there if this script may, and publish
+# each Space. When the stage still needs an approval, from someone else or
+# because the workflow does not count yours, it notes the command to run and
+# leaves this component's later stages alone.
+waiting=
+held=
+release_stage() {
+  local ref=$1 stage=$2 who=$3 s out
+  shift 3
+  [ -z "$held" ] || return 0
+  if has Released "$ref" "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  # A stage that has taken the change order is not promoted again: once the
+  # last stage has it, ConfigHub refuses another promotion. Nor is it
+  # approved again.
+  if ! has Resolved "$ref" "$@"; then
+    cub variant promote --change-order "$ref" --target-stage "$stage" --quiet
+    if [ "$who" = me ]; then cub variant approve --change-order "$ref" --stage "$stage" --quiet; fi
+  fi
+  for s in "$@"; do
+    if ! out=$(publish "$s" "$ref" 2>&1); then
+      case "$out" in
+        *"requires approval"*)
+          echo "$s waits for an approval in $stage"
+          held=$ref
+          waiting="$waiting  cub variant approve --change-order $ref --stage $stage
+"
+          return 0 ;;
+        *) echo "$out" >&2; return 1 ;;
+      esac
+    fi
+    [ -z "$out" ] || echo "$out"
+  done
+}
 # released <space>...: each Space has a published release. Once it has, later
 # changes go through the platform's own change orders, not this script.
 released() {
@@ -459,4 +555,22 @@ const workerJSON = `{
 
 func q(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
+// approvals says which stages handover.sh may approve as the person who runs
+// it: every stage when none are named, or exactly the ones named.
+func approvals(p plan.Plan, named []string) (map[string]bool, error) {
+	may := map[string]bool{}
+	var all []string
+	for _, st := range p.Stages {
+		all = append(all, st.Name)
+		may[st.Name] = named == nil
+	}
+	for _, n := range named {
+		if _, ok := may[n]; !ok {
+			return nil, fmt.Errorf("--approve-stages names %s, which is not a stage of this platform; its stages are %s", n, strings.Join(all, ", "))
+		}
+		may[n] = true
+	}
+	return may, nil
 }

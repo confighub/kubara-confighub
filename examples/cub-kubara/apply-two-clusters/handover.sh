@@ -14,6 +14,14 @@
 #
 # No ApplicationSet delivers bootstrap-crds; Kubara's bootstrap keeps it.
 #
+# Step 4 releases each variant, stage by stage.
+# It approves each release as the person who runs it in: dev, prod.
+# Where a release still needs an approval, because this script may not give
+# it or the workflow does not count it (apply --allow-authors=false), step 4
+# promotes it, prints the cub variant approve command for someone else to
+# run, and the script exits 2 before it changes the hub. Run it again once
+# they have: it resumes the same change orders.
+#
 # Steps 0 to 4 change only ConfigHub. Step 5 changes the hub, after checking
 # that Argo CD would delete nothing: a credential for the gateway, the
 # AppProject so it permits the gateway, and each routed ApplicationSet, which
@@ -26,8 +34,63 @@ set -euo pipefail
 cd "$(dirname "$0")"
 k() { kubectl ${HUB_CONTEXT:+--context "$HUB_CONTEXT"} "$@"; }
 step() { printf '\n== %s\n' "$*"; }
-# A finished change order is skipped, so a re-run releases only what is new.
-rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.Stage)" = Completed ]; }
+# A change order every variant has released is skipped, so a re-run releases
+# only what is new.
+rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.State)" = Released ]; }
+# handover_order <base> <unit> <prefix>: the change order that releases the
+# base's variants. One this script started and has not finished is resumed, so
+# what someone approved is what gets published. Otherwise a new one is named
+# after the base's head revision.
+handover_order() {
+  local pending
+  pending=$(cub changeorder list --space "$1" --where "Slug LIKE '$3-r%'" \
+    -o 'jq=[.[] | select(.ChangeOrder.State != "Released" and (.ChangeOrder.AbortedReason // "") == "")] | sort_by(.ChangeOrder.CreatedAt) | last | .ChangeOrder.Slug // ""')
+  if [ -n "$pending" ]; then echo "$pending"; else echo "$3-r$(cub unit get --space "$1" "$2" -o jq=.Unit.HeadRevisionNum)"; fi
+}
+# has <Resolved|Released> <change order> <space>...: each Space has taken the
+# change order (Resolved), or released it (Released).
+has() {
+  local ids s
+  ids=" $(cub changeorder get --space "${2%/*}" "${2#*/}" -o "jq=.ChangeOrder.$1SpaceIDs // [] | join(\" \")") "
+  shift 2
+  for s in "$@"; do
+    case "$ids" in *" $(cub space get "$s" -o jq=.Space.SpaceID) "*) ;; *) return 1 ;; esac
+  done
+}
+# release_stage <change order> <stage> <me|someone-else> <space>...: promote the
+# change order into the stage, approve it there if this script may, and publish
+# each Space. When the stage still needs an approval, from someone else or
+# because the workflow does not count yours, it notes the command to run and
+# leaves this component's later stages alone.
+waiting=
+held=
+release_stage() {
+  local ref=$1 stage=$2 who=$3 s out
+  shift 3
+  [ -z "$held" ] || return 0
+  if has Released "$ref" "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  # A stage that has taken the change order is not promoted again: once the
+  # last stage has it, ConfigHub refuses another promotion. Nor is it
+  # approved again.
+  if ! has Resolved "$ref" "$@"; then
+    cub variant promote --change-order "$ref" --target-stage "$stage" --quiet
+    if [ "$who" = me ]; then cub variant approve --change-order "$ref" --stage "$stage" --quiet; fi
+  fi
+  for s in "$@"; do
+    if ! out=$(publish "$s" "$ref" 2>&1); then
+      case "$out" in
+        *"requires approval"*)
+          echo "$s waits for an approval in $stage"
+          held=$ref
+          waiting="$waiting  cub variant approve --change-order $ref --stage $stage
+"
+          return 0 ;;
+        *) echo "$out" >&2; return 1 ;;
+      esac
+    fi
+    [ -z "$out" ] || echo "$out"
+  done
+}
 # released <space>...: each Space has a published release. Once it has, later
 # changes go through the platform's own change orders, not this script.
 released() {
@@ -89,40 +152,45 @@ step "4/6 Release each variant, stage by stage: promote, approve, publish"
 if released kx-traefik-hub kx-traefik-edge; then
   echo 'traefik: every variant has a release; later changes go through your own change orders'
 else
-  order=handover-e84ab4de-r$(cub unit get --space kx-traefik-base traefik -o jq=.Unit.HeadRevisionNum)
+  order=$(handover_order kx-traefik-base traefik handover-e84ab4de)
   cub changeorder create --space kx-traefik-base "$order" --change-workflow kx-traefik-base/rollout --description 'Release kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
   if rolled_out kx-traefik-base/"$order"; then
     echo 'traefik: every variant is released'
   else
-    cub variant promote --change-order kx-traefik-base/"$order" --target-stage dev --quiet
-    cub variant approve --change-order kx-traefik-base/"$order" --stage dev --quiet
-    publish kx-traefik-hub kx-traefik-base/"$order"
-    cub variant promote --change-order kx-traefik-base/"$order" --target-stage prod --quiet
-    cub variant approve --change-order kx-traefik-base/"$order" --stage prod --quiet
-    publish kx-traefik-edge kx-traefik-base/"$order"
+    held=
+    release_stage kx-traefik-base/"$order" dev me kx-traefik-hub
+    release_stage kx-traefik-base/"$order" prod me kx-traefik-edge
   fi
 fi
 if released kx-homer-dashboard-hub; then
   echo 'homer-dashboard: every variant has a release; later changes go through your own change orders'
 else
-  order=handover-0d585623-r$(cub unit get --space kx-homer-dashboard-base homer-dashboard -o jq=.Unit.HeadRevisionNum)
+  order=$(handover_order kx-homer-dashboard-base homer-dashboard handover-0d585623)
   cub changeorder create --space kx-homer-dashboard-base "$order" --change-workflow kx-homer-dashboard-base/rollout --description 'Release kx-homer-dashboard-hub for handover' --allow-exists --quiet
   if rolled_out kx-homer-dashboard-base/"$order"; then
     echo 'homer-dashboard: every variant is released'
   else
-    cub variant promote --change-order kx-homer-dashboard-base/"$order" --target-stage dev --quiet
-    cub variant approve --change-order kx-homer-dashboard-base/"$order" --stage dev --quiet
-    publish kx-homer-dashboard-hub kx-homer-dashboard-base/"$order"
+    held=
+    release_stage kx-homer-dashboard-base/"$order" dev me kx-homer-dashboard-hub
   fi
 fi
-order=handover-dec294e7-r$(cub unit get --space kx-argo-cd-base argo-cd -o jq=.Unit.HeadRevisionNum)
+order=$(handover_order kx-argo-cd-base argo-cd handover-dec294e7)
 cub changeorder create --space kx-argo-cd-base "$order" --change-workflow kx-argo-cd-base/rollout --description 'Release kx-argo-cd-hub for handover' --allow-exists --quiet
 if rolled_out kx-argo-cd-base/"$order"; then
   echo 'argo-cd: every variant is released'
 else
-  cub variant promote --change-order kx-argo-cd-base/"$order" --target-stage dev --quiet
-  cub variant approve --change-order kx-argo-cd-base/"$order" --stage dev --quiet
-  publish kx-argo-cd-hub kx-argo-cd-base/"$order"
+  held=
+  release_stage kx-argo-cd-base/"$order" dev me kx-argo-cd-hub
+fi
+if [ -n "$waiting" ]; then
+  echo
+  echo "handover.sh stopped before it changed the hub. Kubara's hub still delivers from Git."
+  echo "These releases wait for an approval from someone other than the person running"
+  echo "this script. Once they have run each of these commands:"
+  printf '%s' "$waiting"
+  echo "run handover.sh again. It resumes the same change orders, publishes what was"
+  echo "approved, and then hands the hub over."
+  exit 2
 fi
 
 step "5/6 Hand the hub to ConfigHub (your hub cluster)"
