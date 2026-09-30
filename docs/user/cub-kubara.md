@@ -161,19 +161,19 @@ cub kubara init --out my-platform \
   --repository https://github.com/acme/platform.git
 ```
 
-`init` writes three files into `my-platform`:
+`init` writes four files into `my-platform`:
 
 - `config.yaml`, Kubara's own configuration, with the catalogs pinned and your
   services enabled on each cluster that can run them;
 - `.env.example`, with placeholders only and no secret;
 - `confighub-intent.yaml`, a record of the catalogs, the chart version each
-  service pins, and the Workshop evidence for each.
+  service pins, and the Workshop evidence for each;
+- `.gitignore`, which keeps `.env` and fetched charts out of Git (see below).
 
-A Kubara config has exactly one hub. Pass `--hub` once: today a second
-`--hub` replaces the first without a word
-([#35](https://github.com/confighub/kubara-confighub/issues/35)). `init`
-refuses to overwrite an existing `config.yaml`. A service that runs only on the
-hub, such as `homer-dashboard`, is left out of the spokes, and `init` says so.
+A Kubara config has exactly one hub, so `init` refuses a second `--hub`. Name
+each other cluster with `--spoke`. `init` refuses to overwrite an existing
+`config.yaml`. A service that runs only on the hub, such as `homer-dashboard`,
+is left out of the spokes, and `init` says so.
 
 Each cluster's DNS name is `<cluster>.traefik.me`, and cert-manager's ACME
 contact is `platform@example.com`. Set your own with `--dns-domain` and
@@ -187,12 +187,12 @@ cp my-platform/.env.example my-platform/.env   # then fill in the values it asks
 kubara --work-dir my-platform --config-file config.yaml --env-file .env generate --helm
 ```
 
-`.env` holds the Argo CD password and your Git token. `init` writes no
-`.gitignore` yet ([#38](https://github.com/confighub/kubara-confighub/issues/38)),
-so add one before you push the work directory to Git. Kubara's own
-`kubara init --prep` writes one. At least leave out `.env`, `**/charts/`,
-`**/Chart.lock` and `**/*.tgz`: `render` and `apply` let helm fetch chart
-dependencies into the work directory.
+`.env` holds the Argo CD password and your Git token, so it must stay out of
+Git. `init` writes a `.gitignore` that leaves out `.env`, `**/charts/`,
+`**/Chart.lock` and `**/*.tgz`, as Kubara's own `kubara init --prep` does.
+Helm writes the last three when it fetches a chart's dependencies. If the
+directory already has a `.gitignore`, `init` keeps every line and adds only
+the ones it lacks, and says which.
 
 ## See the plan
 

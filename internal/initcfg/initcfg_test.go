@@ -98,3 +98,64 @@ func TestWriteCatalog5(t *testing.T) {
 		t.Fatalf("spoke services = %s", got)
 	}
 }
+
+func TestWriteWritesAGitIgnore(t *testing.T) {
+	dir := t.TempDir()
+	res, err := Write(opts(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, l := range GitIgnoreLines {
+		if !strings.Contains(string(b), "\n"+l+"\n") {
+			t.Errorf(".gitignore lacks %s:\n%s", l, b)
+		}
+	}
+	if !strings.HasPrefix(res.GitIgnore, "wrote ") {
+		t.Errorf("GitIgnore = %q", res.GitIgnore)
+	}
+}
+
+// An existing .gitignore keeps every line it has, and gains only the lines it
+// lacks.
+func TestWriteAddsToAnExistingGitIgnore(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".gitignore")
+	if err := os.WriteFile(path, []byte("# mine\n.env\n.local/"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	res, err := Write(opts(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(path)
+	want := "# mine\n.env\n.local/\n# Added by cub kubara init\n**/charts/\n**/Chart.lock\n**/*.tgz\n"
+	if string(b) != want {
+		t.Errorf(".gitignore:\n%s\nwant:\n%s", b, want)
+	}
+	if res.GitIgnore != "added **/charts/, **/Chart.lock, **/*.tgz to "+path {
+		t.Errorf("GitIgnore = %q", res.GitIgnore)
+	}
+}
+
+func TestWriteLeavesACompleteGitIgnore(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".gitignore")
+	mine := "**/*.tgz\n**/Chart.lock\n**/charts/\n.env\n"
+	if err := os.WriteFile(path, []byte(mine), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	res, err := Write(opts(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(path); string(b) != mine {
+		t.Errorf(".gitignore changed:\n%s", b)
+	}
+	if !strings.HasPrefix(res.GitIgnore, "left ") {
+		t.Errorf("GitIgnore = %q", res.GitIgnore)
+	}
+}

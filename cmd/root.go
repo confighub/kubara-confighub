@@ -128,6 +128,7 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 			for _, s := range res.Skipped {
 				fmt.Fprintf(w, "left out %s\n", s)
 			}
+			fmt.Fprintln(w, res.GitIgnore)
 			fmt.Fprintf(w, "\nNext\n  cp %s/.env.example %s/.env   # then fill in the values it asks for\n", opts.Out, opts.Out)
 			fmt.Fprintf(w, "  kubara --work-dir %s --config-file config.yaml --env-file .env generate --helm\n", opts.Out)
 			fmt.Fprintf(w, "  cub kubara plan %s\n", opts.Out)
@@ -559,7 +560,7 @@ type initOptions struct {
 	out            string
 	catalogVersion string
 	services       string
-	hub            string
+	hubs           []string
 	spokes         []string
 	repository     string
 	dnsDomain      string
@@ -635,7 +636,7 @@ func (o *initOptions) register(c *cobra.Command) {
 	c.Flags().StringVar(&o.out, "out", "", "the directory to write the new platform config into")
 	c.Flags().StringVar(&o.catalogVersion, "catalog-version", catalog.DefaultVersion, "the Kubara general catalog version ("+strings.Join(catalog.Known("general"), ", ")+")")
 	c.Flags().StringVar(&o.services, "services", "cert-manager,metrics-server,traefik", "the general catalog services to enable, comma-separated")
-	c.Flags().StringVar(&o.hub, "hub", "dev:dev", "the hub cluster as <name>[:<stage>]")
+	c.Flags().StringArrayVar(&o.hubs, "hub", []string{"dev:dev"}, "the hub cluster as <name>[:<stage>]; a Kubara config has exactly one")
 	c.Flags().StringArrayVar(&o.spokes, "spoke", nil, "a spoke cluster as <name>[:<stage>]; repeat for more")
 	c.Flags().StringVar(&o.repository, "repository", "https://github.com/example/platform.git", "the Git repository Argo CD reads the platform from")
 	c.Flags().StringVar(&o.dnsDomain, "dns-domain", "traefik.me", "each cluster's DNS name is <cluster>.<dns-domain>")
@@ -646,7 +647,12 @@ func (o *initOptions) options() (initcfg.Options, error) {
 	if o.out == "" {
 		return initcfg.Options{}, fmt.Errorf("init needs --out <dir>")
 	}
-	hub, err := parseCluster(o.hub, "hub")
+	// A Kubara config has exactly one hub. The flag is repeatable only so that
+	// a second --hub is refused, not silently put in place of the first.
+	if len(o.hubs) != 1 {
+		return initcfg.Options{}, fmt.Errorf("init takes one --hub, and was given %d: %s. A Kubara config has exactly one hub; name each other cluster with --spoke", len(o.hubs), strings.Join(o.hubs, ", "))
+	}
+	hub, err := parseCluster(o.hubs[0], "hub")
 	if err != nil {
 		return initcfg.Options{}, err
 	}
