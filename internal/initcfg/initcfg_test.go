@@ -74,3 +74,27 @@ func TestWriteRejectsAnUnknownService(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+// The 5.x catalogs: general 5.1.0 pairs with bootstrap 5.0.1, the release
+// Kubara made with it, and the config plans without a problem.
+func TestWriteCatalog5(t *testing.T) {
+	o := opts(t.TempDir())
+	o.CatalogVersion = "5.1.0"
+	o.Services = []string{"cert-manager", "crossplane"}
+	if _, err := Write(o); err != nil {
+		t.Fatal(err)
+	}
+	p, err := platform.Load(o.Out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasSuffix(p.Config.BootstrapCatalog, "bootstrap:5.0.1") || p.Config.Clusters[0].Catalogs[0] != "oci://ghcr.io/kubara-io/catalogs/general:5.1.0" {
+		t.Fatalf("catalogs = %s, %v", p.Config.BootstrapCatalog, p.Config.Clusters[0].Catalogs)
+	}
+	if v, problems := p.Config.CatalogVersion(); v != "5.1.0" || len(problems) != 0 {
+		t.Fatalf("catalog version %s, problems %v", v, problems)
+	}
+	if got := strings.Join(p.Config.Clusters[1].Enabled(), ","); got != "cert-manager,crossplane" {
+		t.Fatalf("spoke services = %s", got)
+	}
+}

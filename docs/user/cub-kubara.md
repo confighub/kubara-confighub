@@ -88,7 +88,10 @@ Kubara pins, with what the Workshop Catalog says about it:
 - **unchecked** means the Workshop Catalog has no entry for that chart.
 
 Add `--catalog-version 5.1.0` for Kubara's newest catalogs, or
-`--catalog-version 1.1.0` for the ones the committed examples use.
+`--catalog-version 1.1.0` for the ones the committed examples use. Kubara
+released general 5.1.0 with bootstrap 5.0.1, so `init` writes that pair, and
+`plan` reads it. 5.1.0 adds crossplane, in a new infrastructure category.
+There is no general 5.0.1.
 
 ## Start a new platform
 
