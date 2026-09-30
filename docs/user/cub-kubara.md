@@ -339,6 +339,9 @@ these changes:
    and the automated sync starts again from ConfigHub.
 5. It waits until every Application reads ConfigHub. If one does not, the
    script names it and stops. It is safe to run again.
+6. It installs [argobot](https://github.com/confighub/argobot) on the hub, and
+   waits until each variant Space has a live status. See
+   [live status](#see-live-status-and-gate-a-stage-on-health).
 
 Secrets keep their live values. ConfigHub holds each Secret's keys, and each
 ApplicationSet tells Argo CD to leave Secret data alone. A cluster that joins
@@ -356,7 +359,9 @@ first runs found the Git sources, AppProject and Git sync problems above, and
 the script now handles each. See the
 [first live run](../../examples/cub-kubara/lab-handover-2026-09-28.log) for how
 they were found, and the [kind lab](../../examples/kind-lab/README.md) to run it
-yourself.
+yourself. The [run of 2026-09-30](../../examples/kind-lab/run-2026-09-30.log)
+adds argobot: each variant Space got its live status, and a stage gated on
+`Healthy` refused a release that left dev Degraded.
 
 ## Change the platform after handover
 
@@ -394,6 +399,71 @@ stages as above:
 cub unit update --space kubara-metrics-server-base metrics-server \
   my-platform-confighub/metrics-server/base.yaml --change-desc "Kubara catalog 3.1.0"
 ```
+
+## See live status and gate a stage on health
+
+After handover, argobot runs on the hub. It watches every Argo CD Application
+and writes the Application's state to its variant Space, as the
+`confighub.com/live-status` annotation. ConfigHub's UI shows it, and a stage
+that requires `Healthy` reads it.
+
+```bash
+cub space get kubara-metrics-server-hub -o 'jq=.Space.Annotations["confighub.com/live-status"]'
+```
+
+```json
+{"source":"argobot","app":"hub-metrics-server","syncStatus":"Synced","healthStatus":"Healthy",
+ "operationPhase":"Succeeded","revision":"sha256:…","message":"successfully synced (all tasks run)","observedAt":"…"}
+```
+
+argobot finds the Space from the Application's source,
+`oci://oci.hub.confighub.com/space/<space>`, so only Applications that read
+ConfigHub are reported.
+
+**Its credential.** argobot runs as the Targets' server worker, which
+handover creates. It is the same identity Argo CD already pulls releases with.
+It can read and annotate only the Spaces its Targets release to. No personal
+token goes into the cluster. handover.sh writes the worker's ID and secret into
+the `argobot-secrets` Secret in the `argobot` namespace. argobot's Role lets it
+read and patch Applications in the Argo CD namespace, and nothing else.
+
+**What it reports.** argobot writes when it starts and whenever an Application
+changes. Each status names the release Argo CD synced, as `revision`, an OCI
+digest. argobot does not compare it with ConfigHub's latest release, and
+ConfigHub's `Healthy` gate does not either. So for the minutes between a
+release and Argo CD pulling it, the Space still shows the previous release as
+Synced and Healthy, and the gate passes on that. The kind lab saw it: dev
+released an image that does not exist, and a promotion to prod two seconds
+later was accepted. Once Argo CD synced the release, dev was Degraded and the
+same promotion was refused.
+
+So before you promote, make sure the stage ahead runs its latest release.
+`cub kubara check` fails until Argo CD has synced it:
+
+```text
+kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
+```
+
+argobot also asks Argo CD to refresh an Application when ConfigHub publishes a
+release. It looks for an Application named after the Space, and Kubara names
+its Applications `<cluster>-<service>`, so it finds none. Argo CD pulls the
+release on its next poll, within about three minutes, or at once if you
+refresh the Application.
+
+A stage that requires `Healthy` checks every Space of the stage ahead. To gate
+prod on dev's health, add `Healthy` to prod's prerequisites. Do it after
+handover: before handover nothing reports health, and handover's own first
+release would wait for it.
+
+```bash
+echo '{"Stages":[
+  {"Name":"dev","WhereSpace":"Labels.Stage = '"'dev'"'","ReleasePrerequisites":["approval"]},
+  {"Name":"prod","WhereSpace":"Labels.Stage = '"'prod'"'","Prerequisites":["Released","Healthy"],"ReleasePrerequisites":["approval"]}]}' \
+  | cub changeworkflow update --patch --space kubara-metrics-server-base rollout --from-stdin
+```
+
+A change order takes a copy of its workflow when you create it. So the gate
+applies to change orders created after this.
 
 ## Check that each cluster runs what was approved
 

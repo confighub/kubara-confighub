@@ -18,7 +18,9 @@
 # that Argo CD would delete nothing: a credential for the gateway, the
 # AppProject so it permits the gateway, and each routed ApplicationSet, which
 # loses its Git sources. Secrets keep their live values: ConfigHub holds their keys,
-# and each ApplicationSet tells Argo CD to leave their data alone. All of it is
+# and each ApplicationSet tells Argo CD to leave their data alone. Step 6
+# installs argobot (argobot.yaml) on the hub, which writes each Application's
+# sync and health to its variant Space as confighub.com/live-status. All of it is
 # safe to re-run.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -47,7 +49,7 @@ would_prune() {
   cub kubara would-prune --application <(printf '%s' "$app") --release <(cub unit data --space "$2" "$3") --name "$1"
 }
 
-step "0/5 Check before changing anything"
+step "0/6 Check before changing anything"
 cub space list --quiet >/dev/null || { echo "cub is not logged in: run cub auth login"; exit 1; }
 for space in kx-traefik-base kx-traefik-hub kx-traefik-edge kx-homer-dashboard-base kx-homer-dashboard-hub kx-argo-cd-base kx-argo-cd-hub; do
   cub space get "$space" --quiet >/dev/null 2>&1 || { echo "$space is missing: run apply.sh first"; exit 1; }
@@ -58,13 +60,13 @@ if [ "$(printf '%s\n' v3.1.0 "$version" | sort -V | head -1)" != v3.1.0 ]; then
   echo "the hub runs Argo CD $version; reading releases from ConfigHub's gateway needs v3.1.0 or later"; exit 1
 fi
 
-step "1/5 One Target per cluster, in kx-targets"
+step "1/6 One Target per cluster, in kx-targets"
 cub space create kx-targets --allow-exists --quiet
 cub worker create --space kx-targets server-worker --filename worker.json --allow-exists --quiet
 cub target create hub '{}' server-worker --space kx-targets --provider OCI --toolchain Any --allow-exists --quiet
 cub target create edge '{}' server-worker --space kx-targets --provider OCI --toolchain Any --allow-exists --quiet
 
-step "2/5 Each variant releases to its own cluster's Target"
+step "2/6 Each variant releases to its own cluster's Target"
 cub unit set-target --space kx-traefik-hub traefik kx-targets/hub --quiet
 cub space update kx-traefik-hub --release-target kx-targets/hub --quiet
 cub unit set-target --space kx-traefik-edge traefik kx-targets/edge --quiet
@@ -74,7 +76,7 @@ cub space update kx-homer-dashboard-hub --release-target kx-targets/hub --quiet
 cub unit set-target --space kx-argo-cd-hub argo-cd kx-targets/hub --quiet
 cub space update kx-argo-cd-hub --release-target kx-targets/hub --quiet
 
-step "3/5 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base"
+step "3/6 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base"
 cub unit data --space kx-argo-cd-base argo-cd -O argo-cd/current.yaml
 cub kubara route-appsets argo-cd/current.yaml --prefix kx --gateway oci.hub.confighub.com --charts argo-cd,homer-dashboard,traefik > argo-cd/routed.yaml
 if cmp -s argo-cd/current.yaml argo-cd/routed.yaml; then
@@ -83,7 +85,7 @@ else
   cub unit update --space kx-argo-cd-base argo-cd argo-cd/routed.yaml --change-desc 'Point Kubara'\''s ApplicationSets at each cluster'\''s approved release in ConfigHub, keeping live Secret values' --quiet
 fi
 
-step "4/5 Release each variant, stage by stage: promote, approve, publish"
+step "4/6 Release each variant, stage by stage: promote, approve, publish"
 if released kx-traefik-hub kx-traefik-edge; then
   echo 'traefik: every variant has a release; later changes go through your own change orders'
 else
@@ -123,7 +125,7 @@ else
   publish kx-argo-cd-hub kx-argo-cd-base/"$order"
 fi
 
-step "5/5 Hand the hub to ConfigHub (your hub cluster)"
+step "5/6 Hand the hub to ConfigHub (your hub cluster)"
 # Kubara's ApplicationSets prune. Before any Application switches, compare
 # what each one manages today with the release it will read, and stop if
 # Argo CD would delete anything.
@@ -196,8 +198,46 @@ for app in hub-traefik edge-traefik hub-homer-dashboard hub-argocd; do
 done
 [ "$left" = 0 ] || { echo "Some Applications do not read ConfigHub yet. Re-run this script once the hub is idle."; exit 1; }
 
+step "6/6 argobot reports each Application's live status to its variant Space"
+# argobot runs as the Targets' server worker, the identity Argo CD already pulls
+# releases with: it can read and annotate only the Spaces those Targets release.
+# No personal token goes into the cluster. Its ID and secret go from cub into
+# the Secret through file descriptors, as above.
+k create namespace argobot --dry-run=client -o yaml | k apply -f - >/dev/null
+k -n argobot create secret generic argobot-secrets \
+  --from-file=CONFIGHUB_URL=<(cub context get -o jq=.coordinate.serverURL | tr -d '\n') \
+  --from-file=CONFIGHUB_WORKER_ID=<(cub worker get --space kx-targets server-worker -o jq=.BridgeWorker.BridgeWorkerID | tr -d '\n') \
+  --from-file=CONFIGHUB_WORKER_SECRET=<(cub worker get --space kx-targets server-worker --include-secret -o jq=.BridgeWorker.Secret | tr -d '\n') \
+  --dry-run=client -o yaml | k apply -f -
+since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+k apply -f argobot.yaml
+k -n argobot rollout restart deployment/argobot >/dev/null
+k -n argobot rollout status deployment/argobot --timeout=180s
+# argobot writes a Space's status when it starts, and again whenever the
+# Application changes. Wait until each variant Space has one from this start;
+# a Space keeps the last status an earlier argobot wrote.
+status() { cub space get "$1" -o 'jq=.Space.Annotations["confighub.com/live-status"] // "{}" | fromjson | select((.observedAt // "") >= "'"$since"'") | tojson'; }
+for _ in $(seq 1 60); do
+  missing=0
+  for space in kx-traefik-hub kx-traefik-edge kx-homer-dashboard-hub kx-argo-cd-hub; do
+    [ -n "$(status "$space")" ] || missing=1
+  done
+  [ "$missing" = 0 ] && break
+  sleep 5
+done
+for space in kx-traefik-hub kx-traefik-edge kx-homer-dashboard-hub kx-argo-cd-hub; do
+  s=$(status "$space")
+  if [ -n "$s" ]; then
+    printf '%s: %s\n' "$space" "$(jq -r '"\(.app) \(.syncStatus) \(.healthStatus) at \(.revision[0:19])"' <<<"$s")"
+  else
+    echo "$space: no live status yet"
+  fi
+done
+[ "$missing" = 0 ] || { echo "argobot has not reported every Application. Look at: kubectl -n argobot logs deployment/argobot"; exit 1; }
+
 echo
-echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub."
+echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub,"
+echo "and argobot writes each Application's sync and health to its variant Space."
 echo "Watch it with: kubectl get applications -n argocd"
 echo "A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;"
 echo "without it, Argo CD empties the values of the Secrets ConfigHub holds without values."

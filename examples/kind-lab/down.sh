@@ -9,9 +9,10 @@ set -euo pipefail
 LAB=${LAB:-$PWD/kubara-lab}
 HUB=${HUB:-hub}
 SPOKE=${SPOKE:-spoke}
+KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
 
-for c in "kubara-$HUB" "kubara-$SPOKE"; do
+for c in "$KIND-$HUB" "$KIND-$SPOKE"; do
   kind get clusters 2>/dev/null | grep -qx "$c" && kind delete cluster --name "$c"
 done
 rm -rf "$LAB"

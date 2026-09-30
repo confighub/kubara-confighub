@@ -12,6 +12,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 LAB=${LAB:-$PWD/kubara-lab}
 HUB=${HUB:-hub}
 SPOKE=${SPOKE:-spoke}
+KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 SERVICES=${SERVICES:-cert-manager,metrics-server,traefik,homer-dashboard}   # init enables homer-dashboard on the hub only
 NODE_IMAGE=${NODE_IMAGE:-kindest/node:v1.35.0}
 REPO=http://git.git-server.svc.cluster.local/platform.git
@@ -35,14 +36,14 @@ export HELM_REPOSITORY_CONFIG=$LAB/helm/repositories.yaml HELM_REPOSITORY_CACHE=
 hub() { kubectl --kubeconfig "$LAB/hub.kubeconfig" "$@"; }
 kubara_() { (cd platform && kubara --work-dir . --config-file config.yaml --env-file .env "$@"); }
 
-step "1/7 Two kind clusters: kubara-$HUB for the hub and kubara-$SPOKE for the spoke"
-for c in "kubara-$HUB" "kubara-$SPOKE"; do
+step "1/7 Two kind clusters: $KIND-$HUB for the hub and $KIND-$SPOKE for the spoke"
+for c in "$KIND-$HUB" "$KIND-$SPOKE"; do
   kind get clusters 2>/dev/null | grep -qx "$c" || kind create cluster --name "$c" --image "$NODE_IMAGE" --wait 120s
 done
-kind get kubeconfig --name "kubara-$HUB" > hub.kubeconfig
-kind get kubeconfig --name "kubara-$SPOKE" > spoke.kubeconfig
+kind get kubeconfig --name "$KIND-$HUB" > hub.kubeconfig
+kind get kubeconfig --name "$KIND-$SPOKE" > spoke.kubeconfig
 # The hub's Argo CD reaches the spoke over the kind network.
-kind get kubeconfig --name "kubara-$SPOKE" --internal > spoke.internal.kubeconfig
+kind get kubeconfig --name "$KIND-$SPOKE" --internal > spoke.internal.kubeconfig
 
 step "2/7 A Kubara platform: $HUB in dev, $SPOKE in prod, with $SERVICES"
 if [ ! -f platform/config.yaml ]; then
@@ -62,8 +63,8 @@ step "3/7 The platform in Git, copied onto the hub's node"
 rm -rf platform.git
 git clone -q --bare platform platform.git
 git -C platform.git update-server-info
-docker exec "kubara-$HUB-control-plane" sh -c 'rm -rf /srv/git && mkdir -p /srv/git'
-docker cp -q platform.git "kubara-$HUB-control-plane:/srv/git/"
+docker exec "$KIND-$HUB-control-plane" sh -c 'rm -rf /srv/git && mkdir -p /srv/git'
+docker cp -q platform.git "$KIND-$HUB-control-plane:/srv/git/"
 
 step "4/7 A Git server in the hub that Argo CD can read"
 hub apply -f "$here/git-server.yaml" >/dev/null

@@ -119,6 +119,9 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	if err := os.WriteFile(filepath.Join(opts.Out, "worker.json"), []byte(workerJSON), 0o644); err != nil {
 		return res, err
 	}
+	if err := os.WriteFile(filepath.Join(opts.Out, "argobot.yaml"), []byte(argobotManifest()), 0o644); err != nil {
+		return res, err
+	}
 	stageOf := map[string]string{}
 	var clusters []string
 	for _, st := range p.Stages {
@@ -135,7 +138,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line := func(format string, args ...any) { fmt.Fprintf(&s, format+"\n", args...) }
 	s.WriteString(header(p, opts.Gateway, res))
 
-	line(`step "0/5 Check before changing anything"`)
+	line(`step "0/6 Check before changing anything"`)
 	line(`cub space list --quiet >/dev/null || { echo "cub is not logged in: run cub auth login"; exit 1; }`)
 	var spaces []string
 	for _, c := range comps {
@@ -154,7 +157,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("fi")
 
 	line("")
-	line(`step "1/5 One Target per cluster, in %s"`, targets)
+	line(`step "1/6 One Target per cluster, in %s"`, targets)
 	line("cub space create %s --allow-exists --quiet", targets)
 	line("cub worker create --space %s %s --filename worker.json --allow-exists --quiet", targets, workerSlug)
 	for _, cl := range clusters {
@@ -162,7 +165,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	}
 
 	line("")
-	line(`step "2/5 Each variant releases to its own cluster's Target"`)
+	line(`step "2/6 Each variant releases to its own cluster's Target"`)
 	for _, c := range comps {
 		for _, v := range c.Variants {
 			line("cub unit set-target --space %s %s %s/%s --quiet", v.Space, c.Name, targets, v.Cluster)
@@ -171,7 +174,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	}
 
 	line("")
-	line(`step "3/5 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base"`)
+	line(`step "3/6 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base"`)
 	line("cub unit data --space %s %s -O %s/current.yaml", argoBase, unitArgoCD, unitArgoCD)
 	line("cub kubara route-appsets %s/current.yaml --prefix %s --gateway %s --charts %s > %s/routed.yaml", unitArgoCD, p.Prefix, opts.Gateway, strings.Join(chartList, ","), unitArgoCD)
 	line("if cmp -s %s/current.yaml %s/routed.yaml; then", unitArgoCD, unitArgoCD)
@@ -181,7 +184,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("fi")
 
 	line("")
-	line(`step "4/5 Release each variant, stage by stage: promote, approve, publish"`)
+	line(`step "4/6 Release each variant, stage by stage: promote, approve, publish"`)
 	for _, c := range comps {
 		var names []string
 		for _, v := range c.Variants {
@@ -229,7 +232,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	}
 
 	line("")
-	line(`step "5/5 Hand the hub to ConfigHub (your hub cluster)"`)
+	line(`step "5/6 Hand the hub to ConfigHub (your hub cluster)"`)
 	line("# Kubara's ApplicationSets prune. Before any Application switches, compare")
 	line("# what each one manages today with the release it will read, and stop if")
 	line("# Argo CD would delete anything.")
@@ -318,9 +321,54 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`  echo "$app reads $(reads "$app")"`)
 	line("done")
 	line(`[ "$left" = 0 ] || { echo "Some Applications do not read ConfigHub yet. Re-run this script once the hub is idle."; exit 1; }`)
+
+	var variantSpaces []string
+	for _, c := range comps {
+		for _, v := range c.Variants {
+			variantSpaces = append(variantSpaces, v.Space)
+		}
+	}
+	line("")
+	line(`step "6/6 argobot reports each Application's live status to its variant Space"`)
+	line("# argobot runs as the Targets' server worker, the identity Argo CD already pulls")
+	line("# releases with: it can read and annotate only the Spaces those Targets release.")
+	line("# No personal token goes into the cluster. Its ID and secret go from cub into")
+	line("# the Secret through file descriptors, as above.")
+	line(`k create namespace %s --dry-run=client -o yaml | k apply -f - >/dev/null`, argobotNamespace)
+	line(`k -n %s create secret generic %s \`, argobotNamespace, argobotSecret)
+	line(`  --from-file=CONFIGHUB_URL=<(cub context get -o jq=.coordinate.serverURL | tr -d '\n') \`)
+	line(`  --from-file=CONFIGHUB_WORKER_ID=<(%s -o jq=.BridgeWorker.BridgeWorkerID | tr -d '\n') \`, worker)
+	line(`  --from-file=CONFIGHUB_WORKER_SECRET=<(%s --include-secret -o jq=.BridgeWorker.Secret | tr -d '\n') \`, worker)
+	line(`  --dry-run=client -o yaml | k apply -f -`)
+	line("since=$(date -u +%%Y-%%m-%%dT%%H:%%M:%%SZ)")
+	line("k apply -f argobot.yaml")
+	line("k -n %s rollout restart deployment/argobot >/dev/null", argobotNamespace)
+	line(`k -n %s rollout status deployment/argobot --timeout=180s`, argobotNamespace)
+	line("# argobot writes a Space's status when it starts, and again whenever the")
+	line("# Application changes. Wait until each variant Space has one from this start;")
+	line("# a Space keeps the last status an earlier argobot wrote.")
+	line(`status() { cub space get "$1" -o 'jq=.Space.Annotations["%s"] // "{}" | fromjson | select((.observedAt // "") >= "'"$since"'") | tojson'; }`, LiveStatus)
+	line("for _ in $(seq 1 60); do")
+	line("  missing=0")
+	line("  for space in %s; do", strings.Join(variantSpaces, " "))
+	line(`    [ -n "$(status "$space")" ] || missing=1`)
+	line("  done")
+	line(`  [ "$missing" = 0 ] && break`)
+	line("  sleep 5")
+	line("done")
+	line("for space in %s; do", strings.Join(variantSpaces, " "))
+	line(`  s=$(status "$space")`)
+	line(`  if [ -n "$s" ]; then`)
+	line(`    printf '%%s: %%s\n' "$space" "$(jq -r '"\(.app) \(.syncStatus) \(.healthStatus) at \(.revision[0:19])"' <<<"$s")"`)
+	line("  else")
+	line(`    echo "$space: no live status yet"`)
+	line("  fi")
+	line("done")
+	line(`[ "$missing" = 0 ] || { echo "argobot has not reported every Application. Look at: kubectl -n %s logs deployment/argobot"; exit 1; }`, argobotNamespace)
 	line("")
 	line("echo")
-	line(`echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub."`)
+	line(`echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub,"`)
+	line(`echo "and argobot writes each Application's sync and health to its variant Space."`)
 	line(`echo "Watch it with: kubectl get applications -n %s"`, argoNamespace)
 	line(`echo "A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;"`)
 	line(`echo "without it, Argo CD empties the values of the Secrets ConfigHub holds without values."`)
@@ -357,7 +405,9 @@ func header(p plan.Plan, gateway string, res Result) string {
 # that Argo CD would delete nothing: a credential for the gateway, the
 # AppProject so it permits the gateway, and each routed ApplicationSet, which
 # loses its Git sources. Secrets keep their live values: ConfigHub holds their keys,
-# and each ApplicationSet tells Argo CD to leave their data alone. All of it is
+# and each ApplicationSet tells Argo CD to leave their data alone. Step 6
+# installs argobot (argobot.yaml) on the hub, which writes each Application's
+# sync and health to its variant Space as ` + LiveStatus + `. All of it is
 # safe to re-run.
 set -euo pipefail
 cd "$(dirname "$0")"

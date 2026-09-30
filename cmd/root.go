@@ -76,8 +76,10 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
             the way Kubara's ApplicationSets deliver it, and writes the
             objects and a manifest, render.json. Offline.
   handover  writes handover.sh, which runs after apply.sh: each cluster gets a
-            Target and a first approved release, and Kubara's hub reads those
-            releases from ConfigHub instead of Git.
+            Target and a first approved release, Kubara's hub reads those
+            releases from ConfigHub instead of Git, and argobot reports each
+            one's live status back to ConfigHub.
+  check     checks that each cluster runs the release its stage approved.
 
 Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kubara.md`,
 		SilenceUsage:  true,
@@ -301,6 +303,10 @@ with the release it will read, and stops if Argo CD would delete anything.
 Secrets keep their live values: ConfigHub holds their keys, and each
 ApplicationSet tells Argo CD to leave their data alone.
 
+Last, it installs argobot on the hub. argobot writes each Application's sync
+and health to its variant Space as confighub.com/live-status, which ConfigHub's
+Healthy gate reads. It runs as the Targets' server worker, not as you.
+
 Use the same --prefix and --stages as apply.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
@@ -332,6 +338,7 @@ Use the same --prefix and --stages as apply.`,
 			if len(res.OnGit) > 0 {
 				fmt.Fprintf(w, "Left on Git, for services this platform does not enable: %s\n", strings.Join(res.OnGit, ", "))
 			}
+			fmt.Fprintf(w, "Then it installs argobot %s on the hub, which writes each variant Space's live status.\n", strings.TrimPrefix(handover.ArgobotImage, "ghcr.io/confighub/argobot:"))
 			fmt.Fprintf(w, "\nNext, after apply.sh\n  less %s\n  HUB_CONTEXT=<kubectl context of Kubara's hub> bash %s\n", res.Script, res.Script)
 			return nil
 		},
