@@ -38,7 +38,9 @@ run() {
   printf '\n%s\n' "$line"
   "$@"
 }
-check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" "$@"; }
+# check judges health too. On kind, cert-manager stays Degraded and Traefik
+# Progressing (see the README), so check exits non-zero; carry on.
+check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" "$@" || true; }
 replicas() { kubectl --context "$1" -n metrics-server get deploy metrics-server -o jsonpath='{.status.readyReplicas}'; }
 # Argo CD looks for new releases every few minutes; ask it to look now.
 pull() {
@@ -73,7 +75,7 @@ run cub variant approve --change-order "$base/two-replicas" --stage dev
 run cub release publish "$PREFIX-metrics-server-$HUB" --revision "ChangeOrder:$base/two-replicas" --quiet
 echo
 echo "Released to dev. Until Argo CD pulls it, check says so:"
-check || true
+check
 pull "$HUB" "$HUB_CONTEXT"
 run kubectl --context "$HUB_CONTEXT" -n metrics-server get deploy metrics-server
 run kubectl --context "$SPOKE_CONTEXT" -n metrics-server get deploy metrics-server

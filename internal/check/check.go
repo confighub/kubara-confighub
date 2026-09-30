@@ -1,8 +1,8 @@
 // Package check looks at a Kubara hub after handover and says, for each
 // variant, whether the cluster runs the release ConfigHub approved: its
-// Application reads the variant's release, is synced to the latest one, would
-// prune nothing, and leaves live Secret values alone. It can record each
-// verdict in ConfigHub as an attestation.
+// Application reads the variant's release, is synced to the latest one, is
+// Healthy, would prune nothing, and leaves live Secret values alone. It can
+// record each verdict in ConfigHub as an attestation.
 package check
 
 import (
@@ -42,12 +42,18 @@ type Result struct {
 	Revision    string // what Argo CD last synced
 	Health      string
 	Problems    []string
+	Waiting     string // why the verdict is "not yet": nothing is wrong, and the Application is not Healthy yet
 	Skipped     string // why the variant was not judged
 	Recorded    string // the attestation's ID
 }
 
-// Passed reports whether the variant was judged and nothing was wrong.
-func (r Result) Passed() bool { return r.Skipped == "" && len(r.Problems) == 0 }
+// Passed reports whether the variant was judged, nothing was wrong, and its
+// Application is Healthy.
+func (r Result) Passed() bool { return r.Skipped == "" && len(r.Problems) == 0 && r.Waiting == "" }
+
+// NotYet reports whether nothing was wrong but the Application is not Healthy
+// yet, such as while it is Progressing. It is neither a Pass nor a rejection.
+func (r Result) NotYet() bool { return r.Skipped == "" && len(r.Problems) == 0 && r.Waiting != "" }
 
 type application struct {
 	Metadata struct {
@@ -229,6 +235,7 @@ func judge(r *Result, a *application) {
 	if a.Status.Sync.Status != "Synced" {
 		r.Problems = append(r.Problems, "sync status is "+or(a.Status.Sync.Status, "unknown"))
 	}
+	judgeHealth(r)
 	var prune []string
 	for _, res := range a.Status.Resources {
 		// Argo CD flags Helm hooks too, but runs them as hooks and never prunes them.
@@ -256,6 +263,20 @@ func judge(r *Result, a *application) {
 	}
 	if !data || !stringData || !respect {
 		r.Problems = append(r.Problems, "a sync would overwrite live Secret values: it needs ignoreDifferences on Secret /data and /stringData, and RespectIgnoreDifferences=true")
+	}
+}
+
+// judgeHealth makes health part of the verdict. Only Healthy passes. Degraded
+// and Missing are wrong, and name the Application. Anything else, such as
+// Progressing, is "not yet": it may still become Healthy, so it is neither a
+// Pass nor a rejection.
+func judgeHealth(r *Result) {
+	switch r.Health {
+	case "Healthy":
+	case "Degraded", "Missing":
+		r.Problems = append(r.Problems, fmt.Sprintf("Argo CD reports %s as %s", r.Application, r.Health))
+	default:
+		r.Waiting = fmt.Sprintf("Argo CD reports %s as %s", r.Application, or(r.Health, "having no health yet"))
 	}
 }
 
@@ -287,18 +308,22 @@ func judgeRelease(r *Result, a *application, run Run) error {
 }
 
 // record writes the verdict as an attestation on the released revisions: a
-// Pass, or a rejection naming what is wrong.
+// Pass, or a rejection naming what is wrong. A "not yet" records nothing.
 func record(r *Result, run Run, typ string) error {
-	if r.Skipped != "" || r.Release == 0 {
+	if r.Skipped != "" || r.Release == 0 || r.NotYet() {
 		return nil
 	}
-	note := "cub kubara check: " + r.Application + " reads and runs release " + fmt.Sprint(r.Release) + ", synced, prunes nothing, keeps Secret values"
+	note := "cub kubara check: " + r.Application + " reads and runs release " + fmt.Sprint(r.Release) + ", synced, healthy, prunes nothing, keeps Secret values"
 	args := []string{"attestation", "create", "--space", r.Space, "--type", typ,
 		"--revision", "LastReleasedRevisionNum",
 		"--claim", "argocd.argoproj.io/application=" + r.Application,
-		"--claim", "argocd.argoproj.io/revision=" + r.Revision}
+		"--claim", "argocd.argoproj.io/revision=" + r.Revision,
+		"--claim", "argocd.argoproj.io/health=" + or(r.Health, "none")}
 	if len(r.Problems) > 0 {
 		note = "cub kubara check: " + strings.Join(r.Problems, "; ")
+		if r.Waiting != "" {
+			note += "; " + r.Waiting
+		}
 		args = append(args, "--reject")
 	}
 	out, err := run("cub", append(args, "--note", note)...)

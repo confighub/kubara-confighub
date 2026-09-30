@@ -97,7 +97,9 @@ func TestCheckPassesAHandedOverHub(t *testing.T) {
 	if len(recorded) != 2 || strings.Contains(recorded[0], "--reject") ||
 		!strings.Contains(recorded[0], "--revision LastReleasedRevisionNum") ||
 		!strings.Contains(recorded[0], "--type LiveCheck") ||
-		!strings.Contains(recorded[0], "argocd.argoproj.io/revision=sha256:b2") {
+		!strings.Contains(recorded[0], "argocd.argoproj.io/revision=sha256:b2") ||
+		!strings.Contains(recorded[0], "argocd.argoproj.io/health=Healthy") ||
+		!strings.Contains(recorded[0], "synced, healthy,") {
 		t.Errorf("recorded:\n%s", strings.Join(recorded, "\n"))
 	}
 }
@@ -183,5 +185,100 @@ func TestCheckWantsARelease(t *testing.T) {
 	}
 	if !strings.Contains(strings.Join(results[0].Problems, ""), "published no release") {
 		t.Errorf("hub = %+v", results[0])
+	}
+}
+
+// health sets the health Argo CD reports for an Application.
+func health(app, status string) string {
+	return strings.Replace(app, `"health":{"status":"Healthy"}`, `"health":{"status":"`+status+`"}`, 1)
+}
+
+func attestations(f *fake) map[string]string {
+	out := map[string]string{}
+	for _, c := range f.calls {
+		if strings.HasPrefix(c, "cub attestation create --space ") {
+			out[strings.Fields(c)[4]] = c
+		}
+	}
+	return out
+}
+
+// A Degraded or Missing Application is a failure that names it, and --record
+// writes a rejection, never a Pass (issue #25: cert-manager on the kind lab).
+func TestCheckRejectsAnUnhealthyApplication(t *testing.T) {
+	for _, status := range []string{"Degraded", "Missing"} {
+		f := &fake{
+			apps: []string{
+				health(app("hub-cert-manager", "lab-metrics-server-lab-hub", "sha256:a1"), status),
+				app("spoke-metrics-server", "lab-metrics-server-lab-spoke", "sha256:a1"),
+			},
+			releases: map[string]string{
+				"lab-metrics-server-lab-hub":   releases("sha256:a1"),
+				"lab-metrics-server-lab-spoke": releases("sha256:a1"),
+			},
+		}
+		results, err := Check(lab, f.run, Options{Record: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		hub := results[0]
+		want := "Argo CD reports hub-cert-manager as " + status
+		if hub.Passed() || hub.NotYet() || strings.Join(hub.Problems, "; ") != want {
+			t.Errorf("%s: hub = %+v, want the one problem %q", status, hub, want)
+		}
+		if !results[1].Passed() {
+			t.Errorf("%s: a Healthy spoke still passes: %+v", status, results[1])
+		}
+		got := attestations(f)
+		rej := got["lab-metrics-server-lab-hub"]
+		if !strings.Contains(rej, "--reject") || !strings.Contains(rej, want) || !strings.Contains(rej, "argocd.argoproj.io/health="+status) {
+			t.Errorf("%s: the hub records a rejection naming the app: %s", status, rej)
+		}
+		if strings.Contains(got["lab-metrics-server-lab-spoke"], "--reject") {
+			t.Errorf("%s: the spoke records a Pass: %s", status, got["lab-metrics-server-lab-spoke"])
+		}
+	}
+}
+
+// Progressing is "not yet": neither a Pass nor a rejection, and nothing is
+// recorded. It may still become Healthy.
+func TestCheckWaitsForAProgressingApplication(t *testing.T) {
+	for _, status := range []string{"Progressing", "Suspended", "Unknown", ""} {
+		f := &fake{
+			apps:     []string{health(app("hub-traefik", "lab-metrics-server-lab-hub", "sha256:a1"), status)},
+			releases: map[string]string{"lab-metrics-server-lab-hub": releases("sha256:a1")},
+		}
+		results, err := Check(lab, f.run, Options{Record: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		hub := results[0]
+		if hub.Passed() || !hub.NotYet() || len(hub.Problems) != 0 || !strings.Contains(hub.Waiting, "hub-traefik") {
+			t.Errorf("%q: hub = %+v", status, hub)
+		}
+		if rec, ok := attestations(f)["lab-metrics-server-lab-hub"]; ok {
+			t.Errorf("%q: a variant that is not Healthy yet records nothing: %s", status, rec)
+		}
+	}
+}
+
+// A Progressing Application with something else wrong is a failure, and its
+// rejection says what Argo CD reports about its health too.
+func TestCheckFailsAProgressingApplicationWithAProblem(t *testing.T) {
+	f := &fake{
+		apps:     []string{health(app("hub-traefik", "lab-metrics-server-lab-hub", "sha256:a1"), "Progressing")},
+		releases: map[string]string{"lab-metrics-server-lab-hub": releases("sha256:a1", "sha256:b2")},
+	}
+	results, err := Check(lab, f.run, Options{Record: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	hub := results[0]
+	if hub.Passed() || hub.NotYet() || len(hub.Problems) != 1 {
+		t.Fatalf("hub = %+v", hub)
+	}
+	rej := attestations(f)["lab-metrics-server-lab-hub"]
+	if !strings.Contains(rej, "--reject") || !strings.Contains(rej, "the latest release, 2") || !strings.Contains(rej, "hub-traefik as Progressing") {
+		t.Errorf("rejection = %s", rej)
 	}
 }

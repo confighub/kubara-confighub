@@ -59,7 +59,7 @@ bootstrap, its AppProject and its ApplicationSets.
 | 2 | `cub kubara apply` renders each cluster with its own capabilities, and `apply.sh` creates 6 components and 10 variants in ConfigHub. |
 | 3 | `cub kubara handover` writes `handover.sh`, which releases every variant and points Kubara's ApplicationSets at ConfigHub. |
 | 4 | `cub kubara check` confirms that each cluster runs the release its stage approved. |
-| 5 | Two metrics-server replicas, changed once on the base, and released to dev. `check` fails until Argo CD pulls the release, then passes. The spoke keeps one replica. |
+| 5 | Two metrics-server replicas, changed once on the base, and released to dev. `check` fails for metrics-server until Argo CD pulls the release, then passes it. The spoke keeps one replica. |
 | 6 | The same change is promoted, approved and released in prod. `check --record` writes each result into ConfigHub. |
 
 `run.sh` creates Spaces named `kubara-*` in your organization. `PREFIX=<name>`
@@ -67,8 +67,8 @@ chooses another prefix.
 
 ## What to expect on kind
 
-Some Applications never turn fully green on kind, and none of it affects the
-story.
+Some Applications never turn fully green on kind. None of it affects the
+story, but `check` judges health, so it says so.
 - cert-manager is Degraded, because Let's Encrypt refuses the `example.com`
   contact address.
 - Traefik is Progressing, because kind has no load balancer to give it an
@@ -76,6 +76,14 @@ story.
 - The hub's argocd Application is Degraded and never finishes its sync,
   because it waits for an Ingress address. Dex restarts, because the lab has
   no single sign-on.
+
+So on kind, `check` fails each Application that is Degraded, such as
+cert-manager. It says "not yet" for each one that is Progressing, such as
+Traefik. It exits non-zero, and `run.sh` carries on. With `--record` it
+records a rejection for each Degraded Application, and nothing for one that is
+Progressing. The
+[recorded run](run-2026-09-28.log) used v0.2.2, which recorded a Pass for all
+of them.
 
 ## Remove it
 
