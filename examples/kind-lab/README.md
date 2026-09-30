@@ -75,7 +75,9 @@ chooses another prefix.
 Some Applications never turn fully green on kind. None of it affects the
 story, but `check` judges health, so it says so.
 - cert-manager is Degraded, because Let's Encrypt refuses the `example.com`
-  contact address.
+  contact address: its ClusterIssuer cannot register an ACME account. Run
+  `up.sh` with `EMAIL=<your address>` to make it Ready; the lab then registers
+  that address with Let's Encrypt's staging server.
 - Traefik is Progressing, because kind has no load balancer to give it an
   address.
 - The hub's argocd Application is Degraded and never finishes its sync,
@@ -104,6 +106,7 @@ CONFIGHUB=yes bash examples/kind-lab/down.sh    # and the lab's kubara-* Spaces
 | `LAB` | `./kubara-lab` | where the platform, the kubeconfigs and the scripts' output go |
 | `HUB`, `SPOKE` | `hub`, `spoke` | the Kubara cluster names |
 | `KIND` | `kubara` | the prefix of the kind clusters, `<KIND>-<HUB>` and `<KIND>-<SPOKE>` |
+| `EMAIL` | `lab@example.com` | the ACME contact of cert-manager's ClusterIssuer; `up.sh` only |
 | `SERVICES` | `cert-manager,metrics-server,traefik,homer-dashboard` | the Kubara services `init` enables |
 | `PREFIX` | `kubara` | the prefix of the Spaces `run.sh` creates |
 | `NODE_IMAGE` | `kindest/node:v1.35.0` | the kind node image |

@@ -13,6 +13,9 @@ LAB=${LAB:-$PWD/kubara-lab}
 HUB=${HUB:-hub}
 SPOKE=${SPOKE:-spoke}
 KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
+# cert-manager's ClusterIssuer registers this address with Let's Encrypt's
+# staging server, which refuses example.com. Give your own to make it Ready.
+EMAIL=${EMAIL:-lab@example.com}
 SERVICES=${SERVICES:-cert-manager,metrics-server,traefik,homer-dashboard}   # init enables homer-dashboard on the hub only
 NODE_IMAGE=${NODE_IMAGE:-kindest/node:v1.35.0}
 REPO=http://git.git-server.svc.cluster.local/platform.git
@@ -48,7 +51,7 @@ kind get kubeconfig --name "$KIND-$SPOKE" --internal > spoke.internal.kubeconfig
 step "2/7 A Kubara platform: $HUB in dev, $SPOKE in prod, with $SERVICES"
 if [ ! -f platform/config.yaml ]; then
   cub kubara init --out platform --hub "$HUB:dev" --spoke "$SPOKE:prod" --services "$SERVICES" \
-    --repository "$REPO" --email lab@example.com
+    --repository "$REPO" --email "$EMAIL"
   cp platform/.env.example platform/.env
 fi
 kubara_ generate --helm
