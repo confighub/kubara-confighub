@@ -33,6 +33,8 @@ ConfigHub without changing how Kubara works. Your path is:
 kubara generate  →  cub kubara plan  →  cub kubara apply  →  cub kubara handover  →  cub kubara check
 ```
 
+`cub kubara handback` undoes handover, if you want Git to deliver again.
+
 Kubara generates. `cub kubara` puts the result under ConfigHub's governance, as a
 base for each component and a variant for each cluster, with an approval before
 each release. `handover` then points Kubara's hub at the approved releases, and
@@ -520,6 +522,54 @@ Application's name, the revision Argo CD synced and its health as claims.
 after a release, a check fails until Argo CD pulls it, and that failure is not
 worth keeping.
 
+## Hand the hub back to Git
+
+`handback` undoes handover on the hub. Kubara's hub delivers from Git again,
+as it did before handover:
+
+```bash
+cub kubara handback my-platform --out my-platform-confighub \
+  --capabilities hub-dev=<hub context> --capabilities edge-prod=<spoke context>
+less my-platform-confighub/handback.sh
+HUB_CONTEXT=<kubectl context of Kubara's hub> bash my-platform-confighub/handback.sh
+```
+
+Give it the platform directory your Git repository holds. `handback` renders
+each cluster from it, the way Kubara's hub delivers it from Git, and reads
+Kubara's own ApplicationSets and AppProject from the hub's argo-cd render.
+
+Before any change, the script compares what each Application manages with what
+Git's render holds for it. Kubara's ApplicationSets prune, so it stops if Argo
+CD would delete anything. Put those objects in Git first, or rerun with
+`ALLOW_PRUNE=yes` if the deletion is what you want. Then it:
+
+1. Sets each ApplicationSet handover changed back to Kubara's spec, with its
+   Git sources, argocd first. Until the hub's argocd Application reads Git,
+   Argo CD can write the ConfigHub version back, so the script repeats this
+   until every Application reads Git. It stops any sync Argo CD started from
+   ConfigHub, which can never finish against Git.
+2. Sets the AppProject back to Kubara's sources, so it no longer permits the
+   gateway.
+3. Removes argobot and the gateway credential from the hub.
+4. Waits until Argo CD has synced every Application from Git.
+
+Secrets keep their live values. Each ApplicationSet keeps the rule that tells
+Argo CD to leave Secret data alone, as handover set it. Remove the rule from an
+ApplicationSet when Git should own its Secret values again.
+
+`handback` changes nothing in ConfigHub. Every Space, release and Target stays,
+so `handover.sh` can hand the hub over again. Each variant Space keeps the last
+live status argobot wrote, which no longer changes. A stage that requires
+`Healthy` reads that status, so do not rely on the gate while Git delivers.
+
+Git must hold what you want Kubara to deliver. A change made in ConfigHub since
+handover, such as more replicas, is undone unless it is in Git too.
+
+The kind lab [handed its hub back](../../examples/kind-lab/handback-2026-09-30.log)
+after the full run. Each of the 8 Applications pruned nothing and synced from
+Git, every Secret kept its value, and a new commit reached the hub. Handing the
+hub over again afterwards also worked.
+
 ## If something goes wrong
 
 | You see | What it means | What to do |
@@ -531,6 +581,8 @@ worth keeping.
 | `check` says `Argo CD runs …, and the latest release … is …` | Argo CD has not pulled the newest release yet. | Wait a few minutes, or refresh the Application in Argo CD, then run `check` again. |
 | `check` says `NOT YET: … Progressing` | Argo CD runs the release, and the Application is not Healthy yet. | Wait for the rollout, then run `check` again. If it stays Progressing, look at the Application in Argo CD. |
 | `check` says `Argo CD reports … as Degraded` | The cluster runs the release, and something in it is failing. | Look at the Application's resources in Argo CD. The release may be wrong for this cluster, or the cluster may lack something it needs. |
+| `Argo CD would delete the objects above` from `handback.sh` | Git's render lacks objects that Argo CD manages today, usually because a change reached them through ConfigHub only. | Put those objects in Git, push, and run `handback.sh` again. Rerun with `ALLOW_PRUNE=yes` only if the deletion is what you want. |
+| `Some Applications still read ConfigHub` from `handback.sh` | The hub's argocd Application wrote a routed ApplicationSet back before it read Git. | Run `handback.sh` again once the hub is idle. |
 | Secret values empty after a manual sync | The sync left out `RespectIgnoreDifferences`. | Restore the values from your secret store, and keep the option on every manual sync. |
 
 ## Refresh the plugin's data
