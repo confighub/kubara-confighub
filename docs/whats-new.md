@@ -5,6 +5,62 @@ changing how Kubara works. Each Kubara component gets a base, each cluster
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.2.4, 2026-09-30
+
+A cold read of the guide found six things to fix before handing the plugin
+to someone outside ConfigHub. Each is fixed or tested here.
+
+**A second person can approve handover's releases.** `handover.sh` used to
+approve every first release, prod included, as the person who ran it.
+`cub kubara handover --approve-stages dev` now names the stages it may
+approve. `none` approves no stage. The default is still every stage.
+- In another stage, it promotes each release and stops before publishing it.
+  It prints one `cub variant approve` command per release, and exits 2
+  before it changes the hub.
+- It stops the same way where a workflow does not count its approval, as
+  after `apply --allow-authors=false`.
+- Run it again once someone else has approved. It resumes the same change
+  orders, so it publishes what they approved. It skips what has released,
+  and does not promote or approve a stage again.
+- A re-run used to treat a change order as done once its last stage was
+  promoted, even when prod's publish had failed. It now waits until every
+  variant has released it.
+- On the kind lab, handover stopped before prod. Each release got a second
+  approval, and the second run handed the hub over
+  ([log](../examples/kind-lab/run-approve-2026-09-30.log)).
+
+**`kubara bootstrap` after handover, tested.** On a hub that has been handed
+over, `kubara bootstrap` hands it back to Git without a word:
+- It writes Kubara's Git sources back into every routed ApplicationSet.
+- Every Application then syncs from Git. On the kind lab, metrics-server went
+  from ConfigHub's three replicas to Git's one.
+- `cub kubara check` names it: `it still lists Git sources`.
+- Running `handover.sh` again is the whole recovery. On the kind lab,
+  nothing was pruned, and metrics-server went back to three replicas
+  ([log](../examples/kind-lab/rebootstrap-2026-09-30.log)).
+- The guide now says to run `handover.sh` straight after any
+  `kubara bootstrap`.
+
+**`--stages` must name every stage.** A stage that `--stages` left out used
+to go last, after prod, with no warning. `plan`, `apply`, `handover`, `check`
+and `handback` now refuse it, and name the stage. They also refuse a stage
+no cluster has, and a stage named twice. The default order is unchanged.
+
+**Helm's error comes through.** When helm failed, `render` and `apply`
+printed only `Use --debug flag to render out invalid YAML`. They now print
+helm's own error, then the chart and each values file they passed.
+
+**The work directory stays clean.**
+- Rendering used to let helm write `charts/*.tgz` and `Chart.lock` into the
+  platform's Git repository. Renders now read a copy of the charts.
+- What helm fetched is cached in your user cache directory, under
+  `cub-kubara/chart-dependencies`, until a chart changes.
+- `cub kubara init` writes a `.gitignore` that keeps out `.env`, which holds
+  the Argo CD password and a Git token, and the fetched charts. An existing
+  `.gitignore` keeps every line, and gains only the lines it lacks.
+
+**`init` refuses a second `--hub`.** It used to keep the last one and exit 0.
+
 ## 0.2.3, 2026-09-30
 
 **Check judges health.** `cub kubara check --record` used to record a Pass
