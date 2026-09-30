@@ -297,7 +297,7 @@ was, and they are cached for the next render. Running it again into the same
 	_ = renderCmd.MarkFlagRequired("out")
 
 	var to plan.Options
-	var tStages, tOut, gateway string
+	var tStages, tOut, gateway, tApprove string
 	var tCaps []string
 	handoverCmd := &cobra.Command{
 		Use:   "handover <kubara-dir> --out <dir>",
@@ -316,6 +316,14 @@ Last, it installs argobot on the hub. argobot writes each Application's sync
 and health to its variant Space as confighub.com/live-status, which ConfigHub's
 Healthy gate reads. It runs as the Targets' server worker, not as you.
 
+Each first release needs an approval in its stage. By default handover.sh
+approves every stage as you. --approve-stages names the stages it may
+approve; in the others it promotes each release, prints the cub variant
+approve command for someone else to run, and exits 2 before it changes the
+hub. Run it again once they have approved: it resumes the same change orders.
+
+  cub kubara handover my-platform --out <dir> --approve-stages dev
+
 Use the same --prefix and --stages as apply.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
@@ -332,7 +340,14 @@ Use the same --prefix and --stages as apply.`,
 			if err != nil {
 				return err
 			}
-			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender(caps)})
+			var approve []string
+			if c.Flags().Changed("approve-stages") {
+				approve = []string{}
+				if tApprove != "none" {
+					approve = split(tApprove)
+				}
+			}
+			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender(caps), ApproveStages: approve})
 			if err != nil {
 				return err
 			}
@@ -348,6 +363,12 @@ Use the same --prefix and --stages as apply.`,
 				fmt.Fprintf(w, "Left on Git, for services this platform does not enable: %s\n", strings.Join(res.OnGit, ", "))
 			}
 			fmt.Fprintf(w, "Then it installs argobot %s on the hub, which writes each variant Space's live status.\n", strings.TrimPrefix(handover.ArgobotImage, "ghcr.io/confighub/argobot:"))
+			if len(res.Approves) > 0 {
+				fmt.Fprintf(w, "It approves each first release as you in: %s.\n", strings.Join(res.Approves, ", "))
+			}
+			if len(res.Waits) > 0 {
+				fmt.Fprintf(w, "In %s it stops before each release, for someone else to approve; run it again once they have.\n", strings.Join(res.Waits, ", "))
+			}
 			fmt.Fprintf(w, "\nNext, after apply.sh\n  less %s\n  HUB_CONTEXT=<kubectl context of Kubara's hub> bash %s\n", res.Script, res.Script)
 			return nil
 		},
@@ -356,6 +377,7 @@ Use the same --prefix and --stages as apply.`,
 	handoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
 	handoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
 	handoverCmd.Flags().StringVar(&gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	handoverCmd.Flags().StringVar(&tApprove, "approve-stages", "", "the stages handover.sh may approve as you, comma-separated, or none; by default every stage. In the others it stops for someone else's approval")
 	handoverCmd.Flags().StringArrayVar(&tCaps, "capabilities", nil, "render the hub with its own Kubernetes version and APIs, read from a kubectl context: <hub>=<context>")
 	_ = handoverCmd.MarkFlagRequired("out")
 

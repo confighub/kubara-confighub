@@ -8,12 +8,18 @@
 #
 # It works in $LAB (default ./kubara-lab) and creates Spaces named $PREFIX-*
 # (default kubara-*) in your ConfigHub organization. down.sh removes both.
+#
+# With APPROVE_STAGES=dev, handover.sh approves only dev's first releases and
+# stops before prod, for someone else to approve. The lab has one person, so
+# run.sh then runs the approve commands handover.sh printed, and runs
+# handover.sh again to finish.
 set -euo pipefail
 LAB=${LAB:-$PWD/kubara-lab}
 HUB=${HUB:-hub}
 SPOKE=${SPOKE:-spoke}
 KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
+APPROVE_STAGES=${APPROVE_STAGES:-}
 export HUB_CONTEXT=kind-$KIND-$HUB
 SPOKE_CONTEXT=kind-$KIND-$SPOKE
 
@@ -79,8 +85,30 @@ run cub kubara apply platform --prefix "$PREFIX" --out confighub \
 run bash confighub/apply.sh
 
 section "3. Hand Kubara's hub to ConfigHub"
-run cub kubara handover platform --prefix "$PREFIX" --out confighub --capabilities "$HUB=$HUB_CONTEXT"
-run bash confighub/handover.sh
+if [ -z "$APPROVE_STAGES" ]; then
+  run cub kubara handover platform --prefix "$PREFIX" --out confighub --capabilities "$HUB=$HUB_CONTEXT"
+  run bash confighub/handover.sh
+else
+  run cub kubara handover platform --prefix "$PREFIX" --out confighub --capabilities "$HUB=$HUB_CONTEXT" \
+    --approve-stages "$APPROVE_STAGES"
+  # handover.sh exits 2 when it stops for someone else's approval.
+  status=0
+  run bash confighub/handover.sh | tee confighub/handover-stopped.out || status=$?
+  [ "$status" = 2 ] || { echo "handover.sh did not stop for an approval (exit $status)"; exit 1; }
+  echo
+  echo "The hub still reads Git:"
+  run kubectl --context "$HUB_CONTEXT" -n argocd get applications \
+    -o custom-columns='APPLICATION:.metadata.name,SOURCE:.spec.sources[*].repoURL,OCI:.spec.source.repoURL'
+  echo
+  echo "A second person approves each release handover.sh left to them. The lab has one"
+  echo "person, so it runs the commands handover.sh printed:"
+  grep '^  cub variant approve ' confighub/handover-stopped.out | while read -r _ _ _ _ ref _ stage; do
+    run cub variant approve --change-order "$ref" --stage "$stage"
+  done
+  echo
+  echo "Then handover.sh again. It resumes the same change orders, and hands the hub over:"
+  run bash confighub/handover.sh
+fi
 
 section "4. Check that each cluster runs the release its stage approved"
 settle

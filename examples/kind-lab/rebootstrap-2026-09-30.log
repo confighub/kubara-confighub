@@ -1,0 +1,278 @@
+# kubara bootstrap run again on the kind lab's hub after handover, recorded on
+# 2026-09-30 with rebootstrap.sh, straight after the run in
+# run-approve-2026-09-30.log on the same clusters (KIND=klab24,
+# PREFIX=klab24-0930), with Kubara v0.16.0 and the same cub kubara build.
+#
+# Before it, every routed ApplicationSet read ConfigHub, and ConfigHub had
+# released three metrics-server replicas to both clusters. The platform's Git
+# repository still held the chart's default, one. The script took 4 minutes.
+#
+# What to look for:
+# - Section 2: kubara bootstrap succeeds, and says nothing about ConfigHub.
+# - Section 3: it has written Kubara's Git sources back into every routed
+#   ApplicationSet, beside the ConfigHub source handover gave each one. Its
+#   field manager, kubara-argocd-bootstrap, owns spec.template.spec.sources.
+#   Argo CD reads sources before source, so every Application reads Git again,
+#   and it synced metrics-server on the hub back to Git's one replica. It
+#   changed nothing in ConfigHub.
+# - cub kubara check fails each variant, and names the cause first: "it still
+#   lists Git sources, which Argo CD reads before the release". Its prune
+#   lists compare the release with what the Git sync left, so they are long.
+# - Section 4: handover.sh again is the whole recovery. Steps 0 to 4 find
+#   every release already published. Step 5 finds that nothing would be
+#   pruned, applies the routed ApplicationSets, and removes the Git sources
+#   again. Every Application reads ConfigHub, and metrics-server runs three
+#   replicas again.
+# - Straight after it, traefik was still OutOfSync while Argo CD synced it.
+#   The check at the end, a minute later, shows what the lab shows after any
+#   run on kind: cert-manager and the hub's argocd Degraded, traefik
+#   Progressing, and every other variant passing.
+
+== 1. Before: every routed ApplicationSet reads ConfigHub
+APPLICATIONSET           GIT SOURCES                                           CONFIGHUB SOURCE
+argocd                   -                                                     oci://oci.hub.confighub.com/space/klab24-0930-argo-cd-{{name}}
+cert-manager             -                                                     oci://oci.hub.confighub.com/space/klab24-0930-cert-manager-{{name}}
+external-dns             http://git.git-server.svc.cluster.local/platform.git  -
+external-secrets         http://git.git-server.svc.cluster.local/platform.git  -
+homer-dashboard          -                                                     oci://oci.hub.confighub.com/space/klab24-0930-homer-dashboard-{{name}}
+kube-prometheus-stack    http://git.git-server.svc.cluster.local/platform.git  -
+kyverno                  http://git.git-server.svc.cluster.local/platform.git  -
+kyverno-policies         http://git.git-server.svc.cluster.local/platform.git  -
+kyverno-policy-reporter  http://git.git-server.svc.cluster.local/platform.git  -
+loki                     http://git.git-server.svc.cluster.local/platform.git  -
+longhorn                 http://git.git-server.svc.cluster.local/platform.git  -
+metallb                  http://git.git-server.svc.cluster.local/platform.git  -
+metrics-server           -                                                     oci://oci.hub.confighub.com/space/klab24-0930-metrics-server-{{name}}
+oauth2-proxy             http://git.git-server.svc.cluster.local/platform.git  -
+reloader                 http://git.git-server.svc.cluster.local/platform.git  -
+traefik                  -                                                     oci://oci.hub.confighub.com/space/klab24-0930-traefik-{{name}}
+velero                   http://git.git-server.svc.cluster.local/platform.git  -
+
+metrics-server runs 3 replicas on hub and 3 on spoke, as ConfigHub released; Git holds the chart's default, 1.
+
+== 2. Kubara's bootstrap on the hub, again
+
+$ kubara --work-dir . --config-file config.yaml --env-file .env --kubeconfig ../hub.kubeconfig bootstrap hub --timeout 10m
+2026-09-30 20:42:44 INF Starting bootstrap process
+2026-09-30 20:42:44 INF Ensuring namespaces exist
+2026-09-30 20:42:44 INF Adding helm repositories
+2026-09-30 20:42:44 INF Added helm repository: "argo-cd"
+2026-09-30 20:42:45 INF Added helm repository: "cert-manager"
+2026-09-30 20:42:45 INF Added helm repository: "kube-prometheus-stack"
+2026-09-30 20:42:45 INF Added helm repository: "external-secrets"
+2026-09-30 20:42:47 INF Refreshed helm repository index
+2026-09-30 20:42:47 INF Updating helm chart dependencies
+2026-09-30 20:42:49 INF Updated helm dependencies for chart: "argo-cd"
+2026-09-30 20:42:53 INF Updated helm dependencies for chart: "bootstrap-crds"
+2026-09-30 20:42:53 INF Applying CRDs
+2026-09-30 20:42:56 INF CRDs applied and established for: "argo-cd"
+2026-09-30 20:43:08 INF CRDs applied and established for: "bootstrap-crds"
+2026-09-30 20:43:08 INF Applying secrets
+2026-09-30 20:43:08 WRN ClusterSecretStore manifest file not provided. You must apply an existing ClusterSecretStore or create one manually
+2026-09-30 20:43:08 INF Created hub secrets successfully
+2026-09-30 20:43:08 INF Secrets applied successfully
+2026-09-30 20:43:08 INF Bootstrapping ArgoCD
+2026-09-30 20:43:14 INF ArgoCD manifest applied successfully
+2026-09-30 20:43:14 INF Waiting for ArgoCD components to be ready
+2026-09-30 20:43:16 INF ArgoCD components are ready
+2026-09-30 20:43:16 INF 
+🎉 ArgoCD bootstrap complete!
+
+You can access the Argo CD UI with user "wizard" and your chosen password "replace-before-use" at:
+
+    kubectl port-forward svc/argocd-server -n argocd 8080:443 --kubeconfig ...
+
+Then open: http://localhost:8080/argocd or try: https://hub.traefik.me/argocd (if ingress is running)
+
+📝 Next steps:
+1. Log in with username: wizard
+2. Configure your applications
+3. Set up monitoring and logging as needed
+2026-09-30 20:43:16 INF ArgoCD bootstrap completed successfully
+
+== 3. After: what bootstrap changed
+APPLICATIONSET           GIT SOURCES                                           CONFIGHUB SOURCE
+argocd                   http://git.git-server.svc.cluster.local/platform.git  oci://oci.hub.confighub.com/space/klab24-0930-argo-cd-{{name}}
+cert-manager             http://git.git-server.svc.cluster.local/platform.git  oci://oci.hub.confighub.com/space/klab24-0930-cert-manager-{{name}}
+external-dns             http://git.git-server.svc.cluster.local/platform.git  -
+external-secrets         http://git.git-server.svc.cluster.local/platform.git  -
+homer-dashboard          http://git.git-server.svc.cluster.local/platform.git  oci://oci.hub.confighub.com/space/klab24-0930-homer-dashboard-{{name}}
+kube-prometheus-stack    http://git.git-server.svc.cluster.local/platform.git  -
+kyverno                  http://git.git-server.svc.cluster.local/platform.git  -
+kyverno-policies         http://git.git-server.svc.cluster.local/platform.git  -
+kyverno-policy-reporter  http://git.git-server.svc.cluster.local/platform.git  -
+loki                     http://git.git-server.svc.cluster.local/platform.git  -
+longhorn                 http://git.git-server.svc.cluster.local/platform.git  -
+metallb                  http://git.git-server.svc.cluster.local/platform.git  -
+metrics-server           http://git.git-server.svc.cluster.local/platform.git  oci://oci.hub.confighub.com/space/klab24-0930-metrics-server-{{name}}
+oauth2-proxy             http://git.git-server.svc.cluster.local/platform.git  -
+reloader                 http://git.git-server.svc.cluster.local/platform.git  -
+traefik                  http://git.git-server.svc.cluster.local/platform.git  oci://oci.hub.confighub.com/space/klab24-0930-traefik-{{name}}
+velero                   http://git.git-server.svc.cluster.local/platform.git  -
+
+The field managers of the metrics-server ApplicationSet's template:
+  kubectl (Apply): destination, ignoreDifferences, project, source, syncPolicy
+  argocd-controller (Apply): destination, ignoreDifferences, project, source, syncPolicy
+  kubara-argocd-bootstrap (Apply): destination, project, sources, syncPolicy
+
+Argo CD synced metrics-server from Git: hub runs 1 replica, Git's default.
+APPLICATION           SYNC       HEALTH       READS  SYNCED
+hub-argocd            OutOfSync  Degraded     Git    c47e43ed77e1f803ca2
+hub-cert-manager      Unknown    Degraded     Git
+hub-homer-dashboard   Unknown    Healthy      Git
+hub-metrics-server    OutOfSync  Healthy      Git    c47e43ed77e1f803ca2
+hub-traefik           OutOfSync  Progressing  Git    c47e43ed77e1f803ca2
+spoke-cert-manager    Unknown    Degraded     Git
+spoke-metrics-server  Unknown    Healthy      Git
+spoke-traefik         Synced     Progressing  Git    c47e43ed77e1f803ca2
+
+$ cub kubara check platform --prefix klab24-0930 --hub-context kind-klab24-hub
+klab24-0930-argo-cd-hub: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is OutOfSync; Argo CD reports hub-argocd as Degraded; Argo CD runs nothing, and the latest release, 1, is sha256:e1252e9bb5b1
+klab24-0930-bootstrap-crds-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab24-0930-bootstrap-crds-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab24-0930-cert-manager-hub: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is Unknown; Argo CD reports hub-cert-manager as Degraded; Argo CD would delete ClusterIssuer//letsencrypt-staging, ClusterRole//cert-manager-cainjector, ClusterRole//cert-manager-cluster-view, ClusterRole//cert-manager-controller-approve:cert-manager-io, ClusterRole//cert-manager-controller-certificates, ClusterRole//cert-manager-controller-certificatesigningrequests, ClusterRole//cert-manager-controller-challenges, ClusterRole//cert-manager-controller-clusterissuers, ClusterRole//cert-manager-controller-ingress-shim, ClusterRole//cert-manager-controller-issuers, ClusterRole//cert-manager-controller-orders, ClusterRole//cert-manager-edit, ClusterRole//cert-manager-view, ClusterRole//cert-manager-webhook:subjectaccessreviews, ClusterRoleBinding//cert-manager-cainjector, ClusterRoleBinding//cert-manager-controller-approve:cert-manager-io, ClusterRoleBinding//cert-manager-controller-certificates, ClusterRoleBinding//cert-manager-controller-certificatesigningrequests, ClusterRoleBinding//cert-manager-controller-challenges, ClusterRoleBinding//cert-manager-controller-clusterissuers, ClusterRoleBinding//cert-manager-controller-ingress-shim, ClusterRoleBinding//cert-manager-controller-issuers, ClusterRoleBinding//cert-manager-controller-orders, ClusterRoleBinding//cert-manager-webhook:subjectaccessreviews, Deployment/cert-manager/cert-manager, Deployment/cert-manager/cert-manager-cainjector, Deployment/cert-manager/cert-manager-webhook, MutatingWebhookConfiguration//cert-manager-webhook, Namespace//cert-manager, PrometheusRule/cert-manager/cert-manager, Role/cert-manager/cert-manager-webhook:dynamic-serving, Role/kube-system/cert-manager-cainjector:leaderelection, Role/kube-system/cert-manager:leaderelection, RoleBinding/cert-manager/cert-manager-webhook:dynamic-serving, RoleBinding/kube-system/cert-manager-cainjector:leaderelection, RoleBinding/kube-system/cert-manager:leaderelection, Service/cert-manager/cert-manager, Service/cert-manager/cert-manager-cainjector, Service/cert-manager/cert-manager-webhook, ServiceAccount/cert-manager/cert-manager, ServiceAccount/cert-manager/cert-manager-cainjector, ServiceAccount/cert-manager/cert-manager-webhook, ServiceMonitor/cert-manager/cert-manager, ValidatingWebhookConfiguration//cert-manager-webhook; Argo CD runs nothing, and the latest release, 1, is sha256:d5efa8261713
+klab24-0930-cert-manager-spoke: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is Unknown; Argo CD reports spoke-cert-manager as Degraded; Argo CD would delete ClusterIssuer//letsencrypt-staging, ClusterRole//cert-manager-cainjector, ClusterRole//cert-manager-cluster-view, ClusterRole//cert-manager-controller-approve:cert-manager-io, ClusterRole//cert-manager-controller-certificates, ClusterRole//cert-manager-controller-certificatesigningrequests, ClusterRole//cert-manager-controller-challenges, ClusterRole//cert-manager-controller-clusterissuers, ClusterRole//cert-manager-controller-ingress-shim, ClusterRole//cert-manager-controller-issuers, ClusterRole//cert-manager-controller-orders, ClusterRole//cert-manager-edit, ClusterRole//cert-manager-view, ClusterRole//cert-manager-webhook:subjectaccessreviews, ClusterRoleBinding//cert-manager-cainjector, ClusterRoleBinding//cert-manager-controller-approve:cert-manager-io, ClusterRoleBinding//cert-manager-controller-certificates, ClusterRoleBinding//cert-manager-controller-certificatesigningrequests, ClusterRoleBinding//cert-manager-controller-challenges, ClusterRoleBinding//cert-manager-controller-clusterissuers, ClusterRoleBinding//cert-manager-controller-ingress-shim, ClusterRoleBinding//cert-manager-controller-issuers, ClusterRoleBinding//cert-manager-controller-orders, ClusterRoleBinding//cert-manager-webhook:subjectaccessreviews, Deployment/cert-manager/cert-manager, Deployment/cert-manager/cert-manager-cainjector, Deployment/cert-manager/cert-manager-webhook, MutatingWebhookConfiguration//cert-manager-webhook, Namespace//cert-manager, PrometheusRule/cert-manager/cert-manager, Role/cert-manager/cert-manager-webhook:dynamic-serving, Role/kube-system/cert-manager-cainjector:leaderelection, Role/kube-system/cert-manager:leaderelection, RoleBinding/cert-manager/cert-manager-webhook:dynamic-serving, RoleBinding/kube-system/cert-manager-cainjector:leaderelection, RoleBinding/kube-system/cert-manager:leaderelection, Service/cert-manager/cert-manager, Service/cert-manager/cert-manager-cainjector, Service/cert-manager/cert-manager-webhook, ServiceAccount/cert-manager/cert-manager, ServiceAccount/cert-manager/cert-manager-cainjector, ServiceAccount/cert-manager/cert-manager-webhook, ServiceMonitor/cert-manager/cert-manager, ValidatingWebhookConfiguration//cert-manager-webhook; Argo CD runs nothing, and the latest release, 1, is sha256:bd208e58bbf8
+klab24-0930-homer-dashboard-hub: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is Unknown; Argo CD would delete ConfigMap/homer-dashboard/homer-assets-icons, ConfigMap/homer-dashboard/homer-assets-tools, ConfigMap/homer-dashboard/homer-config, ConfigMap/homer-dashboard/lighttpd-config, Deployment/homer-dashboard/homer-dashboard, Namespace//homer-dashboard, Service/homer-dashboard/homer-dashboard; Argo CD runs nothing, and the latest release, 1, is sha256:7c3a0cb3b8bf
+klab24-0930-metrics-server-hub: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is OutOfSync; Argo CD runs nothing, and the latest release, 5, is sha256:c6679f69d0fc
+klab24-0930-metrics-server-spoke: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is Unknown; Argo CD would delete APIService//v1beta1.metrics.k8s.io, ClusterRole//system:metrics-server, ClusterRole//system:metrics-server-aggregated-reader, ClusterRoleBinding//metrics-server:system:auth-delegator, ClusterRoleBinding//system:metrics-server, Deployment/metrics-server/metrics-server, Namespace//metrics-server, RoleBinding/kube-system/metrics-server-auth-reader, Service/metrics-server/metrics-server, ServiceAccount/metrics-server/metrics-server, ServiceMonitor/metrics-server/metrics-server; Argo CD runs nothing, and the latest release, 3, is sha256:e2f6c49cd5e6
+klab24-0930-traefik-hub: FAIL: it still lists Git sources, which Argo CD reads before the release; sync status is OutOfSync; Argo CD runs nothing, and the latest release, 1, is sha256:eba846cf1259; Argo CD reports hub-traefik as Progressing
+klab24-0930-traefik-spoke: FAIL: it still lists Git sources, which Argo CD reads before the release; Argo CD runs nothing, and the latest release, 1, is sha256:8e3b80a84bd9; Argo CD reports spoke-traefik as Progressing
+error: 8 of 10 variants do not run their approved release as they should
+
+== 4. Hand the hub to ConfigHub again: handover.sh
+
+$ bash confighub/handover.sh
+
+== 0/6 Check before changing anything
+
+== 1/6 One Target per cluster, in klab24-0930-targets
+
+== 2/6 Each variant releases to its own cluster's Target
+
+== 3/6 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base
+data written to argo-cd/current.yaml
+the argo-cd base already points its ApplicationSets at ConfigHub
+
+== 4/6 Release each variant, stage by stage: promote, approve, publish
+cert-manager: every variant has a release; later changes go through your own change orders
+homer-dashboard: every variant has a release; later changes go through your own change orders
+metrics-server: every variant has a release; later changes go through your own change orders
+traefik: every variant has a release; later changes go through your own change orders
+argo-cd: every variant is released
+
+== 5/6 Hand the hub to ConfigHub (your hub cluster)
+hub-cert-manager: prunes nothing
+spoke-cert-manager: prunes nothing
+hub-homer-dashboard: prunes nothing
+hub-metrics-server: prunes nothing
+spoke-metrics-server: prunes nothing
+hub-traefik: prunes nothing
+spoke-traefik: prunes nothing
+hub-argocd: prunes nothing
+secret/confighub-klab24-0930-targets unchanged
+data written to argo-cd/released.yaml
+appproject.argoproj.io/hub-dev serverside-applied
+applicationset.argoproj.io/argocd serverside-applied
+applicationset.argoproj.io/cert-manager serverside-applied
+applicationset.argoproj.io/homer-dashboard serverside-applied
+applicationset.argoproj.io/metrics-server serverside-applied
+applicationset.argoproj.io/traefik serverside-applied
+applicationset.argoproj.io/argocd patched
+applicationset.argoproj.io/cert-manager patched
+applicationset.argoproj.io/homer-dashboard patched
+applicationset.argoproj.io/metrics-server patched
+applicationset.argoproj.io/traefik patched
+hub-cert-manager reads oci://oci.hub.confighub.com/space/klab24-0930-cert-manager-hub
+spoke-cert-manager reads oci://oci.hub.confighub.com/space/klab24-0930-cert-manager-spoke
+hub-homer-dashboard reads oci://oci.hub.confighub.com/space/klab24-0930-homer-dashboard-hub
+hub-metrics-server reads oci://oci.hub.confighub.com/space/klab24-0930-metrics-server-hub
+spoke-metrics-server reads oci://oci.hub.confighub.com/space/klab24-0930-metrics-server-spoke
+hub-traefik reads oci://oci.hub.confighub.com/space/klab24-0930-traefik-hub
+spoke-traefik reads oci://oci.hub.confighub.com/space/klab24-0930-traefik-spoke
+hub-argocd reads oci://oci.hub.confighub.com/space/klab24-0930-argo-cd-hub
+
+== 6/6 argobot reports each Application's live status to its variant Space
+secret/argobot-secrets unchanged
+namespace/argobot configured
+serviceaccount/argobot unchanged
+role.rbac.authorization.k8s.io/argobot unchanged
+rolebinding.rbac.authorization.k8s.io/argobot unchanged
+deployment.apps/argobot unchanged
+Waiting for deployment spec update to be observed...
+Waiting for deployment "argobot" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "argobot" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "argobot" rollout to finish: 1 old replicas are pending termination...
+deployment "argobot" successfully rolled out
+klab24-0930-cert-manager-hub: hub-cert-manager Synced Degraded at sha256:d5efa8261713
+klab24-0930-cert-manager-spoke: spoke-cert-manager Synced Degraded at sha256:bd208e58bbf8
+klab24-0930-homer-dashboard-hub: hub-homer-dashboard Synced Healthy at sha256:7c3a0cb3b8bf
+klab24-0930-metrics-server-hub: hub-metrics-server Synced Progressing at sha256:c6679f69d0fc
+klab24-0930-metrics-server-spoke: spoke-metrics-server Synced Healthy at sha256:e2f6c49cd5e6
+klab24-0930-traefik-hub: hub-traefik OutOfSync Progressing at sha256:eba846cf1259
+klab24-0930-traefik-spoke: spoke-traefik OutOfSync Progressing at sha256:8e3b80a84bd9
+klab24-0930-argo-cd-hub: hub-argocd Synced Degraded at sha256:e1252e9bb5b1
+
+Done. Kubara's hub now reads each cluster's approved release from ConfigHub,
+and argobot writes each Application's sync and health to its variant Space.
+Watch it with: kubectl get applications -n argocd
+A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;
+without it, Argo CD empties the values of the Secrets ConfigHub holds without values.
+
+APPLICATIONSET           GIT SOURCES                                           CONFIGHUB SOURCE
+argocd                   -                                                     oci://oci.hub.confighub.com/space/klab24-0930-argo-cd-{{name}}
+cert-manager             -                                                     oci://oci.hub.confighub.com/space/klab24-0930-cert-manager-{{name}}
+external-dns             http://git.git-server.svc.cluster.local/platform.git  -
+external-secrets         http://git.git-server.svc.cluster.local/platform.git  -
+homer-dashboard          -                                                     oci://oci.hub.confighub.com/space/klab24-0930-homer-dashboard-{{name}}
+kube-prometheus-stack    http://git.git-server.svc.cluster.local/platform.git  -
+kyverno                  http://git.git-server.svc.cluster.local/platform.git  -
+kyverno-policies         http://git.git-server.svc.cluster.local/platform.git  -
+kyverno-policy-reporter  http://git.git-server.svc.cluster.local/platform.git  -
+loki                     http://git.git-server.svc.cluster.local/platform.git  -
+longhorn                 http://git.git-server.svc.cluster.local/platform.git  -
+metallb                  http://git.git-server.svc.cluster.local/platform.git  -
+metrics-server           -                                                     oci://oci.hub.confighub.com/space/klab24-0930-metrics-server-{{name}}
+oauth2-proxy             http://git.git-server.svc.cluster.local/platform.git  -
+reloader                 http://git.git-server.svc.cluster.local/platform.git  -
+traefik                  -                                                     oci://oci.hub.confighub.com/space/klab24-0930-traefik-{{name}}
+velero                   http://git.git-server.svc.cluster.local/platform.git  -
+
+APPLICATION           SYNC       HEALTH       READS      SYNCED
+hub-argocd            Synced     Degraded     ConfigHub  sha256:e1252e9bb5b1
+hub-cert-manager      Synced     Degraded     ConfigHub  sha256:d5efa8261713
+hub-homer-dashboard   Synced     Healthy      ConfigHub  sha256:7c3a0cb3b8bf
+hub-metrics-server    Synced     Progressing  ConfigHub  sha256:c6679f69d0fc
+hub-traefik           OutOfSync  Progressing  ConfigHub  sha256:eba846cf1259
+spoke-cert-manager    Synced     Degraded     ConfigHub  sha256:bd208e58bbf8
+spoke-metrics-server  Synced     Healthy      ConfigHub  sha256:e2f6c49cd5e6
+spoke-traefik         OutOfSync  Progressing  ConfigHub  sha256:8e3b80a84bd9
+
+metrics-server runs 3 replicas on hub and 3 on spoke again.
+
+$ cub kubara check platform --prefix klab24-0930 --hub-context kind-klab24-hub
+klab24-0930-argo-cd-hub: FAIL: Argo CD reports hub-argocd as Degraded
+klab24-0930-bootstrap-crds-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab24-0930-bootstrap-crds-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab24-0930-cert-manager-hub: FAIL: Argo CD reports hub-cert-manager as Degraded
+klab24-0930-cert-manager-spoke: FAIL: Argo CD reports spoke-cert-manager as Degraded
+klab24-0930-homer-dashboard-hub: hub-homer-dashboard runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab24-0930-metrics-server-hub: NOT YET: hub-metrics-server runs release 5, synced, prunes nothing, keeps Secret values; Argo CD reports hub-metrics-server as Progressing, not Healthy yet
+klab24-0930-metrics-server-spoke: spoke-metrics-server runs release 3, synced, healthy, prunes nothing, keeps Secret values
+klab24-0930-traefik-hub: FAIL: sync status is OutOfSync; Argo CD reports hub-traefik as Progressing
+klab24-0930-traefik-spoke: FAIL: sync status is OutOfSync; Argo CD reports spoke-traefik as Progressing
+error: 5 of 10 variants do not run their approved release as they should, and 1 of 10 variants are not Healthy yet; run check again once they are
+
+# A minute later, once Argo CD had synced traefik:
+
+$ cub kubara check platform --prefix klab24-0930 --hub-context kind-klab24-hub
+klab24-0930-argo-cd-hub: FAIL: Argo CD reports hub-argocd as Degraded
+klab24-0930-bootstrap-crds-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab24-0930-bootstrap-crds-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab24-0930-cert-manager-hub: FAIL: Argo CD reports hub-cert-manager as Degraded
+klab24-0930-cert-manager-spoke: FAIL: Argo CD reports spoke-cert-manager as Degraded
+klab24-0930-homer-dashboard-hub: hub-homer-dashboard runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab24-0930-metrics-server-hub: hub-metrics-server runs release 5, synced, healthy, prunes nothing, keeps Secret values
+klab24-0930-metrics-server-spoke: spoke-metrics-server runs release 3, synced, healthy, prunes nothing, keeps Secret values
+klab24-0930-traefik-hub: NOT YET: hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports hub-traefik as Progressing, not Healthy yet
+klab24-0930-traefik-spoke: NOT YET: spoke-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports spoke-traefik as Progressing, not Healthy yet
+error: 3 of 10 variants do not run their approved release as they should, and 2 of 10 variants are not Healthy yet; run check again once they are
