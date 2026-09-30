@@ -9,7 +9,7 @@ and then prod.
 ```bash
 bash examples/kind-lab/up.sh     # the Kubara platform, about 10 minutes
 cub auth login
-bash examples/kind-lab/run.sh    # the cub kubara story, about 15 minutes
+bash examples/kind-lab/run.sh    # the cub kubara story, about 20 minutes
 bash examples/kind-lab/upgrade.sh    # optional: newer Kubara catalogs, through the stages
 bash examples/kind-lab/handback.sh   # optional: hand the hub back to Git
 bash examples/kind-lab/down.sh   # remove it
@@ -26,10 +26,13 @@ v0.2.2, before argobot.
 - Docker, with about 5 GB of memory and a few CPU cores to spare for two kind
   clusters. On a busy machine, Argo CD's repo server can fail its health
   checks and restart, which slows every sync.
-- `kind`, `kubectl`, `helm`, `git` and `jq`.
+- `kind`, `kubectl`, `helm`, `git` and `jq`. The recorded runs used kind
+  v0.31.0 with Kubernetes v1.35.0.
 - [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer. The lab has run on v0.15.0 and v0.16.0.
-- The `cub` CLI and the plugin: `cub plugin install confighub/kubara-confighub`.
+- The `cub` CLI, v0.6.8 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
 - A ConfigHub organization, for `run.sh` only. `up.sh` needs no account.
+  `run.sh` writes to the organization your current `cub` context points at;
+  set `CUB_CONTEXT` to choose another.
 
 ## What up.sh builds
 
