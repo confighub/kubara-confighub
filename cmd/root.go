@@ -183,7 +183,12 @@ files its ApplicationSet uses. Then write:
 apply.sh creates a component, a base Space and a rollout workflow per Kubara
 component, then a variant Space per cluster holding that cluster's render.
 It creates no Targets and releases nothing: Kubara's hub, AppProject and
-ApplicationSets keep delivering from Git until handover.`,
+ApplicationSets keep delivering from Git until handover.
+
+Run it again after Kubara generates something new, such as a new catalog
+version. Each base whose render changed takes the difference as one change, a
+three-way merge that keeps changes made in ConfigHub since, in a change order
+on its rollout workflow for you to promote, approve and release.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
 			p, err := platform.Load(args[0])

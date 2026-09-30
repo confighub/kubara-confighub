@@ -186,3 +186,69 @@ func TestApprovalPatchCarriesAllowAuthors(t *testing.T) {
 		t.Fatalf("stagesJSON = %s", got)
 	}
 }
+
+// A re-run after Kubara generates something new, such as a new catalog
+// version, proposes the difference to each base as one reviewed change: a
+// three-way merge that keeps changes made in ConfigHub, in a change order on
+// the base's rollout workflow.
+func TestApplyProposesWhatKubaraGeneratesNow(t *testing.T) {
+	out := t.TempDir()
+	pl := build(t)
+	if _, err := Write(pl, Options{Out: out, AllowAuthors: true, Render: fakeRender}); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(out, "apply.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	script := string(b)
+	for _, want := range []string{
+		"cub space create kx-kubara-generated --allow-exists --quiet",
+		`--merge-source "$(cub unit get --space kx-kubara-generated "$unit" -o jq=.Unit.UnitID)"`,
+		`--merge-base "$took" --merge-end "$now" --annotation "` + GeneratedAnnotation + `=$now"`,
+		`cub changeorder create --space "$base" "$order" --change-workflow "$base/rollout"`,
+		// A merge that changes nothing proposes nothing.
+		`[ "$(cub unit get --space "$base" "$unit" -o jq=.Unit.HeadRevisionNum)" != "$head" ] || return 0`,
+		// A base from before this took its first content from Kubara: revision 2.
+		`cub revision data --space "$base" "$unit" 2 --filename "$unit/taken.yaml"`,
+	} {
+		if !strings.Contains(script, want) {
+			t.Errorf("apply.sh lacks %q", want)
+		}
+	}
+	// cub unit create --allow-exists merges a new file into a unit that
+	// exists, with no change order, so apply.sh creates a base only once.
+	for _, l := range strings.Split(script, "\n") {
+		if strings.Contains(l, "cub unit create --space kx-") && strings.Contains(l, "-base ") && strings.Contains(l, "--allow-exists") {
+			t.Errorf("apply.sh must create a base only when it does not exist: %s", l)
+		}
+	}
+	if !strings.Contains(script, "cub unit get --space kx-traefik-base traefik --quiet >/dev/null 2>&1 || cub unit create --space kx-traefik-base traefik traefik/base.yaml") {
+		t.Error("apply.sh must create a base only when it does not exist")
+	}
+	for _, c := range pl.Components {
+		if len(c.Variants) == 0 {
+			continue
+		}
+		workflow := strings.Index(script, "cub changeworkflow create --space "+c.Base+" rollout ")
+		take := strings.Index(script, "take_generated "+c.Base+" "+c.Name+" "+c.Name+"/base.yaml ")
+		if workflow < 0 || take < workflow {
+			t.Errorf("%s: the base and its rollout workflow must exist before it takes what Kubara generates", c.Name)
+		}
+	}
+}
+
+func TestGeneratedDescNamesTheCatalogAndCharts(t *testing.T) {
+	pl := build(t)
+	for _, c := range pl.Components {
+		if c.Name != "traefik" {
+			continue
+		}
+		d := generatedDesc(c, "hub")
+		if !strings.Contains(d, "from "+c.Catalog) || !strings.Contains(d, "traefik ") {
+			t.Fatalf("desc = %q", d)
+		}
+		return
+	}
+	t.Fatal("no traefik in the fixture")
+}

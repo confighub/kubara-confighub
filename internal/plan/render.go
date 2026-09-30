@@ -62,6 +62,8 @@ func Render(p Plan) string {
 	w("  the stages above in order, each waiting for the stage ahead, and an approval attestation")
 	w("  (cub variant approve) before each release. Each variant records its cluster's own render as a change.")
 	w("  Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.")
+	w("  One more Space, %s-kubara-generated, keeps what Kubara generated for each base, so a new", p.Prefix)
+	w("  catalog version reaches a base as one change you review.")
 	w("  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering")
 	w("  from Git until handover, which points each ApplicationSet at the cluster's approved release instead.")
 	w("")
