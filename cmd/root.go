@@ -161,7 +161,7 @@ Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kub
 		},
 	}
 	planCmd.Flags().StringVar(&po.Prefix, "prefix", "kubara", "prefix for everything the plan would create in ConfigHub")
-	planCmd.Flags().StringVar(&stages, "stages", "", "the stage order, comma-separated; by default dev, staging, prod, then any others")
+	planCmd.Flags().StringVar(&stages, "stages", "", "the stage order: each stage config.yaml uses, once, comma-separated; by default dev, staging, prod, then any others")
 
 	var ao plan.Options
 	var aStages, aOut string
@@ -235,7 +235,7 @@ on its rollout workflow for you to promote, approve and release.`,
 	}
 	applyCmd.Flags().StringVar(&aOut, "out", "", "directory to write the renders, workflows and apply.sh (required)")
 	applyCmd.Flags().StringVar(&ao.Prefix, "prefix", "kubara", "prefix for everything apply.sh creates in ConfigHub")
-	applyCmd.Flags().StringVar(&aStages, "stages", "", "the stage order, comma-separated; by default dev, staging, prod, then any others")
+	applyCmd.Flags().StringVar(&aStages, "stages", "", "the stage order: each stage config.yaml uses, once, comma-separated; by default dev, staging, prod, then any others")
 	applyCmd.Flags().StringArrayVar(&capsFlags, "capabilities", nil, "render a cluster with its own Kubernetes version and APIs, read from a kubectl context: <cluster>=<context> (repeatable)")
 	applyCmd.Flags().BoolVar(&allowAuthors, "allow-authors", true, "let whoever promotes a change also approve it; set false once a second person approves")
 	_ = applyCmd.MarkFlagRequired("out")

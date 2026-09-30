@@ -203,6 +203,10 @@ func TestExplicitStageOrder(t *testing.T) {
 	if strings.Join(got, ",") != "dev,canary,prod" {
 		t.Fatalf("order = %v", got)
 	}
+	got = orderStages([]string{"prod", "canary", "dev"}, []string{"canary", "dev", "prod"})
+	if strings.Join(got, ",") != "canary,dev,prod" {
+		t.Fatalf("order = %v", got)
+	}
 	got = orderStages([]string{"prod", "staging", "dev", "edge"}, nil)
 	if strings.Join(got, ",") != "dev,staging,prod,edge" {
 		t.Fatalf("default order = %v", got)
@@ -243,5 +247,65 @@ func TestSpokeWithItsOwnArgoCDIsAProblem(t *testing.T) {
 	}
 	if !strings.Contains(strings.Join(pl.Problems, "\n"), "spoke spoke has argocd.selfManaged enabled") {
 		t.Fatalf("expected a selfManaged problem, got %v", pl.Problems)
+	}
+}
+
+const threeStages = `version: v1alpha4
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0
+clusters:
+  - name: hub-dev
+    stage: dev
+    type: hub
+    argocd: {selfManaged: enabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:3.0.0]
+    services: {traefik: {status: enabled}}
+  - name: edge-staging
+    stage: staging
+    type: spoke
+    argocd: {selfManaged: disabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:3.0.0]
+    services: {traefik: {status: enabled}}
+  - name: edge-prod
+    stage: prod
+    type: spoke
+    argocd: {selfManaged: disabled}
+    catalogs: [oci://ghcr.io/kubara-io/catalogs/general:3.0.0]
+    services: {traefik: {status: enabled}}
+`
+
+// A stage --stages left out used to go last, so dev,prod took a change to
+// staging after prod. plan, apply, handover, check and handback all build
+// their plan here, so each refuses such a --stages.
+func TestStagesMustNameEveryStageOnce(t *testing.T) {
+	p := writeConfig(t, threeStages)
+	for _, tc := range []struct {
+		stages []string
+		want   []string
+	}{
+		{[]string{"dev", "prod"}, []string{"--stages dev,prod leaves out staging, the stage of edge-staging.", "such as --stages dev,staging,prod"}},
+		{[]string{"dev", "stagin", "prod"}, []string{"names stagin, which no cluster in config.yaml has", "leaves out staging"}},
+		{[]string{"dev", "staging", "dev", "prod"}, []string{"names dev twice"}},
+	} {
+		_, err := Build(p, Options{Stages: tc.stages})
+		if err == nil {
+			t.Errorf("--stages %v was accepted", tc.stages)
+			continue
+		}
+		for _, w := range tc.want {
+			if !strings.Contains(err.Error(), w) {
+				t.Errorf("--stages %v: error lacks %q:\n%s", tc.stages, w, err)
+			}
+		}
+	}
+	pl, err := Build(p, Options{Stages: []string{"staging", "dev", "prod"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, st := range pl.Stages {
+		got = append(got, st.Name)
+	}
+	if strings.Join(got, ",") != "staging,dev,prod" {
+		t.Errorf("stages = %v, want the order --stages names", got)
 	}
 }

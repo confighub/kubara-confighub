@@ -204,13 +204,11 @@ func Build(p platform.Platform, opts Options) (Plan, error) {
 		}
 		stageClusters[stage] = append(stageClusters[stage], cp)
 	}
+	if err := checkStages(opts.Stages, seenStages, stageClusters); err != nil {
+		return out, err
+	}
 	for _, name := range orderStages(seenStages, opts.Stages) {
 		out.Stages = append(out.Stages, Stage{Name: name, Clusters: stageClusters[name]})
-	}
-	for _, s := range opts.Stages {
-		if _, ok := stageClusters[s]; !ok {
-			out.Problems = append(out.Problems, fmt.Sprintf("--stages names %s, and no cluster has that stage", s))
-		}
 	}
 	// Variants follow the stage order, so a component's first variant is the
 	// cluster a change reaches first, and its render is the base.
@@ -240,22 +238,48 @@ func allowed(svc catalog.Service, clusterType string) bool {
 	return false
 }
 
+// checkStages refuses a --stages that does not name each stage config.yaml
+// uses exactly once. A stage it left out used to go last, after prod, so a
+// forgotten stage took a change after prod. Every command that takes --stages
+// builds its plan here, so each of them refuses it.
+func checkStages(explicit, seen []string, clusters map[string][]ClusterPlan) error {
+	if len(explicit) == 0 {
+		return nil
+	}
+	var problems []string
+	counted := map[string]int{}
+	for _, s := range explicit {
+		counted[s]++
+		if counted[s] == 2 {
+			problems = append(problems, fmt.Sprintf("names %s twice", s))
+		}
+		if _, ok := clusters[s]; !ok && counted[s] == 1 {
+			problems = append(problems, fmt.Sprintf("names %s, which no cluster in config.yaml has", s))
+		}
+	}
+	for _, s := range seen {
+		if counted[s] == 0 {
+			var names []string
+			for _, cl := range clusters[s] {
+				names = append(names, cl.Name)
+			}
+			problems = append(problems, fmt.Sprintf("leaves out %s, the stage of %s", s, strings.Join(names, ", ")))
+		}
+	}
+	if len(problems) == 0 {
+		return nil
+	}
+	return fmt.Errorf("--stages %s %s.\n"+
+		"Name each stage config.yaml uses once, in the order a change reaches them, such as --stages %s, or leave --stages out for that default order",
+		strings.Join(explicit, ","), strings.Join(problems, "; "), strings.Join(orderStages(seen, nil), ","))
+}
+
+// orderStages puts the stages config.yaml uses in the order a change reaches
+// them: as --stages names them, which checkStages has held to naming each one
+// once, or else dev, staging, prod, then the rest.
 func orderStages(seen, explicit []string) []string {
 	if len(explicit) > 0 {
-		var out []string
-		for _, s := range explicit {
-			for _, x := range seen {
-				if x == s {
-					out = append(out, s)
-				}
-			}
-		}
-		for _, x := range seen {
-			if !contains(out, x) {
-				out = append(out, x)
-			}
-		}
-		return out
+		return append([]string(nil), explicit...)
 	}
 	rank := func(s string) int {
 		for i, x := range stageOrder {
@@ -268,13 +292,4 @@ func orderStages(seen, explicit []string) []string {
 	out := append([]string(nil), seen...)
 	sort.SliceStable(out, func(i, j int) bool { return rank(out[i]) < rank(out[j]) })
 	return out
-}
-
-func contains(list []string, s string) bool {
-	for _, x := range list {
-		if x == s {
-			return true
-		}
-	}
-	return false
 }
