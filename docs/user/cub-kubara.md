@@ -313,13 +313,20 @@ A variant passes when all of these are true:
 - One Application reads the variant's release from ConfigHub, and no Git source.
 - Argo CD has synced the latest published release. `check` compares the digest
   Argo CD synced with the release's digest.
+- Argo CD reports the Application as Healthy.
 - Argo CD would delete nothing. Helm hooks do not count, because Argo CD runs
   them as hooks and never prunes them.
 - A sync leaves live Secret values alone.
 
-`check` shows each Application's health, but does not judge it. Health depends
-on the cluster as much as on the release. A variant that no ApplicationSet
-delivers, such as bootstrap-crds, is skipped.
+Health is part of the verdict:
+
+- **Healthy** can pass.
+- **Degraded** or **Missing** is a failure. The reason names the Application.
+- **Progressing**, or any other health, is "not yet". Nothing is wrong so far,
+  but the Application is not Healthy. `check` records nothing for it and exits
+  non-zero. Run it again later.
+
+A variant that no ApplicationSet delivers, such as bootstrap-crds, is skipped.
 
 Run it after a release, when Argo CD has had time to sync. Until then it
 reports the release Argo CD has not pulled yet:
@@ -328,9 +335,24 @@ reports the release Argo CD has not pulled yet:
 kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
+While Argo CD rolls a release out, the Application is Progressing:
+
+```text
+kubara-traefik-hub: NOT YET: hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports hub-traefik as Progressing, not Healthy yet
+```
+
+`check` exits zero only when every variant it judges passes.
+
 With `--record`, `check` records each verdict in the variant's Space as a
-`LiveCheck` attestation on the released revisions. A failed check records a
-rejection that names what is wrong. `--type` sets another attestation type.
+`LiveCheck` attestation on the released revisions. A Pass means every point
+above holds, health included. A failed check records a rejection that names
+what is wrong. A "not yet" records nothing. Each attestation carries the
+Application's name, the revision Argo CD synced and its health as claims.
+`--type` sets another attestation type.
+
+`--record` is off by default, so `check` writes nothing unless you ask. Right
+after a release, a check fails until Argo CD pulls it, and that failure is not
+worth keeping.
 
 ## If something goes wrong
 
@@ -341,6 +363,8 @@ rejection that names what is wrong. `--type` sets another attestation type.
 | `InvalidSpecError ... is not permitted in project` on an Application | The AppProject does not permit the gateway. | Run `handover.sh` again; it applies the AppProject first. |
 | `check` says `a sync Argo CD started from Git is still running` | A sync from before the switch cannot finish. | Run `handover.sh` again; it stops such a sync. |
 | `check` says `Argo CD runs …, and the latest release … is …` | Argo CD has not pulled the newest release yet. | Wait a few minutes, or refresh the Application in Argo CD, then run `check` again. |
+| `check` says `NOT YET: … Progressing` | Argo CD runs the release, and the Application is not Healthy yet. | Wait for the rollout, then run `check` again. If it stays Progressing, look at the Application in Argo CD. |
+| `check` says `Argo CD reports … as Degraded` | The cluster runs the release, and something in it is failing. | Look at the Application's resources in Argo CD. The release may be wrong for this cluster, or the cluster may lack something it needs. |
 | Secret values empty after a manual sync | The sync left out `RespectIgnoreDifferences`. | Restore the values from your secret store, and keep the option on every manual sync. |
 
 ## Refresh the plugin's data

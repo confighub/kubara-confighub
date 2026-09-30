@@ -2,7 +2,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -373,13 +375,17 @@ Use the same --prefix and --stages as apply.`,
 		Short: "Check that each cluster runs the release ConfigHub approved, and optionally record the verdict",
 		Long: `Check Kubara's hub after handover. For each variant, it checks that one
 Application reads the variant's release from ConfigHub and no Git source, that
-Argo CD has synced the latest published release, that Argo CD would delete
-nothing, and that a sync leaves live Secret values alone. Health is shown and
-not judged, because it depends on the cluster as much as on the release.
+Argo CD has synced the latest published release, that the Application is
+Healthy, that Argo CD would delete nothing, and that a sync leaves live Secret
+values alone.
+
+Health is part of the verdict. Degraded or Missing is a failure that names the
+Application. Progressing, or any other health that is not Healthy yet, is
+"not yet": check exits non-zero and records nothing, so run it again later.
 
 With --record, each verdict is recorded in the variant's Space as an
 attestation of --type on the released revisions: a Pass, or a rejection that
-names what is wrong.
+names what is wrong. A "not yet" records nothing.
 
 Use the same --prefix and --stages as apply. It changes nothing on the hub.
 
@@ -397,35 +403,11 @@ Use the same --prefix and --stages as apply. It changes nothing on the hub.
 			}
 			results, err := check.Check(pl, runCommand, co)
 			w := c.OutOrStdout()
-			failed := 0
-			for _, r := range results {
-				switch {
-				case r.Skipped != "":
-					fmt.Fprintf(w, "%s: skipped, %s\n", r.Space, r.Skipped)
-				case r.Passed():
-					fmt.Fprintf(w, "%s: %s runs release %d, synced, prunes nothing, keeps Secret values; health %s", r.Space, r.Application, r.Release, r.Health)
-				default:
-					failed++
-					fmt.Fprintf(w, "%s: FAIL: %s", r.Space, strings.Join(r.Problems, "; "))
-				}
-				if r.Skipped == "" {
-					if r.Recorded != "" {
-						verdict := "a Pass"
-						if !r.Passed() {
-							verdict = "a rejection"
-						}
-						fmt.Fprintf(w, "; recorded %s (%s)", verdict, r.Recorded)
-					}
-					fmt.Fprintln(w)
-				}
-			}
+			printCheck(w, results)
 			if err != nil {
 				return err
 			}
-			if failed > 0 {
-				return fmt.Errorf("%d of %d variants do not run their approved release as they should", failed, len(results))
-			}
-			return nil
+			return checkVerdict(results)
 		},
 	}
 	checkCmd.Flags().StringVar(&ko.Prefix, "prefix", "kubara", "the prefix apply used")
@@ -437,6 +419,59 @@ Use the same --prefix and --stages as apply. It changes nothing on the hub.
 
 	root.AddCommand(services, initCmd, planCmd, applyCmd, handoverCmd, checkCmd, routeCmd, pruneCmd, versionCmd)
 	return root
+}
+
+// printCheck prints one line per variant: a Pass, "not yet", FAIL or skipped,
+// and what was recorded.
+func printCheck(w io.Writer, results []check.Result) {
+	for _, r := range results {
+		switch {
+		case r.Skipped != "":
+			fmt.Fprintf(w, "%s: skipped, %s\n", r.Space, r.Skipped)
+			continue
+		case r.Passed():
+			fmt.Fprintf(w, "%s: %s runs release %d, synced, healthy, prunes nothing, keeps Secret values", r.Space, r.Application, r.Release)
+		case r.NotYet():
+			fmt.Fprintf(w, "%s: NOT YET: %s runs release %d, synced, prunes nothing, keeps Secret values; %s, not Healthy yet", r.Space, r.Application, r.Release, r.Waiting)
+		default:
+			fmt.Fprintf(w, "%s: FAIL: %s", r.Space, strings.Join(r.Problems, "; "))
+			if r.Waiting != "" {
+				fmt.Fprintf(w, "; %s", r.Waiting)
+			}
+		}
+		switch {
+		case r.Recorded != "" && r.Passed():
+			fmt.Fprintf(w, "; recorded a Pass (%s)", r.Recorded)
+		case r.Recorded != "":
+			fmt.Fprintf(w, "; recorded a rejection (%s)", r.Recorded)
+		}
+		fmt.Fprintln(w)
+	}
+}
+
+// checkVerdict is check's exit status: an error when any variant failed or
+// is not Healthy yet.
+func checkVerdict(results []check.Result) error {
+	failed, waiting := 0, 0
+	for _, r := range results {
+		switch {
+		case r.NotYet():
+			waiting++
+		case r.Skipped == "" && !r.Passed():
+			failed++
+		}
+	}
+	var parts []string
+	if failed > 0 {
+		parts = append(parts, fmt.Sprintf("%d of %d variants do not run their approved release as they should", failed, len(results)))
+	}
+	if waiting > 0 {
+		parts = append(parts, fmt.Sprintf("%d of %d variants are not Healthy yet; run check again once they are", waiting, len(results)))
+	}
+	if len(parts) == 0 {
+		return nil
+	}
+	return errors.New(strings.Join(parts, ", and "))
 }
 
 type initOptions struct {

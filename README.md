@@ -183,6 +183,10 @@ Then the same three commands for prod:
 
 ![The change in prod after its own approval and release: the spoke runs 2 replicas, and check --record writes a Pass for each of the 8 delivered variants.](docs/images/cub-kubara/kind-lab-07-change-prod.png)
 
+These screens come from v0.2.2. Its `check --record` wrote a Pass for
+cert-manager while Argo CD reported it Degraded. Since v0.2.3 that is a
+rejection, and Traefik, which stays Progressing on kind, gets "not yet".
+
 ### 6. Check that each cluster runs what was approved
 
 ```bash
@@ -193,16 +197,18 @@ cub kubara check my-platform --hub-context <hub context>
 
 `check` compares the digest Argo CD synced with the digest of the release
 ConfigHub published. It also checks that Argo CD would delete nothing, and
-that a sync leaves live Secret values alone. Health is shown and not judged,
-because it depends on the cluster as much as on the release. Straight after a
-release, before Argo CD has pulled it, `check` says so:
+that a sync leaves live Secret values alone. Health is part of the verdict:
+Degraded or Missing fails, and Progressing is "not yet", which records nothing
+and exits non-zero. Straight after a release, before Argo CD has pulled it,
+`check` says so:
 
 ```text
 kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
 With `--record`, `check` writes each result into the variant's Space as an
-attestation, next to its approvals.
+attestation, next to its approvals. A Pass means the cluster runs the release
+and the Application is Healthy.
 
 ### 7. See what each cluster runs, and who changed it
 
