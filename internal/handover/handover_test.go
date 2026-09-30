@@ -235,6 +235,36 @@ func TestWriteHandoverScript(t *testing.T) {
 		t.Fatal("no ApplicationSet delivers bootstrap-crds, so handover must leave it alone")
 	}
 	check(t, "handover.sh", script)
+	// The hub reports live status only once it reads ConfigHub: argobot is the last step.
+	if strings.Index(script, "k apply -f argobot.yaml") < strings.Index(script, "drop_git_sources\n") {
+		t.Fatal("argobot must be installed after the hub reads ConfigHub")
+	}
+	manifest, err := os.ReadFile(filepath.Join(out, "argobot.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	check(t, "argobot.yaml", string(manifest))
+}
+
+func TestArgobotHasOnlyWhatItNeeds(t *testing.T) {
+	m := argobotManifest()
+	for _, w := range []string{
+		"image: " + ArgobotImage,
+		`resources: ["applications"]`,
+		`verbs: ["get", "list", "watch", "patch"]`,
+		"name: argobot-secrets",
+	} {
+		if !strings.Contains(m, w) {
+			t.Errorf("argobot.yaml lacks %q", w)
+		}
+	}
+	// Kubara's Argo CD namespace holds repository credentials; argobot must
+	// not be able to read them, nor anything outside Applications.
+	for _, bad := range []string{`"secrets"`, "- secrets", `"*"`, "ClusterRole", "CONFIGHUB_WORKER_SECRET\n              value: "} {
+		if strings.Contains(m, bad) {
+			t.Errorf("argobot.yaml grants or holds %q", bad)
+		}
+	}
 }
 
 func check(t *testing.T, name, got string) {

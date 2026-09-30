@@ -9,12 +9,14 @@ and then prod.
 ```bash
 bash examples/kind-lab/up.sh     # the Kubara platform, about 10 minutes
 cub auth login
-bash examples/kind-lab/run.sh    # the cub kubara story, about 6 minutes
+bash examples/kind-lab/run.sh    # the cub kubara story, about 15 minutes
 bash examples/kind-lab/down.sh   # remove it
 ```
 
-The [recorded run](run-2026-09-28.log) shows each command and what it printed,
-from scratch, with `cub kubara` v0.2.2.
+The [recorded run](run-2026-09-30.log) shows each command and what it printed,
+from scratch, with argobot reporting live status and a stage gated on it. The
+[run of 2026-09-28](run-2026-09-28.log) is the same story with `cub kubara`
+v0.2.2, before argobot.
 
 
 ## What you need
@@ -57,10 +59,13 @@ bootstrap, its AppProject and its ApplicationSets.
 | --- | --- |
 | 1 | `cub kubara plan` shows what ConfigHub will hold. It needs no account and changes nothing. |
 | 2 | `cub kubara apply` renders each cluster with its own capabilities, and `apply.sh` creates 6 components and 10 variants in ConfigHub. |
-| 3 | `cub kubara handover` writes `handover.sh`, which releases every variant and points Kubara's ApplicationSets at ConfigHub. |
+| 3 | `cub kubara handover` writes `handover.sh`, which releases every variant, points Kubara's ApplicationSets at ConfigHub, and installs argobot on the hub. |
 | 4 | `cub kubara check` confirms that each cluster runs the release its stage approved. |
-| 5 | Two metrics-server replicas, changed once on the base, and released to dev. `check` fails for metrics-server until Argo CD pulls the release, then passes it. The spoke keeps one replica. |
-| 6 | The same change is promoted, approved and released in prod. `check --record` writes each result into ConfigHub. |
+| 5 | Each variant Space shows its live status, which argobot writes: sync, health and the release Argo CD synced. |
+| 6 | Two metrics-server replicas, changed once on the base, and released to dev. `check` fails for metrics-server until Argo CD pulls the release, then passes it. The spoke keeps one replica. |
+| 7 | The same change is promoted, approved and released in prod. `check --record` writes each result into ConfigHub. |
+| 8 | prod now waits for dev to be Healthy. Three replicas reach dev, and prod accepts them once dev reports Healthy for that release. |
+| 9 | An image that does not exist reaches dev. dev turns Degraded, and ConfigHub refuses to promote the change to prod. The change is then taken back out. |
 
 `run.sh` creates Spaces named `kubara-*` in your organization. `PREFIX=<name>`
 chooses another prefix.
@@ -70,7 +75,9 @@ chooses another prefix.
 Some Applications never turn fully green on kind. None of it affects the
 story, but `check` judges health, so it says so.
 - cert-manager is Degraded, because Let's Encrypt refuses the `example.com`
-  contact address.
+  contact address: its ClusterIssuer cannot register an ACME account. Run
+  `up.sh` with `EMAIL=<your address>` to make it Ready; the lab then registers
+  that address with Let's Encrypt's staging server.
 - Traefik is Progressing, because kind has no load balancer to give it an
   address.
 - The hub's argocd Application is Degraded and never finishes its sync,
@@ -81,9 +88,9 @@ So on kind, `check` fails each Application that is Degraded, such as
 cert-manager. It says "not yet" for each one that is Progressing, such as
 Traefik. It exits non-zero, and `run.sh` carries on. With `--record` it
 records a rejection for each Degraded Application, and nothing for one that is
-Progressing. The
-[recorded run](run-2026-09-28.log) used v0.2.2, which recorded a Pass for all
-of them.
+Progressing. The recorded runs of [2026-09-28](run-2026-09-28.log) and
+[2026-09-30](run-2026-09-30.log) used a `check` from before health was judged,
+which passed each of them.
 
 ## Remove it
 
@@ -97,7 +104,9 @@ CONFIGHUB=yes bash examples/kind-lab/down.sh    # and the lab's kubara-* Spaces
 | Variable | Default | What it sets |
 | --- | --- | --- |
 | `LAB` | `./kubara-lab` | where the platform, the kubeconfigs and the scripts' output go |
-| `HUB`, `SPOKE` | `hub`, `spoke` | the Kubara cluster names; the kind clusters are `kubara-<name>` |
+| `HUB`, `SPOKE` | `hub`, `spoke` | the Kubara cluster names |
+| `KIND` | `kubara` | the prefix of the kind clusters, `<KIND>-<HUB>` and `<KIND>-<SPOKE>` |
+| `EMAIL` | `lab@example.com` | the ACME contact of cert-manager's ClusterIssuer; `up.sh` only |
 | `SERVICES` | `cert-manager,metrics-server,traefik,homer-dashboard` | the Kubara services `init` enables |
 | `PREFIX` | `kubara` | the prefix of the Spaces `run.sh` creates |
 | `NODE_IMAGE` | `kindest/node:v1.35.0` | the kind node image |
