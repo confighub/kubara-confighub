@@ -263,7 +263,9 @@ each service with its chart and version, upstream charts, values files, the
 also lists each object more than one service renders, and which one owns it.
 
 Secrets keep their keys and lose their values, unless --keep-secret-values.
-It contacts no cluster and no ConfigHub server. Running it again into the same
+It contacts no cluster and no ConfigHub server. Helm fetches each chart's
+dependencies into a copy of the charts, so the work directory stays as it
+was, and they are cached for the next render. Running it again into the same
 --out replaces the earlier render.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
@@ -672,7 +674,11 @@ func (o *initOptions) options() (initcfg.Options, error) {
 
 // Execute runs the command tree and exits non-zero on failure.
 func Execute() {
-	if err := newRoot().Execute(); err != nil {
+	err := newRoot().Execute()
+	// Renders read the charts from a copy, so that helm leaves the work
+	// directory alone; remove the copies before exiting.
+	apply.CleanupCharts()
+	if err != nil {
 		if _, ok := err.(errProblems); !ok {
 			fmt.Fprintln(os.Stderr, "error:", err)
 		}
