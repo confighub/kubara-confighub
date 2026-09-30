@@ -1,7 +1,8 @@
 // Package initcfg writes a new Kubara platform config: Kubara's own
-// config.yaml, an .env.example holding no secret, and a record of which
-// catalogs and chart versions were chosen and what the Workshop Catalog says
-// about each. It generates nothing; Kubara does that.
+// config.yaml, an .env.example holding no secret, a record of which catalogs
+// and chart versions were chosen and what the Workshop Catalog says about
+// each, and a .gitignore that keeps .env and fetched charts out of Git. It
+// generates nothing; Kubara does that.
 package initcfg
 
 import (
@@ -34,9 +35,16 @@ type Options struct {
 }
 
 type Result struct {
-	Files   []string
-	Skipped []string // services a cluster type cannot run, by cluster
+	Files     []string
+	Skipped   []string // services a cluster type cannot run, by cluster
+	GitIgnore string   // what init did to .gitignore, in a sentence
 }
+
+// GitIgnoreLines are the lines init makes sure .gitignore holds. .env holds
+// the Argo CD password and a Git token. Helm writes the other three when it
+// fetches a wrapper chart's dependencies. Kubara's own init --prep ignores
+// all four.
+var GitIgnoreLines = []string{".env", "**/charts/", "**/Chart.lock", "**/*.tgz"}
 
 type config struct {
 	Version          string    `yaml:"version"`
@@ -190,7 +198,51 @@ func Write(opts Options) (Result, error) {
 		return res, err
 	}
 	res.Files = append(res.Files, intentPath)
+
+	if res.GitIgnore, err = writeGitIgnore(filepath.Join(opts.Out, ".gitignore")); err != nil {
+		return res, err
+	}
 	return res, nil
+}
+
+// writeGitIgnore writes .gitignore, or adds the lines it lacks to an existing
+// one. It never removes or changes a line.
+func writeGitIgnore(path string) (string, error) {
+	old, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		body := "# Written by cub kubara init. .env holds the Argo CD password and a Git token.\n" +
+			"# Helm writes the rest when it fetches a chart's dependencies.\n" +
+			strings.Join(GitIgnoreLines, "\n") + "\n"
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("wrote %s, which keeps %s out of Git", path, strings.Join(GitIgnoreLines, ", ")), nil
+	}
+	if err != nil {
+		return "", err
+	}
+	have := map[string]bool{}
+	for _, l := range strings.Split(string(old), "\n") {
+		have[strings.TrimSpace(l)] = true
+	}
+	var missing []string
+	for _, l := range GitIgnoreLines {
+		if !have[l] {
+			missing = append(missing, l)
+		}
+	}
+	if len(missing) == 0 {
+		return fmt.Sprintf("left %s as it was; it already keeps %s out of Git", path, strings.Join(GitIgnoreLines, ", ")), nil
+	}
+	body := string(old)
+	if body != "" && !strings.HasSuffix(body, "\n") {
+		body += "\n"
+	}
+	body += "# Added by cub kubara init\n" + strings.Join(missing, "\n") + "\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("added %s to %s", strings.Join(missing, ", "), path), nil
 }
 
 type intentDoc struct {

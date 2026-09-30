@@ -59,7 +59,10 @@ kubara_ generate --helm
 step "3/7 The platform in Git, copied onto the hub's node"
 (
   cd platform
-  [ -d .git ] || { git init -q -b main; printf '.env\n.local/\n' > .gitignore; }
+  [ -d .git ] || git init -q -b main
+  # cub kubara init writes a .gitignore; keep what it has, and make sure it
+  # leaves out .env and Kubara's .local/.
+  for l in .env .local/; do grep -qxF "$l" .gitignore 2>/dev/null || echo "$l" >> .gitignore; done
   git add -A
   git diff --cached --quiet || git -c user.name=kubara-lab -c user.email=lab@example.com commit -q -m "Kubara lab platform"
 )
