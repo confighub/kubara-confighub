@@ -274,7 +274,9 @@ differently records that render as its first change, described as Kubara's
 values for that cluster. You can run the script again safely. It skips what
 exists and leaves alone any change made in ConfigHub since, except that it sets
 a workflow's stages and approval rule back to the plan's when they differ, as
-when a cluster joins in a new stage or you pass `--allow-authors=false`.
+when a cluster joins in a new stage or you pass `--allow-authors=false`. When
+Kubara generates something new for a base, the script proposes it as a change;
+see [a new Kubara catalog](#take-a-new-kubara-catalog-through-the-stages).
 
 Secret values stay out of ConfigHub. A chart can generate a credential at
 render time, as Kubara's bundled Grafana does with its admin password, so every
@@ -391,16 +393,57 @@ Kubara's hub pulls the new release within a few minutes, and `check` confirms
 it. Then do the same for prod. ConfigHub refuses to promote into a stage before
 the stage ahead has released the change.
 
-A change that comes from Kubara itself, such as a new catalog version, is not
-automatic yet. `apply.sh` leaves alone what already exists, so it does not
-replace a base. Run `kubara generate` and `cub kubara apply` again, then bring
-each new render into its base as a change you review, and take it through the
-stages as above:
+## Take a new Kubara catalog through the stages
+
+A change can also come from Kubara itself, such as a new catalog version. Set
+the new catalogs in `config.yaml`, let Kubara generate the platform again, and
+push it to Git as you always do. Then run `apply` again, and its script:
 
 ```bash
-cub unit update --space kubara-metrics-server-base metrics-server \
-  my-platform-confighub/metrics-server/base.yaml --change-desc "Kubara catalog 3.1.0"
+kubara --work-dir my-platform --config-file config.yaml --env-file .env generate --helm
+cub kubara apply my-platform --out my-platform-confighub --capabilities ...
+bash my-platform-confighub/apply.sh
 ```
+
+`apply.sh` keeps what Kubara generated for each base, as the base last took it,
+in the Space `<prefix>-kubara-generated`. When Kubara now generates something
+different, the base takes the difference as one change. It is a three-way
+merge: what Kubara generated before, what it generates now, and the base as
+ConfigHub holds it. So every change made in ConfigHub since stays, such as the
+routing handover gave the argo-cd base, or a replica count. Each change goes
+into a change order on the base's rollout workflow, named
+`kubara-generated-r<n>`, and `apply.sh` lists them:
+
+```text
+kubara-traefik-base took what Kubara generates now: change order kubara-traefik-base/kubara-generated-r3
+```
+
+Review the change, then take it through the stages as any other:
+
+```bash
+cub unit diff --space kubara-traefik-base traefik -u --from=-1
+cub variant promote --change-order kubara-traefik-base/kubara-generated-r3 --target-stage dev
+cub variant approve --change-order kubara-traefik-base/kubara-generated-r3 --stage dev
+cub release publish kubara-traefik-hub --revision ChangeOrder:kubara-traefik-base/kubara-generated-r3
+```
+
+A base that has not changed gets no change order. A platform brought into
+ConfigHub before this keeps working: the first run records what each base
+took when it was created.
+
+Two limits. A variant takes Kubara's change through its base. If Kubara's new
+catalog renders a cluster's own values differently too, bring that into the
+variant yourself. And bootstrap-crds gets a change order like any base, but
+`kubara bootstrap` installs it, so releasing it reaches no cluster.
+
+The kind lab ran this on Kubara v0.16.0, from catalogs 3.0.0 to bootstrap 5.0.1
+and general 5.1.0. See the [recorded run](../../examples/kind-lab/run-v0.16-2026-09-30.log).
+`apply.sh` proposed changes for argo-cd, bootstrap-crds, cert-manager and
+traefik, and none for metrics-server and homer-dashboard, whose renders did not
+change. traefik v3.7.13 went to dev and then prod. The argo-cd base kept its
+routing to ConfigHub. Its release to dev did not land: on kind the hub's argocd
+Application never finishes a sync, because its Ingress gets no address, so Argo
+CD stayed on 3.5.2.
 
 ## See live status and gate a stage on health
 
@@ -583,6 +626,7 @@ hub over again afterwards also worked.
 | `check` says `Argo CD reports … as Degraded` | The cluster runs the release, and something in it is failing. | Look at the Application's resources in Argo CD. The release may be wrong for this cluster, or the cluster may lack something it needs. |
 | `Argo CD would delete the objects above` from `handback.sh` | Git's render lacks objects that Argo CD manages today, usually because a change reached them through ConfigHub only. | Put those objects in Git, push, and run `handback.sh` again. Rerun with `ALLOW_PRUNE=yes` only if the deletion is what you want. |
 | `Some Applications still read ConfigHub` from `handback.sh` | The hub's argocd Application wrote a routed ApplicationSet back before it read Git. | Run `handback.sh` again once the hub is idle. |
+| An argo-cd release does not land, and the hub's argocd Application has a sync that stays Running | Argo CD starts no new sync while one runs, and does not sync again on its own after a sync you stop. | Fix what the sync waits for, such as an Ingress with no address, then sync the Application with Kubara's sync options, `RespectIgnoreDifferences` included. |
 | Secret values empty after a manual sync | The sync left out `RespectIgnoreDifferences`. | Restore the values from your secret store, and keep the option on every manual sync. |
 
 ## Refresh the plugin's data

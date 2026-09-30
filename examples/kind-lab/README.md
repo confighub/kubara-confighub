@@ -10,6 +10,7 @@ and then prod.
 bash examples/kind-lab/up.sh     # the Kubara platform, about 10 minutes
 cub auth login
 bash examples/kind-lab/run.sh    # the cub kubara story, about 15 minutes
+bash examples/kind-lab/upgrade.sh    # optional: newer Kubara catalogs, through the stages
 bash examples/kind-lab/handback.sh   # optional: hand the hub back to Git
 bash examples/kind-lab/down.sh   # remove it
 ```
@@ -26,7 +27,7 @@ v0.2.2, before argobot.
   clusters. On a busy machine, Argo CD's repo server can fail its health
   checks and restart, which slows every sync.
 - `kind`, `kubectl`, `helm`, `git` and `jq`.
-- [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer.
+- [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer. The lab has run on v0.15.0 and v0.16.0.
 - The `cub` CLI and the plugin: `cub plugin install confighub/kubara-confighub`.
 - A ConfigHub organization, for `run.sh` only. `up.sh` needs no account.
 
@@ -70,6 +71,21 @@ bootstrap, its AppProject and its ApplicationSets.
 
 `run.sh` creates Spaces named `kubara-*` in your organization. `PREFIX=<name>`
 chooses another prefix.
+
+## What upgrade.sh does
+
+| Section | What happens |
+| --- | --- |
+| 1 | `config.yaml` moves to Kubara's bootstrap 5.0.1 and general 5.1.0 catalogs. `kubara generate --helm` regenerates the platform, and it is pushed to the lab's Git server. |
+| 2 | `cub kubara plan` shows the new chart versions. |
+| 3 | `cub kubara apply` and `apply.sh` run again. Each base whose render changed takes the difference as one change, in a change order: argo-cd, bootstrap-crds, cert-manager and traefik. The argo-cd base keeps the routing handover gave it. |
+| 4 | traefik v3.7.13 goes to dev, through its change order. The spoke keeps v3.7.12. |
+| 5 | The same upgrade goes to prod, after its own approval. |
+
+The argo-cd change order waits. On kind the hub's argocd Application never
+finishes a sync, because its Ingress gets no address, so an Argo CD upgrade
+cannot land there. The [recorded run on Kubara v0.16](run-v0.16-2026-09-30.log)
+shows it.
 
 ## What handback.sh does
 

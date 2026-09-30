@@ -69,6 +69,8 @@ ConfigHub would hold 25 Spaces: a base Space per component, and a variant Space 
   the stages above in order, each waiting for the stage ahead, and an approval attestation
   (cub variant approve) before each release. Each variant records its cluster's own render as a change.
   Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.
+  One more Space, hx-kubara-generated, keeps what Kubara generated for each base, so a new
+  catalog version reaches a base as one change you review.
   Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering
   from Git until handover, which points each ApplicationSet at the cluster's approved release instead.
 

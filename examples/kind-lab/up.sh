@@ -74,8 +74,16 @@ hub apply -f "$here/git-server.yaml" >/dev/null
 hub -n git-server create configmap git-server --from-file=server.py="$here/git-server.py" --dry-run=client -o yaml | hub apply -f - >/dev/null
 hub -n git-server rollout restart deploy/git >/dev/null
 hub -n git-server rollout status deploy/git --timeout=240s
-hub run git-check --rm -i --restart=Never --image=alpine/git:2.47.2 -q -- ls-remote "$REPO" | grep -q refs/heads/main \
-  || { echo "the Git server does not serve $REPO"; exit 1; }
+# kubectl can fail to attach to a pod that has just started, so try a few times.
+served=no
+for _ in 1 2 3; do
+  hub -n git-server delete pod git-check --ignore-not-found >/dev/null 2>&1
+  if hub -n git-server run git-check --rm -i --restart=Never --image=alpine/git:2.47.2 -q -- ls-remote "$REPO" 2>/dev/null | grep -q refs/heads/main; then
+    served=yes; break
+  fi
+  sleep 5
+done
+[ "$served" = yes ] || { echo "the Git server does not serve $REPO"; exit 1; }
 echo "$REPO serves main"
 
 step "5/7 Kubara's bootstrap: the spoke first, for its CRDs, then the hub"

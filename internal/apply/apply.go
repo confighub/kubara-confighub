@@ -99,6 +99,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line := func(format string, args ...any) { fmt.Fprintf(&body, format+"\n", args...) }
 
 	line(`step "1/2 A component, a base and a rollout workflow per Kubara component"`)
+	line("cub space create %s --allow-exists --quiet", generatedSpace(p))
 	type variantStep struct{ comp, cluster, stage, space, file, desc, note string }
 	var variants []variantStep
 	for _, c := range p.Components {
@@ -130,10 +131,13 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		component := p.Prefix + "-" + c.Name
 		line("cub component create %s --allow-exists --quiet", component)
 		line("cub space create %s --component %s --allow-exists --quiet", c.Base, component)
-		line("cub unit create --space %s %s %s/base.yaml --change-desc %s --allow-exists --quiet", c.Base, c.Name, c.Name, q(fmt.Sprintf("Kubara's %s as generated for %s: the shared base", c.Name, first)))
+		// Not --allow-exists: on a unit that exists, cub merges the file in as
+		// it stands, with no change order. take_generated proposes it instead.
+		line("cub unit get --space %s %s --quiet >/dev/null 2>&1 || cub unit create --space %s %s %s/base.yaml --change-desc %s --quiet", c.Base, c.Name, c.Base, c.Name, c.Name, q(fmt.Sprintf("Kubara's %s as generated for %s: the shared base", c.Name, first)))
 		line("cub changeworkflow create --space %s rollout --filename %s/change-workflow.yaml --allow-exists --quiet", c.Base, c.Name)
 		line("stages_are %s rollout %s || echo %s | cub changeworkflow update --patch --space %s rollout --from-stdin --quiet", c.Base, strings.Join(stages, ","), q(stagesJSON(stages)), c.Base)
 		line("approval_is %s rollout %v || echo %s | cub changeworkflow update --patch --space %s rollout --from-stdin --quiet", c.Base, opts.AllowAuthors, q(approvalJSON(opts.AllowAuthors)), c.Base)
+		line("take_generated %s %s %s/base.yaml %s", c.Base, c.Name, c.Name, q(generatedDesc(c, first)))
 		res.Components++
 		for _, v := range c.Variants {
 			src, ok := renders[v.Cluster][c.ChartPath]
@@ -237,15 +241,83 @@ cub space list --quiet >/dev/null || { echo "cub is not logged in: run cub auth 
 cub changeworkflow --help >/dev/null 2>&1 || { echo "this cub has no change workflows; upgrade cub"; exit 1; }
 
 `)
+	fmt.Fprintf(s, `# What Kubara generates, as each base last took it, is kept in the Space
+# %[1]s, one unit per component. When Kubara generates something new,
+# as after a new catalog version, the base takes the difference as one change.
+# It is a three-way merge, so every change made in ConfigHub since stays. The
+# change goes into a change order on the base's rollout workflow, for you to
+# promote, approve and release stage by stage. The base records the revision
+# of what Kubara generated that it took, as the %[2]s
+# annotation.
+proposed=()
+take_generated() {
+  local base=$1 unit=$2 file=$3 desc=$4 took now head order
+  if ! cub unit get --space %[1]s "$unit" --quiet >/dev/null 2>&1; then
+    # The first run, or a base from before this: it took its first content from Kubara.
+    cub revision data --space "$base" "$unit" 2 --filename "$unit/taken.yaml"
+    cub unit create --space %[1]s "$unit" "$unit/taken.yaml" --change-desc "What $base took from Kubara" --quiet
+    rm -f "$unit/taken.yaml"
+  fi
+  cub unit update --space %[1]s "$unit" "$file" --change-desc "$desc" --quiet
+  now=$(cub unit get --space %[1]s "$unit" -o jq=.Unit.HeadRevisionNum)
+  took=$(cub unit get --space "$base" "$unit" -o 'jq=.Unit.Annotations["%[2]s"] // "2"')
+  [ "$now" = "$took" ] && return 0
+  head=$(cub unit get --space "$base" "$unit" -o jq=.Unit.HeadRevisionNum)
+  cub unit update --space "$base" "$unit" --merge-source "$(cub unit get --space %[1]s "$unit" -o jq=.Unit.UnitID)" \
+    --merge-base "$took" --merge-end "$now" --annotation "%[2]s=$now" --change-desc "$desc" --quiet
+  # A difference in layout only, such as trailing spaces, merges as no change.
+  [ "$(cub unit get --space "$base" "$unit" -o jq=.Unit.HeadRevisionNum)" != "$head" ] || return 0
+  order=kubara-generated-r$now
+  cub changeorder create --space "$base" "$order" --change-workflow "$base/rollout" --description "$desc" --allow-exists --quiet
+  echo "$base took what Kubara generates now: change order $base/$order"
+  proposed+=("$base $unit $order")
+}
+
+`, generatedSpace(p), GeneratedAnnotation)
+}
+
+// GeneratedAnnotation records, on a base's unit, the revision of what Kubara
+// generated that the base has taken.
+const GeneratedAnnotation = "kubara.confighub.com/generated-revision"
+
+// generatedSpace holds what Kubara generated for each component, as its base
+// last took it.
+func generatedSpace(p plan.Plan) string { return p.Prefix + "-kubara-generated" }
+
+// generatedDesc describes a component's render by the catalog and upstream
+// charts it comes from, so a change taken from a new catalog says which.
+func generatedDesc(c plan.Component, cluster string) string {
+	var charts []string
+	for _, u := range c.Upstream {
+		charts = append(charts, u.Chart.Name+" "+u.Chart.Version)
+	}
+	d := fmt.Sprintf("Kubara's %s as generated for %s, from %s", c.Name, cluster, c.Catalog)
+	if len(charts) > 0 {
+		d += " (" + strings.Join(charts, ", ") + ")"
+	}
+	return d
 }
 
 func writeFooter(s *strings.Builder) {
 	s.WriteString(`
 step "Done"
 echo "Every Kubara component now has a base and a variant per cluster in ConfigHub."
-echo "To change the platform: edit a base, promote the change stage by stage with"
-echo "  cub changeorder create ... then cub variant promote and cub variant approve."
-echo "Kubara's hub still delivers from Git; pointing it at approved releases is handover."
+if [ "${#proposed[@]}" -gt 0 ]; then
+  echo
+  echo "Kubara generates something new for these bases. Each took it as one change,"
+  echo "in a change order. Review it, then take it through the stages:"
+  for p in "${proposed[@]}"; do
+    read -r base unit order <<<"$p"
+    echo "  cub unit diff --space $base $unit -u --from=-1   # the change"
+    echo "  cub variant promote --change-order $base/$order --target-stage <stage>"
+    echo "  cub variant approve --change-order $base/$order --stage <stage>"
+    echo "  cub release publish <variant space> --revision ChangeOrder:$base/$order"
+  done
+else
+  echo "To change the platform: edit a base, promote the change stage by stage with"
+  echo "  cub changeorder create ... then cub variant promote and cub variant approve."
+fi
+echo "Before handover, Kubara's hub delivers from Git; handover points it at approved releases."
 `)
 }
 
