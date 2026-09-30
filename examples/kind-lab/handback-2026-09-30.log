@@ -1,0 +1,172 @@
+# handback.sh on the kind lab, recorded on 2026-09-30, straight after the run
+# in run-2026-09-30.log on the same clusters (KIND=klab, PREFIX=klab-0930-m2),
+# with cub kubara built from the handback branch (0.3.0-dev).
+#
+# Before it, Kubara's hub read every release from ConfigHub, argobot ran on the
+# hub, and ConfigHub had released three metrics-server replicas to both
+# clusters. The platform's Git repository still held the chart's default, one.
+# The whole script took about a minute.
+#
+# What to look for:
+# - handback.sh checks each of the 8 Applications against Kubara's Git render
+#   first: each prunes nothing (step 0/4).
+# - Every Application reads Git and syncs a Git commit (steps 1/4 and 4/4). A
+#   sync the hub's argocd Application started from ConfigHub is stopped.
+# - Git delivers what it holds: metrics-server goes back to one replica.
+# - Secrets: a hash of each Secret's data on both clusters, before and after.
+#   handback removes two of its own, argobot's credential and the gateway's.
+#   The other 16 are unchanged. The two removed are shown by name only here;
+#   the run printed their hashes too, which are cut from this log.
+# - Pruning: of the 284 objects the Applications managed before, none was
+#   pruned. Nine are new: Helm hooks (Jobs and their RBAC) that Argo CD runs on
+#   a sync from Git and keeps as hooks.
+# - A new commit, two replicas on the hub, reaches it from Git (section 4).
+#   The Deployment was still rolling out its second pod when the log was taken.
+#
+# Handing the hub over again was run on an earlier lab the same day
+# (PREFIX=klab-0930), after the same handback. The re-run of handover.sh
+# released nothing new, found that each Application prunes nothing, and every
+# Application read ConfigHub again:
+#   == 4/6 Release each variant, stage by stage: promote, approve, publish
+#   cert-manager: every variant has a release; later changes go through your own change orders
+#   ...
+#   argo-cd: every variant is released
+#   == 5/6 Hand the hub to ConfigHub (your hub cluster)
+#   hub-cert-manager: prunes nothing
+#   ... (all eight)
+#   hub-argocd reads oci://oci.hub.confighub.com/space/klab-0930-argo-cd-hub
+#   exit 0
+
+######## KIND=klab PREFIX=klab-0930-m2 bash examples/kind-lab/handback.sh
+
+
+== 1. Before: Kubara's hub reads ConfigHub
+APPLICATION            SYNC     HEALTH        SOURCE   OCI
+hub-argocd             Synced   Degraded      <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-argo-cd-hub
+hub-cert-manager       Synced   Degraded      <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-cert-manager-hub
+hub-homer-dashboard    Synced   Healthy       <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-homer-dashboard-hub
+hub-metrics-server     Synced   Healthy       <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-metrics-server-hub
+hub-traefik            Synced   Progressing   <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-traefik-hub
+spoke-cert-manager     Synced   Degraded      <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-cert-manager-spoke
+spoke-metrics-server   Synced   Healthy       <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-metrics-server-spoke
+spoke-traefik          Synced   Progressing   <none>   oci://oci.hub.confighub.com/space/klab-0930-m2-traefik-spoke
+
+metrics-server runs 3 replicas on hub and 3 on spoke, as ConfigHub released; Git holds the chart's default, 1.
+18 Secrets on the two clusters; 284 objects the Applications manage.
+
+== 2. Hand the hub back to Git
+
+$ cub kubara handback platform --prefix klab-0930-m2 --out confighub --capabilities hub=kind-klab-hub --capabilities spoke=kind-klab-spoke
+Wrote confighub/handback.sh. These ApplicationSets will read Kubara's Git again:
+  argocd
+  cert-manager
+  homer-dashboard
+  metrics-server
+  traefik
+The AppProject hub-dev will permit Kubara's sources only.
+It first checks that none of these would prune anything: hub-argocd, hub-cert-manager, spoke-cert-manager, hub-homer-dashboard, hub-metrics-server, spoke-metrics-server, hub-traefik, spoke-traefik
+
+Next
+  less confighub/handback.sh
+  HUB_CONTEXT=<kubectl context of Kubara's hub> bash confighub/handback.sh
+
+$ bash confighub/handback.sh
+
+== 0/4 Check before changing anything
+hub-argocd: prunes nothing
+hub-cert-manager: prunes nothing
+hub-homer-dashboard: prunes nothing
+hub-metrics-server: prunes nothing
+hub-traefik: prunes nothing
+spoke-cert-manager: prunes nothing
+spoke-metrics-server: prunes nothing
+spoke-traefik: prunes nothing
+
+== 1/4 Kubara's ApplicationSets read Git again, argocd first
+applicationset.argoproj.io/argocd patched
+applicationset.argoproj.io/cert-manager patched
+applicationset.argoproj.io/homer-dashboard patched
+applicationset.argoproj.io/metrics-server patched
+applicationset.argoproj.io/traefik patched
+hub-argocd: stopping a sync Argo CD started from ConfigHub
+hub-argocd reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+hub-cert-manager reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+hub-homer-dashboard reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+hub-metrics-server reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+hub-traefik reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+spoke-cert-manager reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+spoke-metrics-server reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+spoke-traefik reads http://git.git-server.svc.cluster.local/platform.git http://git.git-server.svc.cluster.local/platform.git 
+
+== 2/4 The AppProject permits Kubara's sources only
+appproject.argoproj.io/hub-dev patched
+
+== 3/4 argobot and the gateway credential leave the hub
+namespace "argobot" deleted
+role.rbac.authorization.k8s.io "argobot" deleted from argocd namespace
+rolebinding.rbac.authorization.k8s.io "argobot" deleted from argocd namespace
+secret "confighub-klab-0930-m2-targets" deleted from argocd namespace
+
+== 4/4 Argo CD syncs every Application from Git
+APPLICATION            SYNC     HEALTH        REVISION
+hub-argocd             Synced   Degraded      be6706a47111aef8b1923f9f0989b3e7205e73e4
+hub-cert-manager       Synced   Degraded      be6706a47111aef8b1923f9f0989b3e7205e73e4
+hub-homer-dashboard    Synced   Healthy       be6706a47111aef8b1923f9f0989b3e7205e73e4
+hub-metrics-server     Synced   Healthy       be6706a47111aef8b1923f9f0989b3e7205e73e4
+hub-traefik            Synced   Progressing   be6706a47111aef8b1923f9f0989b3e7205e73e4
+spoke-cert-manager     Synced   Degraded      be6706a47111aef8b1923f9f0989b3e7205e73e4
+spoke-metrics-server   Synced   Healthy       be6706a47111aef8b1923f9f0989b3e7205e73e4
+spoke-traefik          Synced   Progressing   be6706a47111aef8b1923f9f0989b3e7205e73e4
+
+Done. Kubara's hub delivers from Git again. ConfigHub keeps every Space and
+release; to hand the hub over again, run handover.sh.
+
+== 3. After: Git delivers what it holds, and nothing was pruned
+APPLICATION            SYNC     HEALTH        SOURCE                                                 OCI
+hub-argocd             Synced   Degraded      http://git.git-server.svc.cluster.local/platform.git   <none>
+hub-cert-manager       Synced   Degraded      http://git.git-server.svc.cluster.local/platform.git   <none>
+hub-homer-dashboard    Synced   Healthy       http://git.git-server.svc.cluster.local/platform.git   <none>
+hub-metrics-server     Synced   Healthy       http://git.git-server.svc.cluster.local/platform.git   <none>
+hub-traefik            Synced   Progressing   http://git.git-server.svc.cluster.local/platform.git   <none>
+spoke-cert-manager     Synced   Degraded      http://git.git-server.svc.cluster.local/platform.git   <none>
+spoke-metrics-server   Synced   Healthy       http://git.git-server.svc.cluster.local/platform.git   <none>
+spoke-traefik          Synced   Progressing   http://git.git-server.svc.cluster.local/platform.git   <none>
+
+metrics-server runs 1 replica(s) on hub and 1 on spoke, as Git holds.
+handback removed argobot's credential and the gateway's:
+  klab-hub argobot/argobot-secrets
+  klab-hub argocd/confighub-klab-0930-m2-targets
+Every other Secret on both clusters, 16, is unchanged, values included.
+Of the 284 objects the Applications managed before, none was pruned.
+Objects they manage now and did not before (Helm hooks Git's syncs run):
+  hub-argocd batch/Job argocd/argocd-redis-secret-init
+  hub-cert-manager /ServiceAccount cert-manager/cert-manager-startupapicheck
+  hub-cert-manager batch/Job cert-manager/cert-manager-startupapicheck
+  hub-cert-manager rbac.authorization.k8s.io/Role cert-manager/cert-manager-startupapicheck:create-cert
+  hub-cert-manager rbac.authorization.k8s.io/RoleBinding cert-manager/cert-manager-startupapicheck:create-cert
+  spoke-cert-manager /ServiceAccount cert-manager/cert-manager-startupapicheck
+  spoke-cert-manager batch/Job cert-manager/cert-manager-startupapicheck
+  spoke-cert-manager rbac.authorization.k8s.io/Role cert-manager/cert-manager-startupapicheck:create-cert
+  spoke-cert-manager rbac.authorization.k8s.io/RoleBinding cert-manager/cert-manager-startupapicheck:create-cert
+
+$ kubectl --context kind-klab-hub get namespace argobot --ignore-not-found
+
+== 4. A new commit in Git reaches the hub
+
+$ git -C platform add -A
+
+$ git -C platform -c user.name=kubara-lab -c user.email=lab@example.com commit -q -m 'Two metrics-server replicas on hub'
+
+$ kubectl --context kind-klab-hub -n argocd get application hub-metrics-server -o custom-columns=APPLICATION:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,REVISION:.status.sync.revisions[1]
+APPLICATION          SYNC     HEALTH        REVISION
+hub-metrics-server   Synced   Progressing   8922f65f9cff48e66ce1a0632ffa78e44bd0a219
+
+$ git -C platform rev-parse HEAD
+8922f65f9cff48e66ce1a0632ffa78e44bd0a219
+
+$ kubectl --context kind-klab-hub -n metrics-server get deploy metrics-server
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   1/2     2            1           32m
+
+Done. Kubara's hub delivers from Git again. ConfigHub keeps every Space and
+release; bash confighub/handover.sh hands the hub over again.

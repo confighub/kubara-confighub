@@ -10,6 +10,7 @@ and then prod.
 bash examples/kind-lab/up.sh     # the Kubara platform, about 10 minutes
 cub auth login
 bash examples/kind-lab/run.sh    # the cub kubara story, about 15 minutes
+bash examples/kind-lab/handback.sh   # optional: hand the hub back to Git
 bash examples/kind-lab/down.sh   # remove it
 ```
 
@@ -69,6 +70,19 @@ bootstrap, its AppProject and its ApplicationSets.
 
 `run.sh` creates Spaces named `kubara-*` in your organization. `PREFIX=<name>`
 chooses another prefix.
+
+## What handback.sh does
+
+| Section | What happens |
+| --- | --- |
+| 1 | It records a hash of every Secret on both clusters, and every object the Applications manage. |
+| 2 | `cub kubara handback` writes `handback.sh`, which checks that Argo CD would prune nothing, points each ApplicationSet back at Kubara's Git, and removes argobot and the gateway credential. |
+| 3 | Git delivers what it holds: metrics-server goes back to one replica. Every Secret keeps its value, and no object is pruned. |
+| 4 | A new commit in the lab's Git server reaches the hub. |
+
+ConfigHub keeps every Space and release, so `bash kubara-lab/confighub/handover.sh`
+hands the hub over again. The [recorded hand-back](handback-2026-09-30.log)
+followed the recorded run on the same clusters.
 
 ## What to expect on kind
 

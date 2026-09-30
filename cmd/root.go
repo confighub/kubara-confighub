@@ -80,6 +80,7 @@ releases, and the ConfigHub Workshop Catalog adds evidence about each chart.
             releases from ConfigHub instead of Git, and argobot reports each
             one's live status back to ConfigHub.
   check     checks that each cluster runs the release its stage approved.
+  handback  writes handback.sh, which hands Kubara's hub back to Git.
 
 Guide: https://github.com/confighub/kubara-confighub/blob/main/docs/user/cub-kubara.md`,
 		SilenceUsage:  true,
@@ -350,6 +351,71 @@ Use the same --prefix and --stages as apply.`,
 	handoverCmd.Flags().StringArrayVar(&tCaps, "capabilities", nil, "render the hub with its own Kubernetes version and APIs, read from a kubectl context: <hub>=<context>")
 	_ = handoverCmd.MarkFlagRequired("out")
 
+	var bo plan.Options
+	var bStages, bOut, bGateway string
+	var bCaps []string
+	handbackCmd := &cobra.Command{
+		Use:   "handback <kubara-dir> --out <dir>",
+		Short: "Write the steps that hand Kubara's hub back to Git",
+		Long: `Write handback.sh, which undoes handover on the hub. Each ApplicationSet
+handover pointed at ConfigHub reads Kubara's Git sources again, as Kubara
+generated it. Each AppProject it changed permits only Kubara's sources again.
+argobot and the gateway credential leave the hub.
+
+Before any change, handback.sh compares what each Application manages with
+Kubara's Git render for it, and stops if Argo CD would delete anything. Secrets
+keep their live values: each ApplicationSet keeps the rule that leaves Secret
+data alone.
+
+It changes nothing in ConfigHub. Every Space and release stays, so handover.sh
+can hand the hub over again. Git must hold what you want Kubara to deliver: a
+change made in ConfigHub since handover is undone unless it is in Git too.
+
+Give it the platform directory Kubara's Git holds. Use the same --prefix and
+--stages as apply.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			p, err := platform.Load(args[0])
+			if err != nil {
+				return err
+			}
+			bo.Stages = split(bStages)
+			pl, err := plan.Build(p, bo)
+			if err != nil {
+				return err
+			}
+			caps, err := readCapabilities(bCaps)
+			if err != nil {
+				return err
+			}
+			res, err := handover.WriteHandback(pl, handover.HandbackOptions{Out: bOut, Gateway: bGateway, Render: clusterRender(caps)})
+			if err != nil {
+				return err
+			}
+			w := c.OutOrStdout()
+			fmt.Fprintf(w, "Wrote %s. These ApplicationSets will read Kubara's Git again:\n", res.Script)
+			for _, a := range res.Restore.ApplicationSets {
+				fmt.Fprintf(w, "  %s\n", a.Name)
+			}
+			var projects []string
+			for _, pr := range res.Restore.Projects {
+				projects = append(projects, pr.Name)
+			}
+			if len(projects) > 0 {
+				fmt.Fprintf(w, "The AppProject %s will permit Kubara's sources only.\n", strings.Join(projects, ", "))
+			}
+			fmt.Fprintf(w, "It first checks that none of these would prune anything: %s\n", strings.Join(res.Applications, ", "))
+			fmt.Fprintf(w, "\nNext\n  less %s\n  HUB_CONTEXT=<kubectl context of Kubara's hub> bash %s\n", res.Script, res.Script)
+			return nil
+		},
+	}
+	handbackCmd.Flags().StringVar(&bOut, "out", "", "directory to write handback.sh (required); the handover --out directory is a good choice")
+	handbackCmd.Flags().StringVar(&bo.Prefix, "prefix", "kubara", "the prefix apply used")
+	handbackCmd.Flags().StringVar(&bStages, "stages", "", "the stage order apply used")
+	handbackCmd.Flags().StringVar(&bGateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	handbackCmd.Flags().StringArrayVar(&bCaps, "capabilities", nil, "render a cluster with its own Kubernetes version and APIs, read from a kubectl context: <cluster>=<context> (repeatable)")
+	_ = handbackCmd.MarkFlagRequired("out")
+
 	var rPrefix, rGateway, rCharts, rOnly string
 	routeCmd := &cobra.Command{
 		Use:    "route-appsets <argo-cd render>",
@@ -480,7 +546,7 @@ Use the same --prefix and --stages as apply. It changes nothing on the hub.
 	checkCmd.Flags().BoolVar(&co.Record, "record", false, "record each verdict in ConfigHub as an attestation")
 	checkCmd.Flags().StringVar(&co.Type, "type", check.DefaultType, "the attestation type --record uses")
 
-	root.AddCommand(services, initCmd, planCmd, applyCmd, renderCmd, handoverCmd, checkCmd, routeCmd, pruneCmd, versionCmd)
+	root.AddCommand(services, initCmd, planCmd, applyCmd, renderCmd, handoverCmd, checkCmd, handbackCmd, routeCmd, pruneCmd, versionCmd)
 	return root
 }
 
@@ -514,6 +580,32 @@ func hubArgoRender(caps map[string]apply.Capabilities) handover.HubRender {
 			return nil, fmt.Errorf("rendering produced no argo-cd for the hub %s", cluster)
 		}
 		return os.ReadFile(path)
+	}
+}
+
+// clusterRender renders every chart of one cluster the way Kubara's hub
+// delivers it from Git, with the cluster's own capabilities when a context is
+// given.
+func clusterRender(caps map[string]apply.Capabilities) handover.ClusterRender {
+	return func(kubaraDir, cluster string) (map[string][]byte, error) {
+		tmp, err := os.MkdirTemp("", "cub-kubara-git-")
+		if err != nil {
+			return nil, err
+		}
+		defer os.RemoveAll(tmp)
+		renders, err := apply.NewKubaraRenderer(caps)(kubaraDir, cluster, tmp)
+		if err != nil {
+			return nil, err
+		}
+		out := map[string][]byte{}
+		for chart, path := range renders {
+			b, err := os.ReadFile(path)
+			if err != nil {
+				return nil, err
+			}
+			out[chart] = b
+		}
+		return out, nil
 	}
 }
 
