@@ -5,6 +5,17 @@ changing how Kubara works. Each Kubara component gets a base, each cluster
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.2.5, 2026-10-01
+
+Every chart version Kubara's 3.0 catalogs pin is now checked in the
+ConfigHub Workshop Catalog. The Workshop added the 14 that were missing,
+published and signed (confighub/helm-expt#2052). `cub kubara services` and
+`cub kubara plan` now show each 3.0 service as `checked`, with a link to its
+chart page, where before most said which nearby versions the Workshop had.
+
+The snapshot reads the Workshop Catalog at helm-expt `3e63edb`. The 5.x
+catalogs gain the same versions wherever they pin them.
+
 ## 0.2.4, 2026-09-30
 
 A cold read of the guide found six things to fix before handing the plugin

@@ -1,7 +1,7 @@
 {
   "source": {
     "repository": "https://github.com/confighub/helm-expt",
-    "commit": "c808d0db78429a019c9345df3a92d79fa3495f76",
+    "commit": "3e63edb91e5ae7e7d03fb53a0c21cca1bf64c64c",
     "site": "https://confighub.github.io/helm-expt/site/"
   },
   "charts": [
@@ -65,6 +65,27 @@
           "verdict": "flatten-with-routes",
           "objects": 52,
           "listing": "https://confighub.github.io/helm-expt/site/listings/argo-cd-argo-cd-10-2-1-no-crds.json"
+        }
+      ]
+    },
+    {
+      "name": "argo-cd/argo-cd",
+      "chart": "argo-cd",
+      "version": "10.7.0",
+      "repository": "https://argoproj.github.io/argo-helm",
+      "page": "https://confighub.github.io/helm-expt/site/charts/argo-cd-argo-cd-10-7-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "flatten-with-routes",
+          "objects": 55,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/argo-cd-argo-cd-10-7-0-default.json"
+        },
+        {
+          "name": "no-crds",
+          "verdict": "flatten-with-routes",
+          "objects": 52,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/argo-cd-argo-cd-10-7-0-no-crds.json"
         }
       ]
     },
@@ -1061,6 +1082,27 @@
     {
       "name": "external-secrets/external-secrets",
       "chart": "external-secrets",
+      "version": "2.10.0",
+      "repository": "https://charts.external-secrets.io",
+      "page": "https://confighub.github.io/helm-expt/site/charts/external-secrets-external-secrets-2-10-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "flatten-with-routes",
+          "objects": 44,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/external-secrets-external-secrets-2-10-0-default.json"
+        },
+        {
+          "name": "no-crds",
+          "verdict": "flatten-with-routes",
+          "objects": 19,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/external-secrets-external-secrets-2-10-0-no-crds.json"
+        }
+      ]
+    },
+    {
+      "name": "external-secrets/external-secrets",
+      "chart": "external-secrets",
       "version": "2.5.0",
       "repository": "https://charts.external-secrets.io",
       "page": "https://confighub.github.io/helm-expt/site/charts/external-secrets-external-secrets-2-5-0.html",
@@ -1271,6 +1313,21 @@
     {
       "name": "grafana/alloy",
       "chart": "alloy",
+      "version": "1.12.1",
+      "repository": "https://grafana.github.io/helm-charts",
+      "page": "https://confighub.github.io/helm-expt/site/charts/grafana-alloy-1-12-1.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "flatten-with-routes",
+          "objects": 7,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/grafana-alloy-1-12-1-default.json"
+        }
+      ]
+    },
+    {
+      "name": "grafana/alloy",
+      "chart": "alloy",
       "version": "1.8.2",
       "repository": "https://grafana.github.io/helm-charts",
       "page": "https://confighub.github.io/helm-expt/site/charts/grafana-alloy-1-8-2.html",
@@ -1343,6 +1400,21 @@
           "verdict": "unsafe-to-flatten",
           "objects": 19,
           "listing": "https://confighub.github.io/helm-expt/site/listings/grafana-loki-7-1-0-default.json"
+        }
+      ]
+    },
+    {
+      "name": "grafana/loki",
+      "chart": "loki",
+      "version": "7.3.0",
+      "repository": "https://grafana.github.io/helm-charts",
+      "page": "https://confighub.github.io/helm-expt/site/charts/grafana-loki-7-3-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "unsafe-to-flatten",
+          "objects": 19,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/grafana-loki-7-3-0-default.json"
         }
       ]
     },
@@ -1656,6 +1728,27 @@
       ]
     },
     {
+      "name": "jetstack/cert-manager",
+      "chart": "cert-manager",
+      "version": "1.21.1",
+      "repository": "https://charts.jetstack.io",
+      "page": "https://confighub.github.io/helm-expt/site/charts/jetstack-cert-manager-v1-21-1.html",
+      "bases": [
+        {
+          "name": "crds-enabled",
+          "verdict": "flatten-with-routes",
+          "objects": 46,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/jetstack-cert-manager-v1-21-1-crds-enabled.json"
+        },
+        {
+          "name": "default",
+          "verdict": "flatten-with-routes",
+          "objects": 40,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/jetstack-cert-manager-v1-21-1-default.json"
+        }
+      ]
+    },
+    {
       "name": "jetstack/cert-manager-csi-driver",
       "chart": "cert-manager-csi-driver",
       "version": "0.14.0",
@@ -1776,6 +1869,21 @@
       ]
     },
     {
+      "name": "kyverno/kyverno",
+      "chart": "kyverno",
+      "version": "3.9.0",
+      "repository": "https://kyverno.github.io/kyverno",
+      "page": "https://confighub.github.io/helm-expt/site/charts/kyverno-kyverno-3-9-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "unsafe-to-flatten",
+          "objects": 69,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/kyverno-kyverno-3-9-0-default.json"
+        }
+      ]
+    },
+    {
       "name": "kyverno/kyverno-policies",
       "chart": "kyverno-policies",
       "version": "3.8.0",
@@ -1802,6 +1910,21 @@
           "verdict": "unsafe-to-flatten",
           "objects": 11,
           "listing": "https://confighub.github.io/helm-expt/site/listings/kyverno-kyverno-policies-3-8-2-default.json"
+        }
+      ]
+    },
+    {
+      "name": "kyverno/kyverno-policies",
+      "chart": "kyverno-policies",
+      "version": "3.9.0",
+      "repository": "https://kyverno.github.io/kyverno",
+      "page": "https://confighub.github.io/helm-expt/site/charts/kyverno-kyverno-policies-3-9-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "unsafe-to-flatten",
+          "objects": 11,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/kyverno-kyverno-policies-3-9-0-default.json"
         }
       ]
     },
@@ -1853,6 +1976,21 @@
           "verdict": "unsafe-to-flatten",
           "objects": 42,
           "listing": "https://confighub.github.io/helm-expt/site/listings/longhorn-longhorn-1-12-0-default.json"
+        }
+      ]
+    },
+    {
+      "name": "longhorn/longhorn",
+      "chart": "longhorn",
+      "version": "1.12.1",
+      "repository": "https://charts.longhorn.io",
+      "page": "https://confighub.github.io/helm-expt/site/charts/longhorn-longhorn-1-12-1.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "unsafe-to-flatten",
+          "objects": 50,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/longhorn-longhorn-1-12-1-default.json"
         }
       ]
     },
@@ -1910,6 +2048,27 @@
           "verdict": "unsafe-to-flatten",
           "objects": 9,
           "listing": "https://confighub.github.io/helm-expt/site/listings/metrics-server-metrics-server-3-13-1-external-tls-ca.json"
+        }
+      ]
+    },
+    {
+      "name": "metrics-server/metrics-server",
+      "chart": "metrics-server",
+      "version": "3.14.0",
+      "repository": "https://kubernetes-sigs.github.io/metrics-server/",
+      "page": "https://confighub.github.io/helm-expt/site/charts/metrics-server-metrics-server-3-14-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "safe-to-flatten",
+          "objects": 9,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/metrics-server-metrics-server-3-14-0-default.json"
+        },
+        {
+          "name": "external-tls-ca",
+          "verdict": "unsafe-to-flatten",
+          "objects": 9,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/metrics-server-metrics-server-3-14-0-external-tls-ca.json"
         }
       ]
     },
@@ -2195,6 +2354,21 @@
     {
       "name": "policy-reporter/policy-reporter",
       "chart": "policy-reporter",
+      "version": "3.10.0",
+      "repository": "https://kyverno.github.io/policy-reporter",
+      "page": "https://confighub.github.io/helm-expt/site/charts/policy-reporter-policy-reporter-3-10-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "safe-to-flatten",
+          "objects": 8,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/policy-reporter-policy-reporter-3-10-0-default.json"
+        }
+      ]
+    },
+    {
+      "name": "policy-reporter/policy-reporter",
+      "chart": "policy-reporter",
       "version": "3.9.1",
       "repository": "https://kyverno.github.io/policy-reporter",
       "page": "https://confighub.github.io/helm-expt/site/charts/policy-reporter-policy-reporter-3-9-1.html",
@@ -2346,6 +2520,33 @@
       ]
     },
     {
+      "name": "prometheus-community/kube-prometheus-stack",
+      "chart": "kube-prometheus-stack",
+      "version": "88.6.3",
+      "repository": "https://prometheus-community.github.io/helm-charts",
+      "page": "https://confighub.github.io/helm-expt/site/charts/prometheus-community-kube-prometheus-stack-88-6-3.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "unsafe-to-flatten",
+          "objects": 125,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/prometheus-community-kube-prometheus-stack-88-6-3-default.json"
+        },
+        {
+          "name": "existing-secret",
+          "verdict": "unsafe-to-flatten",
+          "objects": 124,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/prometheus-community-kube-prometheus-stack-88-6-3-existing-secret.json"
+        },
+        {
+          "name": "no-crds",
+          "verdict": "unsafe-to-flatten",
+          "objects": 115,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/prometheus-community-kube-prometheus-stack-88-6-3-no-crds.json"
+        }
+      ]
+    },
+    {
       "name": "prometheus-community/kube-state-metrics",
       "chart": "kube-state-metrics",
       "version": "7.4.0",
@@ -2468,6 +2669,21 @@
           "verdict": "safe-to-flatten",
           "objects": 4,
           "listing": "https://confighub.github.io/helm-expt/site/listings/prometheus-community-prometheus-blackbox-exporter-11-15-1-default.json"
+        }
+      ]
+    },
+    {
+      "name": "prometheus-community/prometheus-blackbox-exporter",
+      "chart": "prometheus-blackbox-exporter",
+      "version": "11.18.0",
+      "repository": "https://prometheus-community.github.io/helm-charts",
+      "page": "https://confighub.github.io/helm-expt/site/charts/prometheus-community-prometheus-blackbox-exporter-11-18-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "safe-to-flatten",
+          "objects": 4,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/prometheus-community-prometheus-blackbox-exporter-11-18-0-default.json"
         }
       ]
     },
@@ -2646,6 +2862,21 @@
       ]
     },
     {
+      "name": "stakater/reloader",
+      "chart": "reloader",
+      "version": "2.2.16",
+      "repository": "https://stakater.github.io/stakater-charts",
+      "page": "https://confighub.github.io/helm-expt/site/charts/stakater-reloader-2-2-16.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "safe-to-flatten",
+          "objects": 6,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/stakater-reloader-2-2-16-default.json"
+        }
+      ]
+    },
+    {
       "name": "strimzi/strimzi-kafka-operator",
       "chart": "strimzi-kafka-operator",
       "version": "1.0.0",
@@ -2699,6 +2930,21 @@
           "verdict": "flatten-with-routes",
           "objects": 31,
           "listing": "https://confighub.github.io/helm-expt/site/listings/traefik-traefik-41-0-2-default.json"
+        }
+      ]
+    },
+    {
+      "name": "traefik/traefik",
+      "chart": "traefik",
+      "version": "41.4.0",
+      "repository": "oci://ghcr.io/traefik/helm",
+      "page": "https://confighub.github.io/helm-expt/site/charts/traefik-traefik-41-4-0.html",
+      "bases": [
+        {
+          "name": "default",
+          "verdict": "flatten-with-routes",
+          "objects": 31,
+          "listing": "https://confighub.github.io/helm-expt/site/listings/traefik-traefik-41-4-0-default.json"
         }
       ]
     },
