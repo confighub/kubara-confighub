@@ -62,7 +62,7 @@ Components: a base per component, a variant per cluster it runs on
               Workshop checked this version (default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/traefik-traefik-41-0-2.html
 
 Workshop evidence  10 of 10 upstream charts checked at the exact version Kubara pins; 0 checked at another version; 0 from another repository; 0 not in the Workshop Catalog.
-                   Kubara's catalogs stay the source of every component; evidence only annotates it. Workshop Catalog at c808d0db7.
+                   Kubara's catalogs stay the source of every component; evidence only annotates it. Workshop Catalog at 3e63edb91.
 
 ConfigHub would hold 25 Spaces: a base Space per component, and a variant Space per cluster it runs on.
   Each base holds what Kubara generated for the earliest-stage cluster that runs it, and a rollout workflow:
