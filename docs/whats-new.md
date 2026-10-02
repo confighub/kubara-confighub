@@ -5,6 +5,65 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.3.0, 2026-10-02
+
+`cub kubara` now works with ConfigHub v0.8.0 and `cub` v0.8.0, and `check`
+asks ConfigHub through the SDK. Use `cub` and ConfigHub v0.8.0 or newer with
+this release.
+
+**`check` no longer runs `cub`.** `check` and `check --record` used to run
+`cub release list` and `cub attestation create`, and read what they printed.
+They now ask ConfigHub in the plugin's own process, through the ConfigHub SDK
+(`core/cubapi` v0.8.0). This is the Kubara step of confighub/helm-expt#2063.
+- What `check` prints, its verdicts, how it judges health, "not yet", and the
+  attestation it records are the same as before: the same type, revision,
+  claims and note.
+- The login is the one `cub` passes a plugin, which is what you get when you
+  run `cub kubara check`. `CUB_CONTEXT` still chooses another context. Run
+  on its own, the plugin uses `CUB_SERVER` and `CUB_TOKEN`, or else `cub`'s
+  current context.
+- With no login, `check` says so and how to get one, instead of passing on an
+  error from `cub`.
+- `check` still runs `kubectl`, to read Kubara's hub.
+
+**The scripts still use `cub`, on purpose.** `apply.sh`, `handover.sh` and
+`handback.sh` are for you to read and then run, so every step in them is a
+`cub` or `kubectl` command you can run yourself. helm-expt#2063 leaves open
+whether that changes.
+
+**Fixed for ConfigHub v0.8.0.** Three things `handover.sh` did stopped working:
+- **Targets.** A Target no longer names a worker, a provider or parameters,
+  and `cub target create` takes only its name. `handover.sh` now creates the
+  server worker with `cub worker create --is-server-worker --org-role none`,
+  and gives the worker's bot user View and ViewChildren on each cluster's
+  Target, which is how Argo CD may pull the releases published for it. It no
+  longer writes `worker.json`.
+- **argobot.** argobot v0.1.7 found its Targets by the worker they named, and
+  stopped at start-up with ``unrecognized attribute name `BridgeWorkerID` ``,
+  so `handover.sh` failed at step 6 with "no live status yet". `handover.sh`
+  now installs argobot v0.1.8, which finds its Targets by that grant.
+- **Live status.** A worker used to be allowed to write to the Spaces that
+  released to its Targets. Now it needs a grant, and argobot's writes were
+  refused with `permission denied`. `handover.sh` gives the worker's bot user
+  Edit on each variant Space, and on no other Space. Edit covers the Space's
+  own fields, such as its annotations and labels; ConfigHub v0.8.0 has no
+  narrower grant for the live status alone.
+
+`check` also works around a fault in SDK core v0.8.0: its `ResolveClient`
+reads `CUB_CONFIG`, which names `cub`'s config directory, as the config file.
+
+Every other `cub` command the scripts run was checked against `cub` v0.8.0
+and needed no change.
+
+**What was run.** On the kind lab, with Kubara v0.16.0, `cub` v0.8.0 and
+ConfigHub v0.8.0, all of `run.sh` passed, from scratch
+([log](../examples/kind-lab/run-sdk-2026-10-02.log)): `apply.sh`,
+`handover.sh`, `check`, argobot's live status, a change released to dev and
+then prod, `check --record`, a promotion gated on dev's health, and a broken
+release held back from prod and demoted. The log ends with `check` run on its
+own with only `CUB_CONTEXT`, with only `CUB_SERVER` and `CUB_TOKEN`, and with
+no login.
+
 ## 0.2.5, 2026-10-01
 
 Every chart version Kubara's 3.0 catalogs pin is now checked in the

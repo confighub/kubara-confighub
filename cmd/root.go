@@ -560,7 +560,7 @@ Use the same --prefix and --stages as apply. It changes nothing on the hub.
 			if err != nil {
 				return err
 			}
-			results, err := check.Check(pl, runCommand, co)
+			results, err := check.Check(pl, runCommand, check.NewHub(version), co)
 			w := c.OutOrStdout()
 			printCheck(w, results)
 			if err != nil {

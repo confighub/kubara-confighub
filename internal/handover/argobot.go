@@ -6,7 +6,7 @@ import "fmt"
 // watches Argo CD's Applications and writes each one's sync and health to its
 // variant Space as confighub.com/live-status, which ConfigHub's Healthy gate
 // and its UI read. See https://github.com/confighub/argobot.
-const ArgobotImage = "ghcr.io/confighub/argobot:v0.1.7"
+const ArgobotImage = "ghcr.io/confighub/argobot:v0.1.8"
 
 // LiveStatus is the Space annotation argobot writes.
 const LiveStatus = "confighub.com/live-status"

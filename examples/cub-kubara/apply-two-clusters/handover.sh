@@ -125,19 +125,24 @@ fi
 
 step "1/6 One Target per cluster, in kx-targets"
 cub space create kx-targets --allow-exists --quiet
-cub worker create --space kx-targets server-worker --filename worker.json --allow-exists --quiet
-cub target create hub '{}' server-worker --space kx-targets --provider OCI --toolchain Any --allow-exists --quiet
-cub target create edge '{}' server-worker --space kx-targets --provider OCI --toolchain Any --allow-exists --quiet
+# A Target names no worker. The server worker is the identity Argo CD pulls
+# as, and it reaches a Target through a grant to its bot user: View to find
+# the Target, and ViewChildren to pull the releases published for it.
+cub worker create --space kx-targets server-worker --is-server-worker --org-role none --allow-exists --quiet
+bot_user=$(cub worker get --space kx-targets server-worker -o jq=.BridgeWorker.UserID | tr -d '"\n')
+[ -n "$bot_user" ] && [ "$bot_user" != null ] || { echo "the worker kx-targets/server-worker has no bot user to grant the Targets to"; exit 1; }
+cub target create hub --space kx-targets --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --allow-exists --quiet
+cub target create edge --space kx-targets --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --allow-exists --quiet
 
 step "2/6 Each variant releases to its own cluster's Target"
 cub unit set-target --space kx-traefik-hub traefik kx-targets/hub --quiet
-cub space update kx-traefik-hub --release-target kx-targets/hub --quiet
+cub space update kx-traefik-hub --release-target kx-targets/hub --permission "Edit:$bot_user" --quiet
 cub unit set-target --space kx-traefik-edge traefik kx-targets/edge --quiet
-cub space update kx-traefik-edge --release-target kx-targets/edge --quiet
+cub space update kx-traefik-edge --release-target kx-targets/edge --permission "Edit:$bot_user" --quiet
 cub unit set-target --space kx-homer-dashboard-hub homer-dashboard kx-targets/hub --quiet
-cub space update kx-homer-dashboard-hub --release-target kx-targets/hub --quiet
+cub space update kx-homer-dashboard-hub --release-target kx-targets/hub --permission "Edit:$bot_user" --quiet
 cub unit set-target --space kx-argo-cd-hub argo-cd kx-targets/hub --quiet
-cub space update kx-argo-cd-hub --release-target kx-targets/hub --quiet
+cub space update kx-argo-cd-hub --release-target kx-targets/hub --permission "Edit:$bot_user" --quiet
 
 step "3/6 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base"
 cub unit data --space kx-argo-cd-base argo-cd -O argo-cd/current.yaml
@@ -268,7 +273,8 @@ done
 
 step "6/6 argobot reports each Application's live status to its variant Space"
 # argobot runs as the Targets' server worker, the identity Argo CD already pulls
-# releases with: it can read and annotate only the Spaces those Targets release.
+# releases with. Step 2 gave its bot user Edit on each variant Space, which is
+# what lets it write the Space's live status.
 # No personal token goes into the cluster. Its ID and secret go from cub into
 # the Secret through file descriptors, as above.
 k create namespace argobot --dry-run=client -o yaml | k apply -f - >/dev/null

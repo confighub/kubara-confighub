@@ -19,7 +19,8 @@ bash examples/kind-lab/down.sh   # remove it
 The [recorded run](run-2026-09-30.log) shows each command and what it printed,
 from scratch, with argobot reporting live status and a stage gated on it. The
 [run of 2026-09-28](run-2026-09-28.log) is the same story with `cub kubara`
-v0.2.2, before argobot.
+v0.2.2, before argobot. The [run of 2026-10-02](run-sdk-2026-10-02.log) is
+the same story against ConfigHub v0.8.0, with `cub kubara` 0.3.0.
 
 
 ## What you need
@@ -30,7 +31,8 @@ v0.2.2, before argobot.
 - `kind`, `kubectl`, `helm`, `git` and `jq`. The recorded runs used kind
   v0.31.0 with Kubernetes v1.35.0.
 - [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer. The lab has run on v0.15.0 and v0.16.0.
-- The `cub` CLI, v0.6.8 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
+- The `cub` CLI, v0.8.0 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
+  The plugin from 0.3.0 on needs ConfigHub v0.8.0 or newer too.
 - A ConfigHub organization, for `run.sh` only. `up.sh` needs no account.
   `run.sh` writes to the organization your current `cub` context points at;
   set `CUB_CONTEXT` to choose another.
