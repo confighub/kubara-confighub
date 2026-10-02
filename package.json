@@ -115,6 +115,7 @@
     "kubara-mini-idp:orphan-audit:receipt-verify": "node scripts/audit-kubara-mini-idp-orphans.mjs --receipt-verify",
     "kubara-release:generate": "node scripts/verify-kubara-release-acceptance.mjs --generate",
     "kubara-release:verify-static": "node scripts/verify-kubara-release-acceptance.mjs --verify-static",
-    "kubara-release:verify": "node scripts/verify-kubara-release-acceptance.mjs --verify"
+    "kubara-release:verify": "node scripts/verify-kubara-release-acceptance.mjs --verify",
+    "no-personal-names:verify": "node scripts/verify-no-personal-names.mjs"
   }
 }
