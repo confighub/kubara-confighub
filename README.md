@@ -1,12 +1,31 @@
 # Kubara on ConfigHub
 
-Run your platform with [Kubara](https://kubara.io), and approve every change
-to it in [ConfigHub](https://confighub.com). Each cluster runs only the release
-its stage approved, and you can see who approved it.
+Manage your clusters' add-ons with [Kubara](https://kubara.io), and approve
+every change to them in [ConfigHub](https://confighub.com).
 
-Kubara stays exactly as it is. It still generates the platform from your
+Kubara is good at add-ons: the certificate manager, the ingress controller,
+monitoring, secrets and the rest of what a cluster needs before an app can run.
+You choose them in `config.yaml`, and Kubara generates them for each cluster.
+ConfigHub adds what comes next:
+
+- **Bring your own set.** Choose add-ons from Kubara's catalogs. The ConfigHub
+  Workshop Catalog shows which chart versions it has checked, and what each one
+  installs and needs.
+- **Promote, roll out and approve.** You make a change once. It reaches each
+  cluster stage by stage, with an approval in each stage. Each cluster runs only
+  the release its stage approved, and you can see who approved it.
+- **Apps the same way.** An app you deliver through ConfigHub is promoted and
+  approved like the add-ons under it. The
+  [Workshop](https://github.com/confighub/cub-workshop) checks that the add-ons
+  carry what the app needs.
+- **Let an assistant do the work.** Every step is a command that shows its plan
+  before it changes anything, so an AI assistant can run it and stop for your
+  approval.
+
+Kubara stays exactly as it is. It still generates everything from your
 `config.yaml`, and its hub's Argo CD still delivers every service through its
-ApplicationSets. ConfigHub decides what each cluster should run.
+ApplicationSets. ConfigHub decides what each cluster should run. Kubara calls
+the result a platform, and so do the commands and the guide below.
 
 This repository has three things:
 - **the plugin, `cub kubara`**, which brings a Kubara platform into ConfigHub
