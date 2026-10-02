@@ -133,9 +133,6 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	if err := os.MkdirAll(filepath.Join(opts.Out, unitArgoCD), 0o755); err != nil {
 		return res, err
 	}
-	if err := os.WriteFile(filepath.Join(opts.Out, "worker.json"), []byte(workerJSON), 0o644); err != nil {
-		return res, err
-	}
 	if err := os.WriteFile(filepath.Join(opts.Out, "argobot.yaml"), []byte(argobotManifest()), 0o644); err != nil {
 		return res, err
 	}
@@ -176,9 +173,14 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("")
 	line(`step "1/6 One Target per cluster, in %s"`, targets)
 	line("cub space create %s --allow-exists --quiet", targets)
-	line("cub worker create --space %s %s --filename worker.json --allow-exists --quiet", targets, workerSlug)
+	line("# A Target names no worker. The server worker is the identity Argo CD pulls")
+	line("# as, and it reaches a Target through a grant to its bot user: View to find")
+	line("# the Target, and ViewChildren to pull the releases published for it.")
+	line("cub worker create --space %s %s --is-server-worker --org-role none --allow-exists --quiet", targets, workerSlug)
+	line(`bot_user=$(cub worker get --space %s %s -o jq=.BridgeWorker.UserID | tr -d '"\n')`, targets, workerSlug)
+	line(`[ -n "$bot_user" ] && [ "$bot_user" != null ] || { echo "the worker %s/%s has no bot user to grant the Targets to"; exit 1; }`, targets, workerSlug)
 	for _, cl := range clusters {
-		line("cub target create %s '{}' %s --space %s --provider OCI --toolchain Any --allow-exists --quiet", cl, workerSlug, targets)
+		line(`cub target create %s --space %s --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --allow-exists --quiet`, cl, targets)
 	}
 
 	line("")
@@ -186,7 +188,9 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	for _, c := range comps {
 		for _, v := range c.Variants {
 			line("cub unit set-target --space %s %s %s/%s --quiet", v.Space, c.Name, targets, v.Cluster)
-			line("cub space update %s --release-target %s/%s --quiet", v.Space, targets, v.Cluster)
+			// Edit lets argobot, which runs as the worker, write the Space's
+			// live status. A Target no longer gives its worker that.
+			line(`cub space update %s --release-target %s/%s --permission "Edit:$bot_user" --quiet`, v.Space, targets, v.Cluster)
 		}
 	}
 
@@ -359,7 +363,8 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("")
 	line(`step "6/6 argobot reports each Application's live status to its variant Space"`)
 	line("# argobot runs as the Targets' server worker, the identity Argo CD already pulls")
-	line("# releases with: it can read and annotate only the Spaces those Targets release.")
+	line("# releases with. Step 2 gave its bot user Edit on each variant Space, which is")
+	line("# what lets it write the Space's live status.")
 	line("# No personal token goes into the cluster. Its ID and secret go from cub into")
 	line("# the Secret through file descriptors, as above.")
 	line(`k create namespace %s --dry-run=client -o yaml | k apply -f - >/dev/null`, argobotNamespace)
@@ -535,23 +540,6 @@ would_prune() {
 `)
 	return b.String()
 }
-
-const workerJSON = `{
-  "Slug": "server-worker",
-  "OrgRole": "none",
-  "ProvidedInfo": {
-    "IsServerWorker": true,
-    "BridgeWorkerInfo": {
-      "SupportedConfigTypes": [
-        {
-          "ProviderType": "OCI",
-          "ToolchainType": "Any"
-        }
-      ]
-    }
-  }
-}
-`
 
 func q(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
