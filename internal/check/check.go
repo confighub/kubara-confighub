@@ -8,7 +8,6 @@ package check
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 
@@ -21,7 +20,8 @@ const DefaultType = "LiveCheck"
 
 const argoNamespace = "argocd"
 
-// Run runs a command and returns its standard output.
+// Run runs a command and returns its standard output. check reads Kubara's
+// hub with it, through kubectl; it asks ConfigHub through a Hub.
 type Run func(name string, args ...string) ([]byte, error)
 
 // Options says where to look and whether to record.
@@ -132,18 +132,8 @@ func (s syncRecord) fromGit() bool {
 	return false
 }
 
-type release struct {
-	Release struct {
-		ReleaseNum     int    `json:"ReleaseNum"`
-		ManifestDigest string `json:"ManifestDigest"`
-		Published      bool   `json:"Published"`
-	} `json:"Release"`
-}
-
-var recordedID = regexp.MustCompile(`attestation ([0-9a-f-]{36})`)
-
 // Check judges every variant in the plan against what Kubara's hub runs.
-func Check(p plan.Plan, run Run, opts Options) ([]Result, error) {
+func Check(p plan.Plan, run Run, hub Hub, opts Options) ([]Result, error) {
 	if opts.Gateway == "" {
 		opts.Gateway = handover.DefaultGateway
 	}
@@ -203,7 +193,7 @@ func Check(p plan.Plan, run Run, opts Options) ([]Result, error) {
 				r.Problems = append(r.Problems, "no Application reads "+repo+"; run handover.sh")
 			default:
 				judge(&r, a)
-				if err := judgeRelease(&r, a, run); err != nil {
+				if err := judgeRelease(&r, a, hub); err != nil {
 					return results, err
 				}
 			}
@@ -213,7 +203,7 @@ func Check(p plan.Plan, run Run, opts Options) ([]Result, error) {
 
 	if opts.Record {
 		for i := range results {
-			if err := record(&results[i], run, opts.Type); err != nil {
+			if err := record(&results[i], hub, opts.Type); err != nil {
 				return results, err
 			}
 		}
@@ -281,18 +271,14 @@ func judgeHealth(r *Result) {
 }
 
 // judgeRelease checks that Argo CD runs the latest release ConfigHub published.
-func judgeRelease(r *Result, a *application, run Run) error {
-	out, err := run("cub", "release", "list", "--space", r.Space, "-o", "json")
+func judgeRelease(r *Result, a *application, hub Hub) error {
+	rels, err := hub.Releases(r.Space)
 	if err != nil {
 		return fmt.Errorf("%s: listing releases: %w", r.Space, err)
 	}
-	var rels []release
-	if err := json.Unmarshal(out, &rels); err != nil {
-		return fmt.Errorf("%s: listing releases: %w", r.Space, err)
-	}
-	var latest *release
+	var latest *HubRelease
 	for i := range rels {
-		if rels[i].Release.Published && (latest == nil || rels[i].Release.ReleaseNum > latest.Release.ReleaseNum) {
+		if rels[i].Published && (latest == nil || rels[i].Num > latest.Num) {
 			latest = &rels[i]
 		}
 	}
@@ -300,39 +286,40 @@ func judgeRelease(r *Result, a *application, run Run) error {
 		r.Problems = append(r.Problems, "ConfigHub has published no release for it")
 		return nil
 	}
-	r.Release = latest.Release.ReleaseNum
-	if a.Status.Sync.Revision != latest.Release.ManifestDigest {
-		r.Problems = append(r.Problems, fmt.Sprintf("Argo CD runs %s, and the latest release, %d, is %s", short(a.Status.Sync.Revision), r.Release, short(latest.Release.ManifestDigest)))
+	r.Release = latest.Num
+	if a.Status.Sync.Revision != latest.ManifestDigest {
+		r.Problems = append(r.Problems, fmt.Sprintf("Argo CD runs %s, and the latest release, %d, is %s", short(a.Status.Sync.Revision), r.Release, short(latest.ManifestDigest)))
 	}
 	return nil
 }
 
 // record writes the verdict as an attestation on the released revisions: a
 // Pass, or a rejection naming what is wrong. A "not yet" records nothing.
-func record(r *Result, run Run, typ string) error {
+func record(r *Result, hub Hub, typ string) error {
 	if r.Skipped != "" || r.Release == 0 || r.NotYet() {
 		return nil
 	}
-	note := "cub kubara check: " + r.Application + " reads and runs release " + fmt.Sprint(r.Release) + ", synced, healthy, prunes nothing, keeps Secret values"
-	args := []string{"attestation", "create", "--space", r.Space, "--type", typ,
-		"--revision", "LastReleasedRevisionNum",
-		"--claim", "argocd.argoproj.io/application=" + r.Application,
-		"--claim", "argocd.argoproj.io/revision=" + r.Revision,
-		"--claim", "argocd.argoproj.io/health=" + or(r.Health, "none")}
-	if len(r.Problems) > 0 {
-		note = "cub kubara check: " + strings.Join(r.Problems, "; ")
-		if r.Waiting != "" {
-			note += "; " + r.Waiting
-		}
-		args = append(args, "--reject")
+	a := Attestation{
+		Space: r.Space, Type: typ, Revision: "LastReleasedRevisionNum",
+		Claims: map[string]string{
+			"argocd.argoproj.io/application": r.Application,
+			"argocd.argoproj.io/revision":    r.Revision,
+			"argocd.argoproj.io/health":      or(r.Health, "none"),
+		},
+		Note: "cub kubara check: " + r.Application + " reads and runs release " + fmt.Sprint(r.Release) + ", synced, healthy, prunes nothing, keeps Secret values",
 	}
-	out, err := run("cub", append(args, "--note", note)...)
+	if len(r.Problems) > 0 {
+		a.Note = "cub kubara check: " + strings.Join(r.Problems, "; ")
+		if r.Waiting != "" {
+			a.Note += "; " + r.Waiting
+		}
+		a.Reject = true
+	}
+	id, err := hub.Attest(a)
 	if err != nil {
 		return fmt.Errorf("%s: recording the verdict: %w", r.Space, err)
 	}
-	if m := recordedID.FindSubmatch(out); m != nil {
-		r.Recorded = string(m[1])
-	}
+	r.Recorded = id
 	return nil
 }
 
