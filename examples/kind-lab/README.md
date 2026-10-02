@@ -20,7 +20,7 @@ The [recorded run](run-2026-09-30.log) shows each command and what it printed,
 from scratch, with argobot reporting live status and a stage gated on it. The
 [run of 2026-09-28](run-2026-09-28.log) is the same story with `cub kubara`
 v0.2.2, before argobot. The [run of 2026-10-02](run-sdk-2026-10-02.log) is
-against ConfigHub v0.8.0 with `cub kubara` 0.3.0; it stops in section 6.
+the same story against ConfigHub v0.8.0, with `cub kubara` 0.3.0.
 
 
 ## What you need

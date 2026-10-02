@@ -56,12 +56,13 @@ Every other `cub` command the scripts run was checked against `cub` v0.8.0
 and needed no change.
 
 **What was run.** On the kind lab, with Kubara v0.16.0, `cub` v0.8.0 and
-ConfigHub v0.8.0: `apply.sh`, all of `handover.sh`, `check`, argobot's live
-status, and one change released to dev
-([log](../examples/kind-lab/run-sdk-2026-10-02.log)). `check --record` wrote
-a Pass and rejections on the same lab. The recording stops in section 6 of
-`run.sh`. The promotion to prod and the stage gated on dev's health,
-sections 7 to 9, have not run against ConfigHub v0.8.0 yet.
+ConfigHub v0.8.0, all of `run.sh` passed, from scratch
+([log](../examples/kind-lab/run-sdk-2026-10-02.log)): `apply.sh`,
+`handover.sh`, `check`, argobot's live status, a change released to dev and
+then prod, `check --record`, a promotion gated on dev's health, and a broken
+release held back from prod and demoted. The log ends with `check` run on its
+own with only `CUB_CONTEXT`, with only `CUB_SERVER` and `CUB_TOKEN`, and with
+no login.
 
 ## 0.2.5, 2026-10-01
 
