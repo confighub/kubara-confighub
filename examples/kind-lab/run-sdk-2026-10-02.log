@@ -1,0 +1,510 @@
+# The kind lab against ConfigHub v0.8.0, recorded from scratch on 2026-10-02 with
+# cub kubara built from the check-through-the-sdk branch (0.3.0-dev). This is
+# a partial run: it stops in section 6 of run.sh. Sections 7 to 9 are not in
+# it, and have not run against ConfigHub v0.8.0.
+#
+# up.sh built a Kubara v0.16.0 platform (catalogs 3.0.0) on kind v0.31.0 with
+# Kubernetes v1.35.0, on clusters named klab30-hub and klab30-spoke
+# (KIND=klab30): a hub called hub in stage dev and a spoke called spoke in stage
+# prod. Kubara's bootstrap installed Argo CD 3.5.2 on the hub. run.sh then ran
+# against a hosted ConfigHub organization at v0.8.0, with cub v0.8.0 and
+# PREFIX=klab30-1002. handover.sh installed argobot v0.1.8 on the hub.
+#
+# up.sh took 10 minutes. The lab directory is shown as ./kubara-lab. On kind,
+# cert-manager is Degraded (Let's Encrypt refuses the example.com contact),
+# traefik is Progressing (no load balancer), and the hub's argocd Application
+# waits for an Ingress address.
+#
+# What to look for:
+# - Section 3, handover.sh step 1, which prints nothing: the server worker and a Target per cluster
+#   are created the way ConfigHub v0.8.0 takes them. A Target names no worker;
+#   the worker's bot user is granted View and ViewChildren on each Target.
+# - Step 5: every Application prunes nothing, and each then reads its release
+#   from ConfigHub, pulled as that worker.
+# - Step 6: argobot v0.1.8 reports every Application's sync and health to its
+#   variant Space. Step 2 granted the worker's bot user Edit on each of those
+#   Spaces, which ConfigHub v0.8.0 needs before it accepts the write.
+# - Sections 4 and 6: cub kubara check. It asks ConfigHub for each Space's
+#   releases through the SDK, in its own process, and runs no cub. Its output
+#   is what earlier versions printed: Pass, FAIL and NOT YET lines, and after
+#   the release to dev, "Argo CD runs sha256:..., and the latest release, 2,
+#   is sha256:...".
+#
+# Why it stops: the machine went idle while section 6 waited for Argo CD to
+# pull the release, the run was stopped, and the cub login had expired by the
+# time it could be resumed. The release did land: the hub ran two
+# metrics-server replicas. check --record and sections 7 to 9, which include
+# the promotion gated on dev's health, are left to run.
+#
+# Two earlier attempts on the same day stopped in handover.sh step 6, with "no
+# live status yet". First argobot v0.1.7 exited at start-up: ConfigHub v0.8.0
+# refused its Target query with "unrecognized attribute name
+# `BridgeWorkerID`". Then argobot v0.1.8 started, and each write of a Space's
+# live status was refused with "permission denied". handover.sh now installs
+# v0.1.8 and grants Edit, and this recording started from a clean organization
+# on new clusters.
+
+######## KIND=klab30 bash examples/kind-lab/up.sh   (kubara v0.16.0 on the PATH)
+
+
+== 1/7 Two kind clusters: klab30-hub for the hub and klab30-spoke for the spoke
+Creating cluster "klab30-hub" ...
+ • Ensuring node image (kindest/node:v1.35.0) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.35.0) 🖼
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Waiting ≤ 2m0s for control-plane = Ready ⏳  ...
+ ✓ Waiting ≤ 2m0s for control-plane = Ready ⏳
+ • Ready after 18s 💚
+Set kubectl context to "kind-klab30-hub"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-klab30-hub
+
+Not sure what to do next? 😅  Check out https://kind.sigs.k8s.io/docs/user/quick-start/
+Creating cluster "klab30-spoke" ...
+ • Ensuring node image (kindest/node:v1.35.0) 🖼  ...
+ ✓ Ensuring node image (kindest/node:v1.35.0) 🖼
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Waiting ≤ 2m0s for control-plane = Ready ⏳  ...
+ ✓ Waiting ≤ 2m0s for control-plane = Ready ⏳
+ • Ready after 16s 💚
+Set kubectl context to "kind-klab30-spoke"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-klab30-spoke
+
+Thanks for using kind! 😊
+
+== 2/7 A Kubara platform: hub in dev, spoke in prod, with cert-manager,metrics-server,traefik,homer-dashboard
+wrote platform/config.yaml
+wrote platform/.env.example
+wrote platform/confighub-intent.yaml
+left out homer-dashboard on spoke (a spoke; it runs only on hub)
+wrote platform/.gitignore, which keeps .env, **/charts/, **/Chart.lock, **/*.tgz out of Git
+
+Next
+  cp platform/.env.example platform/.env   # then fill in the values it asks for
+  kubara --work-dir platform --config-file config.yaml --env-file .env generate --helm
+  cub kubara plan platform
+2026-10-02 10:58:16 INF All files generated successfully.
+✅ Templating complete! Don't forget to PUSH the changes to apply them!
+
+== 3/7 The platform in Git, copied onto the hub's node
+
+== 4/7 A Git server in the hub that Argo CD can read
+Waiting for deployment "git" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "git" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "git" rollout to finish: 1 old replicas are pending termination...
+deployment "git" successfully rolled out
+http://git.git-server.svc.cluster.local/platform.git serves main
+
+== 5/7 Kubara's bootstrap: the spoke first, for its CRDs, then the hub
+2026-10-02 10:59:09 INF Starting bootstrap process
+2026-10-02 10:59:09 INF Ensuring namespaces exist
+2026-10-02 10:59:09 INF Adding helm repositories
+2026-10-02 10:59:10 INF Added helm repository: "argo-cd"
+2026-10-02 10:59:10 INF Added helm repository: "cert-manager"
+2026-10-02 10:59:14 INF Added helm repository: "kube-prometheus-stack"
+2026-10-02 10:59:16 INF Added helm repository: "external-secrets"
+2026-10-02 10:59:32 INF Refreshed helm repository index
+2026-10-02 10:59:32 INF Updating helm chart dependencies
+2026-10-02 11:00:22 INF Updated helm dependencies for chart: "argo-cd"
+2026-10-02 11:00:35 INF Updated helm dependencies for chart: "bootstrap-crds"
+2026-10-02 11:00:35 INF Applying CRDs
+2026-10-02 11:00:37 INF CRDs applied and established for: "argo-cd"
+2026-10-02 11:00:46 INF CRDs applied and established for: "bootstrap-crds"
+2026-10-02 11:00:46 INF Applying secrets
+2026-10-02 11:00:46 WRN ClusterSecretStore manifest file not provided. You must apply an existing ClusterSecretStore or create one manually
+2026-10-02 11:00:46 INF Created hub secrets successfully
+2026-10-02 11:00:46 INF Secrets applied successfully
+2026-10-02 11:00:46 INF Bootstrapping ArgoCD
+2026-10-02 11:00:48 INF ArgoCD manifest applied successfully
+2026-10-02 11:00:48 INF Waiting for ArgoCD components to be ready
+2026-10-02 11:02:27 INF ArgoCD components are ready
+2026-10-02 11:02:27 INF 
+🎉 ArgoCD bootstrap complete!
+
+You can access the Argo CD UI with user "wizard" and your chosen password "replace-before-use" at:
+
+    kubectl port-forward svc/argocd-server -n argocd 8080:443 --kubeconfig ...
+
+Then open: http://localhost:8080/argocd or try: https://spoke.traefik.me/argocd (if ingress is running)
+
+📝 Next steps:
+1. Log in with username: wizard
+2. Configure your applications
+3. Set up monitoring and logging as needed
+2026-10-02 11:02:27 INF ArgoCD bootstrap completed successfully
+2026-10-02 11:02:27 INF Starting bootstrap process
+2026-10-02 11:02:27 INF Ensuring namespaces exist
+2026-10-02 11:02:27 INF Adding helm repositories
+2026-10-02 11:02:27 INF Added helm repository: "argo-cd"
+2026-10-02 11:02:27 INF Added helm repository: "cert-manager"
+2026-10-02 11:02:27 INF Added helm repository: "kube-prometheus-stack"
+2026-10-02 11:02:27 INF Added helm repository: "external-secrets"
+2026-10-02 11:02:28 INF Refreshed helm repository index
+2026-10-02 11:02:28 INF Updating helm chart dependencies
+2026-10-02 11:02:30 INF Updated helm dependencies for chart: "argo-cd"
+2026-10-02 11:02:38 INF Updated helm dependencies for chart: "bootstrap-crds"
+2026-10-02 11:02:38 INF Applying CRDs
+2026-10-02 11:02:40 INF CRDs applied and established for: "argo-cd"
+2026-10-02 11:02:51 INF CRDs applied and established for: "bootstrap-crds"
+2026-10-02 11:02:51 INF Applying secrets
+2026-10-02 11:02:51 WRN ClusterSecretStore manifest file not provided. You must apply an existing ClusterSecretStore or create one manually
+2026-10-02 11:02:51 INF Created hub secrets successfully
+2026-10-02 11:02:51 INF Secrets applied successfully
+2026-10-02 11:02:51 INF Bootstrapping ArgoCD
+2026-10-02 11:02:54 INF ArgoCD manifest applied successfully
+2026-10-02 11:02:54 INF Waiting for ArgoCD components to be ready
+2026-10-02 11:04:12 INF ArgoCD components are ready
+2026-10-02 11:04:12 INF 
+🎉 ArgoCD bootstrap complete!
+
+You can access the Argo CD UI with user "wizard" and your chosen password "replace-before-use" at:
+
+    kubectl port-forward svc/argocd-server -n argocd 8080:443 --kubeconfig ...
+
+Then open: http://localhost:8080/argocd or try: https://hub.traefik.me/argocd (if ingress is running)
+
+📝 Next steps:
+1. Log in with username: wizard
+2. Configure your applications
+3. Set up monitoring and logging as needed
+2026-10-02 11:04:12 INF ArgoCD bootstrap completed successfully
+
+== 6/7 The spoke joins the hub's Argo CD
+secret/spoke-cluster-secret created
+Waiting for statefulset spec update to be observed...
+Waiting for partitioned roll out to finish: 0 out of 1 new pods have been updated...
+Waiting for 1 pods to be ready...
+Waiting for 1 pods to be ready...
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 1 new pods have been updated...
+
+== 7/7 Argo CD delivers every service to both clusters from Git
+APPLICATION            SYNC     HEALTH
+hub-argocd             Synced   Progressing
+hub-cert-manager       Synced   Degraded
+hub-homer-dashboard    Synced   Healthy
+hub-metrics-server     Synced   Healthy
+hub-traefik            Synced   Progressing
+spoke-cert-manager     Synced   Degraded
+spoke-metrics-server   Synced   Healthy
+spoke-traefik          Synced   Progressing
+
+On kind, cert-manager is Degraded (Let's Encrypt refuses the example.com
+contact), traefik is Progressing (no load balancer), and argocd waits for an
+Ingress address. None of that affects what follows.
+
+The Kubara platform is up. Kubara's hub delivers it from Git. Next:
+  cub auth login
+  bash examples/kind-lab/run.sh
+
+######## KIND=klab30 PREFIX=klab30-1002 bash examples/kind-lab/run.sh
+
+
+== 1. See what ConfigHub will hold. This needs no account and changes nothing.
+
+$ cub kubara plan platform --prefix klab30-1002
+Kubara platform  platform  (generated by Kubara; chart versions read from what it wrote)
+Catalogs         oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0, oci://ghcr.io/kubara-io/catalogs/general:3.0.0
+
+Stages, in the order a change rolls out
+  1. dev
+     hub                    hub    runs Kubara's hub Argo CD
+                                   runs argo-cd, bootstrap-crds, cert-manager, homer-dashboard, metrics-server, traefik
+  2. prod
+     spoke                  spoke  delivered by hub's Argo CD, as Kubara wires it
+                                   runs bootstrap-crds, cert-manager, metrics-server, traefik
+
+Components: a base per component, a variant per cluster it runs on
+  argo-cd  (bootstrap 3.0.0)
+    base      klab30-1002-argo-cd-base  reaches no cluster
+    variants  klab30-1002-argo-cd-<cluster> for hub
+    chart     argo-cd 10.7.0 from https://argoproj.github.io/argo-helm
+              Workshop checked this version (default flatten-with-routes; no-crds flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/argo-cd-argo-cd-10-7-0.html
+  bootstrap-crds  (bootstrap 3.0.0)
+    base      klab30-1002-bootstrap-crds-base  reaches no cluster
+    variants  klab30-1002-bootstrap-crds-<cluster> for hub, spoke
+    chart     cert-manager 1.21.1 from https://charts.jetstack.io
+              Workshop checked this version (crds-enabled flatten-with-routes; default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/jetstack-cert-manager-v1-21-1.html
+    chart     kube-prometheus-stack 88.6.3 from https://prometheus-community.github.io/helm-charts
+              Workshop checked this version (default unsafe-to-flatten; existing-secret unsafe-to-flatten; no-crds unsafe-to-flatten): https://confighub.github.io/helm-expt/site/charts/prometheus-community-kube-prometheus-stack-88-6-3.html
+    chart     external-secrets 2.10.0 from https://charts.external-secrets.io
+              Workshop checked this version (default flatten-with-routes; no-crds flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/external-secrets-external-secrets-2-10-0.html
+  cert-manager  (general 3.0.0)
+    base      klab30-1002-cert-manager-base  reaches no cluster
+    variants  klab30-1002-cert-manager-<cluster> for hub, spoke
+    chart     cert-manager 1.21.1 from https://charts.jetstack.io
+              Workshop checked this version (crds-enabled flatten-with-routes; default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/jetstack-cert-manager-v1-21-1.html
+  homer-dashboard  (general 3.0.0)
+    base      klab30-1002-homer-dashboard-base  reaches no cluster
+    variants  klab30-1002-homer-dashboard-<cluster> for hub
+    chart     Kubara's own chart; no upstream chart to check
+  metrics-server  (general 3.0.0)
+    base      klab30-1002-metrics-server-base  reaches no cluster
+    variants  klab30-1002-metrics-server-<cluster> for hub, spoke
+    chart     metrics-server 3.14.0 from https://kubernetes-sigs.github.io/metrics-server
+              Workshop checked this version (default safe-to-flatten; external-tls-ca unsafe-to-flatten): https://confighub.github.io/helm-expt/site/charts/metrics-server-metrics-server-3-14-0.html
+  traefik  (general 3.0.0)
+    base      klab30-1002-traefik-base  reaches no cluster
+    variants  klab30-1002-traefik-<cluster> for hub, spoke
+    chart     traefik 41.4.0 from oci://ghcr.io/traefik/helm
+              Workshop checked this version (default flatten-with-routes): https://confighub.github.io/helm-expt/site/charts/traefik-traefik-41-4-0.html
+
+Workshop evidence  7 of 7 upstream charts checked at the exact version Kubara pins; 0 checked at another version; 0 from another repository; 0 not in the Workshop Catalog.
+                   Kubara's catalogs stay the source of every component; evidence only annotates it. Workshop Catalog at 3e63edb91.
+
+ConfigHub would hold 16 Spaces: a base Space per component, and a variant Space per cluster it runs on.
+  Each base holds what Kubara generated for the earliest-stage cluster that runs it, and a rollout workflow:
+  the stages above in order, each waiting for the stage ahead, and an approval attestation
+  (cub variant approve) before each release. Each variant records its cluster's own render as a change.
+  Secret values stay out of ConfigHub: a Secret keeps its keys and loses its values.
+  One more Space, klab30-1002-kubara-generated, keeps what Kubara generated for each base, so a new
+  catalog version reaches a base as one change you review.
+  Kubara's hub, AppProject and ApplicationSets stay as Kubara generates them, and keep delivering
+  from Git until handover, which points each ApplicationSet at the cluster's approved release instead.
+
+Next
+  cub kubara apply platform --out <dir>   # render each cluster and write apply.sh, the cub steps above
+
+Offline: no account, no cluster, nothing changed.
+
+== 2. Put the platform into ConfigHub: a base per component, a variant per cluster
+
+$ cub kubara apply platform --prefix klab30-1002 --out confighub --capabilities hub=kind-klab30-hub --capabilities spoke=kind-klab30-spoke
+Wrote confighub/apply.sh: 6 components, 10 variants.
+Rendered hub with its own capabilities, from context kind-klab30-hub: Kubernetes v1.35.0, 168 APIs.
+Rendered spoke with its own capabilities, from context kind-klab30-spoke: Kubernetes v1.35.0, 168 APIs.
+These Secrets go to ConfigHub with their keys and without their values:
+  argo-cd: Secret argocd/cluster-kubernetes.default.svc (3 values)
+  klab30-1002-bootstrap-crds-spoke renders the same as its base, so it records no change
+
+Next
+  less confighub/apply.sh        # read what it will do
+  bash confighub/apply.sh
+
+$ bash confighub/apply.sh
+
+== 0/2 Check before changing anything
+
+== 1/2 A component, a base and a rollout workflow per Kubara component
+Config data written to argo-cd/taken.yaml
+Config data written to bootstrap-crds/taken.yaml
+Config data written to cert-manager/taken.yaml
+Config data written to homer-dashboard/taken.yaml
+Config data written to metrics-server/taken.yaml
+Config data written to traefik/taken.yaml
+
+== 2/2 A variant per cluster, holding that cluster's own render
+klab30-1002-argo-cd-hub: the base is this cluster's render
+klab30-1002-bootstrap-crds-hub: the base is this cluster's render
+klab30-1002-bootstrap-crds-spoke: Kubara renders it the same as on hub; no change to record
+klab30-1002-cert-manager-hub: the base is this cluster's render
+klab30-1002-homer-dashboard-hub: the base is this cluster's render
+klab30-1002-metrics-server-hub: the base is this cluster's render
+klab30-1002-traefik-hub: the base is this cluster's render
+
+== Done
+Every Kubara component now has a base and a variant per cluster in ConfigHub.
+To change the platform: edit a base, promote the change stage by stage with
+  cub changeorder create ... then cub variant promote and cub variant approve.
+Before handover, Kubara's hub delivers from Git; handover points it at approved releases.
+
+== 3. Hand Kubara's hub to ConfigHub
+
+$ cub kubara handover platform --prefix klab30-1002 --out confighub --capabilities hub=kind-klab30-hub
+Wrote confighub/handover.sh. These ApplicationSets will read ConfigHub instead of Git:
+  argocd                   oci://oci.hub.confighub.com/space/klab30-1002-argo-cd-{{name}}
+  cert-manager             oci://oci.hub.confighub.com/space/klab30-1002-cert-manager-{{name}}
+  homer-dashboard          oci://oci.hub.confighub.com/space/klab30-1002-homer-dashboard-{{name}}
+  metrics-server           oci://oci.hub.confighub.com/space/klab30-1002-metrics-server-{{name}}
+  traefik                  oci://oci.hub.confighub.com/space/klab30-1002-traefik-{{name}}
+No ApplicationSet delivers bootstrap-crds, so Kubara's bootstrap keeps it.
+Left on Git, for services this platform does not enable: external-dns, external-secrets, kube-prometheus-stack, kyverno, kyverno-policies, kyverno-policy-reporter, loki, longhorn, metallb, oauth2-proxy, reloader, velero
+Then it installs argobot v0.1.8 on the hub, which writes each variant Space's live status.
+It approves each first release as you in: dev, prod.
+
+Next, after apply.sh
+  less confighub/handover.sh
+  HUB_CONTEXT=<kubectl context of Kubara's hub> bash confighub/handover.sh
+
+$ bash confighub/handover.sh
+
+== 0/6 Check before changing anything
+
+== 1/6 One Target per cluster, in klab30-1002-targets
+
+== 2/6 Each variant releases to its own cluster's Target
+
+== 3/6 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base
+data written to argo-cd/current.yaml
+
+== 4/6 Release each variant, stage by stage: promote, approve, publish
+Promoting klab30-1002-cert-manager-hub into stage dev...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Promoting klab30-1002-cert-manager-spoke into stage prod...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Failed: Get "https://hub.confighub.com/api/space?include=TriggerFilterID%2CTriggerIDs&where=Slug+%3D+%27klab30-1002-homer-dashboard-base%27": net/http: TLS handshake timeout
+Promoting klab30-1002-homer-dashboard-hub into stage dev...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Promoting klab30-1002-metrics-server-hub into stage dev...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Promoting klab30-1002-metrics-server-spoke into stage prod...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Promoting klab30-1002-traefik-hub into stage dev...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Promoting klab30-1002-traefik-spoke into stage prod...
+Upgraded 0 unit(s) behind their upstream
+Marked 1 unit(s) the change order covers and carries no changes for
+Adding 0 unit(s) from upstream at the change order's start
+Promoting klab30-1002-argo-cd-hub into stage dev...
+Upgraded 1 unit(s) behind their upstream
+Adding 0 unit(s) from upstream at the change order's start
+
+== 5/6 Hand the hub to ConfigHub (your hub cluster)
+hub-cert-manager: prunes nothing
+spoke-cert-manager: prunes nothing
+hub-homer-dashboard: prunes nothing
+hub-metrics-server: prunes nothing
+spoke-metrics-server: prunes nothing
+hub-traefik: prunes nothing
+spoke-traefik: prunes nothing
+hub-argocd: prunes nothing
+secret/confighub-klab30-1002-targets created
+data written to argo-cd/released.yaml
+appproject.argoproj.io/hub-dev serverside-applied
+applicationset.argoproj.io/argocd serverside-applied
+applicationset.argoproj.io/cert-manager serverside-applied
+applicationset.argoproj.io/homer-dashboard serverside-applied
+applicationset.argoproj.io/metrics-server serverside-applied
+applicationset.argoproj.io/traefik serverside-applied
+applicationset.argoproj.io/argocd patched
+applicationset.argoproj.io/cert-manager patched
+applicationset.argoproj.io/homer-dashboard patched
+applicationset.argoproj.io/metrics-server patched
+applicationset.argoproj.io/traefik patched
+hub-argocd: stopping a sync Argo CD started from Git
+hub-cert-manager reads oci://oci.hub.confighub.com/space/klab30-1002-cert-manager-hub
+spoke-cert-manager reads oci://oci.hub.confighub.com/space/klab30-1002-cert-manager-spoke
+hub-homer-dashboard reads oci://oci.hub.confighub.com/space/klab30-1002-homer-dashboard-hub
+hub-metrics-server reads oci://oci.hub.confighub.com/space/klab30-1002-metrics-server-hub
+spoke-metrics-server reads oci://oci.hub.confighub.com/space/klab30-1002-metrics-server-spoke
+hub-traefik reads oci://oci.hub.confighub.com/space/klab30-1002-traefik-hub
+spoke-traefik reads oci://oci.hub.confighub.com/space/klab30-1002-traefik-spoke
+hub-argocd reads oci://oci.hub.confighub.com/space/klab30-1002-argo-cd-hub
+
+== 6/6 argobot reports each Application's live status to its variant Space
+secret/argobot-secrets created
+namespace/argobot configured
+serviceaccount/argobot created
+role.rbac.authorization.k8s.io/argobot created
+rolebinding.rbac.authorization.k8s.io/argobot created
+deployment.apps/argobot created
+Waiting for deployment "argobot" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "argobot" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "argobot" rollout to finish: 1 old replicas are pending termination...
+deployment "argobot" successfully rolled out
+klab30-1002-cert-manager-hub: hub-cert-manager OutOfSync Degraded at sha256:76042a18a33a
+klab30-1002-cert-manager-spoke: spoke-cert-manager OutOfSync Degraded at sha256:d41e4458adb9
+klab30-1002-homer-dashboard-hub: hub-homer-dashboard Synced Healthy at sha256:a74066d8c9e5
+klab30-1002-metrics-server-hub: hub-metrics-server Synced Healthy at sha256:07eb84413752
+klab30-1002-metrics-server-spoke: spoke-metrics-server Synced Healthy at sha256:082113a16a49
+klab30-1002-traefik-hub: hub-traefik Synced Progressing at sha256:700c61b812c3
+klab30-1002-traefik-spoke: spoke-traefik OutOfSync Progressing at sha256:bccffc954151
+klab30-1002-argo-cd-hub: hub-argocd OutOfSync Degraded at sha256:baac666a4c2f
+
+Done. Kubara's hub now reads each cluster's approved release from ConfigHub,
+and argobot writes each Application's sync and health to its variant Space.
+Watch it with: kubectl get applications -n argocd
+A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;
+without it, Argo CD empties the values of the Secrets ConfigHub holds without values.
+
+== 4. Check that each cluster runs the release its stage approved
+
+$ cub kubara check platform --prefix klab30-1002 --hub-context kind-klab30-hub
+klab30-1002-argo-cd-hub: FAIL: sync status is OutOfSync; Argo CD reports hub-argocd as Degraded
+klab30-1002-bootstrap-crds-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab30-1002-bootstrap-crds-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab30-1002-cert-manager-hub: FAIL: Argo CD reports hub-cert-manager as Degraded
+klab30-1002-cert-manager-spoke: FAIL: Argo CD reports spoke-cert-manager as Degraded
+klab30-1002-homer-dashboard-hub: hub-homer-dashboard runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab30-1002-metrics-server-hub: hub-metrics-server runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab30-1002-metrics-server-spoke: spoke-metrics-server runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab30-1002-traefik-hub: NOT YET: hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports hub-traefik as Progressing, not Healthy yet
+klab30-1002-traefik-spoke: NOT YET: spoke-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports spoke-traefik as Progressing, not Healthy yet
+error: 3 of 10 variants do not run their approved release as they should, and 2 of 10 variants are not Healthy yet; run check again once they are
+
+== 5. See each cluster's live status in ConfigHub, as argobot reports it
+klab30-1002-argo-cd-hub: hub-argocd OutOfSync Degraded, synced sha256:baac666a4c2f
+klab30-1002-cert-manager-hub: hub-cert-manager Synced Degraded, synced sha256:76042a18a33a
+klab30-1002-cert-manager-spoke: spoke-cert-manager Synced Degraded, synced sha256:d41e4458adb9
+klab30-1002-homer-dashboard-hub: hub-homer-dashboard Synced Healthy, synced sha256:a74066d8c9e5
+klab30-1002-metrics-server-hub: hub-metrics-server Synced Healthy, synced sha256:07eb84413752
+klab30-1002-metrics-server-spoke: spoke-metrics-server Synced Healthy, synced sha256:082113a16a49
+klab30-1002-traefik-hub: hub-traefik Synced Progressing, synced sha256:700c61b812c3
+klab30-1002-traefik-spoke: spoke-traefik Synced Progressing, synced sha256:bccffc954151
+
+== 6. One change, released to dev first: two metrics-server replicas
+
+$ cub function set --space klab30-1002-metrics-server-base --unit metrics-server --change-desc 'Run two metrics-server replicas' set-replicas 2 --quiet
+
+$ cub changeorder create --space klab30-1002-metrics-server-base two-replicas --change-workflow klab30-1002-metrics-server-base/rollout --description 'Two metrics-server replicas' --allow-exists
+Successfully created changeorder two-replicas (15e52b01-3363-4d01-bf6a-33b2ccb3896f)
+
+$ cub variant promote --change-order klab30-1002-metrics-server-base/two-replicas --target-stage dev --quiet
+Promoting klab30-1002-metrics-server-hub into stage dev...
+Upgraded 1 unit(s) behind their upstream
+Adding 0 unit(s) from upstream at the change order's start
+
+$ cub variant approve --change-order klab30-1002-metrics-server-base/two-replicas --stage dev
+Recorded pass Approval attestation 088fea4f-d505-4bdc-88d3-9ed0bffe92cd in klab30-1002-metrics-server-hub, covering 1 revision(s)
+
+$ cub release publish klab30-1002-metrics-server-hub --revision ChangeOrder:klab30-1002-metrics-server-base/two-replicas --quiet
+
+Released to dev. Until Argo CD pulls it, check says so:
+
+$ cub kubara check platform --prefix klab30-1002 --hub-context kind-klab30-hub
+klab30-1002-argo-cd-hub: FAIL: sync status is OutOfSync; Argo CD reports hub-argocd as Degraded
+klab30-1002-bootstrap-crds-hub: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab30-1002-bootstrap-crds-spoke: skipped, no ApplicationSet delivers it; Kubara's bootstrap keeps it
+klab30-1002-cert-manager-hub: FAIL: Argo CD reports hub-cert-manager as Degraded
+klab30-1002-cert-manager-spoke: FAIL: Argo CD reports spoke-cert-manager as Degraded
+klab30-1002-homer-dashboard-hub: hub-homer-dashboard runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab30-1002-metrics-server-hub: FAIL: Argo CD runs sha256:07eb84413752, and the latest release, 2, is sha256:e868449d8b8e
+klab30-1002-metrics-server-spoke: spoke-metrics-server runs release 1, synced, healthy, prunes nothing, keeps Secret values
+klab30-1002-traefik-hub: NOT YET: hub-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports hub-traefik as Progressing, not Healthy yet
+klab30-1002-traefik-spoke: NOT YET: spoke-traefik runs release 1, synced, prunes nothing, keeps Secret values; Argo CD reports spoke-traefik as Progressing, not Healthy yet
+error: 4 of 10 variants do not run their approved release as they should, and 2 of 10 variants are not Healthy yet; run check again once they are
+
+######## The recording stops here, in section 6. See the top of this file.

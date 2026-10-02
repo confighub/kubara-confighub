@@ -114,17 +114,23 @@ What each step needs, with the versions it was tested with:
 
 | Step | Needs |
 | --- | --- |
-| `services`, `init`, `plan` | the `cub` CLI (v0.6.8) and the plugin. No account. |
+| `services`, `init`, `plan` | the `cub` CLI (v0.8.0) and the plugin. No account. |
 | `render` | the above, and `helm` (v4.1). No account. Helm may need network access to fetch charts. |
 | `kubara generate` | [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer (v0.15.0 and v0.16.0). |
 | `apply --capabilities` | a `kubectl` context for each cluster, read only. |
-| `apply.sh` | a ConfigHub organization and `cub auth login`, with rights to create Spaces. |
+| `apply.sh` | a ConfigHub organization (v0.8.0) and `cub auth login`, with rights to create Spaces. |
 | `handover.sh`, `handback.sh` | the above, rights to create workers and Targets, `kubectl` access to Kubara's hub that can write in the `argocd` and `argobot` namespaces, and `jq`. The hub needs Argo CD 3.1 or newer; Kubara ships 3.5. `handover.sh` pulls `ghcr.io/confighub/argobot` onto the hub. |
-| `check` | a ConfigHub organization, and `kubectl` read access to Kubara's hub. |
+| `check` | a ConfigHub organization and `cub auth login`, and `kubectl` read access to Kubara's hub. |
 | `cub stack from-kubara`, `cub stack check` | the [ConfigHub Workshop](https://github.com/confighub/cub-workshop) plugin (`cub plugin install confighub/cub-workshop`), with `node` and `oras`. No account. |
 
+Since 0.3.0 the plugin needs `cub` and ConfigHub v0.8.0 or newer.
+`handover.sh` creates Targets the way ConfigHub has since v0.7, which an
+older `cub` refuses.
+
 The scripts use your current `cub` context, and write to the organization it
-points at. Set `CUB_CONTEXT` to choose another. `handover`, `check` and
+points at. Set `CUB_CONTEXT` to choose another. `check` asks ConfigHub itself,
+through the ConfigHub SDK, with the same login: the one `cub` passes it when
+you run `cub kubara check`. It runs `cub` for nothing. `handover`, `check` and
 `handback` expect releases at `oci.hub.confighub.com`. If your ConfigHub
 serves them elsewhere, pass `--gateway`.
 
@@ -448,7 +454,8 @@ later reads those releases; Kubara v0.16 ships 3.5.
 
 Steps 0 to 4 of the script change only ConfigHub. It creates a Space
 `<prefix>-targets`, with a worker called `server-worker` and a Target per
-cluster. It releases every variant an ApplicationSet delivers, through its
+cluster. The worker's bot user gets View and ViewChildren on each Target, so
+the worker may pull the releases published for it and nothing else. It releases every variant an ApplicationSet delivers, through its
 rollout workflow, stage by stage, with argo-cd last. In each stage it
 promotes, approves and publishes. That first release holds what Git already
 delivers.
@@ -691,7 +698,8 @@ ConfigHub are reported.
 
 **Its credential.** argobot runs as the Targets' server worker, which
 handover creates. It is the same identity Argo CD already pulls releases with.
-It can read and annotate only the Spaces its Targets release to. No personal
+handover.sh gives its bot user Edit on each variant Space, so that it can write
+the Space's live status; it gets no grant on any other Space. No personal
 token goes into the cluster. handover.sh writes the worker's ID and secret into
 the `argobot-secrets` Secret in the `argobot` namespace. argobot's Role lets it
 read and patch Applications in the Argo CD namespace, and nothing else.
