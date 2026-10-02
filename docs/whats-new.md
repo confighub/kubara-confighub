@@ -1,7 +1,7 @@
 # What's new in cub kubara
 
-`cub kubara` brings a platform Kubara generates into ConfigHub, without
-changing how Kubara works. Each Kubara component gets a base, each cluster
+`cub kubara` brings the add-ons Kubara manages for your clusters into
+ConfigHub, without changing how Kubara works. Each Kubara component gets a base, each cluster
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 

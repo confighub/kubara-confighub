@@ -1,8 +1,10 @@
 # Run a Kubara platform through ConfigHub with cub kubara
 
-`cub kubara` is a plugin for the ConfigHub CLI. It takes a Kubara platform,
-either one you are about to create or one Kubara has already generated, and
-shows what ConfigHub would hold for it: a base for each component, a variant
+`cub kubara` is a plugin for the ConfigHub CLI. Kubara manages your clusters'
+add-ons: the certificate manager, the ingress controller, monitoring and the
+rest. Kubara calls that set a platform, and so does this guide. The plugin
+takes a Kubara platform, either one you are about to create or one Kubara has
+already generated, and shows what ConfigHub would hold for it: a base for each component, a variant
 for each cluster it runs on, and the order a change rolls out in. That much
 works offline, with no account and no cluster, and changes nothing. When you
 are ready, it writes the cub steps that bring the platform into ConfigHub as
