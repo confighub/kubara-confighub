@@ -5,6 +5,13 @@ changing how Kubara works. Each Kubara component gets a base, each cluster
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.2.6, 2026-10-02
+
+Nothing changes in how `cub kubara` behaves. The plugin is now built on
+ConfigHub SDK core v0.8.0, the version the other cub plugins use. The one SDK
+package it imports, which writes the plugin's manifest on install, is the same
+in both versions.
+
 ## 0.2.5, 2026-10-01
 
 Every chart version Kubara's 3.0 catalogs pin is now checked in the
