@@ -5,7 +5,7 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
-## 0.4.0, not released yet
+## 0.4.0, 2026-10-09
 
 **Live status is recorded on the Release, where ConfigHub now reads it.**
 ConfigHub v0.8.2 moved live status from the Space annotation
