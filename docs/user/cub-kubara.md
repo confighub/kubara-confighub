@@ -119,7 +119,7 @@ What each step needs, with the versions it was tested with:
 | `kubara generate` | [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer (v0.15.0 and v0.16.0). |
 | `apply --capabilities` | a `kubectl` context for each cluster, read only. |
 | `apply.sh` | a ConfigHub organization (v0.8.0) and `cub auth login`, with rights to create Spaces. |
-| `handover.sh`, `handback.sh` | the above, rights to create workers and Targets, `kubectl` access to Kubara's hub that can write in the `argocd` and `argobot` namespaces, and `jq`. The hub needs Argo CD 3.1 or newer; Kubara ships 3.5. `handover.sh` pulls `ghcr.io/confighub/argobot` onto the hub. |
+| `handover.sh`, `handback.sh` | the above, with `cub` and ConfigHub v0.8.2 or newer for `handover.sh`, rights to create workers and Targets, `kubectl` access to Kubara's hub that can write in the `argocd` and `argobot` namespaces, and `jq`. The hub needs Argo CD 3.1 or newer; Kubara ships 3.5. `handover.sh` pulls `ghcr.io/confighub/argobot` onto the hub. |
 | `check` | a ConfigHub organization and `cub auth login`, and `kubectl` read access to Kubara's hub. |
 | `cub stack from-kubara`, `cub stack check` | the [ConfigHub Workshop](https://github.com/confighub/cub-workshop) plugin (`cub plugin install confighub/cub-workshop`), with `node` and `oras`. No account. |
 

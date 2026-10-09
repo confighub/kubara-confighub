@@ -34,7 +34,7 @@ and the gate refuses a release until dev is Healthy on it.
 - `kind`, `kubectl`, `helm`, `git` and `jq`. The recorded runs used kind
   v0.31.0 with Kubernetes v1.35.0.
 - [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer. The lab has run on v0.15.0 and v0.16.0.
-- The `cub` CLI, v0.8.0 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
+- The `cub` CLI, v0.8.2 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
   The plugin from 0.3.0 on needs ConfigHub v0.8.0 or newer too, and from
   0.4.0 on v0.8.2 or newer for live status.
 - A ConfigHub organization, for `run.sh` only. `up.sh` needs no account.
