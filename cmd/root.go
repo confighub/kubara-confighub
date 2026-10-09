@@ -312,9 +312,11 @@ with the release it will read, and stops if Argo CD would delete anything.
 Secrets keep their live values: ConfigHub holds their keys, and each
 ApplicationSet tells Argo CD to leave their data alone.
 
-Last, it installs argobot on the hub. argobot writes each Application's sync
-and health to its variant Space as confighub.com/live-status, which ConfigHub's
-Healthy gate reads. It runs as the Targets' server worker, not as you.
+Last, it installs argobot on the hub. argobot records each Application's sync
+and health on the release it synced, in its variant Space, which ConfigHub's
+Healthy gate reads. It runs as the Targets' server worker, not as you. This
+needs ConfigHub v0.8.2 or newer, where live status moved from the Space onto
+the Release.
 
 Each first release needs an approval in its stage. By default handover.sh
 approves every stage as you. --approve-stages names the stages it may
@@ -362,7 +364,7 @@ Use the same --prefix and --stages as apply.`,
 			if len(res.OnGit) > 0 {
 				fmt.Fprintf(w, "Left on Git, for services this platform does not enable: %s\n", strings.Join(res.OnGit, ", "))
 			}
-			fmt.Fprintf(w, "Then it installs argobot %s on the hub, which writes each variant Space's live status.\n", strings.TrimPrefix(handover.ArgobotImage, "ghcr.io/confighub/argobot:"))
+			fmt.Fprintf(w, "Then it installs argobot %s on the hub, which records each release's live status in its variant Space.\n", strings.TrimPrefix(handover.ArgobotImage, "ghcr.io/confighub/argobot:"))
 			if len(res.Approves) > 0 {
 				fmt.Fprintf(w, "It approves each first release as you in: %s.\n", strings.Join(res.Approves, ", "))
 			}

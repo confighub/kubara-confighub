@@ -164,6 +164,14 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("for space in %s; do", strings.Join(spaces, " "))
 	line(`  cub space get "$space" --quiet >/dev/null 2>&1 || { echo "$space is missing: run apply.sh first"; exit 1; }`)
 	line("done")
+	line("# Step 6 reads each release's live status with cub, which shows it from %s on.", MinimumCub)
+	line("# A build that names no version is let through.")
+	line("# awk reads all of what cub prints: ending early would end cub with a broken")
+	line("# pipe, which pipefail reports as a failure. The first version is cub's own.")
+	line(`cub_version=$(cub version 2>/dev/null | awk '$1 == "Version:" && $2 ~ /^v[0-9]/ && !seen {print $2; seen = 1}')`)
+	line(`if [ -n "$cub_version" ] && [ "$(printf '%%s\n' %s "$cub_version" | sort -V | head -1)" != %s ]; then`, MinimumCub, MinimumCub)
+	line(`  echo "cub is $cub_version; this script needs %s or later, and ConfigHub %s or later: run cub upgrade"; exit 1`, MinimumCub, MinimumCub)
+	line("fi")
 	line(`image=$(k -n %s get deployment -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].spec.template.spec.containers[0].image}')`, argoNamespace)
 	line(`version=${image##*:}`)
 	line(`if [ "$(printf '%%s\n' %s "$version" | sort -V | head -1)" != %s ]; then`, MinimumArgoCD, MinimumArgoCD)
@@ -175,12 +183,17 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("cub space create %s --allow-exists --quiet", targets)
 	line("# A Target names no worker. The server worker is the identity Argo CD pulls")
 	line("# as, and it reaches a Target through a grant to its bot user: View to find")
-	line("# the Target, and ViewChildren to pull the releases published for it.")
+	line("# the Target, ViewChildren to pull the releases published for it, and")
+	line("# EditChildren so argobot, which runs as the same worker, can record each")
+	line("# release's live status on it.")
 	line("cub worker create --space %s %s --is-server-worker --org-role none --allow-exists --quiet", targets, workerSlug)
 	line(`bot_user=$(cub worker get --space %s %s -o jq=.BridgeWorker.UserID | tr -d '"\n')`, targets, workerSlug)
 	line(`[ -n "$bot_user" ] && [ "$bot_user" != null ] || { echo "the worker %s/%s has no bot user to grant the Targets to"; exit 1; }`, targets, workerSlug)
 	for _, cl := range clusters {
-		line(`cub target create %s --space %s --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --allow-exists --quiet`, cl, targets)
+		line(`cub target create %s --space %s --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --permission "EditChildren:$bot_user" --allow-exists --quiet`, cl, targets)
+		// A Target an earlier handover.sh made keeps the grants it was made
+		// with; this adds the one recording live status takes.
+		line(`cub target update %s --space %s --permission "EditChildren:$bot_user" --quiet`, cl, targets)
 	}
 
 	line("")
@@ -188,9 +201,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	for _, c := range comps {
 		for _, v := range c.Variants {
 			line("cub unit set-target --space %s %s %s/%s --quiet", v.Space, c.Name, targets, v.Cluster)
-			// Edit lets argobot, which runs as the worker, write the Space's
-			// live status. A Target no longer gives its worker that.
-			line(`cub space update %s --release-target %s/%s --permission "Edit:$bot_user" --quiet`, v.Space, targets, v.Cluster)
+			line(`cub space update %s --release-target %s/%s --quiet`, v.Space, targets, v.Cluster)
 		}
 	}
 
@@ -361,10 +372,10 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		}
 	}
 	line("")
-	line(`step "6/6 argobot reports each Application's live status to its variant Space"`)
+	line(`step "6/6 argobot records each Application's live status on the release it synced"`)
 	line("# argobot runs as the Targets' server worker, the identity Argo CD already pulls")
-	line("# releases with. Step 2 gave its bot user Edit on each variant Space, which is")
-	line("# what lets it write the Space's live status.")
+	line("# releases with. Step 1 gave its bot user EditChildren on each Target, which is")
+	line("# what lets it record a release's live status.")
 	line("# No personal token goes into the cluster. Its ID and secret go from cub into")
 	line("# the Secret through file descriptors, as above.")
 	line(`k create namespace %s --dry-run=client -o yaml | k apply -f - >/dev/null`, argobotNamespace)
@@ -377,10 +388,11 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("k apply -f argobot.yaml")
 	line("k -n %s rollout restart deployment/argobot >/dev/null", argobotNamespace)
 	line(`k -n %s rollout status deployment/argobot --timeout=180s`, argobotNamespace)
-	line("# argobot writes a Space's status when it starts, and again whenever the")
-	line("# Application changes. Wait until each variant Space has one from this start;")
-	line("# a Space keeps the last status an earlier argobot wrote.")
-	line(`status() { cub space get "$1" -o 'jq=.Space.Annotations["%s"] // "{}" | fromjson | select((.observedAt // "") >= "'"$since"'") | tojson'; }`, LiveStatus)
+	line("# argobot records a release's status when it starts, and again whenever the")
+	line("# Application changes. Wait until each variant Space's newest published")
+	line("# release, the one the Healthy gate reads, has one from this start; a release")
+	line("# keeps the last status an earlier argobot recorded.")
+	line(`status() { cub release list --space "$1" --where "Published = true" -o 'jq=[.[].Release] | max_by(.ReleaseNum) | select((.LiveStatus.ObservedAt // "")[0:19] >= "'"${since%%Z}"'") | {ReleaseNum, LiveStatus} | tojson'; }`)
 	line("for _ in $(seq 1 60); do")
 	line("  missing=0")
 	line("  for space in %s; do", strings.Join(variantSpaces, " "))
@@ -392,7 +404,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("for space in %s; do", strings.Join(variantSpaces, " "))
 	line(`  s=$(status "$space")`)
 	line(`  if [ -n "$s" ]; then`)
-	line(`    printf '%%s: %%s\n' "$space" "$(jq -r '"\(.app) \(.syncStatus) \(.healthStatus) at \(.revision[0:19])"' <<<"$s")"`)
+	line(`    printf '%%s: %%s\n' "$space" "$(jq -r '"release \(.ReleaseNum) \(.LiveStatus.Sync) \(.LiveStatus.Health), from \(.LiveStatus.Reporter)"' <<<"$s")"`)
 	line("  else")
 	line(`    echo "$space: no live status yet"`)
 	line("  fi")
@@ -401,7 +413,8 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("")
 	line("echo")
 	line(`echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub,"`)
-	line(`echo "and argobot writes each Application's sync and health to its variant Space."`)
+	line(`echo "and argobot records each Application's sync and health on the release it synced."`)
+	line(`echo "See it with: cub release list --space <a variant Space>"`)
 	line(`echo "Watch it with: kubectl get applications -n %s"`, argoNamespace)
 	line(`echo "A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;"`)
 	line(`echo "without it, Argo CD empties the values of the Secrets ConfigHub holds without values."`)
@@ -452,8 +465,8 @@ func header(p plan.Plan, gateway string, res Result) string {
 # AppProject so it permits the gateway, and each routed ApplicationSet, which
 # loses its Git sources. Secrets keep their live values: ConfigHub holds their keys,
 # and each ApplicationSet tells Argo CD to leave their data alone. Step 6
-# installs argobot (argobot.yaml) on the hub, which writes each Application's
-# sync and health to its variant Space as ` + LiveStatus + `. All of it is
+# installs argobot (argobot.yaml) on the hub, which records each Application's
+# sync and health on the release it synced, in its variant Space. All of it is
 # safe to re-run.
 set -euo pipefail
 cd "$(dirname "$0")"

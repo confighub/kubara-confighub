@@ -239,6 +239,24 @@ func TestWriteHandoverScript(t *testing.T) {
 	if strings.Index(script, "k apply -f argobot.yaml") < strings.Index(script, "drop_git_sources\n") {
 		t.Fatal("argobot must be installed after the hub reads ConfigHub")
 	}
+	// ConfigHub reads live status from the Release, which takes EditChildren
+	// on the Target to record. Nothing reads the Space annotation now, so the
+	// script must not wait on it, and the worker needs no grant on a Space.
+	for _, w := range []string{
+		`cub target update hub --space kx-targets --permission "EditChildren:$bot_user"`,
+		`cub target update edge --space kx-targets --permission "EditChildren:$bot_user"`,
+		`cub release list --space "$1" --where "Published = true"`,
+		`this script needs v0.8.2 or later`,
+	} {
+		if !strings.Contains(script, w) {
+			t.Errorf("handover.sh lacks %q", w)
+		}
+	}
+	for _, bad := range []string{"confighub.com/live-status", `"Edit:$bot_user"`} {
+		if strings.Contains(script, bad) {
+			t.Errorf("handover.sh still has %q", bad)
+		}
+	}
 	manifest, err := os.ReadFile(filepath.Join(out, "argobot.yaml"))
 	if err != nil {
 		t.Fatal(err)

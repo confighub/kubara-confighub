@@ -27,8 +27,8 @@
 # AppProject so it permits the gateway, and each routed ApplicationSet, which
 # loses its Git sources. Secrets keep their live values: ConfigHub holds their keys,
 # and each ApplicationSet tells Argo CD to leave their data alone. Step 6
-# installs argobot (argobot.yaml) on the hub, which writes each Application's
-# sync and health to its variant Space as confighub.com/live-status. All of it is
+# installs argobot (argobot.yaml) on the hub, which records each Application's
+# sync and health on the release it synced, in its variant Space. All of it is
 # safe to re-run.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -117,6 +117,14 @@ cub space list --quiet >/dev/null || { echo "cub is not logged in: run cub auth 
 for space in kx-traefik-base kx-traefik-hub kx-traefik-edge kx-homer-dashboard-base kx-homer-dashboard-hub kx-argo-cd-base kx-argo-cd-hub; do
   cub space get "$space" --quiet >/dev/null 2>&1 || { echo "$space is missing: run apply.sh first"; exit 1; }
 done
+# Step 6 reads each release's live status with cub, which shows it from v0.8.2 on.
+# A build that names no version is let through.
+# awk reads all of what cub prints: ending early would end cub with a broken
+# pipe, which pipefail reports as a failure. The first version is cub's own.
+cub_version=$(cub version 2>/dev/null | awk '$1 == "Version:" && $2 ~ /^v[0-9]/ && !seen {print $2; seen = 1}')
+if [ -n "$cub_version" ] && [ "$(printf '%s\n' v0.8.2 "$cub_version" | sort -V | head -1)" != v0.8.2 ]; then
+  echo "cub is $cub_version; this script needs v0.8.2 or later, and ConfigHub v0.8.2 or later: run cub upgrade"; exit 1
+fi
 image=$(k -n argocd get deployment -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].spec.template.spec.containers[0].image}')
 version=${image##*:}
 if [ "$(printf '%s\n' v3.1.0 "$version" | sort -V | head -1)" != v3.1.0 ]; then
@@ -127,22 +135,26 @@ step "1/6 One Target per cluster, in kx-targets"
 cub space create kx-targets --allow-exists --quiet
 # A Target names no worker. The server worker is the identity Argo CD pulls
 # as, and it reaches a Target through a grant to its bot user: View to find
-# the Target, and ViewChildren to pull the releases published for it.
+# the Target, ViewChildren to pull the releases published for it, and
+# EditChildren so argobot, which runs as the same worker, can record each
+# release's live status on it.
 cub worker create --space kx-targets server-worker --is-server-worker --org-role none --allow-exists --quiet
 bot_user=$(cub worker get --space kx-targets server-worker -o jq=.BridgeWorker.UserID | tr -d '"\n')
 [ -n "$bot_user" ] && [ "$bot_user" != null ] || { echo "the worker kx-targets/server-worker has no bot user to grant the Targets to"; exit 1; }
-cub target create hub --space kx-targets --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --allow-exists --quiet
-cub target create edge --space kx-targets --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --allow-exists --quiet
+cub target create hub --space kx-targets --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --permission "EditChildren:$bot_user" --allow-exists --quiet
+cub target update hub --space kx-targets --permission "EditChildren:$bot_user" --quiet
+cub target create edge --space kx-targets --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --permission "EditChildren:$bot_user" --allow-exists --quiet
+cub target update edge --space kx-targets --permission "EditChildren:$bot_user" --quiet
 
 step "2/6 Each variant releases to its own cluster's Target"
 cub unit set-target --space kx-traefik-hub traefik kx-targets/hub --quiet
-cub space update kx-traefik-hub --release-target kx-targets/hub --permission "Edit:$bot_user" --quiet
+cub space update kx-traefik-hub --release-target kx-targets/hub --quiet
 cub unit set-target --space kx-traefik-edge traefik kx-targets/edge --quiet
-cub space update kx-traefik-edge --release-target kx-targets/edge --permission "Edit:$bot_user" --quiet
+cub space update kx-traefik-edge --release-target kx-targets/edge --quiet
 cub unit set-target --space kx-homer-dashboard-hub homer-dashboard kx-targets/hub --quiet
-cub space update kx-homer-dashboard-hub --release-target kx-targets/hub --permission "Edit:$bot_user" --quiet
+cub space update kx-homer-dashboard-hub --release-target kx-targets/hub --quiet
 cub unit set-target --space kx-argo-cd-hub argo-cd kx-targets/hub --quiet
-cub space update kx-argo-cd-hub --release-target kx-targets/hub --permission "Edit:$bot_user" --quiet
+cub space update kx-argo-cd-hub --release-target kx-targets/hub --quiet
 
 step "3/6 Kubara's ApplicationSets read ConfigHub: a change to the argo-cd base"
 cub unit data --space kx-argo-cd-base argo-cd -O argo-cd/current.yaml
@@ -271,10 +283,10 @@ for app in hub-traefik edge-traefik hub-homer-dashboard hub-argocd; do
 done
 [ "$left" = 0 ] || { echo "Some Applications do not read ConfigHub yet. Re-run this script once the hub is idle."; exit 1; }
 
-step "6/6 argobot reports each Application's live status to its variant Space"
+step "6/6 argobot records each Application's live status on the release it synced"
 # argobot runs as the Targets' server worker, the identity Argo CD already pulls
-# releases with. Step 2 gave its bot user Edit on each variant Space, which is
-# what lets it write the Space's live status.
+# releases with. Step 1 gave its bot user EditChildren on each Target, which is
+# what lets it record a release's live status.
 # No personal token goes into the cluster. Its ID and secret go from cub into
 # the Secret through file descriptors, as above.
 k create namespace argobot --dry-run=client -o yaml | k apply -f - >/dev/null
@@ -287,10 +299,11 @@ since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 k apply -f argobot.yaml
 k -n argobot rollout restart deployment/argobot >/dev/null
 k -n argobot rollout status deployment/argobot --timeout=180s
-# argobot writes a Space's status when it starts, and again whenever the
-# Application changes. Wait until each variant Space has one from this start;
-# a Space keeps the last status an earlier argobot wrote.
-status() { cub space get "$1" -o 'jq=.Space.Annotations["confighub.com/live-status"] // "{}" | fromjson | select((.observedAt // "") >= "'"$since"'") | tojson'; }
+# argobot records a release's status when it starts, and again whenever the
+# Application changes. Wait until each variant Space's newest published
+# release, the one the Healthy gate reads, has one from this start; a release
+# keeps the last status an earlier argobot recorded.
+status() { cub release list --space "$1" --where "Published = true" -o 'jq=[.[].Release] | max_by(.ReleaseNum) | select((.LiveStatus.ObservedAt // "")[0:19] >= "'"${since%Z}"'") | {ReleaseNum, LiveStatus} | tojson'; }
 for _ in $(seq 1 60); do
   missing=0
   for space in kx-traefik-hub kx-traefik-edge kx-homer-dashboard-hub kx-argo-cd-hub; do
@@ -302,7 +315,7 @@ done
 for space in kx-traefik-hub kx-traefik-edge kx-homer-dashboard-hub kx-argo-cd-hub; do
   s=$(status "$space")
   if [ -n "$s" ]; then
-    printf '%s: %s\n' "$space" "$(jq -r '"\(.app) \(.syncStatus) \(.healthStatus) at \(.revision[0:19])"' <<<"$s")"
+    printf '%s: %s\n' "$space" "$(jq -r '"release \(.ReleaseNum) \(.LiveStatus.Sync) \(.LiveStatus.Health), from \(.LiveStatus.Reporter)"' <<<"$s")"
   else
     echo "$space: no live status yet"
   fi
@@ -311,7 +324,8 @@ done
 
 echo
 echo "Done. Kubara's hub now reads each cluster's approved release from ConfigHub,"
-echo "and argobot writes each Application's sync and health to its variant Space."
+echo "and argobot records each Application's sync and health on the release it synced."
+echo "See it with: cub release list --space <a variant Space>"
 echo "Watch it with: kubectl get applications -n argocd"
 echo "A manual sync must keep RespectIgnoreDifferences, as Kubara's sync options do;"
 echo "without it, Argo CD empties the values of the Secrets ConfigHub holds without values."

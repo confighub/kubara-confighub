@@ -20,7 +20,10 @@ The [recorded run](run-2026-09-30.log) shows each command and what it printed,
 from scratch, with argobot reporting live status and a stage gated on it. The
 [run of 2026-09-28](run-2026-09-28.log) is the same story with `cub kubara`
 v0.2.2, before argobot. The [run of 2026-10-02](run-sdk-2026-10-02.log) is
-the same story against ConfigHub v0.8.0, with `cub kubara` 0.3.0.
+the same story against ConfigHub v0.8.0, with `cub kubara` 0.3.0. The
+[run of 2026-10-09](run-live-status-2026-10-09.log) is the story as it is now,
+against ConfigHub v0.8.11: argobot v0.1.9 records live status on each release,
+and the gate refuses a release until dev is Healthy on it.
 
 
 ## What you need
@@ -32,7 +35,8 @@ the same story against ConfigHub v0.8.0, with `cub kubara` 0.3.0.
   v0.31.0 with Kubernetes v1.35.0.
 - [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer. The lab has run on v0.15.0 and v0.16.0.
 - The `cub` CLI, v0.8.0 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
-  The plugin from 0.3.0 on needs ConfigHub v0.8.0 or newer too.
+  The plugin from 0.3.0 on needs ConfigHub v0.8.0 or newer too, and from
+  0.4.0 on v0.8.2 or newer for live status.
 - A ConfigHub organization, for `run.sh` only. `up.sh` needs no account.
   `run.sh` writes to the organization your current `cub` context points at;
   set `CUB_CONTEXT` to choose another.
@@ -69,10 +73,10 @@ bootstrap, its AppProject and its ApplicationSets.
 | 2 | `cub kubara apply` renders each cluster with its own capabilities, and `apply.sh` creates 6 components and 10 variants in ConfigHub. |
 | 3 | `cub kubara handover` writes `handover.sh`, which releases every variant, points Kubara's ApplicationSets at ConfigHub, and installs argobot on the hub. |
 | 4 | `cub kubara check` confirms that each cluster runs the release its stage approved. |
-| 5 | Each variant Space shows its live status, which argobot writes: sync, health and the release Argo CD synced. |
+| 5 | The newest release of each variant Space shows its live status, which argobot records on the release Argo CD synced: sync and health. |
 | 6 | Two metrics-server replicas, changed once on the base, and released to dev. `check` fails for metrics-server until Argo CD pulls the release, then passes it. The spoke keeps one replica. |
 | 7 | The same change is promoted, approved and released in prod. `check --record` writes each result into ConfigHub. |
-| 8 | prod now waits for dev to be Healthy. Three replicas reach dev, and prod accepts them once dev reports Healthy for that release. |
+| 8 | prod now waits for dev to be Healthy. Three replicas reach dev. Until Argo CD syncs the release it holds no live status, and ConfigHub refuses the promotion; prod accepts it once dev reports Healthy for that release. |
 | 9 | An image that does not exist reaches dev. dev turns Degraded, and ConfigHub refuses to promote the change to prod. The change is then taken back out. |
 
 `run.sh` creates Spaces named `kubara-*` in your organization. `PREFIX=<name>`

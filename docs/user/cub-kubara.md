@@ -123,7 +123,9 @@ What each step needs, with the versions it was tested with:
 | `check` | a ConfigHub organization and `cub auth login`, and `kubectl` read access to Kubara's hub. |
 | `cub stack from-kubara`, `cub stack check` | the [ConfigHub Workshop](https://github.com/confighub/cub-workshop) plugin (`cub plugin install confighub/cub-workshop`), with `node` and `oras`. No account. |
 
-Since 0.3.0 the plugin needs `cub` and ConfigHub v0.8.0 or newer.
+Since 0.3.0 the plugin needs `cub` and ConfigHub v0.8.0 or newer. Since 0.4.0
+`handover.sh` needs `cub` and ConfigHub v0.8.2 or newer, where live status is
+on the Release; it checks `cub` before it changes anything.
 `handover.sh` creates Targets the way ConfigHub has since v0.7, which an
 older `cub` refuses.
 
@@ -533,7 +535,7 @@ It then makes these changes:
 5. It waits until every Application reads ConfigHub. If one does not, the
    script names it and stops. It is safe to run again.
 6. It installs [argobot](https://github.com/confighub/argobot) on the hub, and
-   waits until each variant Space has a live status. See
+   waits until the newest release of each variant Space has a live status. See
    [live status](#see-live-status-and-gate-a-stage-on-health).
 
 **If it stops halfway.** Every step is safe to run again, so fix what it names
@@ -555,8 +557,8 @@ Git without a word:
   since handover. On the kind lab, metrics-server went from the three
   replicas ConfigHub released back to Git's one.
 - It changes nothing in ConfigHub. argobot reports only Applications that
-  read ConfigHub, so a variant Space can keep a live status that is no
-  longer true, and a `Healthy` gate can pass on it.
+  read ConfigHub, so a variant's newest release can keep a live status that
+  is no longer true, and a `Healthy` gate can pass on it.
 
 `cub kubara check` shows it. Each variant fails with `it still lists Git
 sources, which Argo CD reads before the release`. To recover, run
@@ -585,7 +587,8 @@ the script now handles each. See the
 they were found, and the [kind lab](../../examples/kind-lab/README.md) to run it
 yourself. The [run of 2026-09-30](../../examples/kind-lab/run-2026-09-30.log)
 adds argobot: each variant Space got its live status, and a stage gated on
-`Healthy` refused a release that left dev Degraded.
+`Healthy` refused a release that left dev Degraded. Since 0.4.0 the live
+status is on each release, not on the Space.
 
 ## Change the platform after handover
 
@@ -675,21 +678,36 @@ CD stayed on 3.5.2.
 ## See live status and gate a stage on health
 
 After handover, argobot runs on the hub. It watches every Argo CD Application
-and writes the Application's state to its variant Space, as the
-`confighub.com/live-status` annotation. ConfigHub's UI shows it, and a stage
-that requires `Healthy` reads it.
+and records the Application's state on the release it synced, in its variant
+Space. ConfigHub's UI shows it, and a stage that requires `Healthy` reads it.
+
+This needs ConfigHub v0.8.2 or newer and `cub kubara` 0.4.0 or newer. Before
+v0.8.2, ConfigHub read live status from the Space annotation
+`confighub.com/live-status`, which argobot v0.1.8 and older write. ConfigHub
+no longer reads it, so with `cub kubara` 0.3.0 a `Healthy` gate never opens.
+Run the new `handover.sh` again to move: it installs argobot v0.1.9 and gives
+its worker the grant recording takes.
 
 The commands and output in this section and the next come from the kind lab.
 There the hub is called `hub`, in stage dev, and the spoke `spoke`, in stage
 prod.
 
 ```bash
-cub space get kubara-metrics-server-hub -o 'jq=.Space.Annotations["confighub.com/live-status"]'
+cub release list --space kubara-metrics-server-hub
+cub release get --space kubara-metrics-server-hub --oci-reference latest -o jq=.Release.LiveStatus
+```
+
+```text
+NUM    TAG                                                    PUBLISHED    DIGEST          LIVE               CREATED
+5      release-5                                              true         2a3025751b35    Synced/Healthy     2026-10-09 16:58:57
+4      kubara-metrics-server-base/missing-image-co-end        true         388059aec478    Synced/Degraded    2026-10-09 16:58:08
+3      kubara-metrics-server-base/three-replicas-co-end       true         b0bd58436b83    Synced/Healthy     2026-10-09 16:56:29
 ```
 
 ```json
-{"source":"argobot","app":"hub-metrics-server","syncStatus":"Synced","healthStatus":"Healthy",
- "operationPhase":"Succeeded","revision":"sha256:…","message":"successfully synced (all tasks run)","observedAt":"…"}
+{"Reporter":"argobot","DataSource":"hub-metrics-server","Sync":"Synced","Health":"Healthy","Operation":"Succeeded",
+ "ReporterSync":"Synced","ReporterHealth":"Healthy","ReporterOperation":"Succeeded",
+ "Message":"successfully synced (all tasks run)","ObservedAt":"2026-10-09T16:59:10.449947714Z"}
 ```
 
 argobot finds the Space from the Application's source,
@@ -698,9 +716,11 @@ ConfigHub are reported.
 
 **Its credential.** argobot runs as the Targets' server worker, which
 handover creates. It is the same identity Argo CD already pulls releases with.
-handover.sh gives its bot user Edit on each variant Space, so that it can write
-the Space's live status; it gets no grant on any other Space. No personal
-token goes into the cluster. handover.sh writes the worker's ID and secret into
+handover.sh gives its bot user EditChildren on each cluster's Target, so that
+it can record the live status of the releases published to that Target. The
+grant is wider than that one field: it also covers those releases' labels and
+annotations, and withdrawing one. It reaches no Space, unit or other Target.
+No personal token goes into the cluster. handover.sh writes the worker's ID and secret into
 the `argobot-secrets` Secret in the `argobot` namespace. argobot's Role lets it
 read and patch Applications in the Argo CD namespace, and nothing else.
 The same worker secret is in `argocd/confighub-<prefix>-targets`. Anyone who
@@ -709,31 +729,29 @@ can read Secrets in the `argocd` or `argobot` namespace can use it.
 `ghcr.io/confighub/argobot`, at the version `handover.sh` names.
 
 **What it reports.** argobot writes when it starts and whenever an Application
-changes. Each status names the release Argo CD synced, as `revision`, an OCI
-digest. argobot does not compare it with ConfigHub's latest release, and
-ConfigHub's `Healthy` gate does not either. So for the minutes between a
-release and Argo CD pulling it, the Space still shows the previous release as
-Synced and Healthy, and the gate passes on that. The kind lab saw it: dev
-released an image that does not exist, and a promotion to prod two seconds
-later was accepted. Once Argo CD synced the release, dev was Degraded and the
-same promotion was refused.
+changes. It records each status on the release Argo CD synced, which it finds
+by the OCI digest Argo CD reports. ConfigHub's `Healthy` gate reads the newest
+published release of each Space in the stage ahead. So for the minutes
+between a release and Argo CD pulling it, the new release holds no live
+status, and the gate refuses:
 
-So before you promote, make sure the stage ahead runs its latest release.
-`cub kubara check` fails until Argo CD has synced it:
+```text
+Failed: Variant 'hub' has no live status for release 4 yet
+```
+
+Before ConfigHub v0.8.2 the gate read one status per Space, whichever release
+it was about, and passed in those minutes on the release before. That gap is
+closed. `cub kubara check` still tells you which release each cluster runs:
 
 ```text
 kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
-This gap is a ConfigHub limit, and it is tracked there. Until it is fixed, do
-not rely on `Healthy` alone.
-
-argobot also asks Argo CD to refresh an Application when ConfigHub publishes a
-release. It looks for an Application named after the Space, and Kubara names
-its Applications `<cluster>-<service>`, so it finds none
-([confighub/argobot#13](https://github.com/confighub/argobot/issues/13)).
-Argo CD pulls the release on its next poll, within about three minutes, or at
-once if you refresh the Application.
+argobot also asks Argo CD to pull a release when ConfigHub publishes it. From
+v0.1.9 it finds the Application by the Space its source reads, so it finds
+Kubara's, which are named `<cluster>-<service>`. On the kind lab each release
+was pulled within seconds of `cub release publish`. Without argobot, Argo CD
+pulls a release on its next poll, within about three minutes.
 
 A stage that requires `Healthy` checks every Space of the stage ahead. To gate
 prod on dev's health, add `Healthy` to prod's prerequisites. Do it after
@@ -848,9 +866,10 @@ Argo CD to leave Secret data alone, as handover set it. Remove the rule from an
 ApplicationSet when Git should own its Secret values again.
 
 `handback` changes nothing in ConfigHub. Every Space, release and Target stays,
-so `handover.sh` can hand the hub over again. Each variant Space keeps the last
-live status argobot wrote, which no longer changes. A stage that requires
-`Healthy` reads that status, so do not rely on the gate while Git delivers.
+so `handover.sh` can hand the hub over again. Each release keeps the last
+live status argobot recorded on it, which no longer changes. A stage that
+requires `Healthy` reads the newest release's, so do not rely on the gate
+while Git delivers.
 
 Git must hold what you want Kubara to deliver. A change made in ConfigHub since
 handover, such as more replicas, is undone unless it is in Git too.
@@ -868,7 +887,7 @@ hub over again afterwards also worked.
 | `apply` | nothing; it writes files | nothing | Delete `--out`. |
 | `apply.sh` | Creates a component, a base Space and a rollout workflow per Kubara component, a variant Space per cluster, and `<prefix>-kubara-generated`. A re-run can add change orders. | nothing | Delete the Spaces, as below. |
 | `handover.sh` steps 0 to 4 | Creates `<prefix>-targets` with a worker and a Target per cluster. Changes the argo-cd base. Promotes, approves and publishes a first release in each stage. It approves as you only in the stages `--approve-stages` names, every stage by default. | nothing | Delete the Spaces, as below. |
-| `handover.sh` steps 5 and 6 | From then on, argobot writes live status to each variant Space. | On the hub: the Secret `argocd/confighub-<prefix>-targets`, the AppProject, each routed ApplicationSet, and argobot in the `argobot` namespace. The spokes change only as Argo CD syncs to them. | `handback.sh` |
+| `handover.sh` steps 5 and 6 | From then on, argobot records live status on the releases of each variant Space. | On the hub: the Secret `argocd/confighub-<prefix>-targets`, the AppProject, each routed ApplicationSet, and argobot in the `argobot` namespace. The spokes change only as Argo CD syncs to them. | `handback.sh` |
 | a change after handover | A change order, promotions, approvals and releases. | What Argo CD syncs. | Release the state before it, with `--revision Before:ChangeOrder:<change order>`. |
 | `check` | nothing, or attestations with `--record` | nothing | Attestations are kept. `cub attestation revoke` withdraws one. |
 | `handback.sh` | nothing | Sets the hub back to Git, and removes argobot and the gateway credential. | `handover.sh` again. |
@@ -890,14 +909,10 @@ Read these before you use `cub kubara` on a real hub.
 
 - **It has not run on a production platform.** It has run on kind, with
   Kubara v0.15.0 and v0.16.0, and Argo CD 3.5.2.
-- **The `Healthy` gate can pass on stale health.** For a few minutes after a
-  release, the gate reads the previous release's health. Run `cub kubara check`
-  on the stage ahead before you promote. See
+- **The `Healthy` gate needs ConfigHub v0.8.2 and `cub kubara` 0.4.0.** With
+  an older plugin, argobot writes where ConfigHub no longer reads, and the gate
+  never opens. See
   [live status](#see-live-status-and-gate-a-stage-on-health).
-- **argobot cannot refresh Kubara's Applications**
-  ([confighub/argobot#13](https://github.com/confighub/argobot/issues/13)).
-  A release reaches the cluster on Argo CD's next poll, within about three
-  minutes.
 - **An Argo CD upgrade through ConfigHub is not proven.** On kind, the hub's
   argocd Application never finishes a sync, so the argo-cd release did not
   land. See [a new Kubara catalog](#take-a-new-kubara-catalog-through-the-stages).

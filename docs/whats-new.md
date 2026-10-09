@@ -5,6 +5,54 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.4.0, not released yet
+
+**Live status is recorded on the Release, where ConfigHub now reads it.**
+ConfigHub v0.8.2 moved live status from the Space annotation
+`confighub.com/live-status` onto each Release. Its `Healthy` gate and its UI
+read only the Release since then. `handover.sh` from 0.3.0 installs argobot
+v0.1.8, which writes the annotation, so against ConfigHub v0.8.2 or newer a
+stage that requires `Healthy` never opens.
+
+- **argobot v0.1.9.** `handover.sh` installs it. It records each
+  Application's sync and health on the release the Application synced.
+- **The grant.** Recording takes `EditChildren` on the Target a release was
+  published to. `handover.sh` gives the worker's bot user that on each
+  cluster's Target, including Targets an earlier run made. It no longer gives
+  it `Edit` on each variant Space. A Space handed over with 0.3.0 keeps that
+  grant; remove it with
+  `cub space update <space> --permission "-Edit:<bot user>"`. The bot user is
+  `cub worker get --space <prefix>-targets server-worker -o jq=.BridgeWorker.UserID`.
+  The new grant is wider than the live status: it covers the labels and
+  annotations of the releases published to that Target, and withdrawing one.
+- **Step 6 waits on the Release.** It waits until the newest published release
+  of each variant Space has a status from this start of argobot, and prints
+  the release, its sync and its health.
+- **The gate no longer passes on the release before.** The gate reads the
+  newest published release. Until Argo CD has synced it, it holds no live
+  status and the gate refuses. The guide's warning about that gap is gone.
+- **argobot pulls each release at once.** argobot v0.1.9 finds an Application
+  by the Space its source reads, so it now asks Argo CD to pull Kubara's
+  Applications when a release is published
+  (confighub/argobot#13). On the kind lab each release was pulled within
+  seconds.
+- **`handover.sh` checks `cub`.** It stops before changing anything when `cub`
+  is older than v0.8.2, which does not show a release's live status.
+
+To move a hub handed over with 0.3.0: write `handover.sh` again with this
+version and run it. It is safe to run again, and changes only the grant,
+argobot's image and the wait.
+
+**What was run.** On the kind lab, with Kubara v0.15.0, `cub` v0.8.7 and
+ConfigHub v0.8.11, all of `run.sh` passed, from scratch
+([log](../examples/kind-lab/run-live-status-2026-10-09.log)): `handover.sh`
+with argobot v0.1.9 and only the Target grant, a promotion refused with "has
+no live status for release 3 yet" and accepted once dev was Healthy on that
+release, and a broken release refused with "release 4 is not healthy
+(Degraded)".
+
+Needs `cub` and ConfigHub v0.8.2 or newer. Part of confighub/helm-expt#2113.
+
 ## 0.3.0, 2026-10-02
 
 `cub kubara` now works with ConfigHub v0.8.0 and `cub` v0.8.0, and `check`
