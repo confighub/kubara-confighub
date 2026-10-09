@@ -49,27 +49,23 @@ run() {
 # Progressing (see the README), so check exits non-zero; carry on.
 check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" "$@" || true; }
 replicas() { kubectl --context "$1" -n metrics-server get deploy metrics-server -o jsonpath='{.status.readyReplicas}'; }
-# The live status argobot wrote on a variant Space: the Application, whether
-# it is synced and healthy, and the release it synced.
+# The newest published release of a variant Space, with the live status
+# argobot recorded on it. That release is the one ConfigHub's Healthy gate reads.
+newest() { cub release list --space "$1" --where "Published = true" -o 'jq=[.[].Release] | max_by(.ReleaseNum)'; }
 live() {
-  cub space get "$1" -o 'jq=.Space.Annotations["confighub.com/live-status"] // ""' |
-    jq -r --arg s "$1" '"\($s): \(.app) \(.syncStatus) \(.healthStatus), synced \(.revision[0:19])"'
+  newest "$1" | jq -r --arg s "$1" 'if .LiveStatus then "\($s): release \(.ReleaseNum) \(.LiveStatus.Sync) \(.LiveStatus.Health), reported by \(.LiveStatus.Reporter)" else "\($s): release \(.ReleaseNum) has no live status yet" end'
 }
-# The OCI digest of a variant Space's latest published release.
-latest() { cub release list --space "$1" -o 'jq=[.[] | select(.Release.Published)] | max_by(.Release.ReleaseNum) | .Release.ManifestDigest'; }
-# wait_live <space> <health>: until argobot reports the latest release synced,
+# wait_live <space> <health>: until argobot reports the newest release synced,
 # its sync finished, and that health.
 wait_live() {
-  local want
-  want=$(latest "$1")
   for _ in $(seq 1 120); do
-    cub space get "$1" -o 'jq=.Space.Annotations["confighub.com/live-status"] // "{}"' |
-      jq -e --arg d "$want" --arg h "$2" '.revision == $d and .syncStatus == "Synced" and .operationPhase != "Running" and .healthStatus == $h' >/dev/null && { live "$1"; return 0; }
+    newest "$1" | jq -e --arg h "$2" '.LiveStatus.Sync == "Synced" and .LiveStatus.Operation != "Running" and .LiveStatus.Health == $h' >/dev/null && { live "$1"; return 0; }
     sleep 5
   done
-  echo "$1 did not report $2 for its latest release"; live "$1"; return 1
+  echo "$1 did not report $2 for its newest release"; live "$1"; return 1
 }
-# Argo CD looks for new releases every few minutes; ask it to look now.
+# argobot asks Argo CD to pull a release as it is published. Ask too, in case
+# argobot is not running, and wait for the replicas.
 pull() {
   kubectl --context "$HUB_CONTEXT" -n argocd annotate application "$1-metrics-server" argocd.argoproj.io/refresh=normal --overwrite >/dev/null
   for _ in $(seq 1 60); do [ "$(replicas "$2")" = 2 ] && return 0; sleep 5; done
@@ -129,7 +125,8 @@ run cub variant promote --change-order "$base/two-replicas" --target-stage dev -
 run cub variant approve --change-order "$base/two-replicas" --stage dev
 run cub release publish "$PREFIX-metrics-server-$HUB" --revision "ChangeOrder:$base/two-replicas" --quiet
 echo
-echo "Released to dev. Until Argo CD pulls it, check says so:"
+echo "Released to dev. Until Argo CD has pulled it, check says so. argobot asks Argo CD to"
+echo "pull it at once, so check may already find it running:"
 check
 pull "$HUB" "$HUB_CONTEXT"
 run kubectl --context "$HUB_CONTEXT" -n metrics-server get deploy metrics-server
@@ -160,11 +157,14 @@ run cub variant promote --change-order "$base/three-replicas" --target-stage dev
 run cub variant approve --change-order "$base/three-replicas" --stage dev
 run cub release publish "$PREFIX-metrics-server-$HUB" --revision "ChangeOrder:$base/three-replicas" --quiet
 echo
-echo "Straight after the release, argobot still reports the release before it:"
+echo "Straight after the release, dev is not yet Synced and Healthy on it:"
 live "$PREFIX-metrics-server-$HUB"
-echo "latest release: $(latest "$PREFIX-metrics-server-$HUB" | cut -c1-19)"
-echo "ConfigHub's Healthy gate reads that status, so a dry run of the promotion to prod passes:"
-run cub variant promote --change-order "$base/three-replicas" --target-stage prod --dry-run || true
+echo "ConfigHub's Healthy gate reads the newest release, so it refuses the promotion to prod:"
+refusal=0
+run cub variant promote --change-order "$base/three-replicas" --target-stage prod --dry-run 2>&1 | tee confighub/gate-refusal.out || refusal=$?
+if [ "$refusal" = 0 ]; then echo "prod accepted a change dev has not been seen to run"; exit 1; fi
+grep -q -e "no live status" -e "is not synced" -e "is not healthy" -e "operation" confighub/gate-refusal.out ||
+  { echo "the promotion failed, but not because of dev's live status"; exit 1; }
 echo
 echo "check compares digests, and says dev does not run its latest release yet:"
 check

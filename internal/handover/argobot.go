@@ -3,13 +3,16 @@ package handover
 import "fmt"
 
 // ArgobotImage is the argobot release handover installs on the hub. argobot
-// watches Argo CD's Applications and writes each one's sync and health to its
-// variant Space as confighub.com/live-status, which ConfigHub's Healthy gate
-// and its UI read. See https://github.com/confighub/argobot.
-const ArgobotImage = "ghcr.io/confighub/argobot:v0.1.8"
+// watches Argo CD's Applications and records each one's sync and health on the
+// release it synced, in its variant Space, which is where ConfigHub's Healthy
+// gate and its UI read live status from v0.8.2 on. argobot v0.1.9 is the first
+// that writes there; an earlier one writes a Space annotation ConfigHub no
+// longer reads. See https://github.com/confighub/argobot.
+const ArgobotImage = "ghcr.io/confighub/argobot:v0.1.9"
 
-// LiveStatus is the Space annotation argobot writes.
-const LiveStatus = "confighub.com/live-status"
+// MinimumCub is the first cub, and the first ConfigHub, with live status on
+// the Release.
+const MinimumCub = "v0.8.2"
 
 const (
 	argobotNamespace = "argobot"
@@ -24,20 +27,20 @@ const (
 // handover.sh writes it from the Targets' server worker.
 func argobotManifest() string {
 	return fmt.Sprintf(`# argobot, as cub kubara handover installs it on Kubara's hub.
-# It reports each Argo CD Application's sync and health to the ConfigHub Space
-# its OCI source names, as the %[1]s annotation.
+# It records each Argo CD Application's sync and health on the release the
+# Application synced, in the ConfigHub Space its OCI source names.
 # It runs as the Targets' server worker, the same identity Argo CD pulls
-# releases with; handover.sh writes that credential to the %[4]s Secret.
+# releases with; handover.sh writes that credential to the %[3]s Secret.
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: %[2]s
+  name: %[1]s
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: argobot
-  namespace: %[2]s
+  namespace: %[1]s
 ---
 # argobot watches Applications, and patches an Application's refresh
 # annotation when ConfigHub publishes a release. It needs nothing else, and
@@ -46,7 +49,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: argobot
-  namespace: %[3]s
+  namespace: %[2]s
 rules:
   - apiGroups: ["argoproj.io"]
     resources: ["applications"]
@@ -56,7 +59,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: argobot
-  namespace: %[3]s
+  namespace: %[2]s
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -64,13 +67,13 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: argobot
-    namespace: %[2]s
+    namespace: %[1]s
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: argobot
-  namespace: %[2]s
+  namespace: %[1]s
   labels:
     app: argobot
 spec:
@@ -86,27 +89,27 @@ spec:
       serviceAccountName: argobot
       containers:
         - name: argobot
-          image: %[5]s
+          image: %[4]s
           env:
             - name: CONFIGHUB_URL
               valueFrom:
                 secretKeyRef:
-                  name: %[4]s
+                  name: %[3]s
                   key: CONFIGHUB_URL
             - name: CONFIGHUB_WORKER_ID
               valueFrom:
                 secretKeyRef:
-                  name: %[4]s
+                  name: %[3]s
                   key: CONFIGHUB_WORKER_ID
             - name: CONFIGHUB_WORKER_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: %[4]s
+                  name: %[3]s
                   key: CONFIGHUB_WORKER_SECRET
             - name: ARGO_SYNC_MODE
               value: kubernetes
             - name: ARGO_NAMESPACE
-              value: %[3]s
+              value: %[2]s
             - name: ARGO_REFRESH_TYPE
               value: hard
             - name: CONFIGHUB_SUBSCRIPTION_NAME
@@ -123,5 +126,5 @@ spec:
             runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
-`, LiveStatus, argobotNamespace, argoNamespace, argobotSecret, ArgobotImage)
+`, argobotNamespace, argoNamespace, argobotSecret, ArgobotImage)
 }

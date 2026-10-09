@@ -1,6 +1,6 @@
 # argobot, as cub kubara handover installs it on Kubara's hub.
-# It reports each Argo CD Application's sync and health to the ConfigHub Space
-# its OCI source names, as the confighub.com/live-status annotation.
+# It records each Argo CD Application's sync and health on the release the
+# Application synced, in the ConfigHub Space its OCI source names.
 # It runs as the Targets' server worker, the same identity Argo CD pulls
 # releases with; handover.sh writes that credential to the argobot-secrets Secret.
 apiVersion: v1
@@ -61,7 +61,7 @@ spec:
       serviceAccountName: argobot
       containers:
         - name: argobot
-          image: ghcr.io/confighub/argobot:v0.1.8
+          image: ghcr.io/confighub/argobot:v0.1.9
           env:
             - name: CONFIGHUB_URL
               valueFrom:
