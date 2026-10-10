@@ -1144,7 +1144,7 @@ ${graph.spec.evidence.kubaraVersion} across ${s.clusters} cluster(s). It records
 object references and selector matches visible in those manifests. It performs
 no live reads and does not claim live reconciliation.
 
-[Return to the Kubara buyer and adoption journey](https://confighub.github.io/helm-expt/site/kubara.html)
+[Return to the Kubara buyer and adoption journey](https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html)
 · [Browse the component-first Catalog](https://confighub.github.io/helm-expt/site/charts/)
 
 Colored, accessible table: [graph.html](graph.html). Machine-readable forms:
@@ -1255,7 +1255,7 @@ function htmlReport(graph, needs) {
 <body>
 <main>
 <h1>Kubara effective-render wiring</h1>
-<nav aria-label="Kubara example navigation"><a href="https://confighub.github.io/helm-expt/site/kubara.html">Kubara buyer journey</a> · <a href="https://confighub.github.io/helm-expt/site/charts/">Component Catalog</a></nav>
+<nav aria-label="Kubara example navigation"><a href="https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html">Kubara buyer journey</a> · <a href="https://confighub.github.io/helm-expt/site/charts/">Component Catalog</a></nav>
 <p class="lede">${graph.spec.summary.needs} mechanically extracted needs across ${graph.spec.summary.componentInstances} component instances on ${graph.spec.summary.clusters} clusters. Status is always written as text and symbol; color is supplementary.</p>
 <div class="legend" aria-label="Resolution legend"><span class="key rendered">✓ resolved-rendered</span><span class="key runtime">◐ resolved-runtime</span><span class="key external">↗ external / target prerequisite</span><span class="key optional">○ optional-unprovided</span><span class="key unresolved">! unresolved</span><span class="key ambiguous">? ambiguous</span></div>
 <p class="boundary"><strong>Boundary:</strong> rendered means present in committed desired state. Runtime means a rendered controller contract declares the output. Neither is a live-health assertion.</p>
@@ -1266,7 +1266,7 @@ function htmlReport(graph, needs) {
 ${rows}
 </tbody>
 </table>
-<p><a href="https://confighub.github.io/helm-expt/site/kubara.html">Return to the Kubara buyer journey</a> · <a href="https://confighub.github.io/helm-expt/site/charts/">Browse every retained component version</a></p>
+<p><a href="https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html">Return to the Kubara buyer journey</a> · <a href="https://confighub.github.io/helm-expt/site/charts/">Browse every retained component version</a></p>
 </main>
 </body>
 </html>

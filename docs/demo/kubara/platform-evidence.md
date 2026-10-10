@@ -14,7 +14,7 @@ questions:
 To start in ConfigHub rather than in these files, switch to the `Kubara`
 organization, filter Spaces by `StartHere=true`, open `hx-platform`, and then
 open `platform-contract`. Its metadata links to the public
-[buyer and adoption journey](https://confighub.github.io/helm-expt/site/kubara.html),
+[buyer and adoption journey](https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html),
 [component-first Catalog](https://confighub.github.io/helm-expt/site/charts/),
 [36-cell matrix](https://confighub.github.io/helm-expt/data/kubara-platform-matrix/matrix.html),
 and [full wiring graph](https://confighub.github.io/helm-expt/data/kubara-wiring/graph.html).

@@ -6,7 +6,7 @@ current config, committed effective renders, and two digest-pinned app fixtures.
 Historical v0.12.0 adapted
 evidence is retained separately under [historical-v0.12.0](historical-v0.12.0/summary.md).
 
-[Return to the Kubara buyer and adoption journey](https://confighub.github.io/helm-expt/site/kubara.html)
+[Return to the Kubara buyer and adoption journey](https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html)
 · [Browse the component-first Catalog](https://confighub.github.io/helm-expt/site/charts/)
 
 Colored, accessible view: [matrix.html](matrix.html). Machine-readable forms:
