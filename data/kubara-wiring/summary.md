@@ -6,7 +6,7 @@ v0.13.0 across 4 cluster(s). It records
 object references and selector matches visible in those manifests. It performs
 no live reads and does not claim live reconciliation.
 
-[Return to the Kubara buyer and adoption journey](https://confighub.github.io/helm-expt/site/kubara.html)
+[Return to the Kubara buyer and adoption journey](https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html)
 · [Browse the component-first Catalog](https://confighub.github.io/helm-expt/site/charts/)
 
 Colored, accessible table: [graph.html](graph.html). Machine-readable forms:

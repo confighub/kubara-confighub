@@ -82,7 +82,7 @@ In the `Kubara` organization, filter Spaces by `StartHere=true`, open
 entry point for the example; it links the governed platform contract to these
 public views:
 
-- [buyer and adoption journey](https://confighub.github.io/helm-expt/site/kubara.html);
+- [buyer and adoption journey](https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html);
 - [component-first Catalog with every retained version](https://confighub.github.io/helm-expt/site/charts/);
 - [36-cell component × cluster matrix](https://confighub.github.io/helm-expt/data/kubara-platform-matrix/matrix.html);
 - [full extracted wiring graph](https://confighub.github.io/helm-expt/data/kubara-wiring/graph.html).

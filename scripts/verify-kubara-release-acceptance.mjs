@@ -521,7 +521,7 @@ function expectedContract() {
         fullCatalogCoverage: "data/kubara-catalog-1.1-full-coverage/receipt.yaml",
         rootCatalog: "CATALOG.md",
         installerCatalog: "data/installer-oci-packages/packages.json",
-        buyerPage: "site/kubara.html",
+        buyerPage: "site/bring-kubara-into-confighub.html",
         adoptionTutorial: "site/d/docs/demo/kubara/adoption.html",
         evidenceCheckpoints: "site/d/docs/demo/kubara/checkpoints.html",
         guiTour: "site/d/docs/demo/kubara/gui-tour.html",
@@ -858,7 +858,7 @@ function verifyKubaraPublicSourceContract() {
     "appsSpaceID:",
   ]) check(importerRequest.includes(phrase), `Kubara importer request must pin ${phrase}`);
   for (const [name, html] of [["matrix", matrixHtml], ["wiring", wiringHtml]]) {
-    check(html.includes("https://confighub.github.io/helm-expt/site/kubara.html"), `${name} HTML must link back to the Kubara buyer and adoption journey`);
+    check(html.includes("https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html"), `${name} HTML must link back to the Kubara buyer and adoption journey`);
     check(html.includes("https://confighub.github.io/helm-expt/site/charts/"), `${name} HTML must link to the retained component-first Catalog`);
   }
   check(matrixHtml.includes("Argo sync") && !matrixHtml.includes("ConfigHub sync"), "current platform matrix must identify controller state as Argo sync, not ConfigHub sync");
@@ -873,7 +873,7 @@ function verifyKubaraPublicSourceContract() {
     check(!importerSource.includes(stale), `Kubara importer source retains obsolete implementation wording: ${stale}`);
   }
   for (const url of [
-    "https://confighub.github.io/helm-expt/site/kubara.html",
+    "https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html",
     "https://confighub.github.io/helm-expt/data/kubara-platform-matrix/matrix.html",
     "https://confighub.github.io/helm-expt/data/kubara-wiring/graph.html",
   ]) {
@@ -1460,7 +1460,7 @@ function checkInOrder(haystack, needles, label) {
 
 function verifyKubaraPublicVisibility() {
   const paths = {
-    buyer: "site/kubara.html",
+    buyer: "site/bring-kubara-into-confighub.html",
     adoption: "site/d/docs/demo/kubara/single-platform.html",
     tutorial: "site/d/docs/demo/kubara/adoption.html",
     checkpoints: "site/d/docs/demo/kubara/checkpoints.html",
@@ -1734,7 +1734,7 @@ function verifyKubaraPublicVisibility() {
   );
 
   check(
-    examples.includes('href="./kubara.html"')
+    examples.includes('href="./bring-kubara-into-confighub.html"')
       && examples.includes('href="./d/docs/demo/kubara/adoption.html"')
       && examples.includes('href="./d/docs/demo/kubara/single-platform.html"'),
     `${paths.examples} must link the Kubara buyer journey, tutorial, and technical example`,
@@ -1753,13 +1753,13 @@ function verifyKubaraPublicVisibility() {
     `${paths.examples} must link the prepared Kubara handoff and its receipt`,
   );
   check(
-    adoption.includes('href="https://confighub.github.io/helm-expt/site/kubara.html"')
+    adoption.includes('href="https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html"')
       && adoption.includes('href="https://confighub.github.io/helm-expt/data/kubara-platform-matrix/matrix.html"')
       && adoption.includes('href="https://confighub.github.io/helm-expt/data/kubara-wiring/graph.html"'),
     `${paths.adoption} must link the public adoption example, matrix, and full wiring graph`,
   );
   check(
-    evidence.includes('href="https://confighub.github.io/helm-expt/site/kubara.html"')
+    evidence.includes('href="https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html"')
       && evidence.includes('href="https://confighub.github.io/helm-expt/data/kubara-platform-matrix/matrix.html"')
       && evidence.includes('href="https://confighub.github.io/helm-expt/data/kubara-wiring/graph.html"'),
     `${paths.evidence} must link the public adoption example, matrix, and full wiring graph`,
@@ -1992,7 +1992,7 @@ function verifyMiniIdpPlan() {
         && space.labels?.Component),
     "pure control and ClusterTarget Spaces must not pollute the Components GUI",
   );
-  const guideURL = "https://confighub.github.io/helm-expt/site/kubara.html";
+  const guideURL = "https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html";
   const adoptionURL = "https://confighub.github.io/helm-expt/site/d/docs/demo/kubara/adoption.html";
   const performanceURL = "https://confighub.github.io/helm-expt/site/d/docs/demo/kubara/reconciliation-performance.html";
   const catalogURL = "https://confighub.github.io/helm-expt/site/charts/";
@@ -2122,7 +2122,7 @@ function verifyMiniIdpPlan() {
     faithfulReceiptUnit?.labels?.Lane === "Faithful"
       && faithfulReceiptUnit.labels?.StartHere === "true"
       && faithfulReceiptUnit.annotations?.["URL-Guide"]
-        === "https://confighub.github.io/helm-expt/site/kubara.html",
+        === "https://confighub.github.io/helm-expt/site/bring-kubara-into-confighub.html",
     "the faithful lane must have a StartHere-linked GUI receipt",
   );
   const argoDefinitionPayload = plan.spec.payloads.find(

@@ -319,7 +319,7 @@ spec:
     fullCatalogCoverage: "data/kubara-catalog-1.1-full-coverage/receipt.yaml"
     rootCatalog: "CATALOG.md"
     installerCatalog: "data/installer-oci-packages/packages.json"
-    buyerPage: "site/kubara.html"
+    buyerPage: "site/bring-kubara-into-confighub.html"
     adoptionTutorial: "site/d/docs/demo/kubara/adoption.html"
     evidenceCheckpoints: "site/d/docs/demo/kubara/checkpoints.html"
     guiTour: "site/d/docs/demo/kubara/gui-tour.html"
