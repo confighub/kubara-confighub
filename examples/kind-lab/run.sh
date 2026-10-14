@@ -20,6 +20,11 @@ SPOKE=${SPOKE:-spoke}
 KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
 APPROVE_STAGES=${APPROVE_STAGES:-}
+# A ConfigHub on your own machine: GATEWAY=http://host.docker.internal:<OCI port>
+# and CONFIGHUB_URL=http://host.docker.internal:<API port>, the addresses the
+# hub cluster reaches it at.
+GATEWAY=${GATEWAY:-}   # where ConfigHub serves releases; empty is oci.hub.confighub.com
+CONFIGHUB_URL=${CONFIGHUB_URL:-}   # where argobot reaches ConfigHub; empty is cub's current context
 export HUB_CONTEXT=kind-$KIND-$HUB
 SPOKE_CONTEXT=kind-$KIND-$SPOKE
 
@@ -47,7 +52,7 @@ run() {
 }
 # check judges health too. On kind, cert-manager stays Degraded and Traefik
 # Progressing (see the README), so check exits non-zero; carry on.
-check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" "$@" || true; }
+check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" ${GATEWAY:+--gateway "$GATEWAY"} "$@" || true; }
 replicas() { kubectl --context "$1" -n metrics-server get deploy metrics-server -o jsonpath='{.status.readyReplicas}'; }
 # The newest published release of a variant Space, with the live status
 # argobot recorded on it. That release is the one ConfigHub's Healthy gate reads.
@@ -82,11 +87,12 @@ run bash confighub/apply.sh
 
 section "3. Hand Kubara's hub to ConfigHub"
 if [ -z "$APPROVE_STAGES" ]; then
-  run cub kubara handover platform --prefix "$PREFIX" --out confighub --capabilities "$HUB=$HUB_CONTEXT"
+  run cub kubara handover platform --prefix "$PREFIX" --out confighub --capabilities "$HUB=$HUB_CONTEXT" \
+    ${GATEWAY:+--gateway "$GATEWAY"} ${CONFIGHUB_URL:+--confighub-url "$CONFIGHUB_URL"}
   run bash confighub/handover.sh
 else
   run cub kubara handover platform --prefix "$PREFIX" --out confighub --capabilities "$HUB=$HUB_CONTEXT" \
-    --approve-stages "$APPROVE_STAGES"
+    ${GATEWAY:+--gateway "$GATEWAY"} ${CONFIGHUB_URL:+--confighub-url "$CONFIGHUB_URL"} --approve-stages "$APPROVE_STAGES"
   # handover.sh exits 2 when it stops for someone else's approval.
   status=0
   run bash confighub/handover.sh | tee confighub/handover-stopped.out || status=$?
@@ -100,6 +106,10 @@ else
   echo "person, so it runs the commands handover.sh printed:"
   grep '^  cub variant approve ' confighub/handover-stopped.out | while read -r _ _ _ _ ref _ stage; do
     run cub variant approve --change-order "$ref" --stage "$stage"
+  done
+  # A variant the change order carries no change for waits for its first release instead.
+  grep '^  cub release publish ' confighub/handover-stopped.out | while read -r _ _ _ space; do
+    run cub release publish "$space" --quiet
   done
   echo
   echo "Then handover.sh again. It resumes the same change orders, and hands the hub over:"

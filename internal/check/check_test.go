@@ -291,3 +291,29 @@ func TestCheckFailsAProgressingApplicationWithAProblem(t *testing.T) {
 		t.Errorf("the rejection claims the health Argo CD reports: %+v", rej.Claims)
 	}
 }
+
+func TestCheckReadsAPlainHTTPGateway(t *testing.T) {
+	local := func(name, space string) string {
+		return strings.Replace(app(name, space, "sha256:a1"), "oci://oci.hub.confighub.com/", "oci://host.docker.internal:5000/", 1)
+	}
+	f := &fake{
+		apps: []string{local("lab-hub-metrics-server", "lab-metrics-server-lab-hub"), local("lab-spoke-metrics-server", "lab-metrics-server-lab-spoke")},
+		releases: map[string][]HubRelease{
+			"lab-metrics-server-lab-hub":   releases("sha256:a1"),
+			"lab-metrics-server-lab-spoke": releases("sha256:a1"),
+		},
+	}
+	// --gateway http://<host>:<port> names the host Argo CD reads; the scheme is not part of repoURL.
+	results, err := Check(lab, f.run, f, Options{Gateway: "http://host.docker.internal:5000"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, r := range results {
+		if r.Skipped == "" && !r.Passed() {
+			t.Errorf("%s: %v", r.Space, r.Problems)
+		}
+	}
+	if _, err := Check(lab, f.run, f, Options{Gateway: "ftp://host"}); err == nil {
+		t.Error("check took an ftp:// gateway")
+	}
+}

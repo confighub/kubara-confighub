@@ -134,9 +134,11 @@ func (s syncRecord) fromGit() bool {
 
 // Check judges every variant in the plan against what Kubara's hub runs.
 func Check(p plan.Plan, run Run, hub Hub, opts Options) ([]Result, error) {
-	if opts.Gateway == "" {
-		opts.Gateway = handover.DefaultGateway
+	gw, err := handover.ParseGateway(opts.Gateway)
+	if err != nil {
+		return nil, err
 	}
+	opts.Gateway = gw.Host
 	if opts.Type == "" {
 		opts.Type = DefaultType
 	}

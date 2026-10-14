@@ -15,6 +15,7 @@ KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
 BOOTSTRAP=${BOOTSTRAP:-5.0.1}
 GENERAL=${GENERAL:-5.1.0}
+GATEWAY=${GATEWAY:-}   # where ConfigHub serves releases; empty is oci.hub.confighub.com
 export HUB_CONTEXT=kind-$KIND-$HUB
 SPOKE_CONTEXT=kind-$KIND-$SPOKE
 
@@ -31,7 +32,7 @@ run() {
 }
 # check judges health too. On kind, cert-manager stays Degraded and Traefik
 # Progressing (see the README), so check exits non-zero; carry on.
-check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" "$@" || true; }
+check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" ${GATEWAY:+--gateway "$GATEWAY"} "$@" || true; }
 image() { kubectl --context "$1" -n "$2" get deploy "$3" -o jsonpath='{.spec.template.spec.containers[0].image}'; }
 # order <component>: the change order apply.sh proposed for the component's base.
 order() { echo "$PREFIX-$1-base/kubara-generated-r$(cub unit get --space "$PREFIX-kubara-generated" "$1" -o jq=.Unit.HeadRevisionNum)"; }
@@ -55,6 +56,9 @@ pull() {
   done
   echo "$1 did not sync $want"; return 1
 }
+
+gateway_host=${GATEWAY:-oci.hub.confighub.com}
+gateway_host=${gateway_host#*://}
 
 section "1. Kubara generates the platform from newer catalogs"
 run kubara --version
@@ -87,7 +91,7 @@ done
 echo
 echo "A change made in ConfigHub before the new catalog stays: the argo-cd base still"
 echo "points Kubara's ApplicationSets at ConfigHub, as handover set it."
-echo "ApplicationSets in the argo-cd base that read ConfigHub: $(cub unit data --space "$PREFIX-argo-cd-base" argo-cd | grep -c "repoURL: oci://oci.hub.confighub.com/space/$PREFIX-")"
+echo "ApplicationSets in the argo-cd base that read ConfigHub: $(cub unit data --space "$PREFIX-argo-cd-base" argo-cd | grep -c "repoURL: oci://$gateway_host/space/$PREFIX-")"
 
 section "4. traefik $(image "$HUB_CONTEXT" traefik traefik | sed 's/.*://') to $(cub unit data --space "$PREFIX-traefik-base" traefik | sed -n 's/.*image: docker.io\/traefik:\(.*\)/\1/p' | head -1), in dev first"
 release traefik dev "$HUB"

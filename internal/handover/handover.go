@@ -26,8 +26,13 @@ type HubRender func(kubaraDir, cluster string) ([]byte, error)
 
 type Options struct {
 	Out     string
-	Gateway string
+	Gateway string // --gateway: a host, or an http:// URL for a plain-HTTP registry
 	Render  HubRender
+	// ConfigHubURL is the address argobot reaches ConfigHub at from the hub.
+	// Empty means the server of cub's current context, which is right unless
+	// the hub reaches ConfigHub by another name, as a kind cluster reaches a
+	// ConfigHub on your own machine.
+	ConfigHubURL string
 	// ApproveStages are the stages handover.sh may approve as the person who
 	// runs it. nil means every stage. In any other stage it promotes the
 	// release and stops before publishing it, for someone else to approve.
@@ -54,9 +59,11 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	if len(p.Problems) > 0 {
 		return res, fmt.Errorf("the plan has problems to fix first:\n  - %s", strings.Join(p.Problems, "\n  - "))
 	}
-	if opts.Gateway == "" {
-		opts.Gateway = DefaultGateway
+	gw, err := ParseGateway(opts.Gateway)
+	if err != nil {
+		return res, err
 	}
+	opts.Gateway = gw.Host
 	may, err := approvals(p, opts.ApproveStages)
 	if err != nil {
 		return res, err
@@ -149,7 +156,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 
 	var s strings.Builder
 	line := func(format string, args ...any) { fmt.Fprintf(&s, format+"\n", args...) }
-	s.WriteString(header(p, opts.Gateway, res))
+	s.WriteString(header(p, gw, res))
 
 	line(`step "0/6 Check before changing anything"`)
 	line(`cub space list --quiet >/dev/null || { echo "cub is not logged in: run cub auth login"; exit 1; }`)
@@ -319,6 +326,9 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("fi")
 	line(`k -n %s create secret generic %s \`, argoNamespace, secret)
 	line(`  --from-literal=type=oci --from-literal=url=oci://%s/space/%s- \`, opts.Gateway, p.Prefix)
+	if gw.PlainHTTP {
+		line(`  --from-literal=insecureOCIForceHttp=true \`)
+	}
 	line(`  --from-literal=username=token --from-file=password=<(printf '%%s' "$token") \`)
 	line(`  --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml \`)
 	line(`  | k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | k apply -f -`)
@@ -432,7 +442,11 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`  rm -rf "$key_dir"`)
 	line("fi")
 	line(`k -n %s create secret generic %s \`, argobotNamespace, argobotSecret)
-	line(`  --from-file=CONFIGHUB_URL=<(cub context get -o jq=.coordinate.serverURL | tr -d '\n') \`)
+	if opts.ConfigHubURL != "" {
+		line(`  --from-literal=CONFIGHUB_URL=%s \`, q(opts.ConfigHubURL))
+	} else {
+		line(`  --from-file=CONFIGHUB_URL=<(cub context get -o jq=.coordinate.serverURL | tr -d '\n') \`)
+	}
 	line(`  --from-file=CONFIGHUB_AUTH_PRIVATE_KEY=<(printf '%%s' "$key") \`)
 	line(`  --dry-run=client -o yaml | k apply -f -`)
 	line(`unset key`)
@@ -481,7 +495,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	return res, nil
 }
 
-func header(p plan.Plan, gateway string, res Result) string {
+func header(p plan.Plan, gw Gateway, res Result) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, `#!/usr/bin/env bash
 # Hand the Kubara hub in %s to ConfigHub. Run it after apply.sh.
@@ -493,12 +507,15 @@ func header(p plan.Plan, gateway string, res Result) string {
 # Kubara's hub, AppProject and ApplicationSets stay. Each ApplicationSet below
 # reads the cluster's approved release from %s instead of Git:
 #
-`, p.Source, gateway)
+`, p.Source, gw.Host)
 	for _, r := range res.Routes {
 		fmt.Fprintf(&b, "#   %-24s %s\n", r.ApplicationSet, r.RepoURL)
 	}
 	if len(res.WithKubara) > 0 {
 		fmt.Fprintf(&b, "#\n# No ApplicationSet delivers %s; Kubara's bootstrap keeps it.\n", strings.Join(res.WithKubara, ", "))
+	}
+	if gw.PlainHTTP {
+		fmt.Fprintf(&b, "#\n# %s serves plain HTTP, so the gateway credential tells Argo CD not to use TLS.\n", gw.Host)
 	}
 	b.WriteString("#\n# Step 4 releases each variant, stage by stage.\n")
 	if len(res.Approves) > 0 {
@@ -573,7 +590,10 @@ release_stage() {
   local ref=$1 stage=$2 who=$3 s out
   shift 3
   [ -z "$held" ] || return 0
-  if has Released "$ref" "$@" && released "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  if has Released "$ref" "$@"; then
+    first_release "$ref" "$stage" "$who" "$@"
+    return 0
+  fi
   # A stage that has taken the change order is not promoted again: once the
   # last stage has it, ConfigHub refuses another promotion. Nor is it
   # approved again.
@@ -584,6 +604,12 @@ release_stage() {
   for s in "$@"; do
     if ! out=$(publish "$s" "$ref" 2>&1); then
       case "$out" in
+        *"is someone else's to publish"*)
+          echo "$s waits for its first release in $stage"
+          held=$ref
+          waiting="$waiting  cub release publish $s
+"
+          return 0 ;;
         *"requires approval"*)
           echo "$s waits for an approval in $stage"
           held=$ref
@@ -594,6 +620,30 @@ release_stage() {
       esac
     fi
     [ -z "$out" ] || echo "$out"
+  done
+}
+# first_release <change order> <stage> <me|someone-else> <space>...: the change
+# order counts each Space as released. A Space it carries no change for, because
+# the variant already holds every revision of its base, counts too, though it
+# may never have published a release, and a release by the change order then
+# has no revision to approve. Such a Space's first release is its variant as
+# apply.sh made it: the script publishes it where it may approve, and
+# elsewhere notes the command for someone else to run.
+first_release() {
+  local ref=$1 stage=$2 who=$3 s
+  shift 3
+  for s in "$@"; do
+    if released "$s"; then echo "$ref: $stage has released it in $s"; continue; fi
+    if [ "$who" = me ]; then
+      echo "$s: $ref carries no change for it; publishing its first release"
+      cub release publish "$s" --quiet
+    else
+      echo "$s waits for its first release in $stage"
+      held=$ref
+      waiting="$waiting  cub release publish $s
+"
+      return 0
+    fi
   done
 }
 # released <space>...: each Space has a published release. Once it has, later
@@ -617,14 +667,19 @@ publish() {
 # when it is made, so its first change order takes nothing from the base, and
 # from ConfigHub v0.9.2 there is then no revision to release by it. When the
 # change order passed over every unit of the base as AlreadyTaken, the variant
-# is released as it stands, which is what Git delivers today. Any other refusal
-# stops the script.
+# is released as it stands, which is what Git delivers today, where this script
+# may approve; elsewhere it notes the command for someone else. Any other
+# refusal stops the script.
 publish_taken() {
   local skipped id out
   skipped=" $(cub changeorder get --space "${2%/*}" "${2#*/}" -o 'jq=(.ChangeOrder.SkippedUnits // {}) | to_entries | map(.key + "=" + .value) | join(" ")' | tr -d '"') "
   for id in $(cub unit list --space "${2%/*}" -o 'jq=[.[].Unit.UnitID] | join(" ")' | tr -d '"'); do
     case "$skipped" in *" $id=AlreadyTaken "*) ;; *) echo "$3" >&2; return 1 ;; esac
   done
+  # In a stage this script may not approve, the first release is someone
+  # else's to publish, as first_release leaves it. publish runs in a
+  # subshell, so release_stage records the hold.
+  if [ "${who:-me}" != me ]; then echo "the first release of $1 is someone else's to publish"; return 1; fi
   out=$(cub release publish "$1" --quiet 2>&1) && { echo "$1: the change order carried nothing new for it, so it is released as it stands"; return 0; }
   case "$out" in *"no changes were made since :latest bundle"*) echo "$1 already released" ;; *) echo "$out" >&2; return 1 ;; esac
 }

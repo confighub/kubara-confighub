@@ -81,7 +81,10 @@ release_stage() {
   local ref=$1 stage=$2 who=$3 s out
   shift 3
   [ -z "$held" ] || return 0
-  if has Released "$ref" "$@" && released "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  if has Released "$ref" "$@"; then
+    first_release "$ref" "$stage" "$who" "$@"
+    return 0
+  fi
   # A stage that has taken the change order is not promoted again: once the
   # last stage has it, ConfigHub refuses another promotion. Nor is it
   # approved again.
@@ -92,6 +95,12 @@ release_stage() {
   for s in "$@"; do
     if ! out=$(publish "$s" "$ref" 2>&1); then
       case "$out" in
+        *"is someone else's to publish"*)
+          echo "$s waits for its first release in $stage"
+          held=$ref
+          waiting="$waiting  cub release publish $s
+"
+          return 0 ;;
         *"requires approval"*)
           echo "$s waits for an approval in $stage"
           held=$ref
@@ -102,6 +111,30 @@ release_stage() {
       esac
     fi
     [ -z "$out" ] || echo "$out"
+  done
+}
+# first_release <change order> <stage> <me|someone-else> <space>...: the change
+# order counts each Space as released. A Space it carries no change for, because
+# the variant already holds every revision of its base, counts too, though it
+# may never have published a release, and a release by the change order then
+# has no revision to approve. Such a Space's first release is its variant as
+# apply.sh made it: the script publishes it where it may approve, and
+# elsewhere notes the command for someone else to run.
+first_release() {
+  local ref=$1 stage=$2 who=$3 s
+  shift 3
+  for s in "$@"; do
+    if released "$s"; then echo "$ref: $stage has released it in $s"; continue; fi
+    if [ "$who" = me ]; then
+      echo "$s: $ref carries no change for it; publishing its first release"
+      cub release publish "$s" --quiet
+    else
+      echo "$s waits for its first release in $stage"
+      held=$ref
+      waiting="$waiting  cub release publish $s
+"
+      return 0
+    fi
   done
 }
 # released <space>...: each Space has a published release. Once it has, later
@@ -125,14 +158,19 @@ publish() {
 # when it is made, so its first change order takes nothing from the base, and
 # from ConfigHub v0.9.2 there is then no revision to release by it. When the
 # change order passed over every unit of the base as AlreadyTaken, the variant
-# is released as it stands, which is what Git delivers today. Any other refusal
-# stops the script.
+# is released as it stands, which is what Git delivers today, where this script
+# may approve; elsewhere it notes the command for someone else. Any other
+# refusal stops the script.
 publish_taken() {
   local skipped id out
   skipped=" $(cub changeorder get --space "${2%/*}" "${2#*/}" -o 'jq=(.ChangeOrder.SkippedUnits // {}) | to_entries | map(.key + "=" + .value) | join(" ")' | tr -d '"') "
   for id in $(cub unit list --space "${2%/*}" -o 'jq=[.[].Unit.UnitID] | join(" ")' | tr -d '"'); do
     case "$skipped" in *" $id=AlreadyTaken "*) ;; *) echo "$3" >&2; return 1 ;; esac
   done
+  # In a stage this script may not approve, the first release is someone
+  # else's to publish, as first_release leaves it. publish runs in a
+  # subshell, so release_stage records the hold.
+  if [ "${who:-me}" != me ]; then echo "the first release of $1 is someone else's to publish"; return 1; fi
   out=$(cub release publish "$1" --quiet 2>&1) && { echo "$1: the change order carried nothing new for it, so it is released as it stands"; return 0; }
   case "$out" in *"no changes were made since :latest bundle"*) echo "$1 already released" ;; *) echo "$out" >&2; return 1 ;; esac
 }
