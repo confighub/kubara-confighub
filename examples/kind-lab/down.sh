@@ -12,8 +12,10 @@ SPOKE=${SPOKE:-spoke}
 KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
 
+# grep reads all of what kind prints: grep -q stops early, kind then fails on a
+# broken pipe, and pipefail would report a cluster that exists as missing.
 for c in "$KIND-$HUB" "$KIND-$SPOKE"; do
-  kind get clusters 2>/dev/null | grep -qx "$c" && kind delete cluster --name "$c"
+  kind get clusters 2>/dev/null | grep -x "$c" >/dev/null && kind delete cluster --name "$c"
 done
 rm -rf "$LAB"
 
