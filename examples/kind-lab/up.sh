@@ -40,8 +40,10 @@ hub() { kubectl --kubeconfig "$LAB/hub.kubeconfig" "$@"; }
 kubara_() { (cd platform && kubara --work-dir . --config-file config.yaml --env-file .env "$@"); }
 
 step "1/7 Two kind clusters: $KIND-$HUB for the hub and $KIND-$SPOKE for the spoke"
+# grep reads all of what kind prints, as below: grep -q stops early, the writer
+# then fails on a broken pipe, and pipefail reports no match.
 for c in "$KIND-$HUB" "$KIND-$SPOKE"; do
-  kind get clusters 2>/dev/null | grep -qx "$c" || kind create cluster --name "$c" --image "$NODE_IMAGE" --wait 120s
+  kind get clusters 2>/dev/null | grep -x "$c" >/dev/null || kind create cluster --name "$c" --image "$NODE_IMAGE" --wait 120s
 done
 kind get kubeconfig --name "$KIND-$HUB" > hub.kubeconfig
 kind get kubeconfig --name "$KIND-$SPOKE" > spoke.kubeconfig
@@ -83,7 +85,7 @@ hub -n git-server rollout status deploy/git --timeout=240s
 served=no
 for _ in $(seq 1 12); do
   hub -n git-server delete pod git-check --ignore-not-found >/dev/null 2>&1
-  if hub -n git-server run git-check --rm -i --restart=Never --image=alpine/git:2.47.2 -q -- ls-remote "$REPO" 2>/dev/null | grep -q refs/heads/main; then
+  if hub -n git-server run git-check --rm -i --restart=Never --image=alpine/git:2.47.2 -q -- ls-remote "$REPO" 2>/dev/null | grep refs/heads/main >/dev/null; then
     served=yes; break
   fi
   sleep 5
