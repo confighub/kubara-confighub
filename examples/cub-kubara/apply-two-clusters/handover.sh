@@ -68,7 +68,10 @@ release_stage() {
   local ref=$1 stage=$2 who=$3 s out
   shift 3
   [ -z "$held" ] || return 0
-  if has Released "$ref" "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  if has Released "$ref" "$@"; then
+    first_release "$ref" "$stage" "$who" "$@"
+    return 0
+  fi
   # A stage that has taken the change order is not promoted again: once the
   # last stage has it, ConfigHub refuses another promotion. Nor is it
   # approved again.
@@ -89,6 +92,30 @@ release_stage() {
       esac
     fi
     [ -z "$out" ] || echo "$out"
+  done
+}
+# first_release <change order> <stage> <me|someone-else> <space>...: the change
+# order counts each Space as released. A Space it carries no change for, because
+# the variant already holds every revision of its base, counts too, though it
+# may never have published a release, and a release by the change order then
+# has no revision to approve. Such a Space's first release is its variant as
+# apply.sh made it: the script publishes it where it may approve, and
+# elsewhere notes the command for someone else to run.
+first_release() {
+  local ref=$1 stage=$2 who=$3 s
+  shift 3
+  for s in "$@"; do
+    if released "$s"; then echo "$ref: $stage has released it in $s"; continue; fi
+    if [ "$who" = me ]; then
+      echo "$s: $ref carries no change for it; publishing its first release"
+      cub release publish "$s" --quiet
+    else
+      echo "$s waits for its first release in $stage"
+      held=$ref
+      waiting="$waiting  cub release publish $s
+"
+      return 0
+    fi
   done
 }
 # released <space>...: each Space has a published release. Once it has, later
@@ -171,7 +198,7 @@ if released kx-traefik-hub kx-traefik-edge; then
 else
   order=$(handover_order kx-traefik-base traefik handover-e84ab4de)
   cub changeorder create --space kx-traefik-base "$order" --change-workflow kx-traefik-base/rollout --description 'Release kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
-  if rolled_out kx-traefik-base/"$order"; then
+  if rolled_out kx-traefik-base/"$order" && released kx-traefik-hub kx-traefik-edge; then
     echo 'traefik: every variant is released'
   else
     held=
@@ -184,7 +211,7 @@ if released kx-homer-dashboard-hub; then
 else
   order=$(handover_order kx-homer-dashboard-base homer-dashboard handover-0d585623)
   cub changeorder create --space kx-homer-dashboard-base "$order" --change-workflow kx-homer-dashboard-base/rollout --description 'Release kx-homer-dashboard-hub for handover' --allow-exists --quiet
-  if rolled_out kx-homer-dashboard-base/"$order"; then
+  if rolled_out kx-homer-dashboard-base/"$order" && released kx-homer-dashboard-hub; then
     echo 'homer-dashboard: every variant is released'
   else
     held=
@@ -193,7 +220,7 @@ else
 fi
 order=$(handover_order kx-argo-cd-base argo-cd handover-dec294e7)
 cub changeorder create --space kx-argo-cd-base "$order" --change-workflow kx-argo-cd-base/rollout --description 'Release kx-argo-cd-hub for handover' --allow-exists --quiet
-if rolled_out kx-argo-cd-base/"$order"; then
+if rolled_out kx-argo-cd-base/"$order" && released kx-argo-cd-hub; then
   echo 'argo-cd: every variant is released'
 else
   held=

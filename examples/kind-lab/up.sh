@@ -77,9 +77,11 @@ hub apply -f "$here/git-server.yaml" >/dev/null
 hub -n git-server create configmap git-server --from-file=server.py="$here/git-server.py" --dry-run=client -o yaml | hub apply -f - >/dev/null
 hub -n git-server rollout restart deploy/git >/dev/null
 hub -n git-server rollout status deploy/git --timeout=240s
-# kubectl can fail to attach to a pod that has just started, so try a few times.
+# kubectl can fail to attach to a pod that has just started, and the Service
+# can still send a request to the pod the restart replaced, which takes up to
+# its 30-second grace period to go: try for a minute.
 served=no
-for _ in 1 2 3; do
+for _ in $(seq 1 12); do
   hub -n git-server delete pod git-check --ignore-not-found >/dev/null 2>&1
   if hub -n git-server run git-check --rm -i --restart=Never --image=alpine/git:2.47.2 -q -- ls-remote "$REPO" 2>/dev/null | grep -q refs/heads/main; then
     served=yes; break

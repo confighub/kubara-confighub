@@ -21,6 +21,46 @@ const DefaultGateway = "oci.hub.confighub.com"
 // ReleaseTag is the tag of a Space's newest release on the gateway.
 const ReleaseTag = "latest"
 
+// Gateway is where ConfigHub serves Space releases, as --gateway names it: a
+// host, such as oci.hub.confighub.com, or a URL. https:// and oci:// name the
+// host as a bare host does. http:// names a registry that serves plain HTTP,
+// such as a ConfigHub that runs on your own machine, which Argo CD reaches
+// only when the gateway's credential says so.
+type Gateway struct {
+	Host      string // host, with its port if it has one
+	PlainHTTP bool
+}
+
+// ParseGateway reads --gateway. An empty one is DefaultGateway.
+func ParseGateway(s string) (Gateway, error) {
+	s = strings.TrimSuffix(strings.TrimSpace(s), "/")
+	if s == "" {
+		return Gateway{Host: DefaultGateway}, nil
+	}
+	var g Gateway
+	if scheme, rest, ok := strings.Cut(s, "://"); ok {
+		switch scheme {
+		case "http":
+			g.PlainHTTP = true
+		case "https", "oci":
+		default:
+			return g, fmt.Errorf("--gateway %s: a gateway is a host, or an http://, https:// or oci:// URL", s)
+		}
+		s = rest
+	}
+	if s == "" || strings.ContainsAny(s, "/?# ") {
+		return g, fmt.Errorf("--gateway %s: name the gateway's host and port only; handover adds /space/<space>", s)
+	}
+	g.Host = s
+	return g, nil
+}
+
+// gatewayHost is the host of a --gateway, for the functions that take it as a string.
+func gatewayHost(gateway string) (string, error) {
+	g, err := ParseGateway(gateway)
+	return g.Host, err
+}
+
 var docSeparator = regexp.MustCompile(`(?m)^---[ \t]*$\n?`)
 
 // Route is one ApplicationSet pointed at ConfigHub.
@@ -60,9 +100,13 @@ func projectPattern(gateway, prefix string) string {
 // list holding only the gateway, which leaves the scoped repository permitted. Every other document is kept byte for
 // byte, and a render already routed comes back unchanged.
 func RouteApplicationSets(render []byte, charts map[string]bool, prefix, gateway string) ([]byte, Routed, error) {
+	var out Routed
+	gateway, err := gatewayHost(gateway)
+	if err != nil {
+		return nil, out, err
+	}
 	docs := docSeparator.Split(string(render), -1)
 	roots := make([]*yaml.Node, len(docs))
-	var out Routed
 	projects := map[string]bool{}
 	changed := make([]bool, len(docs))
 	for i, doc := range docs {

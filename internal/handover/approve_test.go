@@ -80,8 +80,8 @@ func TestApproveStagesMustBeStagesOfThePlatform(t *testing.T) {
 }
 
 // fakeCub stands in for cub: prod's release needs an approval until
-// approved-prod exists, and each Space in released-ids has released the change
-// order. It logs each call.
+// approved-prod exists, each Space in released-ids has released the change
+// order, and each Space in published has published a release. It logs each call.
 const fakeCub = `#!/usr/bin/env bash
 dir=$(dirname "$0")
 echo "cub $*" >> "$dir/calls"
@@ -93,14 +93,16 @@ case "$*" in
     if grep -q id-edge "$dir/resolved-ids" 2>/dev/null; then echo "change order has completed ChangeWorkflow, so there is nothing left to promote"; exit 1; fi
     echo "id-edge" >> "$dir/resolved-ids" ;;
   "space get "*) echo "id-$3" ;;
+  "release list --space "*) grep -c "^$4\$" "$dir/published" 2>/dev/null || true ;;
+  "release publish hub --quiet" | "release publish edge --quiet") echo "$3" >> "$dir/published" ;;
   "variant approve"*"--stage prod"*) touch "$dir/approved-prod" ;;
   "release publish edge "*)
     if [ ! -f "$dir/approved-prod" ]; then
       echo "Failed: HTTP 422: unable to publish a release of change order 'o1' in stage 'prod': requires approval: 1 Approval attestation(s) from eligible attesters; cm revision 3 has 0 of 1"
       exit 1
     fi
-    echo "id-edge" >> "$dir/released-ids" ;;
-  "release publish hub "*) echo "id-hub" >> "$dir/released-ids" ;;
+    echo "id-edge" >> "$dir/released-ids"; echo edge >> "$dir/published" ;;
+  "release publish hub "*) echo "id-hub" >> "$dir/released-ids"; echo hub >> "$dir/published" ;;
 esac
 exit 0
 `
@@ -109,20 +111,7 @@ exit 0
 // first run releases dev, stops at prod and names the command; after someone
 // else approves prod, a second run resumes without approving anything again.
 func TestReleaseStageStopsAndResumes(t *testing.T) {
-	if _, err := exec.LookPath("bash"); err != nil {
-		t.Skip("bash is not installed")
-	}
-	_, script := writeScript(t, []string{"dev"})
-	start := strings.Index(script, "set -euo pipefail\n")
-	end := strings.Index(script, "# would_prune ")
-	if start < 0 || end < 0 {
-		t.Fatal("the script's helpers moved")
-	}
-	helpers := strings.Replace(script[start:end], "cd \"$(dirname \"$0\")\"\n", "", 1)
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "cub"), []byte(fakeCub), 0o755); err != nil {
-		t.Fatal(err)
-	}
+	helpers, dir := fakeHelpers(t)
 	driver := helpers + `
 held=
 release_stage base/o1 dev me hub
@@ -165,5 +154,57 @@ printf '%s' "$waiting"
 	c = calls()
 	if strings.Contains(c, "variant approve") || strings.Contains(c, "variant promote") || !strings.Contains(c, "cub release publish edge --revision ChangeOrder:base/o1") {
 		t.Errorf("the resumed run must promote and approve nothing, and publish prod:\n%s", c)
+	}
+}
+
+// fakeHelpers is the script's own helpers, with a fake cub first on PATH.
+func fakeHelpers(t *testing.T) (string, string) {
+	t.Helper()
+	if _, err := exec.LookPath("bash"); err != nil {
+		t.Skip("bash is not installed")
+	}
+	_, script := writeScript(t, []string{"dev"})
+	start := strings.Index(script, "set -euo pipefail\n")
+	end := strings.Index(script, "# would_prune ")
+	if start < 0 || end < 0 {
+		t.Fatal("the script's helpers moved")
+	}
+	helpers := strings.Replace(script[start:end], "cd \"$(dirname \"$0\")\"\n", "", 1)
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "cub"), []byte(fakeCub), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	return helpers, dir
+}
+
+// A change order that carries no change for a variant, because the variant
+// already holds every revision of its base, counts the variant as released
+// though it has never published a release. release_stage publishes the
+// variant's first release where it may approve, and leaves it to someone else
+// elsewhere.
+func TestReleaseStagePublishesAFirstReleaseTheChangeOrderCarriesNothingFor(t *testing.T) {
+	helpers, dir := fakeHelpers(t)
+	if err := os.WriteFile(filepath.Join(dir, "released-ids"), []byte("id-hub\nid-edge\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("bash", "-c", helpers+`
+held=
+release_stage base/o1 dev me hub
+release_stage base/o1 prod someone-else edge
+printf '%s' "$waiting"
+`)
+	cmd.Env = append(os.Environ(), "PATH="+dir+":"+os.Getenv("PATH"))
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+	if !strings.Contains(string(out), "hub: base/o1 carries no change for it; publishing its first release") ||
+		!strings.Contains(string(out), "edge waits for its first release in prod\n  cub release publish edge\n") {
+		t.Errorf("output:\n%s", out)
+	}
+	calls, _ := os.ReadFile(filepath.Join(dir, "calls"))
+	if !strings.Contains(string(calls), "cub release publish hub --quiet") || strings.Contains(string(calls), "release publish edge") ||
+		strings.Contains(string(calls), "variant promote") || strings.Contains(string(calls), "variant approve") {
+		t.Errorf("it must publish hub's first release and nothing else:\n%s", calls)
 	}
 }
