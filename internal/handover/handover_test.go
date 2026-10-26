@@ -239,20 +239,31 @@ func TestWriteHandoverScript(t *testing.T) {
 	if strings.Index(script, "k apply -f argobot.yaml") < strings.Index(script, "drop_git_sources\n") {
 		t.Fatal("argobot must be installed after the hub reads ConfigHub")
 	}
-	// ConfigHub reads live status from the Release, which takes EditChildren
-	// on the Target to record. Nothing reads the Space annotation now, so the
-	// script must not wait on it, and the worker needs no grant on a Space.
+	// Two service accounts and no worker: Argo CD pulls with a token of one
+	// that can only read, and argobot records live status with a key of the
+	// other, which alone holds EditChildren. Each credential is kept while
+	// ConfigHub still lists it, and replaced when it does not.
 	for _, w := range []string{
-		`cub target update hub --space kx-targets --permission "EditChildren:$bot_user"`,
-		`cub target update edge --space kx-targets --permission "EditChildren:$bot_user"`,
+		"cub serviceaccount create kx-delivery --allow-exists --quiet",
+		"cub serviceaccount create kx-argobot --allow-exists --quiet",
+		"--permission View:serviceaccount:kx-delivery --permission ViewChildren:serviceaccount:kx-delivery",
+		"--permission View:serviceaccount:kx-argobot --permission ViewChildren:serviceaccount:kx-argobot --permission EditChildren:serviceaccount:kx-argobot",
+		`cub serviceaccount token create kx-delivery --description 'Argo CD on Kubara'\''s hub, kx' -o json) || { no_impersonate kx-delivery; exit 1; }`,
+		`--from-literal=username=token --from-file=password=<(printf '%s' "$token")`,
+		`k annotate --local -f - confighub.com/token-jti="$jti"`,
+		`cub serviceaccount token revoke kx-delivery "$old"`,
+		"--permission Claim:serviceaccount:kx-argobot",
+		`cub serviceaccount key list kx-argobot -o json | jq -e --arg k "$kid" 'any(.[].UserKey; .Kid == $k)'`,
+		`cub serviceaccount key add kx-argobot --generate "$key_dir/argobot.jwk"`,
+		`cub serviceaccount key delete kx-argobot "$old"`,
 		`cub release list --space "$1" --where "Published = true"`,
-		`this script needs v0.8.2 or later`,
+		`this script needs v0.9.0 or later`,
 	} {
 		if !strings.Contains(script, w) {
 			t.Errorf("handover.sh lacks %q", w)
 		}
 	}
-	for _, bad := range []string{"confighub.com/live-status", `"Edit:$bot_user"`} {
+	for _, bad := range []string{"confighub.com/live-status", "cub worker", "bot_user", "EditChildren:serviceaccount:kx-delivery"} {
 		if strings.Contains(script, bad) {
 			t.Errorf("handover.sh still has %q", bad)
 		}
@@ -265,12 +276,14 @@ func TestWriteHandoverScript(t *testing.T) {
 }
 
 func TestArgobotHasOnlyWhatItNeeds(t *testing.T) {
-	m := argobotManifest()
+	m := argobotManifest("kx-targets")
 	for _, w := range []string{
 		"image: " + ArgobotImage,
 		`resources: ["applications"]`,
 		`verbs: ["get", "list", "watch", "patch"]`,
 		"name: argobot-secrets",
+		"key: CONFIGHUB_AUTH_PRIVATE_KEY",
+		"value: kx-targets/argobot",
 	} {
 		if !strings.Contains(m, w) {
 			t.Errorf("argobot.yaml lacks %q", w)
@@ -278,7 +291,7 @@ func TestArgobotHasOnlyWhatItNeeds(t *testing.T) {
 	}
 	// Kubara's Argo CD namespace holds repository credentials; argobot must
 	// not be able to read them, nor anything outside Applications.
-	for _, bad := range []string{`"secrets"`, "- secrets", `"*"`, "ClusterRole", "CONFIGHUB_WORKER_SECRET\n              value: "} {
+	for _, bad := range []string{`"secrets"`, "- secrets", `"*"`, "ClusterRole", "CONFIGHUB_WORKER", "ARGO_SYNC_MODE", "CONFIGHUB_SUBSCRIPTION_NAME"} {
 		if strings.Contains(m, bad) {
 			t.Errorf("argobot.yaml grants or holds %q", bad)
 		}

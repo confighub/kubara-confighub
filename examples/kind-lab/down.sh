@@ -19,11 +19,20 @@ rm -rf "$LAB"
 
 if [ "${CONFIGHUB:-}" = yes ]; then
   spaces=$(cub space list --where "Slug LIKE '$PREFIX-%'" --no-headers -o name)
-  [ -n "$spaces" ] || { echo "no $PREFIX-* Spaces"; exit 0; }
-  echo "Deleting these Spaces and everything in them:"
-  echo "$spaces"
-  # One request, so Spaces that link to each other go together.
-  cub space delete --where "Slug LIKE '$PREFIX-%'" --recursive-force --quiet
+  if [ -n "$spaces" ]; then
+    echo "Deleting these Spaces and everything in them:"
+    echo "$spaces"
+    # One request, so Spaces that link to each other go together.
+    cub space delete --where "Slug LIKE '$PREFIX-%'" --recursive-force --quiet
+  else
+    echo "no $PREFIX-* Spaces"
+  fi
+  # The service accounts handover.sh made; deleting one revokes its tokens and keys.
+  for account in "$PREFIX-delivery" "$PREFIX-argobot"; do
+    if cub serviceaccount get "$account" >/dev/null 2>&1; then
+      cub serviceaccount delete "$account" --quiet && echo "deleted the service account $account"
+    fi
+  done
 else
   echo "The lab's Spaces are still in ConfigHub. To delete them: CONFIGHUB=yes bash $0"
 fi

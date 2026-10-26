@@ -4,15 +4,20 @@ import "fmt"
 
 // ArgobotImage is the argobot release handover installs on the hub. argobot
 // watches Argo CD's Applications and records each one's sync and health on the
-// release it synced, in its variant Space, which is where ConfigHub's Healthy
-// gate and its UI read live status from v0.8.2 on. argobot v0.1.9 is the first
-// that writes there; an earlier one writes a Space annotation ConfigHub no
-// longer reads. See https://github.com/confighub/argobot.
-const ArgobotImage = "ghcr.io/confighub/argobot:v0.1.9"
+// release it synced, in its variant Space, where ConfigHub's Healthy gate and
+// its UI read live status. From v0.2 it signs in as a service account with a
+// key, and hears of published releases on a Channel; ConfigHub is retiring the
+// workers earlier versions ran as. See https://github.com/confighub/argobot.
+const ArgobotImage = "ghcr.io/confighub/argobot:v0.2.3"
 
-// MinimumCub is the first cub, and the first ConfigHub, with live status on
-// the Release.
-const MinimumCub = "v0.8.2"
+// MinimumCub is the first cub, and the ConfigHub release it goes with, that
+// has service accounts.
+const MinimumCub = "v0.9.0"
+
+// pullAccount is the service account Argo CD pulls the gateway with, and
+// botAccount the one argobot runs as.
+func pullAccount(prefix string) string { return prefix + "-delivery" }
+func botAccount(prefix string) string  { return prefix + "-argobot" }
 
 const (
 	argobotNamespace = "argobot"
@@ -24,13 +29,14 @@ const (
 // argobot reads and patches Argo CD Applications in the Argo CD namespace, and
 // nothing else: Kubara's Argo CD namespace holds repository credentials, so the
 // Role names only Applications. The Secret it reads is not in the manifest;
-// handover.sh writes it from the Targets' server worker.
-func argobotManifest() string {
+// handover.sh writes it with a key of the argobot service account.
+func argobotManifest(targets string) string {
 	return fmt.Sprintf(`# argobot, as cub kubara handover installs it on Kubara's hub.
 # It records each Argo CD Application's sync and health on the release the
 # Application synced, in the ConfigHub Space its OCI source names.
-# It runs as the Targets' server worker, the same identity Argo CD pulls
-# releases with; handover.sh writes that credential to the %[3]s Secret.
+# It runs as a service account the Targets grant EditChildren, with a key
+# handover.sh writes to the %[3]s Secret, and hears of each published release
+# on the Channel %[5]s/argobot.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -96,24 +102,17 @@ spec:
                 secretKeyRef:
                   name: %[3]s
                   key: CONFIGHUB_URL
-            - name: CONFIGHUB_WORKER_ID
+            - name: CONFIGHUB_AUTH_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
                   name: %[3]s
-                  key: CONFIGHUB_WORKER_ID
-            - name: CONFIGHUB_WORKER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: %[3]s
-                  key: CONFIGHUB_WORKER_SECRET
-            - name: ARGO_SYNC_MODE
-              value: kubernetes
+                  key: CONFIGHUB_AUTH_PRIVATE_KEY
+            - name: CONFIGHUB_CHANNEL
+              value: %[5]s/argobot
             - name: ARGO_NAMESPACE
               value: %[2]s
             - name: ARGO_REFRESH_TYPE
               value: hard
-            - name: CONFIGHUB_SUBSCRIPTION_NAME
-              value: argobot
           resources:
             requests:
               cpu: 25m
@@ -126,5 +125,5 @@ spec:
             runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
-`, argobotNamespace, argoNamespace, argobotSecret, ArgobotImage)
+`, argobotNamespace, argoNamespace, argobotSecret, ArgobotImage, targets)
 }

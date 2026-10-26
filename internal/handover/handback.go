@@ -277,7 +277,8 @@ func WriteHandback(p plan.Plan, opts HandbackOptions) (HandbackResult, error) {
 #
 #   HUB_CONTEXT=<kubectl context of Kubara's hub> bash handback.sh
 #
-# It changes only the hub. Each ApplicationSet below reads Kubara's Git
+# It changes the hub, and in ConfigHub it only revokes the tokens and removes
+# the keys handover.sh issued for the hub. Each ApplicationSet below reads Kubara's Git
 # sources again, as Kubara generated it:
 #
 `, p.Source)
@@ -382,6 +383,26 @@ confighub_operation() {
 	line("k delete namespace %s --ignore-not-found", argobotNamespace)
 	line("k -n %s delete role,rolebinding argobot --ignore-not-found", argoNamespace)
 	line("k -n %s delete secret confighub-%s-targets --ignore-not-found", argoNamespace, p.Prefix)
+	pull, bot := pullAccount(p.Prefix), botAccount(p.Prefix)
+	line("# The credentials those held still work until ConfigHub forgets them: revoke")
+	line("# the tokens handover.sh issued for this hub, and remove argobot's keys. The")
+	line("# service accounts and their grants stay, so handover.sh can run again.")
+	line("# Revoking takes Impersonate on the service account; without it, or without a")
+	line("# login, this says what to run and carries on.")
+	tokenDesc := q(fmt.Sprintf("Argo CD on Kubara's hub, %s", p.Prefix))
+	keyDesc := q(fmt.Sprintf("argobot on Kubara's hub, %s", p.Prefix))
+	line("if ! cub auth status >/dev/null 2>&1; then")
+	line(`  echo "cub is not logged in, so the hub's tokens and keys are not revoked. Once it is:"`)
+	line(`  echo "  cub serviceaccount token list %s, then cub serviceaccount token revoke %s <jti> for each one described %s"`, pull, pull, tokenDesc)
+	line(`  echo "  cub serviceaccount key list %s, then cub serviceaccount key delete %s <kid> for each one described %s"`, bot, bot, keyDesc)
+	line("else")
+	line(`  { cub serviceaccount token list %[1]s -o json || { echo "could not list the tokens of %[1]s" >&2; echo '[]'; }; } |`, pull)
+	line(`    jq -r --arg d %s '.[].UserToken | select(.Description == $d and (.RevokedAt // "") == "") | .Jti' |`, tokenDesc)
+	line(`    while read -r t; do cub serviceaccount token revoke %[1]s "$t" --quiet || echo "could not revoke a token of %[1]s: cub serviceaccount token revoke %[1]s $t"; done`, pull)
+	line(`  { cub serviceaccount key list %[1]s -o json || { echo "could not list the keys of %[1]s" >&2; echo '[]'; }; } |`, bot)
+	line(`    jq -r --arg d %s '.[].UserKey | select(.Description == $d) | .Kid' |`, keyDesc)
+	line(`    while read -r kid; do cub serviceaccount key delete %[1]s "$kid" >/dev/null || echo "could not remove a key of %[1]s: cub serviceaccount key delete %[1]s $kid"; done`, bot)
+	line("fi")
 
 	line("")
 	line(`step "4/4 Argo CD syncs every Application from Git"`)

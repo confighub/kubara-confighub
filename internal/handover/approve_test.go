@@ -93,6 +93,7 @@ case "$*" in
     if grep -q id-edge "$dir/resolved-ids" 2>/dev/null; then echo "change order has completed ChangeWorkflow, so there is nothing left to promote"; exit 1; fi
     echo "id-edge" >> "$dir/resolved-ids" ;;
   "space get "*) echo "id-$3" ;;
+  "release list --space "*) if grep -qx "id-$4" "$dir/released-ids" 2>/dev/null; then echo 1; else echo 0; fi ;;
   "variant approve"*"--stage prod"*) touch "$dir/approved-prod" ;;
   "release publish edge "*)
     if [ ! -f "$dir/approved-prod" ]; then
@@ -165,5 +166,64 @@ printf '%s' "$waiting"
 	c = calls()
 	if strings.Contains(c, "variant approve") || strings.Contains(c, "variant promote") || !strings.Contains(c, "cub release publish edge --revision ChangeOrder:base/o1") {
 		t.Errorf("the resumed run must promote and approve nothing, and publish prod:\n%s", c)
+	}
+}
+
+// fakeCubTakenNothing stands in for ConfigHub v0.9.2 and later, for a change
+// order the variant took nothing from: the change order reads Released for
+// hub, which has no release yet, and a release by it is refused because no
+// revision carries it.
+const fakeCubTakenNothing = `#!/usr/bin/env bash
+dir=$(dirname "$0")
+echo "cub $*" >> "$dir/calls"
+case "$*" in
+  "changeorder get --space base o1 -o jq=.ChangeOrder.ReleasedSpaceIDs // [] | join(\" \")") echo "id-hub" ;;
+  "changeorder get --space base o1 -o jq=.ChangeOrder.ResolvedSpaceIDs // [] | join(\" \")") echo "id-hub" ;;
+  "changeorder get --space base o1 -o jq=(.ChangeOrder.SkippedUnits"*) echo "\"u1=AlreadyTaken u2=AlreadyTaken\"" ;;
+  "unit list --space base "*) echo "\"u1 u2\"" ;;
+  "space get "*) echo "id-$3" ;;
+  "release list --space hub "*) if [ -f "$dir/published" ]; then echo 1; else echo 0; fi ;;
+  "release publish hub --revision "*)
+    echo "Failed: HTTP 422: unable to publish a release of change order 'o1' in stage 'dev': requires approval, but no Revision was found to evaluate it on"
+    exit 1 ;;
+  "release publish hub --quiet") touch "$dir/published" ;;
+esac
+exit 0
+`
+
+// From ConfigHub v0.9.2 a change order a variant took nothing from reads
+// Released while the variant has no release. release_stage must not take that
+// for done: it publishes the variant as it stands, once the change order
+// passed over every unit as AlreadyTaken. A second run then finds it released.
+func TestReleaseStagePublishesWhatTookNothing(t *testing.T) {
+	if _, err := exec.LookPath("bash"); err != nil {
+		t.Skip("bash is not installed")
+	}
+	_, script := writeScript(t, []string{"dev"})
+	start := strings.Index(script, "set -euo pipefail\n")
+	end := strings.Index(script, "# would_prune ")
+	helpers := strings.Replace(script[start:end], "cd \"$(dirname \"$0\")\"\n", "", 1)
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "cub"), []byte(fakeCubTakenNothing), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	run := func() string {
+		t.Helper()
+		cmd := exec.Command("bash", "-c", helpers+"\nheld=\nrelease_stage base/o1 dev me hub\n")
+		cmd.Env = append(os.Environ(), "PATH="+dir+":"+os.Getenv("PATH"))
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("%v\n%s", err, out)
+		}
+		return string(out)
+	}
+	if out := run(); !strings.Contains(out, "hub: the change order carried nothing new for it, so it is released as it stands") {
+		t.Errorf("first run must publish hub as it stands:\n%s", out)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "published")); err != nil {
+		t.Fatal("hub was not published")
+	}
+	if out := run(); !strings.Contains(out, "base/o1: dev has released it") {
+		t.Errorf("second run must find hub released:\n%s", out)
 	}
 }

@@ -314,9 +314,10 @@ ApplicationSet tells Argo CD to leave their data alone.
 
 Last, it installs argobot on the hub. argobot records each Application's sync
 and health on the release it synced, in its variant Space, which ConfigHub's
-Healthy gate reads. It runs as the Targets' server worker, not as you. This
-needs ConfigHub v0.8.2 or newer, where live status moved from the Space onto
-the Release.
+Healthy gate reads. It runs as the service account <prefix>-argobot, with a
+key, not as you; Argo CD pulls the gateway with a token of <prefix>-delivery.
+Issuing either credential takes Impersonate on the service account, which
+whoever created it has. This needs cub and ConfigHub v0.9.0 or newer.
 
 Each first release needs an approval in its stage. By default handover.sh
 approves every stage as you. --approve-stages names the stages it may
@@ -399,8 +400,9 @@ Kubara's Git render for it, and stops if Argo CD would delete anything. Secrets
 keep their live values: each ApplicationSet keeps the rule that leaves Secret
 data alone.
 
-It changes nothing in ConfigHub. Every Space and release stays, so handover.sh
-can hand the hub over again. Git must hold what you want Kubara to deliver: a
+In ConfigHub it only revokes the tokens and removes the keys handover.sh issued
+for the hub. Every Space, release, Target and service account stays, so
+handover.sh can hand the hub over again. Git must hold what you want Kubara to deliver: a
 change made in ConfigHub since handover is undone unless it is in Git too.
 
 Give it the platform directory Kubara's Git holds. Use the same --prefix and
