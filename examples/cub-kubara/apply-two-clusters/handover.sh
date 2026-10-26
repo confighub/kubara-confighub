@@ -42,6 +42,9 @@ no_impersonate() {
   echo "does not include. Someone who has it can give it to you:"
   echo "  cub serviceaccount update --patch $1 --permission Impersonate:<your user>"
 }
+# The tokens of a service account that still work: token list shows revoked
+# and expired ones too.
+live_tokens() { jq -c '[.[].UserToken | select((.RevokedAt // "") == "" and ((.ExpiresAt // "") == "" or ((.ExpiresAt | sub("\\.[0-9]+"; "")) | fromdateiso8601) > now))]'; }
 # The id ConfigHub lists a key by: the RFC 7638 thumbprint of its public half.
 thumbprint() { jq -j '"{\"crv\":\"\(.crv)\",\"kty\":\"\(.kty)\",\"x\":\"\(.x)\"}"' | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '='; }
 # A change order every variant has released is skipped, so a re-run releases
@@ -78,7 +81,7 @@ release_stage() {
   local ref=$1 stage=$2 who=$3 s out
   shift 3
   [ -z "$held" ] || return 0
-  if has Released "$ref" "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  if has Released "$ref" "$@" && released "$@"; then echo "$ref: $stage has released it"; return 0; fi
   # A stage that has taken the change order is not promoted again: once the
   # last stage has it, ConfigHub refuses another promotion. Nor is it
   # approved again.
@@ -112,6 +115,25 @@ released() {
 publish() {
   local out
   out=$(cub release publish "$1" --revision "ChangeOrder:$2" --quiet 2>&1) && return 0
+  case "$out" in
+    *"no changes were made since :latest bundle"*) echo "$1 already released" ;;
+    *"no Revision was found to evaluate it on"*|*"marks no revision of a unit that has been released"*) publish_taken "$1" "$2" "$out" ;;
+    *) echo "$out" >&2; return 1 ;;
+  esac
+}
+# publish_taken <space> <change order> <refusal>: a variant gets the base's head
+# when it is made, so its first change order takes nothing from the base, and
+# from ConfigHub v0.9.2 there is then no revision to release by it. When the
+# change order passed over every unit of the base as AlreadyTaken, the variant
+# is released as it stands, which is what Git delivers today. Any other refusal
+# stops the script.
+publish_taken() {
+  local skipped id out
+  skipped=" $(cub changeorder get --space "${2%/*}" "${2#*/}" -o 'jq=(.ChangeOrder.SkippedUnits // {}) | to_entries | map(.key + "=" + .value) | join(" ")' | tr -d '"') "
+  for id in $(cub unit list --space "${2%/*}" -o 'jq=[.[].Unit.UnitID] | join(" ")' | tr -d '"'); do
+    case "$skipped" in *" $id=AlreadyTaken "*) ;; *) echo "$3" >&2; return 1 ;; esac
+  done
+  out=$(cub release publish "$1" --quiet 2>&1) && { echo "$1: the change order carried nothing new for it, so it is released as it stands"; return 0; }
   case "$out" in *"no changes were made since :latest bundle"*) echo "$1 already released" ;; *) echo "$out" >&2; return 1 ;; esac
 }
 # would_prune <application> <space> <unit>: fails, naming each object, when
@@ -186,7 +208,7 @@ if released kx-traefik-hub kx-traefik-edge; then
 else
   order=$(handover_order kx-traefik-base traefik handover-e84ab4de)
   cub changeorder create --space kx-traefik-base "$order" --change-workflow kx-traefik-base/rollout --description 'Release kx-traefik-hub, kx-traefik-edge for handover' --allow-exists --quiet
-  if rolled_out kx-traefik-base/"$order"; then
+  if rolled_out kx-traefik-base/"$order" && released kx-traefik-hub kx-traefik-edge; then
     echo 'traefik: every variant is released'
   else
     held=
@@ -199,7 +221,7 @@ if released kx-homer-dashboard-hub; then
 else
   order=$(handover_order kx-homer-dashboard-base homer-dashboard handover-0d585623)
   cub changeorder create --space kx-homer-dashboard-base "$order" --change-workflow kx-homer-dashboard-base/rollout --description 'Release kx-homer-dashboard-hub for handover' --allow-exists --quiet
-  if rolled_out kx-homer-dashboard-base/"$order"; then
+  if rolled_out kx-homer-dashboard-base/"$order" && released kx-homer-dashboard-hub; then
     echo 'homer-dashboard: every variant is released'
   else
     held=
@@ -208,7 +230,7 @@ else
 fi
 order=$(handover_order kx-argo-cd-base argo-cd handover-dec294e7)
 cub changeorder create --space kx-argo-cd-base "$order" --change-workflow kx-argo-cd-base/rollout --description 'Release kx-argo-cd-hub for handover' --allow-exists --quiet
-if rolled_out kx-argo-cd-base/"$order"; then
+if rolled_out kx-argo-cd-base/"$order" && released kx-argo-cd-hub; then
   echo 'argo-cd: every variant is released'
 else
   held=
@@ -246,14 +268,14 @@ fi
 # the command line.
 held_jti=$(k -n argocd get secret confighub-kx-targets -o jsonpath='{.metadata.annotations.confighub\.com/token-jti}' 2>/dev/null || true)
 token=""; jti=""
-if [ -n "$held_jti" ] && cub serviceaccount token list kx-delivery -o json | jq -e --arg j "$held_jti" 'any(.[].UserToken; .Jti == $j)' >/dev/null; then
+if [ -n "$held_jti" ] && cub serviceaccount token list kx-delivery -o json | live_tokens | jq -e --arg j "$held_jti" 'any(.[]; .Jti == $j)' >/dev/null; then
   token=$(k -n argocd get secret confighub-kx-targets -o jsonpath='{.data.password}' | base64 --decode)
   jti=$held_jti
   echo "the repository Secret's token of kx-delivery is still valid: kept"
 fi
 if [ -z "$token" ]; then
   issued=$(cub serviceaccount token create kx-delivery --description 'Argo CD on Kubara'\''s hub, kx' -o json) || { no_impersonate kx-delivery; exit 1; }
-  token=$(jq -r '.Token // empty' <<<"$issued"); jti=$(jq -r '.UserToken.Jti // empty' <<<"$issued")
+  token=$(printf '%s' "$issued" | jq -r '.Token // empty'); jti=$(printf '%s' "$issued" | jq -r '.UserToken.Jti // empty')
   [ -n "$token" ] && [ -n "$jti" ] || { echo "ConfigHub returned no token of kx-delivery"; exit 1; }
 fi
 k -n argocd create secret generic confighub-kx-targets \
@@ -262,7 +284,7 @@ k -n argocd create secret generic confighub-kx-targets \
   --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml \
   | k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | k apply -f -
 unset token issued
-cub serviceaccount token list kx-delivery -o json | jq -r --arg d 'Argo CD on Kubara'\''s hub, kx' --arg j "$jti" '.[].UserToken | select(.Description == $d and .Jti != $j) | .Jti' |
+{ cub serviceaccount token list kx-delivery -o json || { echo "could not list the tokens of kx-delivery, so earlier ones are not revoked" >&2; echo '[]'; }; } | live_tokens | jq -r --arg d 'Argo CD on Kubara'\''s hub, kx' --arg j "$jti" '.[] | select(.Description == $d and .Jti != $j) | .Jti' |
   while read -r old; do cub serviceaccount token revoke kx-delivery "$old" --quiet && echo "revoked an earlier token of kx-delivery" || echo "could not revoke an earlier token of kx-delivery: cub serviceaccount token revoke kx-delivery $old"; done
 # The change Kubara's Git does not make: each routed ApplicationSet reads
 # ConfigHub, and its AppProject, applied first, permits it; Argo CD cannot
@@ -320,10 +342,18 @@ done
 step "6/6 argobot records each Application's live status on the release it synced"
 # argobot runs as kx-argobot, which step 1 gave EditChildren on each Target, and
 # hears of each published release on the Channel kx-targets/argobot.
-if cub channel get kx-targets/argobot >/dev/null 2>&1; then
-  cub channel update kx-targets/argobot --patch --permission Claim:serviceaccount:kx-argobot --quiet
+# A Channel made for an earlier kx-argobot, deleted and made again since, names
+# that account's old identity. Adding the new one takes Claim on the Channel,
+# which its maker does not have, so such a Channel is made again instead.
+bot_uid=$(cub serviceaccount get kx-argobot -o jq=.ServiceAccount.UserID | tr -d '"')
+make_channel() { echo '[{"EventTypes":["release.published"]}]' | cub channel create argobot --space kx-targets --subscriptions - --permission Claim:serviceaccount:kx-argobot --quiet; }
+if claims=$(cub channel get kx-targets/argobot -o 'jq=.Channel.Permissions.Claim.UserIDs // {} | keys | join(" ")' 2>/dev/null); then
+  case " $(printf '%s' "$claims" | tr -d '"') " in
+    *" $bot_uid "*) ;;
+    *) cub channel update kx-targets/argobot --patch --permission Claim:serviceaccount:kx-argobot --quiet 2>/dev/null || { cub channel delete kx-targets/argobot --quiet && make_channel; } ;;
+  esac
 else
-  echo '[{"EventTypes":["release.published"]}]' | cub channel create argobot --space kx-targets --subscriptions - --permission Claim:serviceaccount:kx-argobot --quiet
+  make_channel
 fi
 # Its credential is a key of kx-argobot; ConfigHub keeps only the public half. A key
 # argobot's Secret already holds is kept while ConfigHub still lists it. One it
@@ -331,14 +361,14 @@ fi
 # replaced, and so are keys this script added earlier for this hub.
 k create namespace argobot --dry-run=client -o yaml | k apply -f - >/dev/null
 key=$(k -n argobot get secret argobot-secrets -o jsonpath='{.data.CONFIGHUB_AUTH_PRIVATE_KEY}' 2>/dev/null | base64 --decode 2>/dev/null || true)
-kid=""; [ -z "$key" ] || kid=$(thumbprint <<<"$key")
+kid=""; [ -z "$key" ] || kid=$(printf '%s' "$key" | thumbprint 2>/dev/null) || kid=""
 if [ -n "$kid" ] && cub serviceaccount key list kx-argobot -o json | jq -e --arg k "$kid" 'any(.[].UserKey; .Kid == $k)' >/dev/null; then
   echo "argobot's key of kx-argobot is still registered: kept"
 else
   key_dir=$(mktemp -d)
   trap 'rm -rf "$key_dir"' EXIT
-  cub serviceaccount key add kx-argobot --generate "$key_dir/argobot.jwk" --description 'argobot on Kubara'\''s hub, kx' --quiet || { no_impersonate kx-argobot; exit 1; }
-  key=$(cat "$key_dir/argobot.jwk"); kid=$(thumbprint <<<"$key")
+  cub serviceaccount key add kx-argobot --generate "$key_dir/argobot.jwk" --description 'argobot on Kubara'\''s hub, kx' >/dev/null || { no_impersonate kx-argobot; exit 1; }
+  key=$(cat "$key_dir/argobot.jwk"); kid=$(printf '%s' "$key" | thumbprint)
   rm -rf "$key_dir"
 fi
 k -n argobot create secret generic argobot-secrets \
@@ -346,8 +376,8 @@ k -n argobot create secret generic argobot-secrets \
   --from-file=CONFIGHUB_AUTH_PRIVATE_KEY=<(printf '%s' "$key") \
   --dry-run=client -o yaml | k apply -f -
 unset key
-cub serviceaccount key list kx-argobot -o json | jq -r --arg d 'argobot on Kubara'\''s hub, kx' --arg k "$kid" '.[].UserKey | select(.Description == $d and .Kid != $k) | .Kid' |
-  while read -r old; do cub serviceaccount key delete kx-argobot "$old" --quiet && echo "removed an earlier key of kx-argobot" || echo "could not remove an earlier key of kx-argobot: cub serviceaccount key delete kx-argobot $old"; done
+{ cub serviceaccount key list kx-argobot -o json || { echo "could not list the keys of kx-argobot, so earlier ones are not removed" >&2; echo '[]'; }; } | jq -r --arg d 'argobot on Kubara'\''s hub, kx' --arg k "$kid" '.[].UserKey | select(.Description == $d and .Kid != $k) | .Kid' |
+  while read -r old; do cub serviceaccount key delete kx-argobot "$old" >/dev/null && echo "removed an earlier key of kx-argobot" || echo "could not remove an earlier key of kx-argobot: cub serviceaccount key delete kx-argobot $old"; done
 since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 k apply -f argobot.yaml
 k -n argobot rollout restart deployment/argobot >/dev/null

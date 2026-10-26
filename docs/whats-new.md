@@ -29,12 +29,27 @@ releases but cannot write live status.
   earlier for this hub. So a re-run does not pile up live tokens, and a hub
   onboarded again after its service accounts were deleted gets a working key.
 - **Who may run it.** Issuing a token or a key takes Impersonate on the
-  service account, which whoever created it has. If someone else runs
-  `handover.sh`, it stops and names the command that gives them Impersonate.
+  service account, which whoever created it has; organization admins need no
+  grant. When `handover.sh` has to issue one and cannot, it stops and names
+  the command that gives Impersonate.
 - **`handback.sh`** also revokes the tokens and removes the keys
   `handover.sh` issued for the hub. The service accounts stay.
 - **Needs `cub` and ConfigHub v0.9.0 or newer,** and `jq` and `openssl` where
-  `handover.sh` runs. `handover.sh` checks them before it changes anything.
+  `handover.sh` runs. `handover.sh` checks `cub`, `jq` and `openssl` before it
+  changes anything; it does not check the ConfigHub server's version.
+- **The first release on ConfigHub v0.9.2 or newer.** A change order a variant
+  took nothing from reads Released there although nothing was published, so
+  `handover.sh` skipped publishing and Argo CD found no release. It now counts
+  a variant as released only once it has a published release, and publishes
+  a variant as it stands when its change order passed over every unit as
+  already taken, as `cub argo` and `cub flux` do since confighub/examples#308.
+
+**What was run.** On the kind lab, with Kubara v0.15.0, `cub` v0.9.0 and
+ConfigHub v0.9.5, `run.sh` passed in full
+([log](../examples/kind-lab/run-service-accounts-2026-10-26.log)). Also run:
+deleting both service accounts and running `handover.sh` again, which issued a
+new token and key and left argobot reporting, and `handback.sh`, which revoked
+the token and removed the key.
 
 To move a hub handed over with 0.4.0 or earlier, write `handover.sh` with
 this version and run it again. Then nothing uses the worker, and you can

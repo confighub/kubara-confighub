@@ -23,7 +23,10 @@ v0.2.2, before argobot. The [run of 2026-10-02](run-sdk-2026-10-02.log) is
 the same story against ConfigHub v0.8.0, with `cub kubara` 0.3.0. The
 [run of 2026-10-09](run-live-status-2026-10-09.log) is the story as it is now,
 against ConfigHub v0.8.11: argobot v0.1.9 records live status on each release,
-and the gate refuses a release until dev is Healthy on it.
+and the gate refuses a release until dev is Healthy on it. The
+[run of 2026-10-26](run-service-accounts-2026-10-26.log) is the story against
+ConfigHub v0.9.5 with `cub kubara` 0.5.0, where Argo CD and argobot use service
+accounts, then the reinstall case and handback.sh.
 
 
 ## What you need
@@ -34,9 +37,9 @@ and the gate refuses a release until dev is Healthy on it.
 - `kind`, `kubectl`, `helm`, `git` and `jq`. The recorded runs used kind
   v0.31.0 with Kubernetes v1.35.0.
 - [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer. The lab has run on v0.15.0 and v0.16.0.
-- The `cub` CLI, v0.8.2 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
-  The plugin from 0.3.0 on needs ConfigHub v0.8.0 or newer too, and from
-  0.4.0 on v0.8.2 or newer for live status.
+- The `cub` CLI, v0.9.0 or newer, and the plugin: `cub plugin install confighub/kubara-confighub`.
+  The plugin from 0.5.0 on needs ConfigHub v0.9.0 or newer too, for service
+  accounts, and `openssl` beside `jq`.
 - A ConfigHub organization, for `run.sh` only. `up.sh` needs no account.
   `run.sh` writes to the organization your current `cub` context points at;
   set `CUB_CONTEXT` to choose another.

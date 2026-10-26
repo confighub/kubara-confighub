@@ -40,9 +40,9 @@ account, and change nothing. Read
   through them.
 - **Release**: a fixed bundle of a variant's config, served as OCI. Argo CD
   pulls releases after handover.
-- **Target** and **worker**: a Target is where a variant's releases go, here
-  one per cluster. A worker is a non-personal identity. Here Argo CD pulls
-  releases with it, and argobot reports status with it.
+- **Target** and **service account**: a Target is where a variant's releases
+  go, here one per cluster. A service account is a non-personal identity. Here
+  Argo CD pulls releases with one, and argobot reports status with another.
 - **Attestation**: a recorded claim about revisions, such as an approval or a
   check result.
 
@@ -119,13 +119,14 @@ What each step needs, with the versions it was tested with:
 | `kubara generate` | [Kubara](https://github.com/kubara-io/kubara) v0.15 or newer (v0.15.0 and v0.16.0). |
 | `apply --capabilities` | a `kubectl` context for each cluster, read only. |
 | `apply.sh` | a ConfigHub organization (v0.8.0) and `cub auth login`, with rights to create Spaces. |
-| `handover.sh`, `handback.sh` | the above, with `cub` and ConfigHub v0.8.2 or newer for `handover.sh`, rights to create workers and Targets, `kubectl` access to Kubara's hub that can write in the `argocd` and `argobot` namespaces, and `jq`. The hub needs Argo CD 3.1 or newer; Kubara ships 3.5. `handover.sh` pulls `ghcr.io/confighub/argobot` onto the hub. |
+| `handover.sh`, `handback.sh` | the above, with `cub` and ConfigHub v0.9.0 or newer, rights to create Targets, service accounts and Channels, `kubectl` access to Kubara's hub that can write in the `argocd` and `argobot` namespaces, and `jq` and `openssl`. The hub needs Argo CD 3.1 or newer; Kubara ships 3.5. `handover.sh` pulls `ghcr.io/confighub/argobot` onto the hub. |
 | `check` | a ConfigHub organization and `cub auth login`, and `kubectl` read access to Kubara's hub. |
 | `cub stack from-kubara`, `cub stack check` | the [ConfigHub Workshop](https://github.com/confighub/cub-workshop) plugin (`cub plugin install confighub/cub-workshop`), with `node` and `oras`. No account. |
 
-Since 0.3.0 the plugin needs `cub` and ConfigHub v0.8.0 or newer. Since 0.4.0
-`handover.sh` needs `cub` and ConfigHub v0.8.2 or newer, where live status is
-on the Release; it checks `cub` before it changes anything.
+Since 0.3.0 the plugin needs `cub` and ConfigHub v0.8.0 or newer. Since 0.5.0
+`handover.sh` needs `cub` and ConfigHub v0.9.0 or newer, for service accounts;
+it checks `cub`, `jq` and `openssl` before it changes anything, but not the
+ConfigHub server's version.
 `handover.sh` creates Targets the way ConfigHub has since v0.7, which an
 older `cub` refuses.
 
@@ -564,8 +565,8 @@ Git without a word:
   Application syncs from Git again, and undoes each change made in ConfigHub
   since handover. On the kind lab, metrics-server went from the three
   replicas ConfigHub released back to Git's one.
-- It changes nothing in ConfigHub. argobot reports only Applications that
-  read ConfigHub, so a variant's newest release can keep a live status that
+- In ConfigHub it only revokes the tokens and removes the keys handover.sh
+  issued for the hub. argobot reports only Applications that read ConfigHub, so a variant's newest release can keep a live status that
   is no longer true, and a `Healthy` gate can pass on it.
 
 `cub kubara check` shows it. Each variant fails with `it still lists Git
@@ -749,8 +750,10 @@ the version `handover.sh` names.
 
 **Who may run it.** Issuing a token or adding a key of a service account is
 acting as it, which takes Impersonate on it. Whoever created the service
-account has that; Manage does not include it. If someone else runs
-`handover.sh` later, it stops and says so. Whoever created the accounts can
+account has that; Manage does not include it, and organization admins need
+no grant. A re-run that keeps the token and the key issues nothing, so anyone
+may run it. When `handover.sh` has to issue one and the person running it
+cannot, it stops and says so. Whoever created the accounts can
 give them Impersonate:
 
 ```bash
@@ -895,8 +898,9 @@ Secrets keep their live values. Each ApplicationSet keeps the rule that tells
 Argo CD to leave Secret data alone, as handover set it. Remove the rule from an
 ApplicationSet when Git should own its Secret values again.
 
-`handback` changes nothing in ConfigHub. Every Space, release and Target stays,
-so `handover.sh` can hand the hub over again. Each release keeps the last
+In ConfigHub, `handback` only revokes the tokens and removes the keys
+`handover.sh` issued for the hub. Every Space, release, Target and service
+account stays, so `handover.sh` can hand the hub over again. Each release keeps the last
 live status argobot recorded on it, which no longer changes. A stage that
 requires `Healthy` reads the newest release's, so do not rely on the gate
 while Git delivers.
@@ -928,7 +932,8 @@ the Spaces while the hub reads them. Then list what would go, and delete it:
 ```bash
 cub space list --where "Slug LIKE 'kubara-%'"
 cub space delete --where "Slug LIKE 'kubara-%'" --recursive-force
-cub serviceaccount delete kubara-delivery kubara-argobot
+cub serviceaccount delete kubara-delivery
+cub serviceaccount delete kubara-argobot
 ```
 
 Check the list first: the pattern matches every Space that starts with your

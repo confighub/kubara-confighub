@@ -400,8 +400,9 @@ Kubara's Git render for it, and stops if Argo CD would delete anything. Secrets
 keep their live values: each ApplicationSet keeps the rule that leaves Secret
 data alone.
 
-It changes nothing in ConfigHub. Every Space and release stays, so handover.sh
-can hand the hub over again. Git must hold what you want Kubara to deliver: a
+In ConfigHub it only revokes the tokens and removes the keys handover.sh issued
+for the hub. Every Space, release, Target and service account stays, so
+handover.sh can hand the hub over again. Git must hold what you want Kubara to deliver: a
 change made in ConfigHub since handover is undone unless it is in Git too.
 
 Give it the platform directory Kubara's Git holds. Use the same --prefix and

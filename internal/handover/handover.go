@@ -242,7 +242,10 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		line(in+"order=$(handover_order %s %s handover-%x)", c.Base, c.Name, sum[:4])
 		ref := c.Base + `/"$order"`
 		line(in+`cub changeorder create --space %s "$order" --change-workflow %s/%s --description %s --allow-exists --quiet`, c.Base, c.Base, workflowSlug, q("Release "+strings.Join(names, ", ")+" for handover"))
-		line(in+"if rolled_out %s; then", ref)
+		// From ConfigHub v0.9.2 a change order that a variant took nothing from
+		// reads Released though nothing was published, so a variant counts as
+		// released only once it has a published release.
+		line(in+"if rolled_out %s && released %s; then", ref, strings.Join(names, " "))
 		line(in+"  echo %s", q(c.Name+": every variant is released"))
 		line(in + "else")
 		line(in + "  held=")
@@ -304,14 +307,14 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("# the command line.")
 	line(`held_jti=$(k -n %s get secret %s -o jsonpath='{.metadata.annotations.confighub\.com/token-jti}' 2>/dev/null || true)`, argoNamespace, secret)
 	line(`token=""; jti=""`)
-	line(`if [ -n "$held_jti" ] && cub serviceaccount token list %s -o json | jq -e --arg j "$held_jti" 'any(.[].UserToken; .Jti == $j)' >/dev/null; then`, pull)
+	line(`if [ -n "$held_jti" ] && cub serviceaccount token list %s -o json | live_tokens | jq -e --arg j "$held_jti" 'any(.[]; .Jti == $j)' >/dev/null; then`, pull)
 	line(`  token=$(k -n %s get secret %s -o jsonpath='{.data.password}' | base64 --decode)`, argoNamespace, secret)
 	line(`  jti=$held_jti`)
 	line(`  echo "the repository Secret's token of %s is still valid: kept"`, pull)
 	line("fi")
 	line(`if [ -z "$token" ]; then`)
 	line(`  issued=$(cub serviceaccount token create %s --description %s -o json) || { no_impersonate %s; exit 1; }`, pull, q(desc), pull)
-	line(`  token=$(jq -r '.Token // empty' <<<"$issued"); jti=$(jq -r '.UserToken.Jti // empty' <<<"$issued")`)
+	line(`  token=$(printf '%%s' "$issued" | jq -r '.Token // empty'); jti=$(printf '%%s' "$issued" | jq -r '.UserToken.Jti // empty')`)
 	line(`  [ -n "$token" ] && [ -n "$jti" ] || { echo "ConfigHub returned no token of %s"; exit 1; }`, pull)
 	line("fi")
 	line(`k -n %s create secret generic %s \`, argoNamespace, secret)
@@ -320,7 +323,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`  --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml \`)
 	line(`  | k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | k apply -f -`)
 	line(`unset token issued`)
-	line(`cub serviceaccount token list %s -o json | jq -r --arg d %s --arg j "$jti" '.[].UserToken | select(.Description == $d and .Jti != $j) | .Jti' |`, pull, q(desc))
+	line(`{ cub serviceaccount token list %[1]s -o json || { echo "could not list the tokens of %[1]s, so earlier ones are not revoked" >&2; echo '[]'; }; } | live_tokens | jq -r --arg d %[2]s --arg j "$jti" '.[] | select(.Description == $d and .Jti != $j) | .Jti' |`, pull, q(desc))
 	line(`  while read -r old; do cub serviceaccount token revoke %[1]s "$old" --quiet && echo "revoked an earlier token of %[1]s" || echo "could not revoke an earlier token of %[1]s: cub serviceaccount token revoke %[1]s $old"; done`, pull)
 	// The argo-cd ApplicationSet comes first: once the hub's argo-cd Application
 	// reads its release, that release carries every other routed one.
@@ -399,10 +402,18 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	keyDesc := fmt.Sprintf("argobot on Kubara's hub, %s", p.Prefix)
 	line("# argobot runs as %s, which step 1 gave EditChildren on each Target, and", bot)
 	line("# hears of each published release on the Channel %s/argobot.", targets)
-	line(`if cub channel get %s/argobot >/dev/null 2>&1; then`, targets)
-	line(`  cub channel update %s/argobot --patch --permission Claim:serviceaccount:%s --quiet`, targets, bot)
+	line("# A Channel made for an earlier %s, deleted and made again since, names", bot)
+	line("# that account's old identity. Adding the new one takes Claim on the Channel,")
+	line("# which its maker does not have, so such a Channel is made again instead.")
+	line(`bot_uid=$(cub serviceaccount get %s -o jq=.ServiceAccount.UserID | tr -d '"')`, bot)
+	line(`make_channel() { echo '[{"EventTypes":["release.published"]}]' | cub channel create argobot --space %s --subscriptions - --permission Claim:serviceaccount:%s --quiet; }`, targets, bot)
+	line(`if claims=$(cub channel get %s/argobot -o 'jq=.Channel.Permissions.Claim.UserIDs // {} | keys | join(" ")' 2>/dev/null); then`, targets)
+	line(`  case " $(printf '%%s' "$claims" | tr -d '"') " in`)
+	line(`    *" $bot_uid "*) ;;`)
+	line(`    *) cub channel update %[1]s/argobot --patch --permission Claim:serviceaccount:%[2]s --quiet 2>/dev/null || { cub channel delete %[1]s/argobot --quiet && make_channel; } ;;`, targets, bot)
+	line("  esac")
 	line("else")
-	line(`  echo '[{"EventTypes":["release.published"]}]' | cub channel create argobot --space %s --subscriptions - --permission Claim:serviceaccount:%s --quiet`, targets, bot)
+	line("  make_channel")
 	line("fi")
 	line("# Its credential is a key of %s; ConfigHub keeps only the public half. A key", bot)
 	line("# argobot's Secret already holds is kept while ConfigHub still lists it. One it")
@@ -410,14 +421,14 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("# replaced, and so are keys this script added earlier for this hub.")
 	line(`k create namespace %s --dry-run=client -o yaml | k apply -f - >/dev/null`, argobotNamespace)
 	line(`key=$(k -n %s get secret %s -o jsonpath='{.data.CONFIGHUB_AUTH_PRIVATE_KEY}' 2>/dev/null | base64 --decode 2>/dev/null || true)`, argobotNamespace, argobotSecret)
-	line(`kid=""; [ -z "$key" ] || kid=$(thumbprint <<<"$key")`)
+	line(`kid=""; [ -z "$key" ] || kid=$(printf '%%s' "$key" | thumbprint 2>/dev/null) || kid=""`)
 	line(`if [ -n "$kid" ] && cub serviceaccount key list %s -o json | jq -e --arg k "$kid" 'any(.[].UserKey; .Kid == $k)' >/dev/null; then`, bot)
 	line(`  echo "argobot's key of %s is still registered: kept"`, bot)
 	line("else")
 	line(`  key_dir=$(mktemp -d)`)
 	line(`  trap 'rm -rf "$key_dir"' EXIT`)
-	line(`  cub serviceaccount key add %s --generate "$key_dir/argobot.jwk" --description %s --quiet || { no_impersonate %s; exit 1; }`, bot, q(keyDesc), bot)
-	line(`  key=$(cat "$key_dir/argobot.jwk"); kid=$(thumbprint <<<"$key")`)
+	line(`  cub serviceaccount key add %s --generate "$key_dir/argobot.jwk" --description %s >/dev/null || { no_impersonate %s; exit 1; }`, bot, q(keyDesc), bot)
+	line(`  key=$(cat "$key_dir/argobot.jwk"); kid=$(printf '%%s' "$key" | thumbprint)`)
 	line(`  rm -rf "$key_dir"`)
 	line("fi")
 	line(`k -n %s create secret generic %s \`, argobotNamespace, argobotSecret)
@@ -425,8 +436,8 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`  --from-file=CONFIGHUB_AUTH_PRIVATE_KEY=<(printf '%%s' "$key") \`)
 	line(`  --dry-run=client -o yaml | k apply -f -`)
 	line(`unset key`)
-	line(`cub serviceaccount key list %s -o json | jq -r --arg d %s --arg k "$kid" '.[].UserKey | select(.Description == $d and .Kid != $k) | .Kid' |`, bot, q(keyDesc))
-	line(`  while read -r old; do cub serviceaccount key delete %[1]s "$old" --quiet && echo "removed an earlier key of %[1]s" || echo "could not remove an earlier key of %[1]s: cub serviceaccount key delete %[1]s $old"; done`, bot)
+	line(`{ cub serviceaccount key list %[1]s -o json || { echo "could not list the keys of %[1]s, so earlier ones are not removed" >&2; echo '[]'; }; } | jq -r --arg d %[2]s --arg k "$kid" '.[].UserKey | select(.Description == $d and .Kid != $k) | .Kid' |`, bot, q(keyDesc))
+	line(`  while read -r old; do cub serviceaccount key delete %[1]s "$old" >/dev/null && echo "removed an earlier key of %[1]s" || echo "could not remove an earlier key of %[1]s: cub serviceaccount key delete %[1]s $old"; done`, bot)
 	line("since=$(date -u +%%Y-%%m-%%dT%%H:%%M:%%SZ)")
 	line("k apply -f argobot.yaml")
 	line("k -n %s rollout restart deployment/argobot >/dev/null", argobotNamespace)
@@ -523,6 +534,9 @@ no_impersonate() {
   echo "does not include. Someone who has it can give it to you:"
   echo "  cub serviceaccount update --patch $1 --permission Impersonate:<your user>"
 }
+# The tokens of a service account that still work: token list shows revoked
+# and expired ones too.
+live_tokens() { jq -c '[.[].UserToken | select((.RevokedAt // "") == "" and ((.ExpiresAt // "") == "" or ((.ExpiresAt | sub("\\.[0-9]+"; "")) | fromdateiso8601) > now))]'; }
 # The id ConfigHub lists a key by: the RFC 7638 thumbprint of its public half.
 thumbprint() { jq -j '"{\"crv\":\"\(.crv)\",\"kty\":\"\(.kty)\",\"x\":\"\(.x)\"}"' | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '='; }
 # A change order every variant has released is skipped, so a re-run releases
@@ -559,7 +573,7 @@ release_stage() {
   local ref=$1 stage=$2 who=$3 s out
   shift 3
   [ -z "$held" ] || return 0
-  if has Released "$ref" "$@"; then echo "$ref: $stage has released it"; return 0; fi
+  if has Released "$ref" "$@" && released "$@"; then echo "$ref: $stage has released it"; return 0; fi
   # A stage that has taken the change order is not promoted again: once the
   # last stage has it, ConfigHub refuses another promotion. Nor is it
   # approved again.
@@ -593,6 +607,25 @@ released() {
 publish() {
   local out
   out=$(cub release publish "$1" --revision "ChangeOrder:$2" --quiet 2>&1) && return 0
+  case "$out" in
+    *"no changes were made since :latest bundle"*) echo "$1 already released" ;;
+    *"no Revision was found to evaluate it on"*|*"marks no revision of a unit that has been released"*) publish_taken "$1" "$2" "$out" ;;
+    *) echo "$out" >&2; return 1 ;;
+  esac
+}
+# publish_taken <space> <change order> <refusal>: a variant gets the base's head
+# when it is made, so its first change order takes nothing from the base, and
+# from ConfigHub v0.9.2 there is then no revision to release by it. When the
+# change order passed over every unit of the base as AlreadyTaken, the variant
+# is released as it stands, which is what Git delivers today. Any other refusal
+# stops the script.
+publish_taken() {
+  local skipped id out
+  skipped=" $(cub changeorder get --space "${2%/*}" "${2#*/}" -o 'jq=(.ChangeOrder.SkippedUnits // {}) | to_entries | map(.key + "=" + .value) | join(" ")' | tr -d '"') "
+  for id in $(cub unit list --space "${2%/*}" -o 'jq=[.[].Unit.UnitID] | join(" ")' | tr -d '"'); do
+    case "$skipped" in *" $id=AlreadyTaken "*) ;; *) echo "$3" >&2; return 1 ;; esac
+  done
+  out=$(cub release publish "$1" --quiet 2>&1) && { echo "$1: the change order carried nothing new for it, so it is released as it stands"; return 0; }
   case "$out" in *"no changes were made since :latest bundle"*) echo "$1 already released" ;; *) echo "$out" >&2; return 1 ;; esac
 }
 # would_prune <application> <space> <unit>: fails, naming each object, when

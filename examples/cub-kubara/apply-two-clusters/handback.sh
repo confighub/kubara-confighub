@@ -4,7 +4,8 @@
 #
 #   HUB_CONTEXT=<kubectl context of Kubara's hub> bash handback.sh
 #
-# It changes only the hub. Each ApplicationSet below reads Kubara's Git
+# It changes the hub, and in ConfigHub it only revokes the tokens and removes
+# the keys handover.sh issued for the hub. Each ApplicationSet below reads Kubara's Git
 # sources again, as Kubara generated it:
 #
 #   argocd
@@ -105,12 +106,20 @@ k -n argocd delete secret confighub-kx-targets --ignore-not-found
 # The credentials those held still work until ConfigHub forgets them: revoke
 # the tokens handover.sh issued for this hub, and remove argobot's keys. The
 # service accounts and their grants stay, so handover.sh can run again.
-# Revoking takes Impersonate on the service account; without it, this says so
-# and carries on.
-{ cub serviceaccount token list kx-delivery -o json 2>/dev/null || echo '[]'; } | jq -r --arg d 'Argo CD on Kubara'\''s hub, kx' '.[].UserToken | select(.Description == $d) | .Jti' |
-  while read -r t; do cub serviceaccount token revoke kx-delivery "$t" --quiet || echo "could not revoke a token of kx-delivery: revoke it with cub serviceaccount token revoke kx-delivery $t"; done
-{ cub serviceaccount key list kx-argobot -o json 2>/dev/null || echo '[]'; } | jq -r --arg d 'argobot on Kubara'\''s hub, kx' '.[].UserKey | select(.Description == $d) | .Kid' |
-  while read -r kid; do cub serviceaccount key delete kx-argobot "$kid" --quiet || echo "could not remove a key of kx-argobot: remove it with cub serviceaccount key delete kx-argobot $kid"; done
+# Revoking takes Impersonate on the service account; without it, or without a
+# login, this says what to run and carries on.
+if ! cub auth status >/dev/null 2>&1; then
+  echo "cub is not logged in, so the hub's tokens and keys are not revoked. Once it is:"
+  echo "  cub serviceaccount token list kx-delivery, then cub serviceaccount token revoke kx-delivery <jti> for each one described 'Argo CD on Kubara'\''s hub, kx'"
+  echo "  cub serviceaccount key list kx-argobot, then cub serviceaccount key delete kx-argobot <kid> for each one described 'argobot on Kubara'\''s hub, kx'"
+else
+  { cub serviceaccount token list kx-delivery -o json || { echo "could not list the tokens of kx-delivery" >&2; echo '[]'; }; } |
+    jq -r --arg d 'Argo CD on Kubara'\''s hub, kx' '.[].UserToken | select(.Description == $d and (.RevokedAt // "") == "") | .Jti' |
+    while read -r t; do cub serviceaccount token revoke kx-delivery "$t" --quiet || echo "could not revoke a token of kx-delivery: cub serviceaccount token revoke kx-delivery $t"; done
+  { cub serviceaccount key list kx-argobot -o json || { echo "could not list the keys of kx-argobot" >&2; echo '[]'; }; } |
+    jq -r --arg d 'argobot on Kubara'\''s hub, kx' '.[].UserKey | select(.Description == $d) | .Kid' |
+    while read -r kid; do cub serviceaccount key delete kx-argobot "$kid" >/dev/null || echo "could not remove a key of kx-argobot: cub serviceaccount key delete kx-argobot $kid"; done
+fi
 
 step "4/4 Argo CD syncs every Application from Git"
 # A sync from Git names commits, not OCI digests.
