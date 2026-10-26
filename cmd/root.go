@@ -28,6 +28,8 @@ var (
 // Version is the plugin's version, set at release build time.
 func Version() string { return version }
 
+const gatewayHelp = "host ConfigHub serves releases from; http://<host>:<port> for a registry that serves plain HTTP, such as a ConfigHub on your own machine"
+
 // errProblems makes a command exit non-zero after it has printed its output.
 type errProblems struct{}
 
@@ -297,7 +299,7 @@ was, and they are cached for the next render. Running it again into the same
 	_ = renderCmd.MarkFlagRequired("out")
 
 	var to plan.Options
-	var tStages, tOut, gateway, tApprove string
+	var tStages, tOut, gateway, tApprove, tURL string
 	var tCaps []string
 	handoverCmd := &cobra.Command{
 		Use:   "handover <kubara-dir> --out <dir>",
@@ -350,7 +352,7 @@ Use the same --prefix and --stages as apply.`,
 					approve = split(tApprove)
 				}
 			}
-			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender(caps), ApproveStages: approve})
+			res, err := handover.Write(pl, handover.Options{Out: tOut, Gateway: gateway, Render: hubArgoRender(caps), ApproveStages: approve, ConfigHubURL: tURL})
 			if err != nil {
 				return err
 			}
@@ -379,7 +381,8 @@ Use the same --prefix and --stages as apply.`,
 	handoverCmd.Flags().StringVar(&tOut, "out", "", "directory to write handover.sh (required); the apply --out directory is a good choice")
 	handoverCmd.Flags().StringVar(&to.Prefix, "prefix", "kubara", "the prefix apply used")
 	handoverCmd.Flags().StringVar(&tStages, "stages", "", "the stage order apply used")
-	handoverCmd.Flags().StringVar(&gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	handoverCmd.Flags().StringVar(&gateway, "gateway", handover.DefaultGateway, gatewayHelp)
+	handoverCmd.Flags().StringVar(&tURL, "confighub-url", "", "the address argobot reaches ConfigHub at from the hub; by default the server of cub's current context")
 	handoverCmd.Flags().StringVar(&tApprove, "approve-stages", "", "the stages handover.sh may approve as you, comma-separated, or none; by default every stage. In the others it stops for someone else's approval")
 	handoverCmd.Flags().StringArrayVar(&tCaps, "capabilities", nil, "render the hub with its own Kubernetes version and APIs, read from a kubectl context: <hub>=<context>")
 	_ = handoverCmd.MarkFlagRequired("out")
@@ -446,7 +449,7 @@ Give it the platform directory Kubara's Git holds. Use the same --prefix and
 	handbackCmd.Flags().StringVar(&bOut, "out", "", "directory to write handback.sh (required); the handover --out directory is a good choice")
 	handbackCmd.Flags().StringVar(&bo.Prefix, "prefix", "kubara", "the prefix apply used")
 	handbackCmd.Flags().StringVar(&bStages, "stages", "", "the stage order apply used")
-	handbackCmd.Flags().StringVar(&bGateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	handbackCmd.Flags().StringVar(&bGateway, "gateway", handover.DefaultGateway, gatewayHelp)
 	handbackCmd.Flags().StringArrayVar(&bCaps, "capabilities", nil, "render a cluster with its own Kubernetes version and APIs, read from a kubectl context: <cluster>=<context> (repeatable)")
 	_ = handbackCmd.MarkFlagRequired("out")
 
@@ -482,7 +485,7 @@ Give it the platform directory Kubara's Git holds. Use the same --prefix and
 		},
 	}
 	routeCmd.Flags().StringVar(&rPrefix, "prefix", "kubara", "the prefix apply used")
-	routeCmd.Flags().StringVar(&rGateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	routeCmd.Flags().StringVar(&rGateway, "gateway", handover.DefaultGateway, gatewayHelp)
 	routeCmd.Flags().StringVar(&rCharts, "charts", "", "chart directories ConfigHub holds, comma-separated")
 	routeCmd.Flags().StringVar(&rOnly, "only", "", "print only this ApplicationSet, unchanged")
 
@@ -576,7 +579,7 @@ Use the same --prefix and --stages as apply. It changes nothing on the hub.
 	checkCmd.Flags().StringVar(&ko.Prefix, "prefix", "kubara", "the prefix apply used")
 	checkCmd.Flags().StringVar(&kStages, "stages", "", "the stage order apply used")
 	checkCmd.Flags().StringVar(&co.HubContext, "hub-context", "", "kubectl context of Kubara's hub; the current context when empty")
-	checkCmd.Flags().StringVar(&co.Gateway, "gateway", handover.DefaultGateway, "host ConfigHub serves releases from")
+	checkCmd.Flags().StringVar(&co.Gateway, "gateway", handover.DefaultGateway, gatewayHelp)
 	checkCmd.Flags().BoolVar(&co.Record, "record", false, "record each verdict in ConfigHub as an attestation")
 	checkCmd.Flags().StringVar(&co.Type, "type", check.DefaultType, "the attestation type --record uses")
 

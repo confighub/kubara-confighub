@@ -315,3 +315,76 @@ func check(t *testing.T, name, got string) {
 		t.Fatalf("%s differs from the output; rerun with -update after reviewing:\n%s", path, got)
 	}
 }
+
+func TestParseGateway(t *testing.T) {
+	for in, want := range map[string]Gateway{
+		"":                                 {Host: DefaultGateway},
+		"oci.hub.confighub.com":            {Host: "oci.hub.confighub.com"},
+		"https://oci.example.com/":         {Host: "oci.example.com"},
+		"oci://oci.example.com":            {Host: "oci.example.com"},
+		"http://host.docker.internal:5000": {Host: "host.docker.internal:5000", PlainHTTP: true},
+		"localhost:5000":                   {Host: "localhost:5000"},
+	} {
+		got, err := ParseGateway(in)
+		if err != nil || got != want {
+			t.Errorf("ParseGateway(%q) = %+v, %v; want %+v", in, got, err, want)
+		}
+	}
+	for _, bad := range []string{"ftp://host", "http://", "http://host/space/x", "host?x=1"} {
+		if g, err := ParseGateway(bad); err == nil {
+			t.Errorf("ParseGateway(%q) = %+v; want an error", bad, g)
+		}
+	}
+}
+
+func TestWriteHandoverScriptForAPlainHTTPGateway(t *testing.T) {
+	p, err := platform.Load("../apply/testdata/platform")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pl, err := plan.Build(p, plan.Options{Prefix: "kx"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	write := func(o Options) string {
+		t.Helper()
+		o.Out = t.TempDir()
+		o.Render = func(_, _ string) ([]byte, error) { return fixture(t), nil }
+		res, err := Write(pl, o)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := os.ReadFile(res.Script)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(b)
+	}
+	script := write(Options{Gateway: "http://host.docker.internal:5000", ConfigHubURL: "http://host.docker.internal:9090"})
+	for _, w := range []string{
+		// Argo CD's repoURLs and the credential name the host; the credential says plain HTTP.
+		"#   argocd                   oci://host.docker.internal:5000/space/kx-argo-cd-{{name}}",
+		"--from-literal=url=oci://host.docker.internal:5000/space/kx- \\\n  --from-literal=insecureOCIForceHttp=true \\\n",
+		"--gateway host.docker.internal:5000 ",
+		"case \"$(reads \"$app\")\" in oci://host.docker.internal:5000/*)",
+		// argobot reaches ConfigHub at the address the hub knows it by.
+		"--from-literal=CONFIGHUB_URL='http://host.docker.internal:9090' \\\n",
+	} {
+		if !strings.Contains(script, w) {
+			t.Errorf("handover.sh lacks %q", w)
+		}
+	}
+	for _, bad := range []string{"oci://http://", "oci.hub.confighub.com", "cub context get"} {
+		if strings.Contains(script, bad) {
+			t.Errorf("handover.sh has %q", bad)
+		}
+	}
+	// ConfigHub's own gateway serves TLS: no insecure credential, and argobot uses cub's context.
+	def := write(Options{})
+	if strings.Contains(def, "insecureOCIForceHttp") || !strings.Contains(def, "cub context get -o jq=.coordinate.serverURL") {
+		t.Error("the default handover.sh must use TLS and cub's current context")
+	}
+	if _, err := Write(pl, Options{Out: t.TempDir(), Gateway: "ftp://x", Render: func(_, _ string) ([]byte, error) { return fixture(t), nil }}); err == nil {
+		t.Error("handover took an ftp:// gateway")
+	}
+}

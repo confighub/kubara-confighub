@@ -15,6 +15,7 @@ HUB=${HUB:-hub}
 SPOKE=${SPOKE:-spoke}
 KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
+GATEWAY=${GATEWAY:-}   # where ConfigHub serves releases; empty is oci.hub.confighub.com
 export HUB_CONTEXT=kind-$KIND-$HUB
 SPOKE_CONTEXT=kind-$KIND-$SPOKE
 
@@ -54,7 +55,7 @@ echo "$(wc -l < secrets.before | tr -d ' ') Secrets on the two clusters; $(wc -l
 
 section "2. Hand the hub back to Git"
 run cub kubara handback platform --prefix "$PREFIX" --out confighub \
-  --capabilities "$HUB=$HUB_CONTEXT" --capabilities "$SPOKE=$SPOKE_CONTEXT"
+  --capabilities "$HUB=$HUB_CONTEXT" --capabilities "$SPOKE=$SPOKE_CONTEXT" ${GATEWAY:+--gateway "$GATEWAY"}
 run bash confighub/handback.sh
 
 section "3. After: Git delivers what it holds, and nothing was pruned"

@@ -135,7 +135,12 @@ points at. Set `CUB_CONTEXT` to choose another. `check` asks ConfigHub itself,
 through the ConfigHub SDK, with the same login: the one `cub` passes it when
 you run `cub kubara check`. It runs `cub` for nothing. `handover`, `check` and
 `handback` expect releases at `oci.hub.confighub.com`. If your ConfigHub
-serves them elsewhere, pass `--gateway`.
+serves them elsewhere, pass `--gateway`. A ConfigHub on your own machine
+serves them over plain HTTP: pass `--gateway http://<host>:<port>`, with the
+host the hub cluster reaches it at, and `handover.sh` tells Argo CD not to
+use TLS. argobot reaches ConfigHub at the server of your `cub` context; when
+the hub knows it by another address, pass it to `handover` as
+`--confighub-url`.
 
 ## See what a Kubara catalog offers
 

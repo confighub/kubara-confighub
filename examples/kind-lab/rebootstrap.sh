@@ -13,6 +13,7 @@ HUB=${HUB:-hub}
 SPOKE=${SPOKE:-spoke}
 KIND=${KIND:-kubara}   # the kind clusters are $KIND-$HUB and $KIND-$SPOKE
 PREFIX=${PREFIX:-kubara}
+GATEWAY=${GATEWAY:-}   # where ConfigHub serves releases; empty is oci.hub.confighub.com
 export HUB_CONTEXT=kind-$KIND-$HUB
 SPOKE_CONTEXT=kind-$KIND-$SPOKE
 
@@ -43,7 +44,7 @@ apps() {
       (.status.sync.revision // .status.sync.revisions[0] // "" | .[0:19])]) | @tsv' | column -t -s "$(printf '\t')"
 }
 replicas() { kubectl --context "$1" -n metrics-server get deploy metrics-server -o jsonpath='{.spec.replicas}'; }
-check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" || true; }
+check() { run cub kubara check platform --prefix "$PREFIX" --hub-context "$HUB_CONTEXT" ${GATEWAY:+--gateway "$GATEWAY"} || true; }
 # Wait until metrics-server on the hub runs $1 replicas, for up to five minutes.
 wait_replicas() {
   for _ in $(seq 1 60); do [ "$(replicas "$HUB_CONTEXT")" = "$1" ] && return 0; sleep 5; done

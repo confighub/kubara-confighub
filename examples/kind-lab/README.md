@@ -178,3 +178,5 @@ CONFIGHUB=yes bash examples/kind-lab/down.sh    # and the lab's kubara-* Spaces
 | `PREFIX` | `kubara` | the prefix of the Spaces `run.sh` creates |
 | `APPROVE_STAGES` | empty: every stage | the stages `handover.sh` may approve, passed to `handover --approve-stages`; `run.sh` only |
 | `NODE_IMAGE` | `kindest/node:v1.35.0` | the kind node image |
+| `GATEWAY` | empty: `oci.hub.confighub.com` | where ConfigHub serves releases, passed to `handover`, `check` and `handback` as `--gateway`; `http://<host>:<port>` for one that serves plain HTTP |
+| `CONFIGHUB_URL` | empty: the server of your `cub` context | where argobot on the hub reaches ConfigHub, passed to `handover --confighub-url`; `run.sh` only |

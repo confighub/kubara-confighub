@@ -178,9 +178,11 @@ func WriteHandback(p plan.Plan, opts HandbackOptions) (HandbackResult, error) {
 	if len(p.Problems) > 0 {
 		return res, fmt.Errorf("the plan has problems to fix first:\n  - %s", strings.Join(p.Problems, "\n  - "))
 	}
-	if opts.Gateway == "" {
-		opts.Gateway = DefaultGateway
+	gateway, err := gatewayHost(opts.Gateway)
+	if err != nil {
+		return res, err
 	}
+	opts.Gateway = gateway
 	var hub string
 	var clusters []string
 	for _, st := range p.Stages {
