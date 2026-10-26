@@ -110,14 +110,22 @@ labels=()
 while IFS= read -r l; do [ -n "$l" ] && labels+=("$l"); done < <(hub -n argocd get externalsecret "$es" \
   -o go-template='{{range $k, $v := .spec.target.template.metadata.labels}}{{$k}}={{$v}}{{"\n"}}{{end}}')
 field() { kubectl --kubeconfig spoke.internal.kubeconfig config view --raw --minify -o jsonpath="$1"; }
-hub -n argocd create secret generic "$target" \
+cluster_secret=$(hub -n argocd create secret generic "$target" \
   --from-literal=name="$SPOKE" --from-literal=project="$HUB-dev" \
   --from-literal=server="$(field '{.clusters[0].cluster.server}')" \
   --from-file=config=<(printf '{"tlsClientConfig":{"caData":"%s","certData":"%s","keyData":"%s","insecure":false}}' \
     "$(field '{.clusters[0].cluster.certificate-authority-data}')" \
     "$(field '{.users[0].user.client-certificate-data}')" \
     "$(field '{.users[0].user.client-key-data}')") \
-  --dry-run=client -o yaml | hub label --local -f - "${labels[@]}" -o yaml | hub apply -f -
+  --dry-run=client -o yaml | hub label --local -f - "${labels[@]}" -o yaml)
+# create or replace, not apply, which would keep a copy of the spoke's
+# credentials in the Secret's last-applied-configuration annotation.
+if hub -n argocd get secret "$target" >/dev/null 2>&1; then
+  printf '%s\n' "$cluster_secret" | hub replace -f - >/dev/null
+else
+  printf '%s\n' "$cluster_secret" | hub create -f - >/dev/null
+fi
+unset cluster_secret
 # A fresh controller reads the spoke's new CRDs instead of a cached discovery.
 hub -n argocd rollout restart statefulset argocd-application-controller >/dev/null
 hub -n argocd rollout status statefulset argocd-application-controller --timeout=180s

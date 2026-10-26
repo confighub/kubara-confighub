@@ -331,7 +331,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	}
 	line(`  --from-literal=username=token --from-file=password=<(printf '%%s' "$token") \`)
 	line(`  --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml \`)
-	line(`  | k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | k apply -f -`)
+	line(`  | k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | write_secret %s %s`, argoNamespace, secret)
 	line(`unset token issued`)
 	line(`{ cub serviceaccount token list %[1]s -o json || { echo "could not list the tokens of %[1]s, so earlier ones are not revoked" >&2; echo '[]'; }; } | live_tokens | jq -r --arg d %[2]s --arg j "$jti" '.[] | select(.Description == $d and .Jti != $j) | .Jti' |`, pull, q(desc))
 	line(`  while read -r old; do cub serviceaccount token revoke %[1]s "$old" --quiet && echo "revoked an earlier token of %[1]s" || echo "could not revoke an earlier token of %[1]s: cub serviceaccount token revoke %[1]s $old"; done`, pull)
@@ -448,7 +448,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 		line(`  --from-file=CONFIGHUB_URL=<(cub context get -o jq=.coordinate.serverURL | tr -d '\n') \`)
 	}
 	line(`  --from-file=CONFIGHUB_AUTH_PRIVATE_KEY=<(printf '%%s' "$key") \`)
-	line(`  --dry-run=client -o yaml | k apply -f -`)
+	line(`  --dry-run=client -o yaml | write_secret %s %s`, argobotNamespace, argobotSecret)
 	line(`unset key`)
 	line(`{ cub serviceaccount key list %[1]s -o json || { echo "could not list the keys of %[1]s, so earlier ones are not removed" >&2; echo '[]'; }; } | jq -r --arg d %[2]s --arg k "$kid" '.[].UserKey | select(.Description == $d and .Kid != $k) | .Kid' |`, bot, q(keyDesc))
 	line(`  while read -r old; do cub serviceaccount key delete %[1]s "$old" >/dev/null && echo "removed an earlier key of %[1]s" || echo "could not remove an earlier key of %[1]s: cub serviceaccount key delete %[1]s $old"; done`, bot)
@@ -554,6 +554,21 @@ no_impersonate() {
 # The tokens of a service account that still work: token list shows revoked
 # and expired ones too.
 live_tokens() { jq -c '[.[].UserToken | select((.RevokedAt // "") == "" and ((.ExpiresAt // "") == "" or ((.ExpiresAt | sub("\\.[0-9]+"; "")) | fromdateiso8601) > now))]'; }
+# write_secret <namespace> <name>: writes the Secret the YAML on stdin
+# describes, with create, or replace when it exists. Not kubectl apply, which
+# keeps a copy of what it applies, credentials and all, in the Secret's
+# kubectl.kubernetes.io/last-applied-configuration annotation; replace also
+# drops such a copy an earlier version left.
+write_secret() {
+  local yaml
+  yaml=$(cat)
+  if k -n "$1" get secret "$2" >/dev/null 2>&1; then
+    printf '%s\n' "$yaml" | k replace -f - >/dev/null
+  else
+    printf '%s\n' "$yaml" | k create -f - >/dev/null
+  fi
+  echo "secret/$2 written in $1"
+}
 # The id ConfigHub lists a key by: the RFC 7638 thumbprint of its public half.
 thumbprint() { jq -j '"{\"crv\":\"\(.crv)\",\"kty\":\"\(.kty)\",\"x\":\"\(.x)\"}"' | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '='; }
 # A change order every variant has released is skipped, so a re-run releases
