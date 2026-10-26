@@ -314,9 +314,10 @@ ApplicationSet tells Argo CD to leave their data alone.
 
 Last, it installs argobot on the hub. argobot records each Application's sync
 and health on the release it synced, in its variant Space, which ConfigHub's
-Healthy gate reads. It runs as the Targets' server worker, not as you. This
-needs ConfigHub v0.8.2 or newer, where live status moved from the Space onto
-the Release.
+Healthy gate reads. It runs as the service account <prefix>-argobot, with a
+key, not as you; Argo CD pulls the gateway with a token of <prefix>-delivery.
+Issuing either credential takes Impersonate on the service account, which
+whoever created it has. This needs cub and ConfigHub v0.9.0 or newer.
 
 Each first release needs an approval in its stage. By default handover.sh
 approves every stage as you. --approve-stages names the stages it may

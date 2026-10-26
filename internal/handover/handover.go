@@ -13,7 +13,6 @@ import (
 
 const (
 	unitArgoCD    = "argo-cd"
-	workerSlug    = "server-worker"
 	workflowSlug  = "rollout"
 	argoNamespace = "argocd"
 	// MinimumArgoCD is the first Argo CD release that reads plain manifests
@@ -133,7 +132,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	if err := os.MkdirAll(filepath.Join(opts.Out, unitArgoCD), 0o755); err != nil {
 		return res, err
 	}
-	if err := os.WriteFile(filepath.Join(opts.Out, "argobot.yaml"), []byte(argobotManifest()), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(opts.Out, "argobot.yaml"), []byte(argobotManifest(p.Prefix+"-targets")), 0o644); err != nil {
 		return res, err
 	}
 	stageOf := map[string]string{}
@@ -154,6 +153,7 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 
 	line(`step "0/6 Check before changing anything"`)
 	line(`cub space list --quiet >/dev/null || { echo "cub is not logged in: run cub auth login"; exit 1; }`)
+	line(`for tool in jq openssl; do command -v "$tool" >/dev/null || { echo "this script needs $tool"; exit 1; }; done`)
 	var spaces []string
 	for _, c := range comps {
 		spaces = append(spaces, c.Base)
@@ -164,7 +164,8 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("for space in %s; do", strings.Join(spaces, " "))
 	line(`  cub space get "$space" --quiet >/dev/null 2>&1 || { echo "$space is missing: run apply.sh first"; exit 1; }`)
 	line("done")
-	line("# Step 6 reads each release's live status with cub, which shows it from %s on.", MinimumCub)
+	line("# Service accounts, which the Targets grant and argobot runs as, came with")
+	line("# cub and ConfigHub %s.", MinimumCub)
 	line("# A build that names no version is let through.")
 	line("# awk reads all of what cub prints: ending early would end cub with a broken")
 	line("# pipe, which pipefail reports as a failure. The first version is cub's own.")
@@ -181,20 +182,23 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line("")
 	line(`step "1/6 One Target per cluster, in %s"`, targets)
 	line("cub space create %s --allow-exists --quiet", targets)
-	line("# A Target names no worker. The server worker is the identity Argo CD pulls")
-	line("# as, and it reaches a Target through a grant to its bot user: View to find")
-	line("# the Target, ViewChildren to pull the releases published for it, and")
-	line("# EditChildren so argobot, which runs as the same worker, can record each")
-	line("# release's live status on it.")
-	line("cub worker create --space %s %s --is-server-worker --org-role none --allow-exists --quiet", targets, workerSlug)
-	line(`bot_user=$(cub worker get --space %s %s -o jq=.BridgeWorker.UserID | tr -d '"\n')`, targets, workerSlug)
-	line(`[ -n "$bot_user" ] && [ "$bot_user" != null ] || { echo "the worker %s/%s has no bot user to grant the Targets to"; exit 1; }`, targets, workerSlug)
+	pull, bot := pullAccount(p.Prefix), botAccount(p.Prefix)
+	line("# Two service accounts, neither with a role in the organization:")
+	line("# - %s, which Argo CD pulls the gateway with: View finds each Target,", pull)
+	line("#   ViewChildren pulls the releases published for it;")
+	line("# - %s, which argobot runs as: the same, and EditChildren, which is what", bot)
+	line("#   lets it record a release's live status.")
+	line("# Two, so that the token in Argo CD's repository Secret cannot write live status.")
+	line("cub serviceaccount create %s --allow-exists --quiet", pull)
+	line("cub serviceaccount create %s --allow-exists --quiet", bot)
 	for _, cl := range clusters {
-		line(`cub target create %s --space %s --permission "View:$bot_user" --permission "ViewChildren:$bot_user" --permission "EditChildren:$bot_user" --allow-exists --quiet`, cl, targets)
-		// A Target an earlier handover.sh made keeps the grants it was made
-		// with; this adds the one recording live status takes.
-		line(`cub target update %s --space %s --permission "EditChildren:$bot_user" --quiet`, cl, targets)
+		line("cub target create %s --space %s --allow-exists --quiet", cl, targets)
 	}
+	line("# The grants, as an update, so a Target an earlier run made gets them too.")
+	line("for t in %s; do", strings.Join(clusters, " "))
+	line(`  cub target update "$t" --space %[1]s --permission View:serviceaccount:%[2]s --permission ViewChildren:serviceaccount:%[2]s \`, targets, pull)
+	line(`    --permission View:serviceaccount:%[1]s --permission ViewChildren:serviceaccount:%[1]s --permission EditChildren:serviceaccount:%[1]s --quiet`, bot)
+	line("done")
 
 	line("")
 	line(`step "2/6 Each variant releases to its own cluster's Target"`)
@@ -289,16 +293,35 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	line(`if [ "$blocked" = 1 ] && [ "${ALLOW_PRUNE:-}" != yes ]; then`)
 	line(`  echo "Argo CD would delete the objects above. Fix the release, or rerun with ALLOW_PRUNE=yes to accept it."; exit 1`)
 	line("fi")
-	line("# Argo CD reads the gateway as the Targets' server worker: a credential that")
-	line("# can pull only those Targets' releases. The ID and secret go from cub into")
-	line("# the Secret through file descriptors, never to disk or the command line.")
-	worker := fmt.Sprintf("cub worker get --space %s %s", targets, workerSlug)
 	secret := "confighub-" + targets
+	desc := fmt.Sprintf("Argo CD on Kubara's hub, %s", p.Prefix)
+	line("# Argo CD reads the gateway with a token of %s, which can pull only these", pull)
+	line("# Targets' releases: the username is the word token, the password the token.")
+	line("# A token the Secret already holds is kept while ConfigHub still lists it;")
+	line("# otherwise a new one is issued, and the others this script issued for this")
+	line("# hub are revoked once the Secret holds the new one. The token goes from cub")
+	line("# into the Secret through variables and a file descriptor, never to disk or")
+	line("# the command line.")
+	line(`held_jti=$(k -n %s get secret %s -o jsonpath='{.metadata.annotations.confighub\.com/token-jti}' 2>/dev/null || true)`, argoNamespace, secret)
+	line(`token=""; jti=""`)
+	line(`if [ -n "$held_jti" ] && cub serviceaccount token list %s -o json | jq -e --arg j "$held_jti" 'any(.[].UserToken; .Jti == $j)' >/dev/null; then`, pull)
+	line(`  token=$(k -n %s get secret %s -o jsonpath='{.data.password}' | base64 --decode)`, argoNamespace, secret)
+	line(`  jti=$held_jti`)
+	line(`  echo "the repository Secret's token of %s is still valid: kept"`, pull)
+	line("fi")
+	line(`if [ -z "$token" ]; then`)
+	line(`  issued=$(cub serviceaccount token create %s --description %s -o json) || { no_impersonate %s; exit 1; }`, pull, q(desc), pull)
+	line(`  token=$(jq -r '.Token // empty' <<<"$issued"); jti=$(jq -r '.UserToken.Jti // empty' <<<"$issued")`)
+	line(`  [ -n "$token" ] && [ -n "$jti" ] || { echo "ConfigHub returned no token of %s"; exit 1; }`, pull)
+	line("fi")
 	line(`k -n %s create secret generic %s \`, argoNamespace, secret)
 	line(`  --from-literal=type=oci --from-literal=url=oci://%s/space/%s- \`, opts.Gateway, p.Prefix)
-	line(`  --from-file=username=<(%s -o jq=.BridgeWorker.BridgeWorkerID | tr -d '\n') \`, worker)
-	line(`  --from-file=password=<(%s --include-secret -o jq=.BridgeWorker.Secret | tr -d '\n') \`, worker)
-	line(`  --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml | k apply -f -`)
+	line(`  --from-literal=username=token --from-file=password=<(printf '%%s' "$token") \`)
+	line(`  --dry-run=client -o yaml | k label --local -f - argocd.argoproj.io/secret-type=repo-creds -o yaml \`)
+	line(`  | k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | k apply -f -`)
+	line(`unset token issued`)
+	line(`cub serviceaccount token list %s -o json | jq -r --arg d %s --arg j "$jti" '.[].UserToken | select(.Description == $d and .Jti != $j) | .Jti' |`, pull, q(desc))
+	line(`  while read -r old; do cub serviceaccount token revoke %[1]s "$old" --quiet && echo "revoked an earlier token of %[1]s" || echo "could not revoke an earlier token of %[1]s: cub serviceaccount token revoke %[1]s $old"; done`, pull)
 	// The argo-cd ApplicationSet comes first: once the hub's argo-cd Application
 	// reads its release, that release carries every other routed one.
 	appsets := []string{routedChart[unitArgoCD].ApplicationSet}
@@ -373,21 +396,41 @@ func Write(p plan.Plan, opts Options) (Result, error) {
 	}
 	line("")
 	line(`step "6/6 argobot records each Application's live status on the release it synced"`)
-	line("# argobot runs as the Targets' server worker, the identity Argo CD already pulls")
-	line("# releases with. Step 1 gave its bot user EditChildren on each Target, which is")
-	line("# what lets it record a release's live status.")
-	line("# No personal token goes into the cluster. Its ID and secret go from cub into")
-	line("# the Secret through file descriptors, as above.")
+	keyDesc := fmt.Sprintf("argobot on Kubara's hub, %s", p.Prefix)
+	line("# argobot runs as %s, which step 1 gave EditChildren on each Target, and", bot)
+	line("# hears of each published release on the Channel %s/argobot.", targets)
+	line(`if cub channel get %s/argobot >/dev/null 2>&1; then`, targets)
+	line(`  cub channel update %s/argobot --patch --permission Claim:serviceaccount:%s --quiet`, targets, bot)
+	line("else")
+	line(`  echo '[{"EventTypes":["release.published"]}]' | cub channel create argobot --space %s --subscriptions - --permission Claim:serviceaccount:%s --quiet`, targets, bot)
+	line("fi")
+	line("# Its credential is a key of %s; ConfigHub keeps only the public half. A key", bot)
+	line("# argobot's Secret already holds is kept while ConfigHub still lists it. One it")
+	line("# no longer lists, after the account was deleted and made again say, is")
+	line("# replaced, and so are keys this script added earlier for this hub.")
 	line(`k create namespace %s --dry-run=client -o yaml | k apply -f - >/dev/null`, argobotNamespace)
+	line(`key=$(k -n %s get secret %s -o jsonpath='{.data.CONFIGHUB_AUTH_PRIVATE_KEY}' 2>/dev/null | base64 --decode 2>/dev/null || true)`, argobotNamespace, argobotSecret)
+	line(`kid=""; [ -z "$key" ] || kid=$(thumbprint <<<"$key")`)
+	line(`if [ -n "$kid" ] && cub serviceaccount key list %s -o json | jq -e --arg k "$kid" 'any(.[].UserKey; .Kid == $k)' >/dev/null; then`, bot)
+	line(`  echo "argobot's key of %s is still registered: kept"`, bot)
+	line("else")
+	line(`  key_dir=$(mktemp -d)`)
+	line(`  trap 'rm -rf "$key_dir"' EXIT`)
+	line(`  cub serviceaccount key add %s --generate "$key_dir/argobot.jwk" --description %s --quiet || { no_impersonate %s; exit 1; }`, bot, q(keyDesc), bot)
+	line(`  key=$(cat "$key_dir/argobot.jwk"); kid=$(thumbprint <<<"$key")`)
+	line(`  rm -rf "$key_dir"`)
+	line("fi")
 	line(`k -n %s create secret generic %s \`, argobotNamespace, argobotSecret)
 	line(`  --from-file=CONFIGHUB_URL=<(cub context get -o jq=.coordinate.serverURL | tr -d '\n') \`)
-	line(`  --from-file=CONFIGHUB_WORKER_ID=<(%s -o jq=.BridgeWorker.BridgeWorkerID | tr -d '\n') \`, worker)
-	line(`  --from-file=CONFIGHUB_WORKER_SECRET=<(%s --include-secret -o jq=.BridgeWorker.Secret | tr -d '\n') \`, worker)
+	line(`  --from-file=CONFIGHUB_AUTH_PRIVATE_KEY=<(printf '%%s' "$key") \`)
 	line(`  --dry-run=client -o yaml | k apply -f -`)
+	line(`unset key`)
+	line(`cub serviceaccount key list %s -o json | jq -r --arg d %s --arg k "$kid" '.[].UserKey | select(.Description == $d and .Kid != $k) | .Kid' |`, bot, q(keyDesc))
+	line(`  while read -r old; do cub serviceaccount key delete %[1]s "$old" --quiet && echo "removed an earlier key of %[1]s" || echo "could not remove an earlier key of %[1]s: cub serviceaccount key delete %[1]s $old"; done`, bot)
 	line("since=$(date -u +%%Y-%%m-%%dT%%H:%%M:%%SZ)")
 	line("k apply -f argobot.yaml")
 	line("k -n %s rollout restart deployment/argobot >/dev/null", argobotNamespace)
-	line(`k -n %s rollout status deployment/argobot --timeout=180s`, argobotNamespace)
+	line(`k -n %s rollout status deployment/argobot --timeout=180s || { echo "argobot did not start. What it said: kubectl -n %s logs deployment/argobot"; exit 1; }`, argobotNamespace, argobotNamespace)
 	line("# argobot records a release's status when it starts, and again whenever the")
 	line("# Application changes. Wait until each variant Space's newest published")
 	line("# release, the one the Healthy gate reads, has one from this start; a release")
@@ -472,6 +515,16 @@ set -euo pipefail
 cd "$(dirname "$0")"
 k() { kubectl ${HUB_CONTEXT:+--context "$HUB_CONTEXT"} "$@"; }
 step() { printf '\n== %s\n' "$*"; }
+# Issuing a token or a key of a service account is acting as it, which takes
+# Impersonate on it. Whoever created it has that; Manage does not include it.
+no_impersonate() {
+  echo "could not issue a credential of the service account $1 (the reason is above)."
+  echo "Issuing one takes Impersonate on it, which whoever created it has, and Manage"
+  echo "does not include. Someone who has it can give it to you:"
+  echo "  cub serviceaccount update --patch $1 --permission Impersonate:<your user>"
+}
+# The id ConfigHub lists a key by: the RFC 7638 thumbprint of its public half.
+thumbprint() { jq -j '"{\"crv\":\"\(.crv)\",\"kty\":\"\(.kty)\",\"x\":\"\(.x)\"}"' | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '='; }
 # A change order every variant has released is skipped, so a re-run releases
 # only what is new.
 rolled_out() { [ "$(cub changeorder get --space "${1%/*}" "${1#*/}" -o jq=.ChangeOrder.State)" = Released ]; }

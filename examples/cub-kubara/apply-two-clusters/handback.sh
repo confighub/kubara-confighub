@@ -102,6 +102,15 @@ step "3/4 argobot and the gateway credential leave the hub"
 k delete namespace argobot --ignore-not-found
 k -n argocd delete role,rolebinding argobot --ignore-not-found
 k -n argocd delete secret confighub-kx-targets --ignore-not-found
+# The credentials those held still work until ConfigHub forgets them: revoke
+# the tokens handover.sh issued for this hub, and remove argobot's keys. The
+# service accounts and their grants stay, so handover.sh can run again.
+# Revoking takes Impersonate on the service account; without it, this says so
+# and carries on.
+{ cub serviceaccount token list kx-delivery -o json 2>/dev/null || echo '[]'; } | jq -r --arg d 'Argo CD on Kubara'\''s hub, kx' '.[].UserToken | select(.Description == $d) | .Jti' |
+  while read -r t; do cub serviceaccount token revoke kx-delivery "$t" --quiet || echo "could not revoke a token of kx-delivery: revoke it with cub serviceaccount token revoke kx-delivery $t"; done
+{ cub serviceaccount key list kx-argobot -o json 2>/dev/null || echo '[]'; } | jq -r --arg d 'argobot on Kubara'\''s hub, kx' '.[].UserKey | select(.Description == $d) | .Kid' |
+  while read -r kid; do cub serviceaccount key delete kx-argobot "$kid" --quiet || echo "could not remove a key of kx-argobot: remove it with cub serviceaccount key delete kx-argobot $kid"; done
 
 step "4/4 Argo CD syncs every Application from Git"
 # A sync from Git names commits, not OCI digests.

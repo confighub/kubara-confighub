@@ -5,6 +5,45 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.5.0, not released yet
+
+**Service accounts replace the server worker.** ConfigHub is retiring
+workers. `handover.sh` used to create `<prefix>-targets/server-worker`, which
+Argo CD pulled the gateway with and argobot ran as. It now creates two
+service accounts with no role in the organization:
+- `<prefix>-delivery`, with View and ViewChildren on each Target. Argo CD
+  pulls the gateway with a token of it, username `token`.
+- `<prefix>-argobot`, with the same and EditChildren, which recording live
+  status takes. argobot signs in with a key of it.
+
+Two accounts, so that the token in Argo CD's repository Secret can pull
+releases but cannot write live status.
+
+- **argobot v0.2.3.** It signs in with the key, and hears of each published
+  release on the Channel `<prefix>-targets/argobot`, which `handover.sh`
+  creates and lets `<prefix>-argobot` claim.
+- **Credentials are kept while they still work.** Run again, `handover.sh`
+  keeps the token in the repository Secret while ConfigHub still lists it,
+  and keeps argobot's key while ConfigHub still has it registered. Otherwise
+  it issues a new one, and revokes the tokens or removes the keys it issued
+  earlier for this hub. So a re-run does not pile up live tokens, and a hub
+  onboarded again after its service accounts were deleted gets a working key.
+- **Who may run it.** Issuing a token or a key takes Impersonate on the
+  service account, which whoever created it has. If someone else runs
+  `handover.sh`, it stops and names the command that gives them Impersonate.
+- **`handback.sh`** also revokes the tokens and removes the keys
+  `handover.sh` issued for the hub. The service accounts stay.
+- **Needs `cub` and ConfigHub v0.9.0 or newer,** and `jq` and `openssl` where
+  `handover.sh` runs. `handover.sh` checks them before it changes anything.
+
+To move a hub handed over with 0.4.0 or earlier, write `handover.sh` with
+this version and run it again. Then nothing uses the worker, and you can
+remove it:
+
+```bash
+cub worker delete --space <prefix>-targets server-worker
+```
+
 ## 0.4.0, 2026-10-09
 
 **Live status is recorded on the Release, where ConfigHub now reads it.**

@@ -455,9 +455,15 @@ gateway instead of Git, and Kubara's own sync settings are kept. Argo CD 3.1 or
 later reads those releases; Kubara v0.16 ships 3.5.
 
 Steps 0 to 4 of the script change only ConfigHub. It creates a Space
-`<prefix>-targets`, with a worker called `server-worker` and a Target per
-cluster. The worker's bot user gets View and ViewChildren on each Target, so
-the worker may pull the releases published for it and nothing else. It releases every variant an ApplicationSet delivers, through its
+`<prefix>-targets` with a Target per cluster, and two service accounts with no
+role in the organization:
+- `<prefix>-delivery`, which Argo CD pulls the gateway with. It gets View and
+  ViewChildren on each Target, so it may pull the releases published for it and
+  nothing else.
+- `<prefix>-argobot`, which argobot runs as. It gets the same, and EditChildren
+  on each Target, which is what lets argobot record live status.
+
+It releases every variant an ApplicationSet delivers, through its
 rollout workflow, stage by stage, with argo-cd last. In each stage it
 promotes, approves and publishes. That first release holds what Git already
 delivers.
@@ -519,8 +525,10 @@ ApplicationSets prune, so the script stops if Argo CD would delete anything.
 It then makes these changes:
 
 1. It stores one credential for the gateway, scoped to your prefix's Spaces:
-   the worker's ID and secret, in the Argo CD repository credential
-   `argocd/confighub-<prefix>-targets`.
+   a token of `<prefix>-delivery`, with the username `token`, in the Argo CD
+   repository credential `argocd/confighub-<prefix>-targets`. Run again, it
+   keeps that token while ConfigHub still lists it. When it issues a new one,
+   it revokes the others it issued for this hub.
 2. It applies the AppProject your ApplicationSets use, so that it permits the
    gateway. Kubara's AppProject lists no sources, because its Git repository
    is scoped to the project. The script gives it a list that holds only the
@@ -681,12 +689,12 @@ After handover, argobot runs on the hub. It watches every Argo CD Application
 and records the Application's state on the release it synced, in its variant
 Space. ConfigHub's UI shows it, and a stage that requires `Healthy` reads it.
 
-This needs ConfigHub v0.8.2 or newer and `cub kubara` 0.4.0 or newer. Before
-v0.8.2, ConfigHub read live status from the Space annotation
-`confighub.com/live-status`, which argobot v0.1.8 and older write. ConfigHub
-no longer reads it, so with `cub kubara` 0.3.0 a `Healthy` gate never opens.
-Run the new `handover.sh` again to move: it installs argobot v0.1.9 and gives
-its worker the grant recording takes.
+This needs `cub` and ConfigHub v0.9.0 or newer, and `cub kubara` 0.5.0 or
+newer. `cub kubara` 0.4.0 runs argobot as a worker, which ConfigHub is
+retiring; 0.3.0 and older install an argobot that writes a Space annotation
+ConfigHub no longer reads. Either way, run the new `handover.sh` again to move:
+it installs argobot v0.2.3, which runs as a service account. See
+[What's new](../whats-new.md) for what to remove afterwards.
 
 The commands and output in this section and the next come from the kind lab.
 There the hub is called `hub`, in stage dev, and the spoke `spoke`, in stage
@@ -714,19 +722,41 @@ argobot finds the Space from the Application's source,
 `oci://oci.hub.confighub.com/space/<space>`, so only Applications that read
 ConfigHub are reported.
 
-**Its credential.** argobot runs as the Targets' server worker, which
-handover creates. It is the same identity Argo CD already pulls releases with.
-handover.sh gives its bot user EditChildren on each cluster's Target, so that
-it can record the live status of the releases published to that Target. The
-grant is wider than that one field: it also covers those releases' labels and
-annotations, and withdrawing one. It reaches no Space, unit or other Target.
-No personal token goes into the cluster. handover.sh writes the worker's ID and secret into
-the `argobot-secrets` Secret in the `argobot` namespace. argobot's Role lets it
-read and patch Applications in the Argo CD namespace, and nothing else.
-The same worker secret is in `argocd/confighub-<prefix>-targets`. Anyone who
-can read Secrets in the `argocd` or `argobot` namespace can use it.
-`handback.sh` removes both Secrets. The image is
-`ghcr.io/confighub/argobot`, at the version `handover.sh` names.
+**Its credential.** argobot runs as the service account `<prefix>-argobot`,
+which handover creates. handover.sh gives it EditChildren on each cluster's
+Target, so that it can record the live status of the releases published to
+that Target. The grant is wider than that one field: it also covers those
+releases' labels and annotations, and withdrawing one. It reaches no Space,
+unit or other Target. argobot hears of each published release on the Channel
+`<prefix>-targets/argobot`, which handover creates and lets `<prefix>-argobot`
+claim.
+
+argobot signs in with a key of `<prefix>-argobot`. ConfigHub keeps only the
+public half; handover.sh writes the private half into the `argobot-secrets`
+Secret in the `argobot` namespace. Run again, it keeps that key while
+ConfigHub still lists it, and adds a new one when it does not, as after the
+service account was deleted and made again. No personal credential goes into
+the cluster. argobot's Role lets it read and patch Applications in the Argo CD
+namespace, and nothing else.
+
+The token Argo CD pulls with, in `argocd/confighub-<prefix>-targets`, belongs
+to `<prefix>-delivery`, which can only read. So anyone who can read Secrets in
+the `argocd` namespace can pull these releases, but cannot write live status.
+Anyone who can read Secrets in the `argobot` namespace can write it.
+`handback.sh` removes both Secrets, revokes the tokens and removes the keys
+handover.sh issued for the hub. The image is `ghcr.io/confighub/argobot`, at
+the version `handover.sh` names.
+
+**Who may run it.** Issuing a token or adding a key of a service account is
+acting as it, which takes Impersonate on it. Whoever created the service
+account has that; Manage does not include it. If someone else runs
+`handover.sh` later, it stops and says so. Whoever created the accounts can
+give them Impersonate:
+
+```bash
+cub serviceaccount update --patch <prefix>-delivery --permission Impersonate:<user>
+cub serviceaccount update --patch <prefix>-argobot --permission Impersonate:<user>
+```
 
 **What it reports.** argobot writes when it starts and whenever an Application
 changes. It records each status on the release Argo CD synced, which it finds
@@ -747,8 +777,8 @@ closed. `cub kubara check` still tells you which release each cluster runs:
 kubara-metrics-server-hub: FAIL: Argo CD runs sha256:3cbe6f041c9b, and the latest release, 2, is sha256:b6cbc4b69481
 ```
 
-argobot also asks Argo CD to pull a release when ConfigHub publishes it. From
-v0.1.9 it finds the Application by the Space its source reads, so it finds
+argobot also asks Argo CD to pull a release when ConfigHub publishes it. It
+finds the Application by the Space its source reads, so it finds
 Kubara's, which are named `<cluster>-<service>`. On the kind lab each release
 was pulled within seconds of `cub release publish`. Without argobot, Argo CD
 pulls a release on its next poll, within about three minutes.
@@ -886,11 +916,11 @@ hub over again afterwards also worked.
 | `services`, `init`, `plan`, `render` | nothing | nothing | Delete the files they wrote. |
 | `apply` | nothing; it writes files | nothing | Delete `--out`. |
 | `apply.sh` | Creates a component, a base Space and a rollout workflow per Kubara component, a variant Space per cluster, and `<prefix>-kubara-generated`. A re-run can add change orders. | nothing | Delete the Spaces, as below. |
-| `handover.sh` steps 0 to 4 | Creates `<prefix>-targets` with a worker and a Target per cluster. Changes the argo-cd base. Promotes, approves and publishes a first release in each stage. It approves as you only in the stages `--approve-stages` names, every stage by default. | nothing | Delete the Spaces, as below. |
+| `handover.sh` steps 0 to 4 | Creates `<prefix>-targets` with a Target per cluster, and the service accounts `<prefix>-delivery` and `<prefix>-argobot`. Changes the argo-cd base. Promotes, approves and publishes a first release in each stage. It approves as you only in the stages `--approve-stages` names, every stage by default. | nothing | Delete the Spaces, as below. |
 | `handover.sh` steps 5 and 6 | From then on, argobot records live status on the releases of each variant Space. | On the hub: the Secret `argocd/confighub-<prefix>-targets`, the AppProject, each routed ApplicationSet, and argobot in the `argobot` namespace. The spokes change only as Argo CD syncs to them. | `handback.sh` |
 | a change after handover | A change order, promotions, approvals and releases. | What Argo CD syncs. | Release the state before it, with `--revision Before:ChangeOrder:<change order>`. |
 | `check` | nothing, or attestations with `--record` | nothing | Attestations are kept. `cub attestation revoke` withdraws one. |
-| `handback.sh` | nothing | Sets the hub back to Git, and removes argobot and the gateway credential. | `handover.sh` again. |
+| `handback.sh` | Revokes the tokens and removes the keys `handover.sh` issued for the hub; the service accounts stay. | Sets the hub back to Git, and removes argobot and the gateway credential. | `handover.sh` again. |
 
 To remove the platform from ConfigHub, run `handback.sh` first. Never delete
 the Spaces while the hub reads them. Then list what would go, and delete it:
@@ -898,10 +928,12 @@ the Spaces while the hub reads them. Then list what would go, and delete it:
 ```bash
 cub space list --where "Slug LIKE 'kubara-%'"
 cub space delete --where "Slug LIKE 'kubara-%'" --recursive-force
+cub serviceaccount delete kubara-delivery kubara-argobot
 ```
 
 Check the list first: the pattern matches every Space that starts with your
-prefix. This is what the kind lab's `down.sh` does with `CONFIGHUB=yes`.
+prefix. Deleting a service account deletes its keys and revokes its tokens.
+This is what the kind lab's `down.sh` does with `CONFIGHUB=yes`.
 
 ## Known limits
 

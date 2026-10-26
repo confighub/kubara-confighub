@@ -1,8 +1,9 @@
 # argobot, as cub kubara handover installs it on Kubara's hub.
 # It records each Argo CD Application's sync and health on the release the
 # Application synced, in the ConfigHub Space its OCI source names.
-# It runs as the Targets' server worker, the same identity Argo CD pulls
-# releases with; handover.sh writes that credential to the argobot-secrets Secret.
+# It runs as a service account the Targets grant EditChildren, with a key
+# handover.sh writes to the argobot-secrets Secret, and hears of each published release
+# on the Channel kx-targets/argobot.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -61,31 +62,24 @@ spec:
       serviceAccountName: argobot
       containers:
         - name: argobot
-          image: ghcr.io/confighub/argobot:v0.1.9
+          image: ghcr.io/confighub/argobot:v0.2.3
           env:
             - name: CONFIGHUB_URL
               valueFrom:
                 secretKeyRef:
                   name: argobot-secrets
                   key: CONFIGHUB_URL
-            - name: CONFIGHUB_WORKER_ID
+            - name: CONFIGHUB_AUTH_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
                   name: argobot-secrets
-                  key: CONFIGHUB_WORKER_ID
-            - name: CONFIGHUB_WORKER_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: argobot-secrets
-                  key: CONFIGHUB_WORKER_SECRET
-            - name: ARGO_SYNC_MODE
-              value: kubernetes
+                  key: CONFIGHUB_AUTH_PRIVATE_KEY
+            - name: CONFIGHUB_CHANNEL
+              value: kx-targets/argobot
             - name: ARGO_NAMESPACE
               value: argocd
             - name: ARGO_REFRESH_TYPE
               value: hard
-            - name: CONFIGHUB_SUBSCRIPTION_NAME
-              value: argobot
           resources:
             requests:
               cpu: 25m
