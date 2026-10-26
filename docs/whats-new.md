@@ -5,7 +5,7 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
-## 0.5.0, not released yet
+## 0.5.0, 2026-10-26
 
 **Service accounts replace the server worker.** ConfigHub is retiring
 workers. `handover.sh` used to create `<prefix>-targets/server-worker`, which
