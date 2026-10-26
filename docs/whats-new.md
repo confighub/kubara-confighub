@@ -5,6 +5,29 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.5.1, 2026-10-26
+
+**A second approver's stage waits again for the first release.** On ConfigHub
+v0.9.2 and later, a change order a variant took nothing from reads Released
+although nothing was published. 0.5.0 published such a variant as it stands in
+every stage, so with `--approve-stages dev`, prod's first release went out
+without the second person and `handover.sh` did not stop for them. Now
+`handover.sh` publishes it only in a stage it may approve. In any other stage
+it prints `cub release publish <space>` for someone else to run, and exits 2
+before it changes the hub, as it does for an approval.
+
+**Hand over to a ConfigHub on your own machine.**
+- `--gateway http://<host>:<port>` names a gateway that serves plain HTTP;
+  `handover.sh` then tells Argo CD not to use TLS for it, and `check` and
+  `handback` take the same form.
+- `--confighub-url` gives argobot the address the hub cluster reaches
+  ConfigHub at, when that is not the server of your `cub` context, such as
+  `127.0.0.1`, which no pod can reach.
+- The kind lab takes `GATEWAY` and `CONFIGHUB_URL` for the same.
+
+The local-hub path has been run with tests and offline checks; it has not been
+run again against a local ConfigHub since it was rebased onto 0.5.0.
+
 ## 0.5.0, 2026-10-26
 
 **Service accounts replace the server worker.** ConfigHub is retiring
