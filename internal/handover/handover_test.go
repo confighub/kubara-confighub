@@ -263,6 +263,21 @@ func TestWriteHandoverScript(t *testing.T) {
 			t.Errorf("handover.sh lacks %q", w)
 		}
 	}
+	// Credential Secrets are written with create or replace: kubectl apply
+	// would keep a copy of the token or key in last-applied-configuration.
+	for _, w := range []string{
+		`k annotate --local -f - confighub.com/token-jti="$jti" -o yaml | write_secret argocd confighub-kx-targets`,
+		"--dry-run=client -o yaml | write_secret argobot argobot-secrets",
+	} {
+		if !strings.Contains(script, w) {
+			t.Errorf("handover.sh lacks %q", w)
+		}
+	}
+	for _, l := range strings.Split(script, "\n") {
+		if strings.Contains(l, "secret") && strings.Contains(l, "k apply -f -") {
+			t.Errorf("handover.sh applies a Secret: %s", l)
+		}
+	}
 	for _, bad := range []string{"confighub.com/live-status", "cub worker", "bot_user", "EditChildren:serviceaccount:kx-delivery"} {
 		if strings.Contains(script, bad) {
 			t.Errorf("handover.sh still has %q", bad)

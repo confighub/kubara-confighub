@@ -5,6 +5,23 @@ ConfigHub, without changing how Kubara works. Each Kubara component gets a base,
 gets a variant, and after handover Kubara's hub delivers only what each
 stage approved. The [guide](user/cub-kubara.md) is the full walkthrough.
 
+## 0.5.2, 2026-10-26
+
+**Credentials are no longer copied into an annotation.** `handover.sh` wrote
+Argo CD's gateway Secret, which holds a token, and argobot's Secret, which
+holds a private key, with `kubectl apply`. `apply` keeps a copy of what it
+applies, credentials and all, in the Secret's
+`kubectl.kubernetes.io/last-applied-configuration` annotation, which shows up
+where a Secret's data is usually hidden. Both Secrets are now written with
+`create`, or `replace` when they exist, and `replace` removes a copy an
+earlier version left. Run `handover.sh` again to clean a hub handed over with
+an earlier version. The kind lab's `up.sh` writes the spoke's cluster Secret
+the same way.
+
+Checked on a kind cluster: a Secret written with `apply` held the copy; after
+`handover.sh`'s write it held only its own `confighub.com/token-jti`
+annotation, and a re-run left it so.
+
 ## 0.5.1, 2026-10-26
 
 **A second approver's stage waits again for the first release.** On ConfigHub
